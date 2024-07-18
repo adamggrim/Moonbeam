@@ -16,5 +16,6 @@ let package = Package(
         .target(
             name: "Moonbeam",
             dependencies: []),
-    ]
+    ],
+    swiftLanguageVersions: [.v5]
 )
