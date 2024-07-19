@@ -16,7 +16,7 @@
 
 ## Variations
 
-`Moonbeam` offers two slider thumb options—capsule and circle. The color slider will adjust to fit your slider thumb selection.
+`Moonbeam` offers two slider thumb options—capsule and circle.
 
 Capsule
 
