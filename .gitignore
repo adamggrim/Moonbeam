@@ -15,4 +15,4 @@ DerivedData/
 *.ipa
 *.xcuserstate
 *.xcscmblueprint
-!default.xcworkspace
+.swiftpm
