@@ -1,6 +1,6 @@
 # Moonbeam
 
-`Moonbeam` is a Swift package for color selection with floating color previews. For a given hue range, `Moonbeam` lets you bend saturation in specific sections. It also offers customizable sizing and presentation options.
+`Moonbeam` is a Swift package for color sliders with floating color previews. For a given hue range, `Moonbeam` lets you bend saturation in specific sections. It also offers customizable sizing and presentation options.
 
 ## Requirements
 
@@ -34,13 +34,12 @@ This example demonstrates how to create a color slider using `Moonbeam`.
 2. **Choose the slider type and hues**
 
 
-
 3. **Bend the saturation**
 
-To improve legibility of certain colors against a light or dark background, you can bend the saturation in specific sections.
+To improve legibility of certain colors against a light or dark background, you can bend the saturation in a specific section.
 
 
-To add a second saturation bend, repeat the process:
+4. **View the slider**
 
 
 ## Usage
