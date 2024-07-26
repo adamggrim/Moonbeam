@@ -51,15 +51,16 @@ class ColorSliderViewModel {
         // Clamp the persistedDrag value within the left and right bounds.
         let clampedValue = min(max(persistedDrag, leftBound), rightBound)
         
-        let effectiveOffset = thumbOffset + halfThumbWidth
+        // Offset to center the floating color preview above the thumb slider
+        let centeredOffset = thumbOffset + halfThumbWidth
 
-            if !isDragging && effectiveOffset < halfColorPreviewWidth {
-                return -halfColorPreviewWidth + effectiveOffset
-            } else if !isDragging && effectiveOffset > dimensions.sliderWidth - halfColorPreviewWidth {
-                return dimensions.sliderWidth - halfColorPreviewWidth - halfThumbWidth
-            }
-
+        if !isDragging && centeredOffset < halfColorPreviewWidth {
+            return -halfColorPreviewWidth + centeredOffset
+        } else if !isDragging && centeredOffset > dimensions.sliderWidth - halfColorPreviewWidth {
+            return dimensions.sliderWidth - halfColorPreviewWidth - halfThumbWidth
+        } else {
             return clampedValue - halfColorPreviewWidth + halfThumbWidth
+        }
     }
     
     var colorPreviewVerticalOffset: CGFloat {
