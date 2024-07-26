@@ -75,6 +75,13 @@ class ColorSliderViewModel {
         return min(max(persistedDrag, leftBound), rightBound)
     }
     
+    func calculateDrag(hue: CGFloat, sliderWidth: CGFloat) -> CGFloat {
+        
+        let calculatedDrag = hue * sliderWidth
+        
+        return calculatedDrag
+    }
+    
     func onDragChanged(_ value: DragGesture.Value) {
         
         containerDrag = value.translation.width

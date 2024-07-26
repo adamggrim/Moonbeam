@@ -134,10 +134,3 @@ func calculateSaturation(index: Int, hue: CGFloat) -> CGFloat {
         return CGFloat(defaultSaturation)
     }
 }
-
-func calculateDrag(hue: CGFloat, sliderWidth: CGFloat) -> CGFloat {
-    
-    let calculatedDrag = hue * sliderWidth
-    
-    return calculatedDrag
-}
