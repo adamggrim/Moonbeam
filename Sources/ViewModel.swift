@@ -5,7 +5,7 @@ import Observation
 
 @Observable
 class ColorSliderViewModel {
-        
+    
     // Drag variable to get the color of the color preview (different from persistedDrag whenever the drag extends to the width of the thumb at the end of the slider)
     var colorDrag: CGFloat = .zero
     var isDragging: Bool = false
@@ -16,12 +16,14 @@ class ColorSliderViewModel {
     var newDrag: CGFloat = .zero
     
     var color: Color
-    var thumbColor: Color
+    let thumbColor: Color
+    let previewHidden: Bool
     let dimensions: ColorSliderDimensions
     
-    init(color: Color, thumbColor: Color, dimensions: ColorSliderDimensions) {
+    init(color: Color, thumbColor: Color, previewHidden: Bool, dimensions: ColorSliderDimensions) {
         self.color = color
         self.thumbColor = thumbColor
+        self.previewHidden = previewHidden
         self.dimensions = dimensions
         
         let uiColor = UIColor(color)
@@ -53,13 +55,28 @@ class ColorSliderViewModel {
         
         // Offset to center the floating color preview above the thumb slider
         let centeredOffset = thumbOffset + halfThumbWidth
-
-        if !isDragging && centeredOffset < halfColorPreviewWidth {
-            return -halfColorPreviewWidth + centeredOffset
-        } else if !isDragging && centeredOffset > dimensions.sliderWidth - halfColorPreviewWidth {
-            return dimensions.sliderWidth - halfColorPreviewWidth - halfThumbWidth
-        } else {
-            return clampedValue - halfColorPreviewWidth + halfThumbWidth
+        
+        if previewHidden {
+            if !isDragging && centeredOffset < halfColorPreviewWidth {
+                return -halfColorPreviewWidth + centeredOffset
+            } else if !isDragging && centeredOffset > dimensions.sliderWidth - halfColorPreviewWidth {
+                return dimensions.sliderWidth - halfColorPreviewWidth - halfThumbWidth
+            } else {
+                return clampedValue - halfColorPreviewWidth + halfThumbWidth
+            }
+        }
+        
+        else {
+            if centeredOffset < halfColorPreviewWidth {
+                // Clamp the color preview to the left edge of the slider.
+                return 0
+            } else if centeredOffset > dimensions.sliderWidth - halfColorPreviewWidth {
+                // Clamp the color preview to the right edge of the slider.
+                return dimensions.sliderWidth - dimensions.colorPreviewWidth
+            } else {
+                // Centered and and clamped to the left and right bounds of the slider.
+                return clampedValue - halfColorPreviewWidth + halfThumbWidth
+            }
         }
     }
     

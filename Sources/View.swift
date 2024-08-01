@@ -1,5 +1,6 @@
 import SwiftUI
 
+// The color slider, with a draggable thumb and color preview
 struct ColorSliderView: View {
     
     var viewModel: ColorSliderViewModel
@@ -7,10 +8,10 @@ struct ColorSliderView: View {
     let dimensions: ColorSliderDimensions
     let duration = 0.25
     
-    init(width: CGFloat, height: CGFloat, color: Color, thumbColor: Color = .white) {
+    init(width: CGFloat, height: CGFloat, color: Color, thumbColor: Color = .white, previewHidden: Bool = true) {
         let dimensions = ColorSliderDimensions(width: width, height: height)
         self.dimensions = dimensions
-        self.viewModel = ColorSliderViewModel(color: color, thumbColor: thumbColor, dimensions: dimensions)
+        self.viewModel = ColorSliderViewModel(color: color, thumbColor: thumbColor, previewHidden: previewHidden, dimensions: dimensions)
     }
     
     var body: some View {
@@ -54,12 +55,32 @@ struct ColorSliderView: View {
             RoundedRectangle(cornerRadius: dimensions.colorPreviewCornerRadius)
                 .foregroundColor(viewModel.color)
                 .frame(width: dimensions.colorPreviewWidth, height: dimensions.colorPreviewWidth)
-                .scaleEffect(viewModel.isDragging ? 1.0 : dimensions.scaleRatio, anchor: .bottom)
-                .opacity(viewModel.isDragging ? 1.0 : .zero)
+                .modifyColorPreview(isDragging: viewModel.isDragging, scaleRatio: dimensions.scaleRatio, previewHidden: viewModel.previewHidden)
                 .shadow(radius: dimensions.shadowRadius)
                 .offset(x: viewModel.colorPreviewHorizontalOffset, y: viewModel.colorPreviewVerticalOffset)
         }
         .frame(width: dimensions.sliderWidth, height: dimensions.thumbHeight)
+    }
+}
+
+// Apply modifiers based on whether the color preview is hidden.
+struct ColorPreviewViewModifier: ViewModifier {
+    
+    var isDragging: Bool
+    let scaleRatio: CGFloat
+    let previewHidden: Bool
+    
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(previewHidden && !isDragging ? scaleRatio : 1.0, anchor: .bottom)
+            .opacity(previewHidden && !isDragging ? 0 : 1.0)
+    }
+}
+
+extension View {
+    
+    func modifyColorPreview(isDragging: Bool, scaleRatio: CGFloat, previewHidden: Bool) -> some View {
+        self.modifier(ColorPreviewViewModifier(isDragging: isDragging, scaleRatio: scaleRatio, previewHidden: previewHidden))
     }
 }
 
