@@ -84,12 +84,3 @@ struct ColorSliderDimensions {
         self.shadowRadius = height / 2
     }
 }
-
-#Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
-        
-        ColorSliderView(width: 200, height: 15, color: Color.red)
-            .colorScheme(.dark)
-    }
-}
