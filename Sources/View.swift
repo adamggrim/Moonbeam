@@ -4,14 +4,19 @@ import SwiftUI
 struct ColorSliderView: View {
     
     var viewModel: ColorSliderViewModel
-    
     let dimensions: ColorSliderDimensions
+    
     let duration = 0.25
     
-    init(width: CGFloat, height: CGFloat, color: Color, thumbColor: Color = .white, previewHidden: Bool = true) {
+    init(width: CGFloat, height: CGFloat, color: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle, previewHidden: Bool = true) {
         let dimensions = ColorSliderDimensions(width: width, height: height)
         self.dimensions = dimensions
-        self.viewModel = ColorSliderViewModel(color: color, thumbColor: thumbColor, previewHidden: previewHidden, dimensions: dimensions)
+        self.viewModel = ColorSliderViewModel(
+            color: color, 
+            thumbColor: thumbColor,
+            thumbStyle: thumbStyle,
+            previewHidden: previewHidden,
+            dimensions: dimensions)
     }
     
     var body: some View {
@@ -28,28 +33,35 @@ struct ColorSliderView: View {
             )
             .frame(height: dimensions.sliderHeight)
             
-            // Thumb capsule
-            Capsule()
-                .foregroundColor(viewModel.thumbColor)
-                .frame(width: dimensions.thumbWidth, height: dimensions.thumbHeight)
-                .shadow(radius: dimensions.shadowRadius)
-                .offset(x: viewModel.thumbOffset)
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            withAnimation(.easeInOut(duration: duration)) {
-                                viewModel.isDragging = true
-                            }
-                            viewModel.color = viewModel.calculatedColor
-                            viewModel.onDragChanged(value)
+            // Slider thumb
+            Group {
+                switch viewModel.thumbStyle {
+                case .capsule:
+                    Capsule()
+                case .circle:
+                    Circle()
+                }
+            }
+            .foregroundColor(viewModel.thumbColor)
+            .frame(width: dimensions.thumbWidth, height: dimensions.thumbHeight)
+            .shadow(radius: dimensions.shadowRadius)
+            .offset(x: viewModel.thumbOffset)
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        withAnimation(.easeInOut(duration: duration)) {
+                            viewModel.isDragging = true
                         }
-                        .onEnded { value in
-                            withAnimation(.easeInOut(duration: duration)) {
-                                viewModel.isDragging = false
-                            }
-                            viewModel.onDragEnded()
+                        viewModel.color = viewModel.calculatedColor
+                        viewModel.onDragChanged(value)
+                    }
+                    .onEnded { value in
+                        withAnimation(.easeInOut(duration: duration)) {
+                            viewModel.isDragging = false
                         }
-                )
+                        viewModel.onDragEnded()
+                    }
+            )
             
             // Floating color preview
             RoundedRectangle(cornerRadius: dimensions.colorPreviewCornerRadius)
@@ -61,6 +73,11 @@ struct ColorSliderView: View {
         }
         .frame(width: dimensions.sliderWidth, height: dimensions.thumbHeight)
     }
+}
+
+enum ThumbStyle {
+    case capsule
+    case circle
 }
 
 // Apply modifiers based on whether the color preview is hidden.

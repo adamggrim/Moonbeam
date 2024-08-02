@@ -17,12 +17,14 @@ class ColorSliderViewModel {
     
     var color: Color
     let thumbColor: Color
+    let thumbStyle: ThumbStyle
     let previewHidden: Bool
     let dimensions: ColorSliderDimensions
     
-    init(color: Color, thumbColor: Color, previewHidden: Bool, dimensions: ColorSliderDimensions) {
+    init(color: Color, thumbColor: Color, thumbStyle: ThumbStyle, previewHidden: Bool, dimensions: ColorSliderDimensions) {
         self.color = color
         self.thumbColor = thumbColor
+        self.thumbStyle = thumbStyle
         self.previewHidden = previewHidden
         self.dimensions = dimensions
         
