@@ -15,6 +15,14 @@ let whitesStepSize = 1.0 / CGFloat(maxWhite)
 let blueSaturation = 0.5
 let defaultSaturation = 0.75
 
+struct SaturationBend {
+    let startingHue: Int
+    // Number of hues in the bend section
+    let sectionCount: Int
+    // Saturation at the center of the bend
+    let targetSaturation: CGFloat
+}
+
 // Section of the color slider with special conditions for saturation
 struct HueSection {
     
