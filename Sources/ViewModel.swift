@@ -15,20 +15,20 @@ class ColorSliderViewModel {
     var containerDrag: CGFloat = .zero
     var newDrag: CGFloat = .zero
     
-    var color: Color
+    var startingColor: Color
     let thumbColor: Color
     let thumbStyle: ThumbStyle
     let previewHidden: Bool
     let dimensions: ColorSliderDimensions
     
-    init(color: Color, thumbColor: Color, thumbStyle: ThumbStyle, previewHidden: Bool, dimensions: ColorSliderDimensions) {
-        self.color = color
+    init(startingColor: Color, thumbColor: Color, thumbStyle: ThumbStyle, previewHidden: Bool, dimensions: ColorSliderDimensions) {
+        self.startingColor = startingColor
         self.thumbColor = thumbColor
         self.thumbStyle = thumbStyle
         self.previewHidden = previewHidden
         self.dimensions = dimensions
         
-        let uiColor = UIColor(color)
+        let uiColor = UIColor(startingColor)
         var hue: CGFloat = 0
         
         uiColor.getHue(&hue, saturation: nil, brightness: nil, alpha: nil)
@@ -45,12 +45,12 @@ class ColorSliderViewModel {
         return sliderColors[colorIndex]
     }
     
-    var colorPreviewHorizontalOffset: CGFloat {
-        let halfColorPreviewWidth = dimensions.colorPreviewWidth / 2
+    var previewHorizontalOffset: CGFloat {
+        let halfPreviewWidth = dimensions.previewWidth / 2
         let halfThumbWidth = dimensions.thumbWidth / 2
         
-        let leftBound = halfColorPreviewWidth - halfThumbWidth
-        let rightBound = dimensions.sliderWidth - halfColorPreviewWidth - halfThumbWidth
+        let leftBound = halfPreviewWidth - halfThumbWidth
+        let rightBound = dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
         
         // Clamp the persistedDrag value within the left and right bounds.
         let clampedValue = min(max(persistedDrag, leftBound), rightBound)
@@ -59,36 +59,33 @@ class ColorSliderViewModel {
         let centeredOffset = thumbOffset + halfThumbWidth
         
         if previewHidden {
-            if !isDragging && centeredOffset < halfColorPreviewWidth {
-                return -halfColorPreviewWidth + centeredOffset
-            } else if !isDragging && centeredOffset > dimensions.sliderWidth - halfColorPreviewWidth {
-                return dimensions.sliderWidth - halfColorPreviewWidth - halfThumbWidth
+            if !isDragging && centeredOffset < halfPreviewWidth {
+                return -halfPreviewWidth + centeredOffset
+            } else if !isDragging && centeredOffset > dimensions.sliderWidth - halfPreviewWidth {
+                return dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
             } else {
-                return clampedValue - halfColorPreviewWidth + halfThumbWidth
+                return clampedValue - halfPreviewWidth + halfThumbWidth
             }
         }
         
         else {
-            if centeredOffset < halfColorPreviewWidth {
+            if centeredOffset < halfPreviewWidth {
                 // Clamp the color preview to the left edge of the slider.
                 return 0
-            } else if centeredOffset > dimensions.sliderWidth - halfColorPreviewWidth {
+            } else if centeredOffset > dimensions.sliderWidth - halfPreviewWidth {
                 // Clamp the color preview to the right edge of the slider.
-                return dimensions.sliderWidth - dimensions.colorPreviewWidth
+                return dimensions.sliderWidth - dimensions.previewWidth
             } else {
                 // Centered and and clamped to the left and right bounds of the slider.
-                return clampedValue - halfColorPreviewWidth + halfThumbWidth
+                return clampedValue - halfPreviewWidth + halfThumbWidth
             }
         }
     }
-    
-    var colorPreviewVerticalOffset: CGFloat {
-        return -dimensions.sliderHeight * 3.3333
-    }
-    
+        
     var thumbOffset: CGFloat {
-        let leftBound = 0.0
-        let rightBound = dimensions.sliderWidth - dimensions.thumbWidth
+        let thumbInset = (thumbStyle == .capsule) ? 0.0 : (dimensions.sliderHeight - dimensions.thumbWidth) / 2
+        let leftBound = thumbInset
+        let rightBound = dimensions.sliderWidth - dimensions.thumbWidth - thumbInset
         
         // Clamp the persistedDrag value within the left and right bounds.
         return min(max(persistedDrag, leftBound), rightBound)

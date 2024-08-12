@@ -8,11 +8,11 @@ struct ColorSliderView: View {
     
     let duration = 0.25
     
-    init(width: CGFloat, height: CGFloat, color: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle, previewHidden: Bool = true) {
-        let dimensions = ColorSliderDimensions(width: width, height: height)
+    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, previewWidth: CGFloat, previewOffset: CGFloat, startingColor: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle, previewHidden: Bool = true) {
+        let dimensions = ColorSliderDimensions(sliderWidth: sliderWidth, sliderHeight: sliderHeight, thumbWidth: thumbWidth, previewWidth: previewWidth, previewOffset: previewOffset)
         self.dimensions = dimensions
         self.viewModel = ColorSliderViewModel(
-            color: color, 
+            startingColor: startingColor,
             thumbColor: thumbColor,
             thumbStyle: thumbStyle,
             previewHidden: previewHidden,
@@ -52,7 +52,7 @@ struct ColorSliderView: View {
                         withAnimation(.easeInOut(duration: duration)) {
                             viewModel.isDragging = true
                         }
-                        viewModel.color = viewModel.calculatedColor
+                        viewModel.startingColor = viewModel.calculatedColor
                         viewModel.onDragChanged(value)
                     }
                     .onEnded { value in
@@ -64,12 +64,12 @@ struct ColorSliderView: View {
             )
             
             // Floating color preview
-            RoundedRectangle(cornerRadius: dimensions.colorPreviewCornerRadius)
-                .foregroundColor(viewModel.color)
-                .frame(width: dimensions.colorPreviewWidth, height: dimensions.colorPreviewWidth)
-                .modifyColorPreview(isDragging: viewModel.isDragging, scaleRatio: dimensions.scaleRatio, previewHidden: viewModel.previewHidden)
+            RoundedRectangle(cornerRadius: dimensions.previewCornerRadius)
+                .foregroundColor(viewModel.startingColor)
+                .frame(width: dimensions.previewWidth, height: dimensions.previewWidth)
+                .modifyPreview(isDragging: viewModel.isDragging, scaleRatio: dimensions.scaleRatio, previewHidden: viewModel.previewHidden)
                 .shadow(radius: dimensions.shadowRadius)
-                .offset(x: viewModel.colorPreviewHorizontalOffset, y: viewModel.colorPreviewVerticalOffset)
+                .offset(x: viewModel.previewHorizontalOffset, y: dimensions.previewOffset)
         }
         .frame(width: dimensions.sliderWidth, height: dimensions.thumbHeight)
     }
@@ -81,7 +81,7 @@ enum ThumbStyle {
 }
 
 // Apply modifiers based on whether the color preview is hidden.
-struct ColorPreviewViewModifier: ViewModifier {
+struct PreviewViewModifier: ViewModifier {
     
     var isDragging: Bool
     let scaleRatio: CGFloat
@@ -96,8 +96,8 @@ struct ColorPreviewViewModifier: ViewModifier {
 
 extension View {
     
-    func modifyColorPreview(isDragging: Bool, scaleRatio: CGFloat, previewHidden: Bool) -> some View {
-        self.modifier(ColorPreviewViewModifier(isDragging: isDragging, scaleRatio: scaleRatio, previewHidden: previewHidden))
+    func modifyPreview(isDragging: Bool, scaleRatio: CGFloat, previewHidden: Bool) -> some View {
+        self.modifier(PreviewViewModifier(isDragging: isDragging, scaleRatio: scaleRatio, previewHidden: previewHidden))
     }
 }
 
@@ -107,18 +107,20 @@ struct ColorSliderDimensions {
     let sliderHeight: CGFloat
     let thumbWidth: CGFloat
     let thumbHeight: CGFloat
-    let colorPreviewWidth: CGFloat
-    let colorPreviewCornerRadius: CGFloat
+    let previewWidth: CGFloat
+    let previewCornerRadius: CGFloat
+    let previewOffset: CGFloat
     let shadowRadius: CGFloat
     let scaleRatio: CGFloat = 0.25
     
-    init(width: CGFloat, height: CGFloat) {
-        self.sliderWidth = width
-        self.sliderHeight = height
-        self.thumbWidth = height
-        self.thumbHeight = height * 2.3333
-        self.colorPreviewWidth = height * 3.3333
-        self.colorPreviewCornerRadius = height * 0.6666
-        self.shadowRadius = height / 2
+    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, previewWidth: CGFloat, previewOffset: CGFloat) {
+        self.sliderWidth = sliderWidth
+        self.sliderHeight = sliderHeight
+        self.thumbWidth = thumbWidth
+        self.thumbHeight = thumbWidth * 2.3333
+        self.previewWidth = previewWidth
+        self.previewOffset = previewOffset
+        self.previewCornerRadius = previewWidth * 0.225
+        self.shadowRadius = sliderHeight / 2
     }
 }
