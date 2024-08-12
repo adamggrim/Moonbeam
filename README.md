@@ -36,7 +36,7 @@ This example demonstrates how to create a color slider using `Moonbeam`.
 
 3. **Bend the saturation**
 
-To improve legibility of certain colors against a light or dark background, you can bend the saturation in a specific section.
+To improve legibility of certain colors against a light or dark background, you can bend the saturation in specific sections.
 
 
 4. **View the slider**
