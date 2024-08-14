@@ -8,8 +8,8 @@ struct ColorSliderView: View {
     
     let duration = 0.25
     
-    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, previewWidth: CGFloat, previewOffset: CGFloat, startingColor: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle, previewHidden: Bool = true) {
-        let dimensions = ColorSliderDimensions(sliderWidth: sliderWidth, sliderHeight: sliderHeight, thumbWidth: thumbWidth, previewWidth: previewWidth, previewOffset: previewOffset)
+    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, thumbHeight: CGFloat, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat, startingColor: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle, previewHidden: Bool = true) {
+        let dimensions = ColorSliderDimensions(sliderWidth: sliderWidth, sliderHeight: sliderHeight, thumbWidth: thumbWidth, thumbHeight: thumbHeight, previewWidth: previewWidth, previewOffset: previewOffset, shadowRadius: shadowRadius)
         self.dimensions = dimensions
         self.viewModel = ColorSliderViewModel(
             startingColor: startingColor,
@@ -113,14 +113,14 @@ struct ColorSliderDimensions {
     let shadowRadius: CGFloat
     let scaleRatio: CGFloat = 0.25
     
-    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, previewWidth: CGFloat, previewOffset: CGFloat) {
+    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, thumbHeight: CGFloat, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat) {
         self.sliderWidth = sliderWidth
         self.sliderHeight = sliderHeight
         self.thumbWidth = thumbWidth
-        self.thumbHeight = thumbWidth * 2.3333
+        self.thumbHeight = thumbHeight
         self.previewWidth = previewWidth
         self.previewOffset = previewOffset
+        self.shadowRadius = shadowRadius
         self.previewCornerRadius = previewWidth * 0.225
-        self.shadowRadius = sliderHeight / 2
     }
 }
