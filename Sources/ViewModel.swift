@@ -6,38 +6,37 @@ import Observation
 @Observable
 class ColorSliderViewModel {
     
-    // Drag variable to get the color of the color preview (different from persistedDrag whenever the drag extends to the width of the thumb at the end of the slider)
-    var colorDrag: CGFloat = .zero
     var isDragging: Bool = false
+    // Drag variable to get the color of the color preview (different from persistedDrag whenever the drag extends to the width of the thumb at the end of the slider)
+    private var colorDrag: CGFloat = .zero
     
-    var persistedDrag: CGFloat = .zero
-    var sliderDrag: CGFloat = .zero
-    var containerDrag: CGFloat = .zero
-    var newDrag: CGFloat = .zero
+    private var persistedDrag: CGFloat = .zero
+    private var sliderDrag: CGFloat = .zero
+    private var containerDrag: CGFloat = .zero
+    private var currentDrag: CGFloat = .zero
     
     var startingColor: Color
     let thumbColor: Color
     let thumbStyle: ThumbStyle
+    let thumbInset: CGFloat
     let previewHidden: Bool
     let dimensions: ColorSliderDimensions
-    
+
     init(startingColor: Color, thumbColor: Color, thumbStyle: ThumbStyle, previewHidden: Bool, dimensions: ColorSliderDimensions) {
         self.startingColor = startingColor
         self.thumbColor = thumbColor
         self.thumbStyle = thumbStyle
+        self.thumbInset = (thumbStyle == .capsule) ? 0.0 : (dimensions.sliderHeight - dimensions.thumbWidth) / 2
         self.previewHidden = previewHidden
         self.dimensions = dimensions
         
-        let uiColor = UIColor(startingColor)
-        var hue: CGFloat = 0
-        
-        uiColor.getHue(&hue, saturation: nil, brightness: nil, alpha: nil)
+        let hue: CGFloat = 0
         let dragValue = calculateDrag(hue: hue, sliderWidth: dimensions.sliderWidth)
         
         self.persistedDrag = dragValue
         self.sliderDrag = dragValue
         self.containerDrag = dragValue
-        self.newDrag = dragValue
+        self.currentDrag = dragValue
     }
     
     var calculatedColor: Color {
@@ -83,7 +82,6 @@ class ColorSliderViewModel {
     }
         
     var thumbOffset: CGFloat {
-        let thumbInset = (thumbStyle == .capsule) ? 0.0 : (dimensions.sliderHeight - dimensions.thumbWidth) / 2
         let leftBound = thumbInset
         let rightBound = dimensions.sliderWidth - dimensions.thumbWidth - thumbInset
         
@@ -92,20 +90,18 @@ class ColorSliderViewModel {
     }
     
     func calculateDrag(hue: CGFloat, sliderWidth: CGFloat) -> CGFloat {
-        
         let calculatedDrag = hue * sliderWidth
         
         return calculatedDrag
     }
     
     func onDragChanged(_ value: DragGesture.Value) {
-        
         containerDrag = value.translation.width
-        newDrag = sliderDrag + containerDrag
+        currentDrag = sliderDrag + containerDrag
         
         // Clamp to prevent the drag gesture from displacing the thumb on rebound from the left and right edges of the slider.
-        colorDrag = min(max(newDrag, 0), dimensions.sliderWidth)
-        persistedDrag = min(max(newDrag, 0), dimensions.sliderWidth - dimensions.thumbWidth)
+        colorDrag = min(max(currentDrag, 0), dimensions.sliderWidth)
+        persistedDrag = min(max(currentDrag, 0 + thumbInset), dimensions.sliderWidth - dimensions.thumbWidth - thumbInset)
     }
     
     func onDragEnded() {
