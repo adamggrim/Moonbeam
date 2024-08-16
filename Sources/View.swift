@@ -6,9 +6,9 @@ struct ColorSliderView: View {
     var viewModel: ColorSliderViewModel
     let dimensions: ColorSliderDimensions
     
-    let duration = 0.25
+    let duration: Double
     
-    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, thumbHeight: CGFloat, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat, startingColor: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle, previewHidden: Bool = true) {
+    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, thumbHeight: CGFloat? = nil, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat, startingColor: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle, previewHidden: Bool = true, duration: Double = 0.25) {
         let dimensions = ColorSliderDimensions(sliderWidth: sliderWidth, sliderHeight: sliderHeight, thumbWidth: thumbWidth, thumbHeight: thumbHeight, previewWidth: previewWidth, previewOffset: previewOffset, shadowRadius: shadowRadius)
         self.dimensions = dimensions
         self.viewModel = ColorSliderViewModel(
@@ -17,10 +17,10 @@ struct ColorSliderView: View {
             thumbStyle: thumbStyle,
             previewHidden: previewHidden,
             dimensions: dimensions)
+        self.duration = duration
     }
     
     var body: some View {
-        
         ZStack(alignment: .leading) {
             
             // Gradient capsule
@@ -82,7 +82,6 @@ enum ThumbStyle {
 
 // Apply modifiers based on whether the color preview is hidden.
 struct PreviewViewModifier: ViewModifier {
-    
     var isDragging: Bool
     let scaleRatio: CGFloat
     let previewHidden: Bool
@@ -95,29 +94,27 @@ struct PreviewViewModifier: ViewModifier {
 }
 
 extension View {
-    
     func modifyPreview(isDragging: Bool, scaleRatio: CGFloat, previewHidden: Bool) -> some View {
         self.modifier(PreviewViewModifier(isDragging: isDragging, scaleRatio: scaleRatio, previewHidden: previewHidden))
     }
 }
 
 struct ColorSliderDimensions {
-    
     let sliderWidth: CGFloat
     let sliderHeight: CGFloat
     let thumbWidth: CGFloat
-    let thumbHeight: CGFloat
+    let thumbHeight: CGFloat?
     let previewWidth: CGFloat
     let previewCornerRadius: CGFloat
     let previewOffset: CGFloat
     let shadowRadius: CGFloat
     let scaleRatio: CGFloat = 0.25
     
-    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, thumbHeight: CGFloat, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat) {
+    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, thumbHeight: CGFloat? = nil, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat) {
         self.sliderWidth = sliderWidth
         self.sliderHeight = sliderHeight
         self.thumbWidth = thumbWidth
-        self.thumbHeight = thumbHeight
+        self.thumbHeight = thumbHeight // Ignored when thumbStyle is .circle
         self.previewWidth = previewWidth
         self.previewOffset = previewOffset
         self.shadowRadius = shadowRadius
