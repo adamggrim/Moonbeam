@@ -25,7 +25,6 @@ struct SaturationBend {
 
 // Section of the color slider with special conditions for saturation
 struct HueSection {
-    
     let index: Int
     let start: Int
 //  The total number of hues in the section
@@ -50,7 +49,6 @@ struct HueSection {
 }
 
 struct HueRatios {
-    
     let hueStart: Int
     let hueSectionCount: Int
     
@@ -68,7 +66,6 @@ struct HueRatios {
 }
 
 let sliderColors: [Color] = {
-    
     let hueValues = Array(0...maxHue)
     let whiteValues = Array(stride(from: 0.0, through: defaultSaturation, by: whitesStepSize))
     
@@ -80,7 +77,6 @@ let sliderColors: [Color] = {
     }
     
     let huesArray: [Color] = hueValues.enumerated().map { (index, hue) in
-        
         let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
         let calculatedSaturation = calculateSaturation(index: index, hue: normalizedHue)
         
@@ -95,7 +91,6 @@ let sliderColors: [Color] = {
 }()
 
 let toggleTintColors: [Color] = {
-    
     let hueValues = Array(0...maxHue)
     let whiteValues = Array(stride(from: 0.0, through: defaultSaturation, by: whitesStepSize))
     
@@ -108,7 +103,6 @@ let toggleTintColors: [Color] = {
     }
     
     let huesArray: [Color] = hueValues.enumerated().map { (index, hue) in
-        
         let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
         let calculatedSaturation = calculateSaturation(index: index, hue: normalizedHue)
         
@@ -124,7 +118,6 @@ let toggleTintColors: [Color] = {
 
 //  Function to incrementally reduce, then increase, the saturation of certain hues on ColorSliderView to improve legibility
 func calculateSaturation(index: Int, hue: CGFloat) -> CGFloat {
-    
     let blueRatios = HueRatios(hueStart: 180, hueSectionCount: 120)
     let blueSection = HueSection(index: index, start: blueRatios.hueStart, sectionCount: blueRatios.hueSectionCount, hueSaturation: blueSaturation)
     
