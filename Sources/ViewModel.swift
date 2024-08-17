@@ -47,35 +47,49 @@ class ColorSliderViewModel {
     var previewHorizontalOffset: CGFloat {
         let halfPreviewWidth = dimensions.previewWidth / 2
         let halfThumbWidth = dimensions.thumbWidth / 2
-        
+        let quarterThumbWidth = halfThumbWidth / 2
         let leftBound = halfPreviewWidth - halfThumbWidth
         let rightBound = dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
-        
         // Clamp the persistedDrag value within the left and right bounds.
         let clampedValue = min(max(persistedDrag, leftBound), rightBound)
         
-        // Offset to center the floating color preview above the thumb slider
-        let centeredOffset = thumbOffset + halfThumbWidth
+        // Offset to center the floating color preview above the thumb
+        let halfThumbOffset = thumbOffset + halfThumbWidth
+        // Offset to position the floating color preview at one quarter the length of the thumb
+        let quarterThumbOffset = thumbOffset + quarterThumbWidth
         
-        if previewHidden {
-            if !isDragging && centeredOffset < halfPreviewWidth {
-                return -halfPreviewWidth + centeredOffset
-            } else if !isDragging && centeredOffset > dimensions.sliderWidth - halfPreviewWidth {
+        if previewHidden && thumbStyle == .capsule {
+            // Left edge of the slider
+            if !isDragging && halfThumbOffset < halfPreviewWidth {
+                return -halfPreviewWidth + halfThumbOffset
+            // Right edge of the slider
+            } else if !isDragging && halfThumbOffset > dimensions.sliderWidth - halfPreviewWidth {
                 return dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
             } else {
                 return clampedValue - halfPreviewWidth + halfThumbWidth
             }
         }
         
+        else if previewHidden && thumbStyle == .circle {
+            // Left edge of the slider
+            if !isDragging && halfThumbOffset < halfPreviewWidth {
+                return -halfPreviewWidth + quarterThumbOffset
+            // Right edge of the slider
+            } else if !isDragging && halfThumbOffset > dimensions.sliderWidth - halfPreviewWidth {
+                return dimensions.sliderWidth - halfPreviewWidth - quarterThumbWidth
+            } else {
+                return clampedValue - halfPreviewWidth + halfThumbWidth
+            }
+        }
+        
         else {
-            if centeredOffset < halfPreviewWidth {
+            if halfThumbOffset < halfPreviewWidth {
                 // Clamp the color preview to the left edge of the slider.
                 return 0
-            } else if centeredOffset > dimensions.sliderWidth - halfPreviewWidth {
+            } else if halfThumbOffset > dimensions.sliderWidth - halfPreviewWidth {
                 // Clamp the color preview to the right edge of the slider.
                 return dimensions.sliderWidth - dimensions.previewWidth
             } else {
-                // Centered and and clamped to the left and right bounds of the slider.
                 return clampedValue - halfPreviewWidth + halfThumbWidth
             }
         }
