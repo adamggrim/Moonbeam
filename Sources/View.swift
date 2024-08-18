@@ -8,8 +8,10 @@ struct ColorSliderView: View {
     
     let duration: Double
     
-    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, thumbHeight: CGFloat? = nil, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat, startingColor: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle, previewHidden: Bool = true, duration: Double = 0.25) {
+    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat? = nil, thumbHeight: CGFloat? = nil, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat, startingColor: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle = .capsule, previewHidden: Bool = true, duration: Double = 0.25) {
+        
         let dimensions = ColorSliderDimensions(sliderWidth: sliderWidth, sliderHeight: sliderHeight, thumbWidth: thumbWidth, thumbHeight: thumbHeight, previewWidth: previewWidth, previewOffset: previewOffset, shadowRadius: shadowRadius)
+        
         self.dimensions = dimensions
         self.viewModel = ColorSliderViewModel(
             startingColor: startingColor,
@@ -110,11 +112,11 @@ struct ColorSliderDimensions {
     let shadowRadius: CGFloat
     let scaleRatio: CGFloat = 0.25
     
-    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat, thumbHeight: CGFloat? = nil, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat) {
+    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat? = nil, thumbHeight: CGFloat? = nil, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat) {
         self.sliderWidth = sliderWidth
         self.sliderHeight = sliderHeight
-        self.thumbWidth = thumbWidth
-        self.thumbHeight = thumbHeight // Ignored when thumbStyle is .circle
+        self.thumbWidth = thumbWidth ?? sliderHeight
+        self.thumbHeight = thumbHeight ?? sliderHeight * 2 // Ignored when thumbStyle is .circle
         self.previewWidth = previewWidth
         self.previewOffset = previewOffset
         self.shadowRadius = shadowRadius
