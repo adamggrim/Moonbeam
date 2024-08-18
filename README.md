@@ -16,13 +16,7 @@
 
 ## Variations
 
-`Moonbeam` offers two slider thumb styles—capsule and circle.
-
-Capsule
-
-
-Circle
-
+`Moonbeam` offers two slider thumb styles—capsule and circle. For capsules, you can customize by width and height, and for circles, you can customize by width.
 
 ## Example
 
