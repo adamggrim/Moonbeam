@@ -52,10 +52,9 @@ class ColorSliderViewModel {
         let rightBound = dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
         // Clamp the persistedDrag value within the left and right bounds.
         let clampedValue = min(max(persistedDrag, leftBound), rightBound)
-        
         // Offset to center the floating color preview above the thumb
         let halfThumbOffset = thumbOffset + halfThumbWidth
-        // Offset to position the floating color preview at one quarter the length of the thumb
+        // Offset to offset the floating color preview at one quarter the length of the thumb
         let quarterThumbOffset = thumbOffset + quarterThumbWidth
         
         if previewHidden && thumbStyle == .capsule {
@@ -98,21 +97,18 @@ class ColorSliderViewModel {
     var thumbOffset: CGFloat {
         let leftBound = thumbInset
         let rightBound = dimensions.sliderWidth - dimensions.thumbWidth - thumbInset
-        
         // Clamp the persistedDrag value within the left and right bounds.
         return min(max(persistedDrag, leftBound), rightBound)
     }
     
     func calculateDrag(hue: CGFloat, sliderWidth: CGFloat) -> CGFloat {
         let calculatedDrag = hue * sliderWidth
-        
         return calculatedDrag
     }
     
     func onDragChanged(_ value: DragGesture.Value) {
         containerDrag = value.translation.width
         currentDrag = sliderDrag + containerDrag
-        
         // Clamp to prevent the drag gesture from displacing the thumb on rebound from the left and right edges of the slider.
         colorDrag = min(max(currentDrag, 0), dimensions.sliderWidth)
         persistedDrag = min(max(currentDrag, 0 + thumbInset), dimensions.sliderWidth - dimensions.thumbWidth - thumbInset)
