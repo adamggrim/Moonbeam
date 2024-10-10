@@ -33,7 +33,7 @@ This example demonstrates how to create a color slider using `Moonbeam`.
 To improve legibility of certain colors against a light or dark background, you can bend the saturation in specific sections.
 
 
-4. **View the slider**
+4. **Use the slider**
 
 
 ## Usage
