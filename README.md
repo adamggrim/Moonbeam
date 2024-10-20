@@ -16,28 +16,46 @@
 
 ## Variations
 
-`Moonbeam` offers two slider thumb styles—capsule and circle.
+`Moonbeam` supports two color models—HSB and RGB.
 
-For capsules, you can customize by width and height:
+- For HSB sliders, you can bend saturation or brightness for specific hues to improve legibility:
 
-For circles, you can customize by width:
+- With RGB sliders, you can create a precise gradient between two colors:
 
-## Example
+`Moonbeam` also offers two slider thumb styles—capsule and circle.
 
-This example demonstrates how to create a color slider using `Moonbeam`.
+- For capsules, you can customize by width and height:
 
-1. **Initialize the slider**
+- For circles, you can customize by width:
+
+## HSB Slider Example
+
+This example demonstrates how to create an HSB color slider using `Moonbeam`.
+
+1. **Create the slider**
 
 
-2. **Choose the slider type and hues**
+2. **Choose the slider thumb style and hues**
 
 
-3. **Bend the saturation**
-
-To improve legibility of certain colors against a light or dark background, you can bend the saturation in specific sections.
+3. **Bend the saturation or brightness**
 
 
 4. **Use the slider**
+
+To improve legibility of certain colors against a light or dark background, you can bend the saturation or brightness in specific sections.
+
+## RGB Slider Example
+
+This example demonstrates how to create an RGB color slider using `Moonbeam`.
+
+1. **Create the slider**
+
+
+2. **Choose the slider thumb style and hues**
+
+
+3. **Use the slider**
 
 
 ## Usage
