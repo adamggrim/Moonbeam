@@ -18,7 +18,7 @@
 
 `Moonbeam` supports two color models—HSB and RGB.
 
-- For HSB sliders, you can bend saturation or brightness for specific hues to improve legibility:
+- For HSB sliders, you can bend saturation or brightness in specific sections to improve legibility:
 
 - With RGB sliders, you can create a precise gradient between two colors:
 
