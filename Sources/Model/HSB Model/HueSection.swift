@@ -18,10 +18,16 @@ struct HSBHueSection {
 struct HSBBendSection {
     let startHue: Int
     let endHue: Int
+    
     let bendSaturation: CGFloat
     let saturationDelta: CGFloat
     let saturationIncrement: CGFloat
     let defaultSaturation: CGFloat
+    
+    let bendBrightness: CGFloat
+    let brightnessDelta: CGFloat
+    let brightnessIncrement: CGFloat
+    let defaultBrightness: CGFloat
     
     var hueCount: Int {
         endHue - startHue
@@ -31,7 +37,7 @@ struct HSBBendSection {
         CGFloat(startHue + (hueCount / 2)) / 360
     }
     
-    init(startHue: Int, endHue: Int, sectionCount: Int, bendSaturation: CGFloat) {
+    init(startHue: Int, endHue: Int, sectionCount: Int, bendSaturation: CGFloat = 1.0, bendBrightness: CGFloat = 1.0) {
         self.startHue = startHue
         self.endHue = endHue
         self.bendSaturation = bendSaturation
