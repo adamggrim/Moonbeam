@@ -28,9 +28,9 @@
 
 - For circles, you can customize by width:
 
-## Example (HSB slider)
+## Example (HSB)
 
-This example demonstrates how to create an HSB color slider using `Moonbeam`.
+This example demonstrates how to create an HSB slider using `Moonbeam`.
 
 1. **Create the slider**
 
@@ -45,9 +45,9 @@ This example demonstrates how to create an HSB color slider using `Moonbeam`.
 
 To improve legibility of certain colors against a light or dark background, you can bend the saturation or brightness in specific sections.
 
-## Example (RGB slider)
+## Example (RGB)
 
-This example demonstrates how to create an RGB color slider using `Moonbeam`.
+This example demonstrates how to create an RGB slider using `Moonbeam`.
 
 1. **Create the slider**
 

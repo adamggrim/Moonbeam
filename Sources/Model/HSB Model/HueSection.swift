@@ -15,7 +15,7 @@ struct HSBHueSection {
 }
 
 // Section of the color slider with special conditions for saturation or brightness
-struct HSBBendSection {
+struct BendSection {
     let startHue: Int
     let endHue: Int
     
