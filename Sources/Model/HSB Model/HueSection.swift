@@ -16,8 +16,8 @@ struct HSBHueSection {
 
 // Section of the color slider with special conditions for saturation or brightness
 struct BendSection {
-    let startHue: Int
-    let endHue: Int
+    let startHue: CGFloat
+    let endHue: CGFloat
     
     let bendSaturation: CGFloat
     let saturationDelta: CGFloat
@@ -29,7 +29,7 @@ struct BendSection {
     let brightnessIncrement: CGFloat
     let defaultBrightness: CGFloat
     
-    var hueCount: Int {
+    var hueCount: CGFloat {
         endHue - startHue
     }
     
@@ -37,7 +37,7 @@ struct BendSection {
         CGFloat(startHue + (hueCount / 2)) / 360
     }
     
-    init(startHue: Int, endHue: Int, sectionCount: Int, bendSaturation: CGFloat = 1.0, bendBrightness: CGFloat = 1.0) {
+    init(startHue: CGFloat, endHue: CGFloat, sectionCount: Int, bendSaturation: CGFloat = 1.0, bendBrightness: CGFloat = 1.0) {
         self.startHue = startHue
         self.endHue = endHue
         self.bendSaturation = bendSaturation
