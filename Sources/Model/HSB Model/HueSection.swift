@@ -1,7 +1,7 @@
 import Foundation
 
 // Main section of the color slider, for showing the full spectrum of color options
-struct HSBHueSection {
+struct HueSection {
     let minHue: CGFloat
     let maxHue: CGFloat
     
