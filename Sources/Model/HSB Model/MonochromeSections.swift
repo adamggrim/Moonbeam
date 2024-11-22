@@ -1,13 +1,11 @@
 import Foundation
 
 enum MonochromeColor {
-    case black
-    case white
+    case black, white
 }
 
 enum Position {
-    case start
-    case end
+    case start, end
 }
 
 // Section of the color slider that fades to or from a monochrome color
