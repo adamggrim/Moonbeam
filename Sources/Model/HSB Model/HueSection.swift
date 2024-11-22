@@ -19,12 +19,12 @@ struct BendSection {
     let startHue: CGFloat
     let endHue: CGFloat
     
-    let bendSaturation: CGFloat
+    let targetSaturation: CGFloat
     let saturationDelta: CGFloat
     let saturationIncrement: CGFloat
     let defaultSaturation: CGFloat
     
-    let bendBrightness: CGFloat
+    let targetBrightness: CGFloat
     let brightnessDelta: CGFloat
     let brightnessIncrement: CGFloat
     let defaultBrightness: CGFloat
@@ -33,15 +33,37 @@ struct BendSection {
         endHue - startHue
     }
     
-    var middleHue: CGFloat {
-        CGFloat(startHue + (hueCount / 2)) / 360
+    // Whether the bend goes to or from a target saturation or brightness (oneWay), or there and back (roundtrip)
+    enum BendMode {
+        case oneWay, roundtrip
     }
     
-    init(startHue: CGFloat, endHue: CGFloat, sectionCount: Int, bendSaturation: CGFloat = 1.0, bendBrightness: CGFloat = 1.0) {
+    var bendMode: BendMode
+    var middleHue: CGFloat? {
+        guard bendMode == .roundtrip else { return nil }
+        return CGFloat(startHue + (hueCount / 2)) / 360
+    }
+    
+    init(startHue: CGFloat, endHue: CGFloat, targetSaturation: CGFloat = 1.0, targetBrightness: CGFloat = 1.0) {
         self.startHue = startHue
         self.endHue = endHue
-        self.bendSaturation = bendSaturation
-        self.saturationDelta = defaultSaturation - bendSaturation
-        self.saturationIncrement = saturationDelta / (CGFloat(hueCount) / 2)
+        
+        self.targetSaturation = targetSaturation
+        self.saturationDelta = defaultSaturation - targetSaturation
+        
+        self.targetBrightness = targetBrightness
+        self.brightnessDelta = defaultBrightness - targetBrightness
+        
+        // Take into account whether the bend section is one-way or roundtrip
+        let denominator: CGFloat = {
+            if let middleHue {
+                return abs(middleHue * 360 - startHue)
+            } else {
+                return CGFloat(hueCount)
+            }
+        }()
+        
+        self.saturationIncrement = saturationDelta / denominator
+        self.brightnessIncrement = brightnessDelta / denominator
     }
 }
