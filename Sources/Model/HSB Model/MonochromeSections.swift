@@ -9,7 +9,7 @@ enum Position {
 }
 
 // Section of the color slider that fades to or from a monochrome color
-protocol HSBMonochromeSection {
+protocol MonochromeSection {
     var color: MonochromeColor { get }
     
     // Number of monochrome gradations added to the hue section (each equal in width to a single hue)
@@ -19,20 +19,20 @@ protocol HSBMonochromeSection {
     var stepSize: CGFloat { get }
 }
 
-extension HSBMonochromeSection {
+extension MonochromeSection {
     var stepSize: CGFloat {
         guard count > 1 else { return 1.0 }
         return 1.0 / (count - 1)
     }
 }
 
-struct HSBBlackSection: HSBMonochromeSection {
+struct BlackSection: MonochromeSection {
     let color: MonochromeColor = .black
     let count: CGFloat
     let position: Position
 }
 
-struct HSBWhiteSection: HSBMonochromeSection {
+struct WhiteSection: MonochromeSection {
     let color: MonochromeColor = .white
     let count: CGFloat
     let position: Position
