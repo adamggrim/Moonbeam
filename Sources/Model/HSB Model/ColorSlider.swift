@@ -31,6 +31,21 @@ struct HSBColorSliderModel {
     }
     
     var sliderColors: [Color] {
+        func getMonochromeColors(
+            // Value representing either starting brightness or starting saturation
+            startValue: CGFloat,
+            // Value representing either ending brightness or ending saturation
+            endValue: CGFloat,
+            monochromeSection: MonochromeSection) -> [Color] {
+                let values: [CGFloat] = {
+                    switch monochromeSection.position {
+                    case .start:
+                        return Array(stride(from: 0.0, through: startValue, by: monochromeSection.stepSize))
+                    case .end:
+                        return Array(stride(from: endValue, through: 0.0, by: monochromeSection.stepSize))
+                    }
+                }()
+                
                 return values.map { value in
                     if adjustBrightness {
                         return Color(hue: hue, saturation: defaultSaturation, brightness: value, opacity: 1.0)
