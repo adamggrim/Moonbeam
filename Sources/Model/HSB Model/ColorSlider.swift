@@ -36,6 +36,7 @@ struct HSBColorSliderModel {
             startValue: CGFloat,
             // Value representing either ending brightness or ending saturation
             endValue: CGFloat,
+            huePosition: CGFloat,
             monochromeSection: MonochromeSection) -> [Color] {
                 let values: [CGFloat] = {
                     switch monochromeSection.position {
@@ -47,10 +48,11 @@ struct HSBColorSliderModel {
                 }()
                 
                 return values.map { value in
-                    if adjustBrightness {
-                        return Color(hue: hue, saturation: defaultSaturation, brightness: value, opacity: 1.0)
-                    } else {
-                        return Color(hue: hue, saturation: value, brightness: defaultBrightness, opacity: 1.0)
+                    switch monochromeSection.color {
+                    case .black:
+                        return Color(hue: huePosition, saturation: value, brightness: defaultBrightness, opacity: 1.0)
+                    case .white:
+                        return Color(hue: huePosition, saturation: defaultSaturation, brightness: value, opacity: 1.0)
                     }
                 }
             }
@@ -87,32 +89,15 @@ struct HSBColorSliderModel {
             
             switch monochromeSection.color {
             case .black:
-                let monochromeBrightnesses: [CGFloat]
-                
-                switch monochromeSection.position {
-                case .start:
-                    monochromeBrightnesses = Array(stride(from: 0.0, through: bendAdjustment.startBrightness, by: -monochromeSection.stepSize))
-                case .end:
-                    monochromeBrightnesses = Array(stride(from: bendAdjustment.endBrightness, through: 0.0, by: monochromeSection.stepSize))
-                }
-                
-                return monochromeBrightnesses.map {
-                    Color(hue: huePosition, saturation: defaultSaturation, brightness: $0, opacity: 1.0)
-                }
-                
+                return getMonochromeColors(startValue: bendAdjustment.startBrightness,
+                                           endValue: bendAdjustment.endBrightness,
+                                           huePosition: huePosition,
+                                           monochromeSection: monochromeSection)
             case .white:
-                let monochromeSaturations: [CGFloat]
-                
-                switch monochromeSection.position {
-                case .start:
-                    monochromeSaturations = Array(stride(from: 0.0, through: bendAdjustment.startSaturation, by: -monochromeSection.stepSize))
-                case .end:
-                    monochromeSaturations = Array(stride(from: bendAdjustment.endSaturation, through: 0.0, by: monochromeSection.stepSize))
-                }
-                
-                return monochromeSaturations.map {
-                    Color(hue: huePosition, saturation: $0, brightness: defaultBrightness, opacity: 1.0)
-                }
+                return getMonochromeColors(startValue: bendAdjustment.startSaturation,
+                                           endValue: bendAdjustment.endSaturation,
+                                           huePosition: huePosition,
+                                           monochromeSection: monochromeSection)
             }
         }
         
