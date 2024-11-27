@@ -77,11 +77,6 @@ struct ColorSliderView: View {
     }
 }
 
-enum ThumbStyle {
-    case capsule
-    case circle
-}
-
 // Apply modifiers based on whether the color preview is hidden.
 struct PreviewViewModifier: ViewModifier {
     var isDragging: Bool
@@ -122,4 +117,12 @@ struct ColorSliderDimensions {
         self.shadowRadius = shadowRadius
         self.previewCornerRadius = previewWidth * 0.225
     }
+}
+
+enum ThumbStyle {
+    case capsule, circle
+}
+
+enum Orientation {
+    case horizontal, vertical
 }
