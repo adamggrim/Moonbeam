@@ -3,6 +3,12 @@ import SwiftUI
 
 // Model for assembling the HSB color slider values into an array
 struct HSBColorSliderModel {
+    // Enum for prioritizing which monochrome section to display first if the black and white sections are on the same side of the color slider
+    enum PrioritySection {
+        case black
+        case white
+    }
+    
     let minHue: CGFloat
     let maxHue: CGFloat
     // The saturation anywhere there is no saturation bend
@@ -12,6 +18,7 @@ struct HSBColorSliderModel {
     let monochromeSections: [MonochromeSection]?
     let hueSection: HueSection
     let bendSections: [BendSection]?
+    let prioritySection: PrioritySection?
     
     init(minHue: CGFloat,
          maxHue: CGFloat,
