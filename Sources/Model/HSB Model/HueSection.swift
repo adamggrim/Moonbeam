@@ -33,14 +33,14 @@ struct BendSection {
         endHue - startHue
     }
     
-    // Whether the bend goes to or from a target saturation or brightness (oneWay), or there and back (roundtrip)
+    // Whether the bend goes to or from a target saturation or brightness (oneWay), or there and back (twoWay)
     enum BendMode {
-        case oneWay, roundtrip
+        case oneWay, twoWay
     }
     
     var bendMode: BendMode
     var middleHue: CGFloat? {
-        guard bendMode == .roundtrip else { return nil }
+        guard bendMode == .twoWay else { return nil }
         return CGFloat(startHue + (hueCount / 2)) / 360
     }
     
@@ -54,7 +54,7 @@ struct BendSection {
         self.targetBrightness = targetBrightness
         self.brightnessDelta = defaultBrightness - targetBrightness
         
-        // Take into account whether the bend section is one-way or roundtrip
+        // Take into account whether the bend section is one-way or twoWay
         let denominator: CGFloat = {
             if let middleHue {
                 return abs(middleHue * 360 - startHue)
