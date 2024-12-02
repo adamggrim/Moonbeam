@@ -1,34 +1,34 @@
 import SwiftUI
 
-// The color slider, with a draggable thumb and color preview
 struct ColorSliderView: View {
     
+    var model: ColorSliderModel
     var viewModel: ColorSliderViewModel
     let dimensions: ColorSliderDimensions
-    
     let duration: Double
     
     init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat? = nil, thumbHeight: CGFloat? = nil, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat, startingColor: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle = .capsule, previewHidden: Bool = true, duration: Double = 0.25) {
         
         let dimensions = ColorSliderDimensions(sliderWidth: sliderWidth, sliderHeight: sliderHeight, thumbWidth: thumbWidth, thumbHeight: thumbHeight, previewWidth: previewWidth, previewOffset: previewOffset, shadowRadius: shadowRadius)
-        
-        self.dimensions = dimensions
+                
+        self.model = ColorSliderModel(maxWhite: <#T##Int#>, maxHue: <#T##Int#>, defaultSaturation: <#T##CGFloat#>)
         self.viewModel = ColorSliderViewModel(
             startingColor: startingColor,
             thumbColor: thumbColor,
             thumbStyle: thumbStyle,
             previewHidden: previewHidden,
             dimensions: dimensions)
+        self.dimensions = dimensions
         self.duration = duration
     }
     
     var body: some View {
         ZStack(alignment: .leading) {
             
-            // Gradient capsule
+            // Color gradient capsule
             Capsule().fill(
                 LinearGradient(
-                    gradient: Gradient(colors: sliderColors),
+                    gradient: Gradient(colors: model.sliderColors),
                     startPoint: .leading,
                     endPoint: .trailing
                 )
@@ -125,4 +125,13 @@ enum ThumbStyle {
 
 enum Orientation {
     case horizontal, vertical
+}
+
+#Preview {
+    ZStack {
+        Color.black.ignoresSafeArea()
+        
+        ColorSliderView(sliderWidth: 300, sliderHeight: 25, previewWidth: 100, previewOffset: -95, shadowRadius: 5, startingColor: Color.white)
+            .colorScheme(.dark)
+    }
 }

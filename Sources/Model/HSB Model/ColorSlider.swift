@@ -9,6 +9,12 @@ struct HSBColorSliderModel {
         case white
     }
     
+    /// Struct for pairing a MonochromeSection with an array of colors.
+    struct SectionColors {
+        let section: MonochromeSection
+        let colors: [Color]
+    }
+    
     let minHue: CGFloat
     let maxHue: CGFloat
     // The saturation anywhere there is no saturation bend
