@@ -126,12 +126,3 @@ enum ThumbStyle {
 enum Orientation {
     case horizontal, vertical
 }
-
-#Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
-        
-        ColorSliderView(sliderWidth: 300, sliderHeight: 25, previewWidth: 100, previewOffset: -95, shadowRadius: 5, startingColor: Color.white)
-            .colorScheme(.dark)
-    }
-}
