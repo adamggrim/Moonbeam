@@ -73,6 +73,20 @@ struct HSBColorSliderModel {
         func processMonochromeSections(monochromeSections: [MonochromeSection]?) -> [[Color]]? {
             return monochromeSections?.map { monochromeSection in
                 // Where in the hue range to insert the monochrome section
+            func getMonochromeSections(blackSection: BlackSection?, whiteSection: WhiteSection?) -> [MonochromeSection]? {
+                var monochromeSections: [MonochromeSection] = []
+                
+                if let blackSection = blackSection {
+                    monochromeSections.append(blackSection)
+                }
+                if let whiteSection = whiteSection {
+                    monochromeSections.append(whiteSection)
+                }
+                
+                return monochromeSections.isEmpty ? nil : monochromeSections
+            }
+            
+            let monochromeSections = getMonochromeSections(blackSection: blackSection, whiteSection: whiteSection)
                 let huePosition = monochromeSection.position == .start ? minHue : maxHue
                 
                 struct BendAdjustment {
