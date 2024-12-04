@@ -22,8 +22,10 @@ struct HSBColorSliderModel {
     let defaultSaturation: CGFloat
     /// The brightness anywhere there is no brightness bend.
     let defaultBrightness: CGFloat
-    let monochromeSections: [MonochromeSection]?
+    
     let hueSection: HueSection
+    let blackSection: BlackSection?
+    let whiteSection: WhiteSection?
     let bendSections: [BendSection]?
     let prioritySection: PrioritySection?
     
