@@ -1,9 +1,9 @@
 import Foundation
 import SwiftUI
 
-// Model for assembling the HSB color slider values into an array
+/// Model for assembling the HSB color slider values into an array
 struct HSBColorSliderModel {
-    // Enum for prioritizing which monochrome section to display first if the black and white sections are on the same side of the color slider
+    /// Enum for prioritizing which monochrome section to display first if the black and white sections are on the same side of the color slider.
     enum PrioritySection {
         case black
         case white
@@ -17,9 +17,10 @@ struct HSBColorSliderModel {
     
     let minHue: CGFloat
     let maxHue: CGFloat
-    // The saturation anywhere there is no saturation bend
+    
+    /// The saturation anywhere there is no saturation bend.
     let defaultSaturation: CGFloat
-    // The brightness anywhere there is no brightness bend
+    /// The brightness anywhere there is no brightness bend.
     let defaultBrightness: CGFloat
     let monochromeSections: [MonochromeSection]?
     let hueSection: HueSection
@@ -44,10 +45,20 @@ struct HSBColorSliderModel {
     }
     
     var sliderColors: [Color] {
+        
+        /// Generates an array of `Color` representing a monochrome color fading into or away from the start or end of a hue section.
+        ///
+        /// The `color` property of the `monochromeSection` determines whether the gradient to or from the monochrome color affects brightness (for white) or saturation (for black).
+        ///
+        /// - Parameters:
+        ///   - startValue: A value representing either starting brightness or starting saturation.
+        ///   - endValue: A value representing either ending brightness or ending saturation.
+        ///   - huePosition: The hue value for the entire monochrome section, equivalent to the hue at the start or end of the hue section.
+        ///   - monochromeSection: A `MonochromeSection` instance defining the color, position and step size for the monochrome section of the slider.
+        ///
+        /// - Returns: An array of `Color` instances representing the monochrome section.
         func getMonochromeColors(
-            // Value representing either starting brightness or starting saturation
             startValue: CGFloat,
-            // Value representing either ending brightness or ending saturation
             endValue: CGFloat,
             huePosition: CGFloat,
             monochromeSection: MonochromeSection) -> [Color] {
@@ -88,6 +99,10 @@ struct HSBColorSliderModel {
             }
             
             let monochromeSections = getMonochromeSections(blackSection: blackSection, whiteSection: whiteSection)
+            
+            return monochromeSections?.compactMap { monochromeSection in
+                
+                /// Where in the hue range to insert the monochrome section.
                 let huePosition = monochromeSection.position == .start ? minHue : maxHue
                 
                 struct BendAdjustment {
