@@ -27,23 +27,6 @@ struct HSBColorSliderModel {
     let bendSections: [BendSection]?
     let prioritySection: PrioritySection?
     
-    init(minHue: CGFloat,
-         maxHue: CGFloat,
-         defaultSaturation: CGFloat,
-         defaultBrightness: CGFloat,
-         monochromeSections: [MonochromeSection]?,
-         hueSection: HueSection,
-         bendSections: [BendSection]?) {
-        
-        self.minHue = minHue
-        self.maxHue = maxHue
-        self.defaultSaturation = defaultSaturation
-        self.defaultBrightness = defaultBrightness
-        self.monochromeSections = monochromeSections
-        self.hueSection = hueSection
-        self.bendSections = bendSections
-    }
-    
     var sliderColors: [Color] {
         
         /// Generates an array of `Color` representing a monochrome color fading into or away from the start or end of a hue section.
