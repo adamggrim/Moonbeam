@@ -10,7 +10,7 @@ struct HSBColorSliderModel {
     }
     
     /// Struct for pairing a MonochromeSection with an array of colors.
-    struct SectionColors {
+    struct MonochromeSectionColors {
         let section: MonochromeSection
         let colors: [Color]
     }
