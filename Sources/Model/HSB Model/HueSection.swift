@@ -14,7 +14,7 @@ struct HueSection {
     }
 }
 
-// Section of the color slider with special conditions for saturation or brightness
+/// Section of the color slider with special conditions for saturation or brightness
 struct BendSection {
     let startHue: CGFloat
     let endHue: CGFloat
@@ -54,7 +54,7 @@ struct BendSection {
         self.targetBrightness = targetBrightness
         self.brightnessDelta = defaultBrightness - targetBrightness
         
-        // Take into account whether the bend section is one-way or twoWay
+        // Take into account whether the bend section is one-way or two-way
         let denominator: CGFloat = {
             if let middleHue {
                 return abs(middleHue * 360 - startHue)

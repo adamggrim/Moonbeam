@@ -8,11 +8,11 @@ enum Position {
     case start, end
 }
 
-// Section of the color slider that fades to or from a monochrome color
+/// Section of the color slider that fades to or from a monochrome color
 protocol MonochromeSection {
     var color: MonochromeColor { get }
     
-    // Number of monochrome gradations added to the hue section (each equal in width to a single hue)
+    /// Number of monochrome gradations added to the hue section (each equal in width to a single hue)
     var count: CGFloat { get }
     var position: Position { get }
     

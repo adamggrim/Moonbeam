@@ -9,7 +9,7 @@ struct HSBColorSliderModel {
         case white
     }
     
-    /// Struct for pairing a MonochromeSection with an array of colors.
+    /// Struct for pairing a `MonochromeSection` with an array of colors.
     struct MonochromeSectionColors {
         let section: MonochromeSection
         let colors: [Color]
