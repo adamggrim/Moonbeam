@@ -66,9 +66,15 @@ struct HSBColorSliderModel {
                 }
             }
         
-        func processMonochromeSections(monochromeSections: [MonochromeSection]?) -> [[Color]]? {
-            return monochromeSections?.map { monochromeSection in
-                // Where in the hue range to insert the monochrome section
+        /// Processes black and white sections to generate corresponding `MonochromeSectionColors` structs.
+        ///
+        /// - Parameters:
+        ///   - blackSection: A `MonochromeSection` instance representing the black section.
+        ///   - whiteSection: A `MonochromeSection` instance representing the white section.
+        ///
+        /// - Returns: An array of `MonochromeSectionColors` instances for each section, or an empty array if .
+        func getMonochromeSectionColors(blackSection: BlackSection?, whiteSection: WhiteSection?) -> [MonochromeSectionColors]? {
+            
             /// Combines an optional `BlackSection` and `WhiteSection` into an optional array of `MonochromeSection`.
             ///
             /// - Parameters:
@@ -116,18 +122,20 @@ struct HSBColorSliderModel {
                     }
                 }
                 
-                return getMonochromeColors(startValue: monochromeSection.color == .black ? bendAdjustment.startBrightness : bendAdjustment.startSaturation,
-                                           endValue: monochromeSection.color == .black ? bendAdjustment.endBrightness : bendAdjustment.endSaturation,
-                                           huePosition: huePosition,
-                                           monochromeSection: monochromeSection)
+                let monochromeColors = getMonochromeColors(startValue: monochromeSection.color == .black ? bendAdjustment.startBrightness : bendAdjustment.startSaturation,
+                                                           endValue: monochromeSection.color == .black ? bendAdjustment.endBrightness : bendAdjustment.endSaturation,
+                                                           huePosition: huePosition,
+                                                           monochromeSection: monochromeSection)
+                return MonochromeSectionColors(section: monochromeSection, colors: monochromeColors)
             }
         }
         
         let monochromeStartSections = monochromeSections?.filter { $0.position == .start }
         let monochromeEndSections = monochromeSections?.filter { $0.position == .end }
         
-        let monochromeStartColors = processMonochromeSections(monochromeSections: monochromeStartSections)
-        let monochromeEndColors = processMonochromeSections(monochromeSections: monochromeEndSections)
+        // only pass in the monochromeSection if 
+        let monochromeStartColors = getMonochromeSectionColors(monochromeSections: monochromeStartSections)
+        let monochromeEndColors = getMonochromeSectionColors(monochromeSections: monochromeEndSections)
 
         let hueValues = Array(stride(from: minHue, to: maxHue, by: hueSection.stepSize))
         let hueColors: [Color] = hueValues.enumerated().map { (index, hue) in
