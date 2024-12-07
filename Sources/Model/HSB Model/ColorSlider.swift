@@ -66,13 +66,13 @@ struct HSBColorSliderModel {
                 }
             }
         
-        /// Processes black and white sections to generate corresponding `MonochromeSectionColors` structs.
+        /// Generates an optional array of `MonochromeSectionColors` structs from black and white monochrome sections.
         ///
         /// - Parameters:
-        ///   - blackSection: A `MonochromeSection` instance representing the black section.
-        ///   - whiteSection: A `MonochromeSection` instance representing the white section.
+        ///   - blackSection: An optional `MonochromeSection` instance representing the black section.
+        ///   - whiteSection: An optional `MonochromeSection` instance representing the white section.
         ///
-        /// - Returns: An array of `MonochromeSectionColors` instances for each section, or an empty array if .
+        /// - Returns: An array of `MonochromeSectionColors`, or `nil` if `blackSection` and `whiteSection` are both `nil`.
         func getMonochromeSectionColors(blackSection: BlackSection?, whiteSection: WhiteSection?) -> [MonochromeSectionColors]? {
             
             /// Combines an optional `BlackSection` and `WhiteSection` into an optional array of `MonochromeSection`.
