@@ -31,6 +31,20 @@ struct HSBColorSliderModel {
     
     var sliderColors: [Color] {
         
+        /// Combines an optional `BlackSection` and `WhiteSection` into an optional array of `MonochromeSection`.
+        ///
+        /// - Parameters:
+        ///   - blackSection: An optional `BlackSection` of the color slider
+        ///   - whiteSection: An optional `WhiteSection` of the color slider
+        ///
+        /// - Returns:
+        ///     An array of `MonochromeSection`. If either section exists, it is included in the returned array of `MonochromeSection`.
+        ///     The function returns an empty array if both sections are `nil`.
+        func getMonochromeSections(blackSection: BlackSection?, whiteSection: WhiteSection?) -> [MonochromeSection]? {
+            let monochromeSections = [blackSection as MonochromeSection?, whiteSection as MonochromeSection?].compactMap { $0 }
+            return monochromeSections.isEmpty ? nil : monochromeSections
+        }
+        
         /// Generates an array of `Color` representing a monochrome color fading into or away from the start or end of a hue section.
         ///
         /// The `color` property of the `monochromeSection` determines whether the gradient to or from the monochrome color affects brightness (for white) or saturation (for black).
@@ -74,23 +88,6 @@ struct HSBColorSliderModel {
         ///
         /// - Returns: An array of `MonochromeSectionColors`, or `nil` if `blackSection` and `whiteSection` are both `nil`.
         func getMonochromeSectionColors(blackSection: BlackSection?, whiteSection: WhiteSection?) -> [MonochromeSectionColors]? {
-            
-            /// Combines an optional `BlackSection` and `WhiteSection` into an optional array of `MonochromeSection`.
-            ///
-            /// - Parameters:
-            ///   - blackSection: An optional `BlackSection` of the color slider
-            ///   - whiteSection: An optional `WhiteSection` of the color slider
-            ///
-            /// - Returns:
-            ///     An array of `MonochromeSection`. If either section exists, it is included in the returned array of `MonochromeSection`.
-            ///     The function returns an empty array if both sections are `nil`.
-            func getMonochromeSections(blackSection: BlackSection?, whiteSection: WhiteSection?) -> [MonochromeSection]? {
-                let monochromeSections = [blackSection as MonochromeSection?, whiteSection as MonochromeSection?].compactMap { $0 }
-                return monochromeSections.isEmpty ? nil : monochromeSections
-            }
-            
-            let monochromeSections = getMonochromeSections(blackSection: blackSection, whiteSection: whiteSection)
-            
             return monochromeSections?.compactMap { monochromeSection in
                 
                 /// Where in the hue range to insert the monochrome section.
@@ -129,6 +126,8 @@ struct HSBColorSliderModel {
                 return MonochromeSectionColors(section: monochromeSection, colors: monochromeColors)
             }
         }
+        
+        let monochromeSections = getMonochromeSections(blackSection: blackSection, whiteSection: whiteSection)
         
         let monochromeStartSections = monochromeSections?.filter { $0.position == .start }
         let monochromeEndSections = monochromeSections?.filter { $0.position == .end }
