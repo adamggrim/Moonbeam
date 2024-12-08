@@ -166,7 +166,7 @@ struct HSBColorSliderModel {
             return Color(hue: normalizedHue, saturation: calculatedSaturation, brightness: 1.0, opacity: 1.0)
         }
         
-        return monochromeStartColors + hueColors + monochromeEndColors
+        return [monochromeStartColors, hueColors, monochromeEndColors].compactMap { $0 }.flatMap { $0 }
     }
 }
 
