@@ -31,31 +31,46 @@ struct HSBColorSliderModel {
     
     var sliderColors: [Color] {
         
-        /// Combines an optional `BlackSection` and `WhiteSection` into an optional array of `MonochromeSection`.
-        ///
-        /// - Parameters:
-        ///   - blackSection: An optional `BlackSection` of the color slider
-        ///   - whiteSection: An optional `WhiteSection` of the color slider
-        ///
-        /// - Returns:
-        ///     An array of `MonochromeSection`. If either section exists, it is included in the returned array of `MonochromeSection`.
-        ///     The function returns an empty array if both sections are `nil`.
+        /**
+         Combines an optional `BlackSection` and `WhiteSection` into an optional
+         array of `MonochromeSection`.
+         
+         - Parameters:
+            - blackSection: An optional `BlackSection` of the color slider.
+            - whiteSection: An optional `WhiteSection` of the color slider.
+
+         - Returns:
+            An array of `MonochromeSection`. If either section exists, it is
+            included in the returned array of `MonochromeSection`. The function
+            returns an empty array if both sections are `nil`.
+         */
         func getMonochromeSections(blackSection: BlackSection?, whiteSection: WhiteSection?) -> [MonochromeSection]? {
             let monochromeSections = [blackSection as MonochromeSection?, whiteSection as MonochromeSection?].compactMap { $0 }
             return monochromeSections.isEmpty ? nil : monochromeSections
         }
         
-        /// Generates an array of `Color` representing a monochrome color fading into or away from the start or end of a hue section.
-        ///
-        /// The `color` property of the `monochromeSection` determines whether the gradient to or from the monochrome color affects brightness (for white) or saturation (for black).
-        ///
-        /// - Parameters:
-        ///   - startValue: A value representing either starting brightness or starting saturation.
-        ///   - endValue: A value representing either ending brightness or ending saturation.
-        ///   - huePosition: The hue value for the entire monochrome section, equivalent to the hue at the start or end of the hue section.
-        ///   - monochromeSection: A `MonochromeSection` instance defining the color, position and step size for the monochrome section of the slider.
-        ///
-        /// - Returns: An array of `Color` instances representing the monochrome section.
+        /**
+         Generates an array of `Color` representing a monochrome color fading
+         into or away from the start or end of a hue section.
+         
+         The `color` property of the `monochromeSection` determines whether the
+         gradient to or from the monochrome color affects brightness (for white
+         or saturation (for black).
+         
+         - Parameters:
+            - startValue: A value representing either starting brightness or
+            starting saturation.
+            - endValue: A value representing either ending brightness or ending
+            saturation.
+            - huePosition: The hue value for the entire monochrome section,
+            equivalent to the hue at the start or end of the hue section.
+            - monochromeSection: A `MonochromeSection` instance defining the
+            color, position and step size for the monochrome section of the
+            color slider.
+         
+         - Returns:
+            An array of `Color` instances representing the monochrome section.
+         */
         func getMonochromeColors(
             startValue: CGFloat,
             endValue: CGFloat,
