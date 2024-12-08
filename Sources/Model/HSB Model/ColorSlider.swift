@@ -95,14 +95,21 @@ struct HSBColorSliderModel {
                 }
             }
         
-        /// Generates an optional array of `MonochromeSectionColors` structs from black and white monochrome sections.
-        ///
-        /// - Parameters:
-        ///   - blackSection: An optional `MonochromeSection` instance representing the black section.
-        ///   - whiteSection: An optional `MonochromeSection` instance representing the white section.
-        ///
-        /// - Returns: An array of `MonochromeSectionColors`, or `nil` if `blackSection` and `whiteSection` are both `nil`.
-        func getMonochromeSectionColors(blackSection: BlackSection?, whiteSection: WhiteSection?) -> [MonochromeSectionColors]? {
+        /**
+         Generates an optional array of `MonochromeSectionColors` structs from
+         an array of monochrome sections.
+
+         This function accounts for any brightness or saturation bends that
+         border a monochrome section.
+
+         - Parameters:
+            - monochromeSections: An optional array of `MonochromeSection`.
+
+         - Returns:
+            An array of `MonochromeSectionColors`, or `nil` if
+            `monochromeSections` is `nil`.
+         */
+        func getMonochromeSectionColors(monochromeSections: [MonochromeSection]?) -> [MonochromeSectionColors]? {
             return monochromeSections?.compactMap { monochromeSection in
                 
                 /// Where in the hue range to insert the monochrome section.
