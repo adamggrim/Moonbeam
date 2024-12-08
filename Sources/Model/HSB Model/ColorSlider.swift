@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Model for assembling the HSB color slider values into an array
 struct HSBColorSliderModel {
-    /// Enum for prioritizing which monochrome section to display first if the black and white sections are on the same side of the color slider.
+    /// Enum for prioritizing which monochrome section to show first if the black and white sections are on the same side of the color slider.
     enum PrioritySection {
         case black
         case white
