@@ -154,10 +154,10 @@ struct HSBColorSliderModel {
         let monochromeStartSections = monochromeSections?.filter { $0.position == .start }
         let monochromeEndSections = monochromeSections?.filter { $0.position == .end }
         
-        // only pass in the monochromeSection if 
-        let monochromeStartColors = getMonochromeSectionColors(monochromeSections: monochromeStartSections)
-        let monochromeEndColors = getMonochromeSectionColors(monochromeSections: monochromeEndSections)
-
+        /// An optional array of `SectionColors` representing monochrome sections at the start of the color slider.
+        let monochromeStartSectionColors = getMonochromeSectionColors(monochromeSections: monochromeStartSections)
+        /// An optional array of `SectionColors` representing monochrome sections at the end of the color slider.
+        let monochromeEndSectionColors = getMonochromeSectionColors(monochromeSections: monochromeEndSections)
         let hueValues = Array(stride(from: minHue, to: maxHue, by: hueSection.stepSize))
         let hueColors: [Color] = hueValues.enumerated().map { (index, hue) in
             let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
