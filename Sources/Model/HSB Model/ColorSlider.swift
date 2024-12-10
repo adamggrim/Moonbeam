@@ -94,9 +94,9 @@ struct HSBColorSliderModel {
                 return values.map { value in
                     switch monochromeSection.color {
                     case .black:
-                        return Color(hue: huePosition, saturation: value, brightness: defaultBrightness, opacity: 1.0)
-                    case .white:
                         return Color(hue: huePosition, saturation: defaultSaturation, brightness: value, opacity: 1.0)
+                    case .white:
+                        return Color(hue: huePosition, saturation: value, brightness: defaultBrightness, opacity: 1.0)
                     }
                 }
             }
