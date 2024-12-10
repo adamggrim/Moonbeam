@@ -76,6 +76,12 @@ struct HSBColorSliderModel {
             endValue: CGFloat,
             huePosition: CGFloat,
             monochromeSection: MonochromeSection) -> [Color] {
+                
+                /**
+                 An array for whatever value is changing (either brightness or
+                 saturation) as the monochromeSection gets farther from the
+                 hueSection.
+                 */
                 let values: [CGFloat] = {
                     switch monochromeSection.sliderPosition {
                     case .start:
