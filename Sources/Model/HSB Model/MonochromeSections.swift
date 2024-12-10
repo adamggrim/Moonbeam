@@ -4,7 +4,7 @@ enum MonochromeColor {
     case black, white
 }
 
-enum Position {
+enum SliderPosition {
     case start, end
 }
 
@@ -14,7 +14,7 @@ protocol MonochromeSection {
     
     /// Number of monochrome gradations added to the hue section (each equal in width to a single hue)
     var count: CGFloat { get }
-    var position: Position { get }
+    var sliderPosition: SliderPosition { get }
     
     var stepSize: CGFloat { get }
 }
@@ -29,11 +29,11 @@ extension MonochromeSection {
 struct BlackSection: MonochromeSection {
     let color: MonochromeColor = .black
     let count: CGFloat
-    let position: Position
+    let sliderPosition: SliderPosition
 }
 
 struct WhiteSection: MonochromeSection {
     let color: MonochromeColor = .white
     let count: CGFloat
-    let position: Position
+    let sliderPosition: SliderPosition
 }

@@ -65,7 +65,7 @@ struct HSBColorSliderModel {
             - huePosition: The hue value for the entire monochrome section,
             equivalent to the hue at the start or end of the hue section.
             - monochromeSection: A `MonochromeSection` instance defining the
-            color, position and step size for the monochrome section of the
+            color, slider position and step size for the monochrome section of the
             color slider.
          
          - Returns:
@@ -77,7 +77,7 @@ struct HSBColorSliderModel {
             huePosition: CGFloat,
             monochromeSection: MonochromeSection) -> [Color] {
                 let values: [CGFloat] = {
-                    switch monochromeSection.position {
+                    switch monochromeSection.sliderPosition {
                     case .start:
                         return Array(stride(from: 0.0, through: startValue, by: monochromeSection.stepSize))
                     case .end:
@@ -113,7 +113,7 @@ struct HSBColorSliderModel {
             return monochromeSections?.compactMap { monochromeSection in
                 
                 /// Where in the hue range to insert the monochrome section.
-                let huePosition = monochromeSection.position == .start ? minHue : maxHue
+                let huePosition = monochromeSection.sliderPosition == .start ? minHue : maxHue
                 
                 struct BendAdjustment {
                     var startBrightness: CGFloat
