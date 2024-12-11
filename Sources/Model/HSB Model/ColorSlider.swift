@@ -83,7 +83,7 @@ struct HSBColorSliderModel {
                  hueSection.
                  */
                 let values: [CGFloat] = {
-                    switch monochromeSection.sliderPosition {
+                    switch monochromeSection.positionOnSlider {
                     case .start:
                         return Array(stride(from: 0.0, through: startValue, by: monochromeSection.stepSize))
                     case .end:
@@ -119,7 +119,7 @@ struct HSBColorSliderModel {
             return monochromeSections?.compactMap { monochromeSection in
                 
                 /// Where in the hue range to insert the monochrome section.
-                let huePosition = monochromeSection.sliderPosition == .start ? minHue : maxHue
+                let huePosition = monochromeSection.positionOnSlider == .start ? minHue : maxHue
                 
                 struct BendAdjustment {
                     var startBrightness: CGFloat
@@ -157,8 +157,8 @@ struct HSBColorSliderModel {
         
         let monochromeSections = getMonochromeSections(blackSection: blackSection, whiteSection: whiteSection)
         
-        let monochromeStartSections = monochromeSections?.filter { $0.position == .start }
-        let monochromeEndSections = monochromeSections?.filter { $0.position == .end }
+        let monochromeStartSections = monochromeSections?.filter { $0.positionOnSlider == .start }
+        let monochromeEndSections = monochromeSections?.filter { $0.positionOnSlider == .end }
         
         /// An optional array of `SectionColors` representing monochrome sections at the start of the color slider.
         let monochromeStartSectionColors = getMonochromeSectionColors(monochromeSections: monochromeStartSections)
