@@ -106,6 +106,43 @@ struct HSBColorSliderModel {
             }
         
         /**
+         Generates an array of `Color` representing a `MonochromeSection`
+         blending into an adjacent `MonochromeSection`.
+         
+         - Parameters:
+            - huePosition: The hue value for the entire `MonochromeSection`,
+            equivalent to the hue at either the start or end of the color slider.
+            `HueSection`.
+            - monochromeSection: A `MonochromeSection` object representing the
+            color, slider position and step size for the monochrome section of
+            the color slider.
+         
+          - Returns: An array of `Color` objects representing the
+            `MonochromeSection` blending into an adjacent  `MonochromeSection`.
+         */
+        func getblendedMonochromeColors(
+            huePosition: CGFloat,
+            monochromeSection: MonochromeSection) -> [Color] {
+                
+                /**
+                 An array for the brightness values as the `MonochromeSection`
+                 gets closer to the adjacent `MonochromeSection`.
+                 */
+                let brightnessValues: [CGFloat] = {
+                    switch (monochromeSection.color, monochromeSection.positionOnSlider) {
+                    case (.black, .start), (.white, .end):
+                        return Array(stride(from: 0.0, through: 1.0, by: monochromeSection.stepSize))
+                    case (.white, .start), (.black, .end):
+                        return Array(stride(from: 1.0, through: 0.0, by: monochromeSection.stepSize))
+                    }
+                }()
+                
+                return brightnessValues.map { brightness in
+                    return Color(hue: huePosition, saturation: 0.0, brightness: brightness, opacity: 1.0)
+                }
+            }
+    
+        /**
          Generates an optional array of `MonochromeSectionColors` structs from
          an array of `MonochromeSection`.
 
