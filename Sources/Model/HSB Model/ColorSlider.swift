@@ -1,9 +1,12 @@
 import Foundation
 import SwiftUI
 
-/// Model for assembling the HSB color slider values into an array
+/// Model for assembling the HSB color slider values into an array.
 struct HSBColorSliderModel {
-    /// Enum for prioritizing which monochrome section to show first if the black and white sections are on the same side of the color slider.
+    
+    /** Enum for prioritizing which `MonochromeSection` to show first if the
+     black and white sections are on the same side of the color slider.
+     */
     enum PrioritySection {
         case black
         case white
@@ -50,26 +53,27 @@ struct HSBColorSliderModel {
         }
         
         /**
-         Generates an array of `Color` representing a monochrome color fading
-         into or away from the start or end of a hue section.
+         Generates an array of `Color` objects representing a monochrome color
+         fading into or away from the start or end of a `HueSection`.
          
          The `color` property of the `monochromeSection` determines whether the
-         gradient to or from the monochrome color affects brightness (for white
-         or saturation (for black).
+         gradient to or from the monochrome color affects brightness (for black
+         sections) or saturation (for white sections).
          
          - Parameters:
             - startValue: A value representing either starting brightness or
             starting saturation.
             - endValue: A value representing either ending brightness or ending
             saturation.
-            - huePosition: The hue value for the entire monochrome section,
-            equivalent to the hue at the start or end of the hue section.
-            - monochromeSection: A `MonochromeSection` instance defining the
-            color, slider position and step size for the monochrome section of the
-            color slider.
+            - huePosition: The hue value for the entire `MonochromeSection`,
+            equivalent to the hue at either the start or end of the
+            `HueSection`.
+            - monochromeSection: A `MonochromeSection` object representing the
+            color, slider position and step size for the monochrome section of
+            the color slider.
          
          - Returns:
-            An array of `Color` instances representing the monochrome section.
+            An array of `Color` objects representing the `MonochromeSection`.
          */
         func getMonochromeColors(
             startValue: CGFloat,
@@ -79,8 +83,8 @@ struct HSBColorSliderModel {
                 
                 /**
                  An array for whatever value is changing (either brightness or
-                 saturation) as the monochromeSection gets farther from the
-                 hueSection.
+                 saturation) as the `MonochromeSection` gets farther from the
+                 `HueSection`.
                  */
                 let values: [CGFloat] = {
                     switch monochromeSection.positionOnSlider {
@@ -103,10 +107,10 @@ struct HSBColorSliderModel {
         
         /**
          Generates an optional array of `MonochromeSectionColors` structs from
-         an array of monochrome sections.
+         an array of `MonochromeSection`.
 
          This function accounts for any brightness or saturation bends that
-         border a monochrome section.
+         border a `MonochromeSection`.
 
          - Parameters:
             - monochromeSections: An optional array of `MonochromeSection`.
@@ -118,7 +122,7 @@ struct HSBColorSliderModel {
         func getMonochromeSectionColors(monochromeSections: [MonochromeSection]?) -> [MonochromeSectionColors]? {
             return monochromeSections?.compactMap { monochromeSection in
                 
-                /// Where in the hue range to insert the monochrome section.
+                /// Where in the hue range to insert the `MonochromeSection`.
                 let huePosition = monochromeSection.positionOnSlider == .start ? minHue : maxHue
                 
                 struct BendAdjustment {
