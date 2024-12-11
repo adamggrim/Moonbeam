@@ -68,7 +68,7 @@ struct HSBColorSliderModel {
             - endValue: A value representing either ending brightness or ending
             saturation.
             - huePosition: The hue value for the entire `MonochromeSection`,
-            equivalent to the hue at either the start or end of the
+            equivalent to the hue at either the start or end of the color slider.
             `HueSection`.
             - monochromeSection: A `MonochromeSection` object representing the
             color, slider position and step size for the monochrome section of
