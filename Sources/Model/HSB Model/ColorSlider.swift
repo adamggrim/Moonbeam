@@ -47,8 +47,10 @@ struct HSBColorSliderModel {
             included in the returned array of `MonochromeSection`. The function
             returns an empty array if both sections are `nil`.
          */
-        func getMonochromeSections(blackSection: BlackSection?, whiteSection: WhiteSection?) -> [MonochromeSection]? {
-            let monochromeSections = [blackSection as MonochromeSection?, whiteSection as MonochromeSection?].compactMap { $0 }
+        func getMonochromeSections(blackSection: BlackSection?,
+                                   whiteSection: WhiteSection?) -> [MonochromeSection]? {
+            let monochromeSections = [blackSection as MonochromeSection?,
+                                      whiteSection as MonochromeSection?].compactMap { $0 }
             return monochromeSections.isEmpty ? nil : monochromeSections
         }
         
