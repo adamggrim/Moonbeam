@@ -18,6 +18,26 @@ struct HSBColorSliderModel {
         let colors: [Color]
     }
     
+    /**
+     Combines an optional `BlackSection` and `WhiteSection` into an optional
+     array of `MonochromeSection`.
+     
+     - Parameters:
+        - blackSection: An optional `BlackSection` of the color slider.
+        - whiteSection: An optional `WhiteSection` of the color slider.
+
+     - Returns:
+        An array of `MonochromeSection`. If either section exists, it is
+        included in the returned array of `MonochromeSection`. The function
+        returns an empty array if both sections are `nil`.
+     */
+    func getMonochromeSections(blackSection: BlackSection?,
+                               whiteSection: WhiteSection?) -> [MonochromeSection]? {
+        let monochromeSections = [blackSection as MonochromeSection?,
+                                  whiteSection as MonochromeSection?].compactMap { $0 }
+        return monochromeSections.isEmpty ? nil : monochromeSections
+    }
+    
     let minHue: CGFloat
     let maxHue: CGFloat
     
@@ -32,27 +52,13 @@ struct HSBColorSliderModel {
     let bendSections: [BendSection]?
     let prioritySection: PrioritySection?
     
-    var sliderColors: [Color] {
         
-        /**
-         Combines an optional `BlackSection` and `WhiteSection` into an optional
-         array of `MonochromeSection`.
-         
-         - Parameters:
-            - blackSection: An optional `BlackSection` of the color slider.
-            - whiteSection: An optional `WhiteSection` of the color slider.
-
-         - Returns:
-            An array of `MonochromeSection`. If either section exists, it is
-            included in the returned array of `MonochromeSection`. The function
-            returns an empty array if both sections are `nil`.
-         */
-        func getMonochromeSections(blackSection: BlackSection?,
-                                   whiteSection: WhiteSection?) -> [MonochromeSection]? {
-            let monochromeSections = [blackSection as MonochromeSection?,
-                                      whiteSection as MonochromeSection?].compactMap { $0 }
-            return monochromeSections.isEmpty ? nil : monochromeSections
-        }
+        self.monochromeSections = getMonochromeSections(blackSection: self.blackSection, whiteSection: self.whiteSection)
+        self.monochromeStartSections = self.monochromeSections?.filter { $0.positionOnSlider == .start }
+        self.monochromeEndSections = self.monochromeSections?.filter { $0.positionOnSlider == .end }
+    }
+    
+    var sliderColors: [Color] {
         
         /**
          Generates an array of `Color` objects representing a monochrome color
