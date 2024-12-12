@@ -52,6 +52,31 @@ struct HSBColorSliderModel {
     let bendSections: [BendSection]?
     let prioritySection: PrioritySection?
     
+    let monochromeSections: [MonochromeSection]?
+    
+    let monochromeStartSections: [MonochromeSection]?
+    let monochromeEndSections: [MonochromeSection]?
+    
+    init(
+        minHue: CGFloat,
+        maxHue: CGFloat,
+        defaultSaturation: CGFloat,
+        defaultBrightness: CGFloat,
+        hueSection: HueSection,
+        blackSection: BlackSection?,
+        whiteSection: WhiteSection?,
+        bendSections: [BendSection]?,
+        prioritySection: PrioritySection?
+    ) {
+        self.minHue = minHue
+        self.maxHue = maxHue
+        self.defaultSaturation = defaultSaturation
+        self.defaultBrightness = defaultBrightness
+        self.hueSection = hueSection
+        self.blackSection = blackSection
+        self.whiteSection = whiteSection
+        self.bendSections = bendSections
+        self.prioritySection = prioritySection
         
         self.monochromeSections = getMonochromeSections(blackSection: self.blackSection, whiteSection: self.whiteSection)
         self.monochromeStartSections = self.monochromeSections?.filter { $0.positionOnSlider == .start }
@@ -203,11 +228,6 @@ struct HSBColorSliderModel {
                 return MonochromeSectionColors(section: monochromeSection, colors: monochromeColors)
             }
         }
-        
-        let monochromeSections = getMonochromeSections(blackSection: blackSection, whiteSection: whiteSection)
-        
-        let monochromeStartSections = monochromeSections?.filter { $0.positionOnSlider == .start }
-        let monochromeEndSections = monochromeSections?.filter { $0.positionOnSlider == .end }
         
         /// An optional array of `SectionColors` representing monochrome sections at the start of the color slider.
         let monochromeStartSectionColors = getMonochromeSectionColors(monochromeSections: monochromeStartSections)
