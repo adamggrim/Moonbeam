@@ -98,75 +98,6 @@ struct HSBColorSliderModel {
     var sliderColors: [Color] {
         
         /**
-         Generates an array of `Color` objects representing a monochrome color
-         fading into or away from the start or end of a `HueSection`.
-         
-         The `color` property of the `monochromeSection` determines whether the
-         gradient to or from the monochrome color affects brightness (for black
-         sections) or saturation (for white sections).
-         
-         - Parameters:
-            - startValue: A value representing either starting brightness or
-            starting saturation.
-            - endValue: A value representing either ending brightness or ending
-            saturation.
-            - huePosition: The hue value for the entire `MonochromeSection`,
-            equivalent to the hue at either the start or end of the color slider.
-            `HueSection`.
-            - monochromeSection: A `MonochromeSection` object representing the
-            color, slider position and step size for the monochrome section of
-            the color slider.
-         
-         - Returns:
-            An array of `Color` objects representing the `MonochromeSection`.
-         */
-        func getMonochromeColors(
-            startValue: CGFloat,
-            endValue: CGFloat,
-            huePosition: CGFloat,
-            monochromeSection: MonochromeSection) -> [Color] {
-                
-                /**
-                 An array for whatever value is changing (either brightness or
-                 saturation) as the `MonochromeSection` gets farther from the
-                 `HueSection`.
-                 */
-                let values: [CGFloat] = {
-                    switch monochromeSection.positionOnSlider {
-                    case .start:
-                        return Array(
-                            stride(from: 0.0,
-                                   through: startValue,
-                                   by: monochromeSection.stepSize))
-                    case .end:
-                        return Array(
-                            stride(from: endValue,
-                                   through: 0.0,
-                                   by: monochromeSection.stepSize))
-                    }
-                }()
-                
-                return values.map { value in
-                    switch monochromeSection.color {
-                    case .black:
-                        return Color(
-                            hue: huePosition,
-                            saturation: defaultSaturation,
-                            brightness: value,
-                            opacity: 1.0
-                        )
-                    case .white:
-                        return Color(
-                            hue: huePosition,
-                            saturation: value,
-                            brightness: defaultBrightness,
-                            opacity: 1.0
-                        )
-                    }
-                }
-            }
-        
-        /**
          Generates an array of `Color` representing a `MonochromeSection`
          blending into an adjacent `MonochromeSection`.
          
@@ -237,6 +168,78 @@ struct HSBColorSliderModel {
         func getMonochromeSectionColors(
             monochromeSections: [MonochromeSection]?
         ) -> [MonochromeSectionColors]? {
+            
+            /**
+             Generates an array of `Color` objects representing a monochrome
+             color fading into or away from the start or end of a `HueSection`.
+             
+             The `color` property of the `monochromeSection` determines whether
+             the gradient to or from the monochrome color affects brightness
+             (for black sections) or saturation (for white sections).
+             
+             - Parameters:
+                - startValue: A value representing either starting brightness or
+                starting saturation.
+                - endValue: A value representing either ending brightness or
+                ending saturation.
+                - huePosition: The hue value for the entire `MonochromeSection`,
+                equivalent to the hue at either the start or end of the color
+                slider.
+                `HueSection`.
+                - monochromeSection: A `MonochromeSection` object representing
+                the color, slider position and step size for the monochrome
+                section of the color slider.
+             
+             - Returns:
+                An array of `Color` objects representing the
+                `MonochromeSection`.
+             */
+            func getMonochromeColors(
+                startValue: CGFloat,
+                endValue: CGFloat,
+                huePosition: CGFloat,
+                monochromeSection: MonochromeSection) -> [Color] {
+                    
+                    /**
+                     An array for whatever value is changing (either brightness
+                     or saturation) as the `MonochromeSection` gets farther
+                     from the `HueSection`.
+                     */
+                    let values: [CGFloat] = {
+                        switch monochromeSection.positionOnSlider {
+                        case .start:
+                            return Array(
+                                stride(from: 0.0,
+                                       through: startValue,
+                                       by: monochromeSection.stepSize))
+                        case .end:
+                            return Array(
+                                stride(from: endValue,
+                                       through: 0.0,
+                                       by: monochromeSection.stepSize))
+                        }
+                    }()
+                    
+                    return values.map { value in
+                        switch monochromeSection.color {
+                        case .black:
+                            return Color(
+                                hue: huePosition,
+                                saturation: defaultSaturation,
+                                brightness: value,
+                                opacity: 1.0
+                            )
+                        case .white:
+                            return Color(
+                                hue: huePosition,
+                                saturation: value,
+                                brightness: defaultBrightness,
+                                opacity: 1.0
+                            )
+                        }
+                    }
+                }
+            
             return monochromeSections?.compactMap { monochromeSection in
                 
                 /// Where in the hue range to insert the `MonochromeSection`.
