@@ -181,7 +181,7 @@ struct HSBColorSliderModel {
           - Returns: An array of `Color` objects representing the
             `MonochromeSection` blending into an adjacent  `MonochromeSection`.
          */
-        func getblendedMonochromeColors(
+        func getBlendedMonochromeColors(
             huePosition: CGFloat,
             monochromeSection: MonochromeSection) -> [Color] {
                 
