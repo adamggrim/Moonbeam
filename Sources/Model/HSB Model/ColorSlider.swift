@@ -99,8 +99,8 @@ struct HSBColorSliderModel {
             equivalent to the hue at either the start or end of the color slider.
             `HueSection`.
             - monochromeSection: A `MonochromeSection` object representing the
-            color, slider position and step size for the monochrome section of
-            the color slider.
+            color,  position and step size for the monochrome section of the
+            color slider.
          
           - Returns: An array of `Color` objects representing the
             `MonochromeSection` blending into an adjacent  `MonochromeSection`.
@@ -143,7 +143,7 @@ struct HSBColorSliderModel {
                         opacity: 1.0)
                 }
             }
-    
+        
         /**
          Generates an optional array of `MonochromeSectionColors` structs from
          an array of `MonochromeSection`.
@@ -166,7 +166,7 @@ struct HSBColorSliderModel {
              Generates an array of `Color` objects representing a monochrome
              color fading into or away from the start or end of a `HueSection`.
              
-             The `color` property of the `monochromeSection` determines whether
+             The `color` property of the `MonochromeSection` determines whether
              the gradient to or from the monochrome color affects brightness
              (for black sections) or saturation (for white sections).
              
@@ -180,11 +180,11 @@ struct HSBColorSliderModel {
                 slider.
                 `HueSection`.
                 - monochromeSection: A `MonochromeSection` object representing
-                the color, slider position and step size for the monochrome
-                section of the color slider.
+                the color, position and step size for the monochrome section of
+                the color slider.
              
              - Returns:
-                An array of `Color` objects representing the
+                An array of `Color` objects representing the colors of the
                 `MonochromeSection`.
              */
             func getMonochromeColors(
