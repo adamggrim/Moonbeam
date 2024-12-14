@@ -8,8 +8,7 @@ struct HSBColorSliderModel {
      black and white sections are on the same side of the color slider.
      */
     enum PrioritySection {
-        case black
-        case white
+        case black, white
     }
     
     /**
