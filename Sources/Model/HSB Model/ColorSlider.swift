@@ -4,13 +4,6 @@ import SwiftUI
 /// Model for assembling the HSB color slider values into an array.
 struct HSBColorSliderModel {
     
-    /** Enum for prioritizing which `MonochromeSection` to show first if the
-     black and white sections are on the same side of the color slider.
-     */
-    enum PrioritySection {
-        case black, white
-    }
-    
     /**
      Combines an optional `BlackSection` and `WhiteSection` into an optional
      array of `MonochromeSection`.
@@ -48,7 +41,7 @@ struct HSBColorSliderModel {
     let blackSection: BlackSection?
     let whiteSection: WhiteSection?
     let bendSections: [BendSection]?
-    let prioritySection: PrioritySection?
+    let prioritySection: MonochromeColor?
     
     let monochromeSections: [MonochromeSection]?
     
