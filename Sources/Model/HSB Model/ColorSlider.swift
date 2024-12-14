@@ -138,22 +138,29 @@ struct HSBColorSliderModel {
             }
         
         /**
-         Generates an optional array of `MonochromeSectionColors` structs from
-         an array of `MonochromeSection`.
+         Generates an array of `Color` objects from a `MonochromeSection`.
 
          This function accounts for any brightness or saturation bends that
-         border a `MonochromeSection`.
+         border the `MonochromeSection`.
 
          - Parameters:
-            - monochromeSections: An optional array of `MonochromeSection`.
+            - monochromeSection: A `MonochromeSection` object representing the
+            color, position and step size for the monochrome section of the
+            color slider.
 
          - Returns:
-            An array of `MonochromeSectionColors`, or `nil` if
-            `monochromeSections` is `nil`.
+            An array of `Color` objects representing the colors of the
+            `MonochromeSection`.
          */
-        func getMonochromeSectionColors(
-            monochromeSections: [MonochromeSection]?
-        ) -> [MonochromeSectionColors]? {
+        func getAdjustedMonochromeColors(
+            monochromeSection: MonochromeSection) -> [Color] {
+            
+            struct BendAdjustment {
+                var startBrightness: CGFloat
+                var endBrightness: CGFloat
+                var startSaturation: CGFloat
+                var endSaturation: CGFloat
+            }
             
             /**
              Generates an array of `Color` objects representing a monochrome
@@ -226,49 +233,44 @@ struct HSBColorSliderModel {
                     }
                 }
             
-            return monochromeSections?.compactMap { monochromeSection in
-                
-                /// Where in the hue range to insert the `MonochromeSection`.
-                let huePosition = monochromeSection.positionOnSlider == .start ? minHue : maxHue
-                
-                struct BendAdjustment {
-                    var startBrightness: CGFloat
-                    var endBrightness: CGFloat
-                    var startSaturation: CGFloat
-                    var endSaturation: CGFloat
-                }
-                
-                var bendAdjustment = BendAdjustment(startBrightness: defaultBrightness,
-                                                    endBrightness: defaultBrightness,
-                                                    startSaturation: defaultSaturation,
-                                                    endSaturation: defaultSaturation)
-                
-                /*
-                 Adjust starting brightness and saturation values if the bend
-                 mode is one-way and the bendSection begins at minHue or ends
-                 at maxHue.
-                */
-                if let bendSections = bendSections {
-                    for bendSection in bendSections where
-                        bendSection.bendMode == .oneWay &&
-                        (bendSection.startHue == minHue || bendSection.endHue == maxHue) {
-                        
-                        if bendSection.startHue == minHue {
-                            bendAdjustment.startBrightness = bendSection.targetBrightness
-                            bendAdjustment.startSaturation = bendSection.targetSaturation
-                        }
-                        else if bendSection.endHue == maxHue {
-                            bendAdjustment.endBrightness = bendSection.targetBrightness
-                            bendAdjustment.endSaturation = bendSection.targetSaturation
-                        }
+            let huePosition = monochromeSection.positionOnSlider == .start ? minHue : maxHue
+            
+            var bendAdjustment = BendAdjustment(startBrightness: defaultBrightness,
+                                                endBrightness: defaultBrightness,
+                                                startSaturation: defaultSaturation,
+                                                endSaturation: defaultSaturation)
+            
+            /*
+             Adjust starting brightness and saturation values if the bend
+             mode is one-way and the bendSection begins at minHue or ends
+             at maxHue.
+            */
+            if let bendSections = bendSections {
+                for bendSection in bendSections where
+                    bendSection.bendMode == .oneWay &&
+                    (bendSection.startHue == minHue || bendSection.endHue == maxHue) {
+                    
+                    if bendSection.startHue == minHue {
+                        bendAdjustment.startBrightness = bendSection.targetBrightness
+                        bendAdjustment.startSaturation = bendSection.targetSaturation
+                    }
+                    else if bendSection.endHue == maxHue {
+                        bendAdjustment.endBrightness = bendSection.targetBrightness
+                        bendAdjustment.endSaturation = bendSection.targetSaturation
                     }
                 }
+            }
+            
+            return getMonochromeColors(
+                startValue: monochromeSection.color == .black ? bendAdjustment.startBrightness : bendAdjustment.startSaturation,
+                endValue: monochromeSection.color == .black ? bendAdjustment.endBrightness : bendAdjustment.endSaturation,
+                huePosition: huePosition,
+                monochromeSection: monochromeSection
+            )
+        }
                 
-                let monochromeColors = getMonochromeColors(startValue: monochromeSection.color == .black ? bendAdjustment.startBrightness : bendAdjustment.startSaturation,
-                                                           endValue: monochromeSection.color == .black ? bendAdjustment.endBrightness : bendAdjustment.endSaturation,
-                                                           huePosition: huePosition,
-                                                           monochromeSection: monochromeSection)
-                return MonochromeSectionColors(section: monochromeSection, colors: monochromeColors)
+                }
+                
             }
         }
         
