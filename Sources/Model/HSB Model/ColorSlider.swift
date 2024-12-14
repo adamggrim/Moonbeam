@@ -268,8 +268,34 @@ struct HSBColorSliderModel {
                 monochromeSection: monochromeSection
             )
         }
+        
+        /**
+         Reorders an array of two `MonochromeSection` objects to place the
+         prioritized `MonochromeColor` first.
+         
+         - Parameters:
+            - monochromeSections: An array containing two `MonochromeSection`
+            objects. If the array does not have exactly two elements, it returns unchanged.
+            - prioritySection: The `MonochromeColor` to prioritize.
+
+         - Returns: A reordered array of `MonochromeSection` objects where the
+         `prioritySection` is first, or the original array if
+         `monochromeSections` does not have exactly two elements.
+         */
+        func prioritizeMonochromeSections(
+            monochromeSections: [MonochromeSection],
+            prioritySection: MonochromeColor) -> [MonochromeSection] {
+            guard monochromeSections.count == 2 else {
+                return monochromeSections
                 
+                if monochromeSections[0].color == prioritySection {
+                    return monochromeSections
                 }
+                else {
+                    return [monochromeSections[1], monochromeSections[0]]
+                }
+            }
+        }
                 
             }
         }
