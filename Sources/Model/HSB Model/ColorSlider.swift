@@ -313,48 +313,36 @@ struct HSBColorSliderModel {
         let monochromeStartColors: [Color]?
         let monochromeEndColors: [Color]?
         
-        if let monochromeStartSections = monochromeStartSections,
-            monochromeStartSections.count == 2 {
+        if let sections = monochromeStartSections ?? monochromeEndSections,
+           sections.count == 2 {
+            firstSectionColors = getFirstSectionColors(sections: sections)
+            secondSectionColors = getSecondSectionColors(sections: sections)
             
-            firstSectionColors = getBlendedMonochromeColors(
-                huePosition: minHue,
-                monochromeSection: monochromeStartSections[0]
-            )
-            secondSectionColors = getAdjustedMonochromeColors(
-                monochromeSection: monochromeStartSections[1]
-            )
-            
-            monochromeStartColors = firstSectionColors + secondSectionColors
-            monochromeEndColors = nil
+            if let monochromeStartSections = monochromeStartSections {
+                monochromeStartColors = firstSectionColors + secondSectionColors
+                monochromeEndColors = nil
+            } else {
+                monochromeStartColors = nil
+                monochromeEndColors = firstSectionColors + secondSectionColors
+            }
         }
-        else if let monochromeEndSections = monochromeEndSections,
-                monochromeEndSections.count == 2 {
-            
-            firstSectionColors = getAdjustedMonochromeColors(
-                monochromeSection: monochromeEndSections[0]
-            )
-            
-            secondSectionColors = getBlendedMonochromeColors(
-                huePosition: maxHue,
-                monochromeSection: monochromeEndSections[1]
-            )
-            
-            monochromeStartColors = nil
-            monochromeEndColors = firstSectionColors + secondSectionColors
-        }
+        
         else {
             if let monochromeStartSections {
                 monochromeStartColors = getAdjustedMonochromeColors(
                     monochromeSection: monochromeStartSections[0]
                 )
             }
+            else {
+                monochromeStartColors = nil
+            }
+            
             if let monochromeEndSections {
                 monochromeEndColors = getAdjustedMonochromeColors(
                     monochromeSection: monochromeEndSections[0]
                 )
             }
-            if monochromeStartSections == nil && monochromeEndSections == nil {
-                monochromeStartColors = nil
+            else {
                 monochromeEndColors = nil
             }
         }
