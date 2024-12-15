@@ -57,7 +57,7 @@ struct HSBColorSliderModel {
         blackSection: BlackSection?,
         whiteSection: WhiteSection?,
         bendSections: [BendSection]?,
-        prioritySection: PrioritySection?
+        prioritySection: MonochromeColor?
     ) {
         self.minHue = minHue
         self.maxHue = maxHue
