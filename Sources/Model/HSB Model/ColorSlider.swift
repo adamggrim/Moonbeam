@@ -29,6 +29,38 @@ struct HSBColorSliderModel {
         return monochromeSections.isEmpty ? nil : monochromeSections
     }
     
+    /**
+     Reorders an optional array of two `MonochromeSection` objects to place the
+     prioritized `MonochromeColor` first.
+     
+     - Parameters:
+        - monochromeSections: An optional array containing two
+        `MonochromeSection` objects. If the array does not have exactly two
+        elements, it remains unchanged.
+        - prioritySection: An optional `MonochromeColor` to prioritize in the
+        array,
+
+     - Returns: A reordered array of `MonochromeSection` objects in which the
+     `prioritySection` is first, or the original optional array if
+     `monochromeSections` does not have exactly two elements.
+     */
+    func prioritizeMonochromeSections(
+        monochromeSections: [MonochromeSection]?,
+        prioritySection: MonochromeColor?) -> [MonochromeSection]? {
+            guard let monochromeSections = monochromeSections,
+                  let prioritySection = prioritySection,
+                  monochromeSections.count == 2 else {
+                return monochromeSections
+            }
+            
+            if monochromeSections[0].color == prioritySection {
+                return monochromeSections
+            }
+            else {
+                return [monochromeSections[1], monochromeSections[0]]
+            }
+        }
+    
     let minHue: CGFloat
     let maxHue: CGFloat
     
@@ -73,12 +105,18 @@ struct HSBColorSliderModel {
             blackSection: self.blackSection,
             whiteSection: self.whiteSection
         )
-        self.monochromeStartSections = self.monochromeSections?.filter {
-            $0.positionOnSlider == .start
-        }
-        self.monochromeEndSections = self.monochromeSections?.filter {
-            $0.positionOnSlider == .end
-        }
+        self.monochromeStartSections = prioritizeMonochromeSections(
+            monochromeSections: self.monochromeSections?.filter {
+                $0.positionOnSlider == .start
+            },
+            prioritySection: self.prioritySection
+        )
+        self.monochromeEndSections = prioritizeMonochromeSections(
+            monochromeSections: self.monochromeSections?.filter {
+                $0.positionOnSlider == .end
+            },
+            prioritySection: self.prioritySection
+        )
     }
     
     var sliderColors: [Color] {
@@ -269,32 +307,6 @@ struct HSBColorSliderModel {
             )
         }
         
-        /**
-         Reorders an array of two `MonochromeSection` objects to place the
-         prioritized `MonochromeColor` first.
-         
-         - Parameters:
-            - monochromeSections: An array containing two `MonochromeSection`
-            objects. If the array does not have exactly two elements, it returns unchanged.
-            - prioritySection: The `MonochromeColor` to prioritize.
-
-         - Returns: A reordered array of `MonochromeSection` objects where the
-         `prioritySection` is first, or the original array if
-         `monochromeSections` does not have exactly two elements.
-         */
-        func prioritizeMonochromeSections(
-            monochromeSections: [MonochromeSection],
-            prioritySection: MonochromeColor) -> [MonochromeSection] {
-            guard monochromeSections.count == 2 else {
-                return monochromeSections
-                
-                if monochromeSections[0].color == prioritySection {
-                    return monochromeSections
-                }
-                else {
-                    return [monochromeSections[1], monochromeSections[0]]
-                }
-            }
         }
                 
             }
