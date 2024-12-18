@@ -286,7 +286,8 @@ struct HSBColorSliderModel {
             if let bendSections = bendSections {
                 for bendSection in bendSections where
                     bendSection.bendMode == .oneWay &&
-                    (bendSection.startHue == minHue || bendSection.endHue == maxHue) {
+                    (bendSection.startHue == minHue
+                        || bendSection.endHue == maxHue) {
                     
                     if bendSection.startHue == minHue {
                         bendAdjustment.startBrightness = bendSection.targetBrightness
@@ -300,8 +301,12 @@ struct HSBColorSliderModel {
             }
             
             return getMonochromeColors(
-                startValue: monochromeSection.color == .black ? bendAdjustment.startBrightness : bendAdjustment.startSaturation,
-                endValue: monochromeSection.color == .black ? bendAdjustment.endBrightness : bendAdjustment.endSaturation,
+                startValue: monochromeSection.color == .black
+                    ? bendAdjustment.startBrightness
+                    : bendAdjustment.startSaturation,
+                endValue: monochromeSection.color == .black
+                    ? bendAdjustment.endBrightness
+                    : bendAdjustment.endSaturation,
                 huePosition: huePosition,
                 monochromeSection: monochromeSection
             )
@@ -369,10 +374,18 @@ struct HSBColorSliderModel {
             }
         }
         
-        let hueValues = Array(stride(from: minHue, to: maxHue, by: hueSection.stepSize))
-        let hueColors: [Color] = hueValues.enumerated().map { (index, hue) in
+        let hueColors: [Color] = stride(
+            from: minHue,
+            to: maxHue,
+            by: hueSection.stepSize
+        ).enumerated().map { (index, hue) in
             let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
-            let calculatedSaturation = calculateSaturation(index: index, hue: normalizedHue, defaultSaturation: defaultSaturation, bendSections: bendSections)
+            let calculatedSaturation = calculateValues(
+                index: index,
+                hue: normalizedHue,
+                defaultSaturation: defaultSaturation,
+                bendSections: bendSections
+            )
             
             return Color(hue: normalizedHue, saturation: calculatedSaturation, brightness: 1.0, opacity: 1.0)
         }
