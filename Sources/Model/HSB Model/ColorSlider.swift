@@ -126,7 +126,7 @@ struct HSBColorSliderModel {
          blending into an adjacent `MonochromeSection`.
          
          - Parameters:
-            - huePosition: The hue value for the entire `MonochromeSection`,
+            - hue: The hue value for the entire `MonochromeSection`,
             equivalent to the hue at either the start or end of the color slider.
             `HueSection`.
             - monochromeSection: A `MonochromeSection` object representing the
@@ -137,7 +137,7 @@ struct HSBColorSliderModel {
             `MonochromeSection` blending into an adjacent  `MonochromeSection`.
          */
         func getBlendedMonochromeColors(
-            huePosition: CGFloat,
+            hue: CGFloat,
             monochromeSection: MonochromeSection) -> [Color] {
                 
                 /**
@@ -168,7 +168,7 @@ struct HSBColorSliderModel {
                 
                 return brightnessValues.map { brightness in
                     return Color(
-                        hue: huePosition,
+                        hue: hue,
                         saturation: 0.0,
                         brightness: brightness,
                         opacity: 1.0)
@@ -213,9 +213,8 @@ struct HSBColorSliderModel {
                 starting saturation.
                 - endValue: A value representing either ending brightness or
                 ending saturation.
-                - huePosition: The hue value for the entire `MonochromeSection`,
-                equivalent to the hue at either the start or end of the color
-                slider.
+                - hue: The hue value for the entire `MonochromeSection`,
+                equivalent to the hue at either the start or end of the
                 `HueSection`.
                 - monochromeSection: A `MonochromeSection` object representing
                 the color, position and step size for the monochrome section of
@@ -228,7 +227,7 @@ struct HSBColorSliderModel {
             func getMonochromeColors(
                 startValue: CGFloat,
                 endValue: CGFloat,
-                huePosition: CGFloat,
+                hue: CGFloat,
                 monochromeSection: MonochromeSection) -> [Color] {
                     
                     /**
@@ -255,14 +254,14 @@ struct HSBColorSliderModel {
                         switch monochromeSection.color {
                         case .black:
                             return Color(
-                                hue: huePosition,
+                                hue: hue,
                                 saturation: defaultSaturation,
                                 brightness: value,
                                 opacity: 1.0
                             )
                         case .white:
                             return Color(
-                                hue: huePosition,
+                                hue: hue,
                                 saturation: value,
                                 brightness: defaultBrightness,
                                 opacity: 1.0
@@ -271,7 +270,7 @@ struct HSBColorSliderModel {
                     }
                 }
             
-            let huePosition = monochromeSection.positionOnSlider == .start ? minHue : maxHue
+            let hue = monochromeSection.positionOnSlider == .start ? minHue : maxHue
             
             var bendAdjustment = BendAdjustment(startBrightness: defaultBrightness,
                                                 endBrightness: defaultBrightness,
@@ -307,7 +306,7 @@ struct HSBColorSliderModel {
                 endValue: monochromeSection.color == .black
                     ? bendAdjustment.endBrightness
                     : bendAdjustment.endSaturation,
-                huePosition: huePosition,
+                hue: hue,
                 monochromeSection: monochromeSection
             )
         }
