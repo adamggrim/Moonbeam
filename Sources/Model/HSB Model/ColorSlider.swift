@@ -80,6 +80,9 @@ struct HSBColorSliderModel {
     let monochromeStartSections: [MonochromeSection]?
     let monochromeEndSections: [MonochromeSection]?
     
+    let monochromeStartColors: [Color]?
+    let monochromeEndColors: [Color]?
+    
     init(
         minHue: CGFloat,
         maxHue: CGFloat,
@@ -313,9 +316,6 @@ struct HSBColorSliderModel {
         
         let firstSectionColors: [Color]
         let secondSectionColors: [Color]
-        
-        let monochromeStartColors: [Color]?
-        let monochromeEndColors: [Color]?
         
         if let sections = monochromeStartSections ?? monochromeEndSections,
            sections.count == 2 {
