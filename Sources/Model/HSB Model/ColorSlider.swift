@@ -311,28 +311,6 @@ struct HSBColorSliderModel {
             )
         }
         
-        func getFirstSectionColors(sections: [MonochromeSection]) -> [Color] {
-            return (monochromeStartSections != nil)
-                ? getBlendedMonochromeColors(
-                    huePosition: minHue,
-                    monochromeSection: sections[0]
-                )
-                : getAdjustedMonochromeColors(
-                    monochromeSection: sections[0]
-                )
-        }
-        
-        func getSecondSectionColors(sections: [MonochromeSection]) -> [Color] {
-            return (monochromeEndSections != nil)
-                ? getBlendedMonochromeColors(
-                    huePosition: maxHue,
-                    monochromeSection: sections[1]
-                )
-                : getAdjustedMonochromeColors(
-                    monochromeSection: sections[1]
-                )
-        }
-        
         let firstSectionColors: [Color]
         let secondSectionColors: [Color]
         
