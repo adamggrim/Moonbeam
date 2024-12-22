@@ -343,14 +343,74 @@ struct HSBColorSliderModel {
            sections.count == 2 {
             firstSectionColors = getFirstSectionColors(sections: sections)
             secondSectionColors = getSecondSectionColors(sections: sections)
+        /**
+         Determines which helper function to use to generate an array of `Color`
+         objects from two adjacent `MonochromeSection` objects.
+         
+         For each section, the function will  blend colors into either the
+         adjacent `MonochromeSection` or the start or end of the `HueSection`.
+         To blend into the adjacent `MonochromeSection`, it uses the function
+         `getBlendedMonochromeColors`. To blend into the `HueSection`, it uses
+         the function `getAdjustedMonochromeColors`.
+         
+         - Parameters:
+            - monochromeSections: An array of `MonochromeSection` representing
+            the available monochrome sections.
+            - positionOnSlider: The position of the `MonochromeSection` objects on the color slider, either `.start` or `.end`.
+         
+         - Returns: An array of `Color` objects representing the colors of both
+         sections. Returns an empty array if `monochromeSections` is an empty
+         array.
+         */
+        func getAdjacentMonochromeColors(
+            monochromeSections: [MonochromeSection],
+            positionOnSlider: PositionOnSlider
+        ) -> [Color] {
+            let hue = (positionOnSlider == .start) ? minHue : maxHue
+            var adjacentMonochromeColors: [Color] = []
             
-            if let monochromeStartSections = monochromeStartSections {
-                monochromeStartColors = firstSectionColors + secondSectionColors
-                monochromeEndColors = nil
-            } else {
-                monochromeStartColors = nil
-                monochromeEndColors = firstSectionColors + secondSectionColors
+            for sectionIndex in 0..<monochromeSections.count {
+                var sectionColors: [Color] = []
+                
+                switch positionOnSlider {
+                case .start:
+                    /*
+                     If the color is the last of the start sections, blend into
+                     the HueSection.
+                     */
+                    if sectionIndex == (monochromeSections.count - 1) {
+                        sectionColors = getAdjustedMonochromeColors(
+                            monochromeSection: monochromeSections[sectionIndex]
+                        )
+                    }
+                    // Otherwise, blend into the other monochromeSection.
+                    else {
+                        sectionColors = getBlendedMonochromeColors(
+                            hue: minHue,
+                            monochromeSection: monochromeSections[sectionIndex]
+                        )
+                    }
+                case .end:
+                    /*
+                     If the color is the first of the end sections, blend into
+                     the HueSection.
+                     */
+                    if sectionIndex == 0 {
+                        sectionColors = getAdjustedMonochromeColors(
+                            monochromeSection: monochromeSections[sectionIndex]
+                        )
+                    }
+                    // Otherwise, blend into the other monochromeSection.
+                    else {
+                        sectionColors = getBlendedMonochromeColors(
+                            hue: maxHue,
+                            monochromeSection: monochromeSections[sectionIndex]
+                        )
+                    }
+                }
+                adjacentMonochromeColors.append(contentsOf: sectionColors)
             }
+            return adjacentMonochromeColors
         }
         
         else {
