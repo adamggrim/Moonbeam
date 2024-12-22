@@ -202,7 +202,7 @@ struct HSBColorSliderModel {
             
             /**
              Generates an array of `Color` objects representing a monochrome
-             color fading into or away from the start or end of a `HueSection`.
+             color blending into the start or end of a `HueSection`.
              
              The `color` property of the `MonochromeSection` determines whether
              the gradient to or from the monochrome color affects brightness
