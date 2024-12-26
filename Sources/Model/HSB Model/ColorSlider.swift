@@ -317,38 +317,45 @@ struct HSBColorSliderModel {
         return adjacentMonochromeColors
     }
     
+    /**
+     Extracts a list of `Color` objects from an array of `MonochromeSection`.
+     
+     - Parameters:
+        - monochromeSections: An optional array of `MonochromeSection`.
+     
+     - Returns: An optional array of `Color` objects representing the extracted
+     colors. Returns `nil` if the input `monochromeSections` is `nil`, or if the
+     number of sections is not one or two.
+     */
     func getMonochromeColors(
-        monochromeSections: [MonochromeSection]?
-    ) -> [Color]? {
-        guard let monochromeSections = monochromeSections else {
-            return nil
-        }
+            monochromeSections: [MonochromeSection]?
+        ) -> [Color]? {
+            guard let monochromeSections = monochromeSections else {
+                return nil
+            }
         
-        if monochromeSections.count == 2,
-           monochromeSections.allSatisfy({ $0.positionOnSlider == .start }) {
-            return blendAdjacentMonochromeSections(
-                monochromeSections: monochromeSections,
-                positionOnSlider: .start
-            )
-        }
-        else if monochromeSections.count == 2,
-                monochromeSections.allSatisfy({ $0.positionOnSlider == .end }) {
-            return blendAdjacentMonochromeSections(
-                monochromeSections: monochromeSections,
-                positionOnSlider: .end
-            )
-        }
-        else if monochromeSections.count == 1,
-                let monochromeSection = monochromeSections.first,
-                monochromeSection.positionOnSlider == .start {
-            return blendIntoHue(monochromeSection: monochromeSection)
-        }
-        else if monochromeSections.count == 1,
-                let monochromeSection = monochromeSections.first,
-                monochromeSection.positionOnSlider == .end {
-            return blendIntoHue(monochromeSection: monochromeSection)
-        }
-        else {
+            switch monochromeSections.count {
+            case 1:
+                if let monochromeSection = monochromeSections.first {
+                    return blendIntoHue(monochromeSection: monochromeSection)
+                }
+            case 2:
+                if monochromeSections.allSatisfy({ $0.positionOnSlider == .start }) {
+                    return blendAdjacentMonochromeSections(
+                        monochromeSections: monochromeSections,
+                        positionOnSlider: .start
+                    )
+                }
+                else if monochromeSections.allSatisfy({ $0.positionOnSlider == .end }) {
+                    return blendAdjacentMonochromeSections(
+                        monochromeSections: monochromeSections,
+                        positionOnSlider: .end
+                    )
+                }
+            default:
+                break
+            }
+            
             return nil
         }
     }
