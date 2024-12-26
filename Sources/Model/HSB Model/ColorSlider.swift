@@ -120,6 +120,12 @@ struct HSBColorSliderModel {
             },
             prioritySection: self.prioritySection
         )
+        self.monochromeStartColors = getMonochromeColors(
+            monochromeSections: self.monochromeStartSections
+        )
+        self.monochromeEndColors = getMonochromeColors(
+            monochromeSections: self.monochromeEndSections
+        )
     }
     
     var sliderColors: [Color] {
