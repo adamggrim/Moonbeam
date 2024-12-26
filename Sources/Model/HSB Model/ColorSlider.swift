@@ -61,6 +61,262 @@ struct HSBColorSliderModel {
             }
         }
     
+    /**
+     Generates an array of `Color` objects representing a `MonochromeSection`
+     blending into an adjacent `MonochromeSection`.
+     
+     - Parameters:
+        - hue: The hue value for the entire `MonochromeSection`, equivalent to 
+        the hue at either the start or end of the `HueSection`.
+        - monochromeSection: A `MonochromeSection` object representing the 
+        color,  position and step size for the monochrome section of the color
+        slider.
+     
+      - Returns: An array of `Color` objects representing the
+        `MonochromeSection` blending into an adjacent  `MonochromeSection`.
+     */
+    func blendIntoMonochromeColor(
+        hue: CGFloat,
+        monochromeSection: MonochromeSection) -> [Color] {
+            
+            /**
+             An array for the brightness values as the `MonochromeSection` gets
+             closer to the adjacent `MonochromeSection`.
+             */
+            let brightnessValues: [CGFloat] = {
+                switch (monochromeSection.color,
+                        monochromeSection.positionOnSlider) {
+                case (.black, .start), (.white, .end):
+                    return Array(
+                        stride(
+                            from: 0.0,
+                            through: 1.0,
+                            by: monochromeSection.stepSize
+                        )
+                    )
+                case (.white, .start), (.black, .end):
+                    return Array(
+                        stride(
+                            from: 1.0,
+                            through: 0.0,
+                            by: monochromeSection.stepSize
+                        )
+                    )
+                }
+            }()
+            
+            return brightnessValues.map { brightness in
+                return Color(
+                    hue: hue,
+                    saturation: 0.0,
+                    brightness: brightness,
+                    opacity: 1.0)
+            }
+        }
+    
+    /**
+     Accounting for any brightness or saturation bends, generates an array of
+     `Color` objects representing a `MonochromeSection` blending into the start
+     or end of a `HueSection`.
+     
+     - Parameters:
+        - monochromeSection: A `MonochromeSection` object representing the
+        color, position and step size for the monochrome section of the color
+        slider.
+
+     - Returns:
+        An array of `Color` objects representing the colors of the
+        `MonochromeSection`.
+     */
+    func blendIntoHue(
+        monochromeSection: MonochromeSection) -> [Color] {
+        
+        struct BendAdjustment {
+            var startBrightness: CGFloat
+            var endBrightness: CGFloat
+            var startSaturation: CGFloat
+            var endSaturation: CGFloat
+        }
+        
+        /**
+         Generates an array of `Color` objects representing a
+         `MonochromeSection` blending into he start or end of a `HueSection`.
+         
+         The `color` property of the `MonochromeSection` determines whether the
+         gradient to or from the monochrome color affects brightness (for black
+         sections) or saturation (for white sections).
+         
+         - Parameters:
+            - startValue: A value representing either starting brightness or
+            starting saturation.
+            - endValue: A value representing either ending brightness or ending
+            saturation.
+            - hue: The hue value for the entire `MonochromeSection`, equivalent
+            to the hue at either the start or end of the `HueSection`.
+            - monochromeSection: A `MonochromeSection` object representing the
+            color, position and step size for the monochrome section of the
+            color slider.
+         
+         - Returns:
+            An array of `Color` objects representing the colors of the
+            `MonochromeSection`.
+         */
+        func getBlendIntoHueColors(
+            startValue: CGFloat,
+            endValue: CGFloat,
+            hue: CGFloat,
+            monochromeSection: MonochromeSection) -> [Color] {
+                
+                /**
+                 An array for whatever value is changing (either brightness or
+                 saturation) as the `MonochromeSection` gets farther from the
+                 `HueSection`.
+                 */
+                let values: [CGFloat] = {
+                    switch monochromeSection.positionOnSlider {
+                    case .start:
+                        return Array(
+                            stride(from: 0.0,
+                                   through: startValue,
+                                   by: monochromeSection.stepSize))
+                    case .end:
+                        return Array(
+                            stride(from: endValue,
+                                   through: 0.0,
+                                   by: monochromeSection.stepSize))
+                    }
+                }()
+                
+                return values.map { value in
+                    switch monochromeSection.color {
+                    case .black:
+                        return Color(
+                            hue: hue,
+                            saturation: defaultSaturation,
+                            brightness: value,
+                            opacity: 1.0
+                        )
+                    case .white:
+                        return Color(
+                            hue: hue,
+                            saturation: value,
+                            brightness: defaultBrightness,
+                            opacity: 1.0
+                        )
+                    }
+                }
+            }
+        
+        let hue = monochromeSection.positionOnSlider == .start ? minHue : maxHue
+        
+        var bendAdjustment = BendAdjustment(startBrightness: defaultBrightness,
+                                            endBrightness: defaultBrightness,
+                                            startSaturation: defaultSaturation,
+                                            endSaturation: defaultSaturation)
+        
+        /*
+         Adjust starting brightness and saturation values if the bend mode is
+         one-way and the bendSection begins at minHue or ends at maxHue.
+        */
+        if let bendSections = bendSections {
+            for bendSection in bendSections where
+                bendSection.bendMode == .oneWay &&
+                (bendSection.startHue == minHue
+                    || bendSection.endHue == maxHue) {
+                
+                if bendSection.startHue == minHue {
+                    bendAdjustment.startBrightness = bendSection.targetBrightness
+                    bendAdjustment.startSaturation = bendSection.targetSaturation
+                }
+                else if bendSection.endHue == maxHue {
+                    bendAdjustment.endBrightness = bendSection.targetBrightness
+                    bendAdjustment.endSaturation = bendSection.targetSaturation
+                }
+            }
+        }
+        
+        return getBlendIntoHueColors(
+            startValue: monochromeSection.color == .black
+                ? bendAdjustment.startBrightness
+                : bendAdjustment.startSaturation,
+            endValue: monochromeSection.color == .black
+                ? bendAdjustment.endBrightness
+                : bendAdjustment.endSaturation,
+            hue: hue,
+            monochromeSection: monochromeSection
+        )
+    }
+    
+    /**
+     Determines which helper function to use to generate an array of `Color`
+     objects from two adjacent `MonochromeSection` objects.
+     
+     For each section, the function will  blend colors into either the adjacent
+     `MonochromeSection` or the start or end of the `HueSection`. To blend into
+     the adjacent `MonochromeSection`, it uses the function
+     `blendIntoMonochromeColor`. To blend into the `HueSection`, it uses the
+     function `blendIntoHue`.
+     
+     - Parameters:
+        - monochromeSections: An array of `MonochromeSection` representing the
+        available monochrome sections.
+        - positionOnSlider: The position of the `MonochromeSection` objects on
+        the color slider, either `.start` or `.end`.
+     
+     - Returns: An array of `Color` objects representing the colors of both
+     sections. Returns an empty array if `monochromeSections` is an empty array.
+     */
+    func blendAdjacentMonochromeSections(
+        monochromeSections: [MonochromeSection],
+        positionOnSlider: PositionOnSlider
+    ) -> [Color] {
+        let hue = (positionOnSlider == .start) ? minHue : maxHue
+        var adjacentMonochromeColors: [Color] = []
+        
+        for sectionIndex in 0..<monochromeSections.count {
+            var sectionColors: [Color] = []
+            
+            switch positionOnSlider {
+            case .start:
+                /*
+                 If the color is the last of the start sections, blend into the
+                 HueSection.
+                 */
+                if sectionIndex == (monochromeSections.count - 1) {
+                    sectionColors = blendIntoHue(
+                        monochromeSection: monochromeSections[sectionIndex]
+                    )
+                }
+                // Otherwise, blend into the other monochromeSection.
+                else {
+                    sectionColors = blendIntoMonochromeColor(
+                        hue: minHue,
+                        monochromeSection: monochromeSections[sectionIndex]
+                    )
+                }
+            case .end:
+                /*
+                 If the color is the first of the end sections, blend into the
+                 HueSection.
+                 */
+                if sectionIndex == 0 {
+                    sectionColors = blendIntoHue(
+                        monochromeSection: monochromeSections[sectionIndex]
+                    )
+                }
+                // Otherwise, blend into the other monochromeSection.
+                else {
+                    sectionColors = blendIntoMonochromeColor(
+                        hue: maxHue,
+                        monochromeSection: monochromeSections[sectionIndex]
+                    )
+                }
+            }
+            adjacentMonochromeColors.append(contentsOf: sectionColors)
+        }
+        return adjacentMonochromeColors
+    }
+    
     let minHue: CGFloat
     let maxHue: CGFloat
     
@@ -129,296 +385,6 @@ struct HSBColorSliderModel {
     }
     
     var sliderColors: [Color] {
-        
-        /**
-         Generates an array of `Color` objects representing a
-         `MonochromeSection` blending into an adjacent `MonochromeSection`.
-         
-         - Parameters:
-            - hue: The hue value for the entire `MonochromeSection`,
-            equivalent to the hue at either the start or end of the color slider.
-            `HueSection`.
-            - monochromeSection: A `MonochromeSection` object representing the
-            color,  position and step size for the monochrome section of the
-            color slider.
-         
-          - Returns: An array of `Color` objects representing the
-            `MonochromeSection` blending into an adjacent  `MonochromeSection`.
-         */
-        func blendIntoMonochromeColor(
-            hue: CGFloat,
-            monochromeSection: MonochromeSection) -> [Color] {
-                
-                /**
-                 An array for the brightness values as the `MonochromeSection`
-                 gets closer to the adjacent `MonochromeSection`.
-                 */
-                let brightnessValues: [CGFloat] = {
-                    switch (monochromeSection.color,
-                            monochromeSection.positionOnSlider) {
-                    case (.black, .start), (.white, .end):
-                        return Array(
-                            stride(
-                                from: 0.0,
-                                through: 1.0,
-                                by: monochromeSection.stepSize
-                            )
-                        )
-                    case (.white, .start), (.black, .end):
-                        return Array(
-                            stride(
-                                from: 1.0,
-                                through: 0.0,
-                                by: monochromeSection.stepSize
-                            )
-                        )
-                    }
-                }()
-                
-                return brightnessValues.map { brightness in
-                    return Color(
-                        hue: hue,
-                        saturation: 0.0,
-                        brightness: brightness,
-                        opacity: 1.0)
-                }
-            }
-        
-        /**
-         Generates an array of `Color` objects representing a
-         `MonochromeSection` blending into the start or end of a `HueSection`.
-         
-         This function accounts for any brightness or saturation bends that
-         border the `MonochromeSection`.
-
-         - Parameters:
-            - monochromeSection: A `MonochromeSection` object representing the
-            color, position and step size for the monochrome section of the
-            color slider.
-
-         - Returns:
-            An array of `Color` objects representing the colors of the
-            `MonochromeSection`.
-         */
-        func blendIntoHue(
-            monochromeSection: MonochromeSection) -> [Color] {
-            
-            struct BendAdjustment {
-                var startBrightness: CGFloat
-                var endBrightness: CGFloat
-                var startSaturation: CGFloat
-                var endSaturation: CGFloat
-            }
-            
-            /**
-             Without accounting for any saturation bends, generates an array of
-             `Color` objects representing a `MonochromeSection` blending into
-             the start or end of a `HueSection`.
-             
-             The `color` property of the `MonochromeSection` determines whether
-             the gradient to or from the monochrome color affects brightness
-             (for black sections) or saturation (for white sections).
-             
-             - Parameters:
-                - startValue: A value representing either starting brightness or
-                starting saturation.
-                - endValue: A value representing either ending brightness or
-                ending saturation.
-                - hue: The hue value for the entire `MonochromeSection`,
-                equivalent to the hue at either the start or end of the
-                `HueSection`.
-                - monochromeSection: A `MonochromeSection` object representing
-                the color, position and step size for the monochrome section of
-                the color slider.
-             
-             - Returns:
-                An array of `Color` objects representing the colors of the
-                `MonochromeSection`.
-             */
-            func getBlendIntoHueColors(
-                startValue: CGFloat,
-                endValue: CGFloat,
-                hue: CGFloat,
-                monochromeSection: MonochromeSection) -> [Color] {
-                    
-                    /**
-                     An array for whatever value is changing (either brightness
-                     or saturation) as the `MonochromeSection` gets farther
-                     from the `HueSection`.
-                     */
-                    let values: [CGFloat] = {
-                        switch monochromeSection.positionOnSlider {
-                        case .start:
-                            return Array(
-                                stride(from: 0.0,
-                                       through: startValue,
-                                       by: monochromeSection.stepSize))
-                        case .end:
-                            return Array(
-                                stride(from: endValue,
-                                       through: 0.0,
-                                       by: monochromeSection.stepSize))
-                        }
-                    }()
-                    
-                    return values.map { value in
-                        switch monochromeSection.color {
-                        case .black:
-                            return Color(
-                                hue: hue,
-                                saturation: defaultSaturation,
-                                brightness: value,
-                                opacity: 1.0
-                            )
-                        case .white:
-                            return Color(
-                                hue: hue,
-                                saturation: value,
-                                brightness: defaultBrightness,
-                                opacity: 1.0
-                            )
-                        }
-                    }
-                }
-            
-            let hue = monochromeSection.positionOnSlider == .start ? minHue : maxHue
-            
-            var bendAdjustment = BendAdjustment(startBrightness: defaultBrightness,
-                                                endBrightness: defaultBrightness,
-                                                startSaturation: defaultSaturation,
-                                                endSaturation: defaultSaturation)
-            
-            /*
-             Adjust starting brightness and saturation values if the bend
-             mode is one-way and the bendSection begins at minHue or ends
-             at maxHue.
-            */
-            if let bendSections = bendSections {
-                for bendSection in bendSections where
-                    bendSection.bendMode == .oneWay &&
-                    (bendSection.startHue == minHue
-                        || bendSection.endHue == maxHue) {
-                    
-                    if bendSection.startHue == minHue {
-                        bendAdjustment.startBrightness = bendSection.targetBrightness
-                        bendAdjustment.startSaturation = bendSection.targetSaturation
-                    }
-                    else if bendSection.endHue == maxHue {
-                        bendAdjustment.endBrightness = bendSection.targetBrightness
-                        bendAdjustment.endSaturation = bendSection.targetSaturation
-                    }
-                }
-            }
-            
-            return getBlendIntoHueColors(
-                startValue: monochromeSection.color == .black
-                    ? bendAdjustment.startBrightness
-                    : bendAdjustment.startSaturation,
-                endValue: monochromeSection.color == .black
-                    ? bendAdjustment.endBrightness
-                    : bendAdjustment.endSaturation,
-                hue: hue,
-                monochromeSection: monochromeSection
-            )
-        }
-        
-        let firstSectionColors: [Color]
-        let secondSectionColors: [Color]
-        
-        if let sections = monochromeStartSections ?? monochromeEndSections,
-           sections.count == 2 {
-            firstSectionColors = getFirstSectionColors(sections: sections)
-            secondSectionColors = getSecondSectionColors(sections: sections)
-        /**
-         Determines which helper function to use to generate an array of `Color`
-         objects from two adjacent `MonochromeSection` objects.
-         
-         For each section, the function will  blend colors into either the
-         adjacent `MonochromeSection` or the start or end of the `HueSection`.
-         To blend into the adjacent `MonochromeSection`, it uses the function
-         `blendIntoMonochromeColor`. To blend into the `HueSection`, it uses
-         the function `blendIntoHue`.
-         
-         - Parameters:
-            - monochromeSections: An array of `MonochromeSection` representing
-            the available monochrome sections.
-            - positionOnSlider: The position of the `MonochromeSection` objects on the color slider, either `.start` or `.end`.
-         
-         - Returns: An array of `Color` objects representing the colors of both
-         sections. Returns an empty array if `monochromeSections` is an empty
-         array.
-         */
-        func blendAdjacentMonochromeSections(
-            monochromeSections: [MonochromeSection],
-            positionOnSlider: PositionOnSlider
-        ) -> [Color] {
-            let hue = (positionOnSlider == .start) ? minHue : maxHue
-            var adjacentMonochromeColors: [Color] = []
-            
-            for sectionIndex in 0..<monochromeSections.count {
-                var sectionColors: [Color] = []
-                
-                switch positionOnSlider {
-                case .start:
-                    /*
-                     If the color is the last of the start sections, blend into
-                     the HueSection.
-                     */
-                    if sectionIndex == (monochromeSections.count - 1) {
-                        sectionColors = blendIntoHue(
-                            monochromeSection: monochromeSections[sectionIndex]
-                        )
-                    }
-                    // Otherwise, blend into the other monochromeSection.
-                    else {
-                        sectionColors = blendIntoMonochromeColor(
-                            hue: minHue,
-                            monochromeSection: monochromeSections[sectionIndex]
-                        )
-                    }
-                case .end:
-                    /*
-                     If the color is the first of the end sections, blend into
-                     the HueSection.
-                     */
-                    if sectionIndex == 0 {
-                        sectionColors = blendIntoHue(
-                            monochromeSection: monochromeSections[sectionIndex]
-                        )
-                    }
-                    // Otherwise, blend into the other monochromeSection.
-                    else {
-                        sectionColors = blendIntoMonochromeColor(
-                            hue: maxHue,
-                            monochromeSection: monochromeSections[sectionIndex]
-                        )
-                    }
-                }
-                adjacentMonochromeColors.append(contentsOf: sectionColors)
-            }
-            return adjacentMonochromeColors
-        }
-        
-        else {
-            if let monochromeStartSections {
-                monochromeStartColors = getAdjustedMonochromeColors(
-                    monochromeSection: monochromeStartSections[0]
-                )
-            }
-            else {
-                monochromeStartColors = nil
-            }
-            
-            if let monochromeEndSections {
-                monochromeEndColors = getAdjustedMonochromeColors(
-                    monochromeSection: monochromeEndSections[0]
-                )
-            }
-            else {
-                monochromeEndColors = nil
-            }
-        }
-        
         let hueColors: [Color] = stride(
             from: minHue,
             to: maxHue,
