@@ -258,18 +258,19 @@ struct HSBColorSliderModel {
      function `blendIntoHue`.
      
      - Parameters:
-        - monochromeSections: An array of `MonochromeSection` representing the
-        available monochrome sections.
-        - positionOnSlider: The position of the `MonochromeSection` objects on
-        the color slider, either `.start` or `.end`.
+        - monochromeSections: An array of `MonochromeSection`.
      
      - Returns: An array of `Color` objects representing the colors of both
-     sections. Returns an empty array if `monochromeSections` is an empty array.
+     sections. Returns an empty array if `monochromeSections` is empty.
      */
     func blendAdjacentMonochromeSections(
-        monochromeSections: [MonochromeSection],
-        positionOnSlider: PositionOnSlider
+        monochromeSections: [MonochromeSection]
     ) -> [Color] {
+        guard let positionOnSlider = monochromeSections.first?.positionOnSlider,
+              monochromeSections.allSatisfy({ $0.positionOnSlider == positionOnSlider }) else {
+            return []
+        }
+        
         let hue = (positionOnSlider == .start) ? minHue : maxHue
         var adjacentMonochromeColors: [Color] = []
         
@@ -333,25 +334,16 @@ struct HSBColorSliderModel {
             guard let monochromeSections = monochromeSections else {
                 return nil
             }
-        
+            
             switch monochromeSections.count {
             case 1:
                 if let monochromeSection = monochromeSections.first {
                     return blendIntoHue(monochromeSection: monochromeSection)
                 }
             case 2:
-                if monochromeSections.allSatisfy({ $0.positionOnSlider == .start }) {
-                    return blendAdjacentMonochromeSections(
-                        monochromeSections: monochromeSections,
-                        positionOnSlider: .start
-                    )
-                }
-                else if monochromeSections.allSatisfy({ $0.positionOnSlider == .end }) {
-                    return blendAdjacentMonochromeSections(
-                        monochromeSections: monochromeSections,
-                        positionOnSlider: .end
-                    )
-                }
+                return blendAdjacentMonochromeSections(
+                    monochromeSections: monochromeSections
+                )
             default:
                 break
             }
