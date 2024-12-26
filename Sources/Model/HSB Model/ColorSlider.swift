@@ -317,6 +317,42 @@ struct HSBColorSliderModel {
         return adjacentMonochromeColors
     }
     
+    func getMonochromeColors(
+        monochromeSections: [MonochromeSection]?
+    ) -> [Color]? {
+        guard let monochromeSections = monochromeSections else {
+            return nil
+        }
+        
+        if monochromeSections.count == 2,
+           monochromeSections.allSatisfy({ $0.positionOnSlider == .start }) {
+            return blendAdjacentMonochromeSections(
+                monochromeSections: monochromeSections,
+                positionOnSlider: .start
+            )
+        }
+        else if monochromeSections.count == 2,
+                monochromeSections.allSatisfy({ $0.positionOnSlider == .end }) {
+            return blendAdjacentMonochromeSections(
+                monochromeSections: monochromeSections,
+                positionOnSlider: .end
+            )
+        }
+        else if monochromeSections.count == 1,
+                let monochromeSection = monochromeSections.first,
+                monochromeSection.positionOnSlider == .start {
+            return blendIntoHue(monochromeSection: monochromeSection)
+        }
+        else if monochromeSections.count == 1,
+                let monochromeSection = monochromeSections.first,
+                monochromeSection.positionOnSlider == .end {
+            return blendIntoHue(monochromeSection: monochromeSection)
+        }
+        else {
+            return nil
+        }
+    }
+    
     let minHue: CGFloat
     let maxHue: CGFloat
     
