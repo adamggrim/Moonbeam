@@ -354,6 +354,49 @@ struct HSBColorSliderModel {
             }
             
             return nil
+    func generateHueColors(
+        modifying components: Set<BendableHSBComponent>,
+        minHue: CGFloat,
+        maxHue: CGFloat,
+        hueSection: HueSection,
+        bendSections: [BendSection]
+    ) -> [Color] {
+        stride(
+            from: minHue,
+            to: maxHue,
+            by: hueSection.stepSize
+        ).enumerated().map { (index, hue) in
+            let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
+            let calculatedSaturation: CGFloat
+            let calculatedBrightness: CGFloat
+            
+            for component in components {
+                switch component {
+                case .saturation:
+                    calculatedSaturation = calculateValues(
+                        index: index,
+                        hue: normalizedHue,
+                        defaultValue: defaultSaturation,
+                        bendSections: bendSections
+                    )
+                    calculatedBrightness = defaultBrightness
+                case .brightness:
+                    calculatedSaturation = defaultSaturation
+                    calculatedBrightness = calculateValues(
+                        index: index,
+                        hue: normalizedHue,
+                        defaultValue: defaultBrightness,
+                        bendSections: bendSections
+                    )
+                }
+            }
+            
+            return Color(
+                hue: normalizedHue,
+                saturation: calculatedSaturation,
+                brightness: calculatedBrightness,
+                opacity: 1.0
+            )
         }
     }
     
