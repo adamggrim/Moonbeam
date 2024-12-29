@@ -17,7 +17,7 @@ struct HSBColorSliderModel {
         included in the returned array of `MonochromeSection`. The function
         returns an empty array if both sections are `nil`.
      */
-    func getMonochromeSections(
+    func constructMonochromeSections(
         blackSection: BlackSection?,
         whiteSection: WhiteSection?
     ) -> [MonochromeSection]? {
@@ -75,7 +75,7 @@ struct HSBColorSliderModel {
       - Returns: An array of `Color` objects representing the
         `MonochromeSection` blending into an adjacent  `MonochromeSection`.
      */
-    func blendIntoMonochromeColor(
+    func calculateMonochromeBlendColors(
         hue: CGFloat,
         monochromeSection: MonochromeSection) -> [Color] {
             
@@ -115,9 +115,9 @@ struct HSBColorSliderModel {
         }
     
     /**
-     Accounting for any brightness or saturation bends, generates an array of
-     `Color` objects representing a `MonochromeSection` blending into the start
-     or end of a `HueSection`.
+     While accounting for any brightness or saturation bends, generates an array
+     of `Color` objects representing a `MonochromeSection` blending into the
+     start or end of a `HueSection`.
      
      - Parameters:
         - monochromeSection: A `MonochromeSection` object representing the
@@ -128,7 +128,7 @@ struct HSBColorSliderModel {
         An array of `Color` objects representing the colors of the
         `MonochromeSection`.
      */
-    func blendIntoHue(
+    func calculateHueBlendColors(
         monochromeSection: MonochromeSection) -> [Color] {
         
         struct BendAdjustment {
@@ -161,7 +161,7 @@ struct HSBColorSliderModel {
             An array of `Color` objects representing the colors of the
             `MonochromeSection`.
          */
-        func getBlendIntoHueColors(
+        func blendIntoHue(
             startValue: CGFloat,
             endValue: CGFloat,
             hue: CGFloat,
@@ -235,7 +235,7 @@ struct HSBColorSliderModel {
             }
         }
         
-        return getBlendIntoHueColors(
+        return blendIntoHue(
             startValue: monochromeSection.color == .black
                 ? bendAdjustment.startBrightness
                 : bendAdjustment.startSaturation,
@@ -254,8 +254,8 @@ struct HSBColorSliderModel {
      For each section, the function will  blend colors into either the adjacent
      `MonochromeSection` or the start or end of the `HueSection`. To blend into
      the adjacent `MonochromeSection`, it uses the function
-     `blendIntoMonochromeColor`. To blend into the `HueSection`, it uses the
-     function `blendIntoHue`.
+     `calculateMonochromeBlendColors`. To blend into the `HueSection`, it uses
+     the function `calculateHueBlendColors`.
      
      - Parameters:
         - monochromeSections: An array of `MonochromeSection`.
@@ -263,7 +263,7 @@ struct HSBColorSliderModel {
      - Returns: An array of `Color` objects representing the colors of both
      sections. Returns an empty array if `monochromeSections` is empty.
      */
-    func blendAdjacentMonochromeSections(
+    func processAdjacentMonochromeSections(
         monochromeSections: [MonochromeSection]
     ) -> [Color] {
         guard let positionOnSlider = monochromeSections.first?.positionOnSlider,
@@ -284,13 +284,13 @@ struct HSBColorSliderModel {
                  HueSection.
                  */
                 if sectionIndex == (monochromeSections.count - 1) {
-                    sectionColors = blendIntoHue(
+                    sectionColors = calculateHueBlendColors(
                         monochromeSection: monochromeSections[sectionIndex]
                     )
                 }
                 // Otherwise, blend into the other monochromeSection.
                 else {
-                    sectionColors = blendIntoMonochromeColor(
+                    sectionColors = calculateMonochromeBlendColors(
                         hue: minHue,
                         monochromeSection: monochromeSections[sectionIndex]
                     )
@@ -301,13 +301,13 @@ struct HSBColorSliderModel {
                  HueSection.
                  */
                 if sectionIndex == 0 {
-                    sectionColors = blendIntoHue(
+                    sectionColors = calculateHueBlendColors(
                         monochromeSection: monochromeSections[sectionIndex]
                     )
                 }
                 // Otherwise, blend into the other monochromeSection.
                 else {
-                    sectionColors = blendIntoMonochromeColor(
+                    sectionColors = calculateMonochromeBlendColors(
                         hue: maxHue,
                         monochromeSection: monochromeSections[sectionIndex]
                     )
@@ -328,7 +328,7 @@ struct HSBColorSliderModel {
      colors. Returns `nil` if the input `monochromeSections` is `nil`, or if the
      number of sections is not one or two.
      */
-    func getMonochromeColors(
+    func processMonochromeSections(
             monochromeSections: [MonochromeSection]?
         ) -> [Color]? {
             guard let monochromeSections = monochromeSections else {
@@ -338,10 +338,10 @@ struct HSBColorSliderModel {
             switch monochromeSections.count {
             case 1:
                 if let monochromeSection = monochromeSections.first {
-                    return blendIntoHue(monochromeSection: monochromeSection)
+                    return calculateHueBlendColors(monochromeSection: monochromeSection)
                 }
             case 2:
-                return blendAdjacentMonochromeSections(
+                return processAdjacentMonochromeSections(
                     monochromeSections: monochromeSections
                 )
             default:
@@ -395,7 +395,7 @@ struct HSBColorSliderModel {
         self.bendSections = bendSections
         self.prioritySection = prioritySection
         
-        self.monochromeSections = getMonochromeSections(
+        self.monochromeSections = constructMonochromeSections(
             blackSection: self.blackSection,
             whiteSection: self.whiteSection
         )
@@ -411,10 +411,10 @@ struct HSBColorSliderModel {
             },
             prioritySection: self.prioritySection
         )
-        self.monochromeStartColors = getMonochromeColors(
+        self.monochromeStartColors = processMonochromeSections(
             monochromeSections: self.monochromeStartSections
         )
-        self.monochromeEndColors = getMonochromeColors(
+        self.monochromeEndColors = processMonochromeSections(
             monochromeSections: self.monochromeEndSections
         )
     }
@@ -439,4 +439,3 @@ struct HSBColorSliderModel {
         return [monochromeStartColors, hueColors, monochromeEndColors].compactMap { $0 }.flatMap { $0 }
     }
 }
-
