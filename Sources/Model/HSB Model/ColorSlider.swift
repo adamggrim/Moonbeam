@@ -1,6 +1,11 @@
 import Foundation
 import SwiftUI
 
+/// Represents the components of the HSB color model
+enum HSBComponent {
+    case hue, saturation, brightness
+}
+
 /// Model for assembling the HSB color slider values into an array.
 struct HSBColorSliderModel {
     
