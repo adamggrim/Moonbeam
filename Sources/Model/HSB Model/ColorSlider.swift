@@ -375,10 +375,10 @@ struct HSBColorSliderModel {
             $0.startHue < $1.startHue
         }
         
-        for sectionIndex in 0..<sortedBendSections.count - 1 {
-            let currentSection = sortedBendSections[sectionIndex]
-            let nextSection = sortedBendSections[sectionIndex + 1]
-
+        for (currentSection, nextSection) in zip(
+            sortedBendSections,
+            sortedBendSections.dropFirst()
+        ) {
             // Check whether the bend sections overlap
             if currentSection.endHue > nextSection.startHue {
                 return false
