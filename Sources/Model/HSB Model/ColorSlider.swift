@@ -355,6 +355,31 @@ struct HSBColorSliderModel {
             }
             
             return nil
+    }
+    
+    /**
+     Validates an array of `BendSection` objects to ensure that no two bend
+     sections on the color slider overlap.
+     
+     - Parameter bendSections: An array of `BendSection` objects to validate.
+     - Returns: `true` if no bend sections overlap. Otherwise, returns `false`.
+     */
+    func validateBendSections(bendSections: [BendSection]) -> Bool {
+        guard bendSections.count > 1 else { return true }
+        
+        let sortedBendSections = bendSections.sorted { $0.startHue < $1.startHue }
+        
+        for sectionIndex in 0..<sortedBendSections.count - 1 {
+            let currentSection = sortedBendSections[sectionIndex]
+            let nextSection = sortedBendSections[sectionIndex + 1]
+
+            // Check whether the bend sections overlap
+            if currentSection.endHue > nextSection.startHue {
+                return false
+            }
+        }
+        return true
+    }
     func generateHueColors(
         hue: BendableHSBComponent,
         minHue: CGFloat,
