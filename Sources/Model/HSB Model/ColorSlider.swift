@@ -358,16 +358,22 @@ struct HSBColorSliderModel {
     }
     
     /**
-     Validates an array of `BendSection` objects to ensure that no two bend
-     sections on the color slider overlap.
+     Validates an array of `BendSection` objects to ensure that there is at
+     least one `BendSection` and that no two `BendSection` objects overlap.
      
-     - Parameter bendSections: An array of `BendSection` objects to validate.
-     - Returns: `true` if no bend sections overlap. Otherwise, returns `false`.
+     - Parameter bendSections: An optional array of `BendSection` objects to
+        validate.
+     - Returns: `true` if there is at least one `BendSection` and no
+        `BendSection` objects overlap. Otherwise, returns `false`.
      */
-    func validateBendSections(bendSections: [BendSection]) -> Bool {
-        guard bendSections.count > 1 else { return true }
+    func validateBendSections(bendSections: [BendSection]?) -> Bool {
+        guard let unwrappedBendSections = bendSections,
+                unwrappedBendSections.count > 0 else { return false }
+        guard unwrappedBendSections.count > 1 else { return true }
         
-        let sortedBendSections = bendSections.sorted { $0.startHue < $1.startHue }
+        let sortedBendSections = unwrappedBendSections.sorted {
+            $0.startHue < $1.startHue
+        }
         
         for sectionIndex in 0..<sortedBendSections.count - 1 {
             let currentSection = sortedBendSections[sectionIndex]
