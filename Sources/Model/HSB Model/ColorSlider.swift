@@ -45,9 +45,10 @@ struct HSBColorSliderModel {
         - prioritySection: An optional `MonochromeColor` to prioritize in the
         array,
 
-     - Returns: A reordered array of `MonochromeSection` objects in which the
-     `prioritySection` is first, or the original optional array if
-     `monochromeSections` does not have exactly two elements.
+     - Returns:
+        A reordered array of `MonochromeSection` objects in which the
+        `prioritySection` is first, or the original optional array if
+        `monochromeSections` does not have exactly two elements.
      */
     func prioritizeMonochromeSections(
         monochromeSections: [MonochromeSection]?,
@@ -77,8 +78,9 @@ struct HSBColorSliderModel {
         color,  position and step size for the monochrome section of the color
         slider.
      
-      - Returns: An array of `Color` objects representing the
-        `MonochromeSection` blending into an adjacent  `MonochromeSection`.
+      - Returns:
+        An array of `Color` objects representing the `MonochromeSection`
+        blending into an adjacent  `MonochromeSection`.
      */
     func calculateMonochromeBlendColors(
         hue: CGFloat,
@@ -124,10 +126,9 @@ struct HSBColorSliderModel {
      of `Color` objects representing a `MonochromeSection` blending into the
      start or end of a `HueSection`.
      
-     - Parameters:
-        - monochromeSection: A `MonochromeSection` object representing the
-        color, position and step size for the monochrome section of the color
-        slider.
+     - Parameter monochromeSection: A `MonochromeSection` object representing
+        the color, position and step size for the monochrome section of the
+        color slider.
 
      - Returns:
         An array of `Color` objects representing the colors of the
@@ -262,11 +263,11 @@ struct HSBColorSliderModel {
      `calculateMonochromeBlendColors`. To blend into the `HueSection`, it uses
      the function `calculateHueBlendColors`.
      
-     - Parameters:
-        - monochromeSections: An array of `MonochromeSection`.
+     - Parameter monochromeSections: An array of `MonochromeSection`.
      
-     - Returns: An array of `Color` objects representing the colors of both
-     sections. Returns an empty array if `monochromeSections` is empty.
+     - Returns:
+        An array of `Color` objects representing the colors of both sections.
+        Returns an empty array if `monochromeSections` is empty.
      */
     func processAdjacentMonochromeSections(
         monochromeSections: [MonochromeSection]
@@ -326,12 +327,12 @@ struct HSBColorSliderModel {
     /**
      Extracts a list of `Color` objects from an array of `MonochromeSection`.
      
-     - Parameters:
-        - monochromeSections: An optional array of `MonochromeSection`.
+     - Parameter monochromeSections: An optional array of `MonochromeSection`.
      
-     - Returns: An optional array of `Color` objects representing the extracted
-     colors. Returns `nil` if the input `monochromeSections` is `nil`, or if the
-     number of sections is not one or two.
+     - Returns:
+        An optional array of `Color` objects representing the extracted colors.
+        Returns `nil` if the input `monochromeSections` is `nil`, or if the
+        number of sections is not one or two.
      */
     func processMonochromeSections(
             monochromeSections: [MonochromeSection]?
