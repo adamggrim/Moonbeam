@@ -1,8 +1,8 @@
 import Foundation
 import SwiftUI
 
-/// Represents the components of the HSB color model
-enum BendableHSBComponent {
+/// Represents the bendable components of the HSB color model
+enum BendableComponent {
     case saturation, brightness
 }
 
@@ -387,7 +387,6 @@ struct HSBColorSliderModel {
         return true
     }
     func generateHueColors(
-        hue: BendableHSBComponent,
         minHue: CGFloat,
         maxHue: CGFloat,
         hueSection: HueSection,
