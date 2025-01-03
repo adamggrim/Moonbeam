@@ -386,7 +386,7 @@ struct HSBColorSliderModel {
         }
         return true
     }
-    func generateHueColors(
+    func calculateHueColors(
         minHue: CGFloat,
         maxHue: CGFloat,
         hueSection: HueSection,
