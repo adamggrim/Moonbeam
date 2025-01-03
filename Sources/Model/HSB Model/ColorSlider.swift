@@ -459,10 +459,10 @@ struct HSBColorSliderModel {
         defaultSaturation: CGFloat,
         defaultBrightness: CGFloat,
         hueSection: HueSection,
-        blackSection: BlackSection?,
-        whiteSection: WhiteSection?,
-        bendSections: [BendSection]?,
-        prioritySection: MonochromeColor?
+        blackSection: BlackSection? = nil,
+        whiteSection: WhiteSection? = nil,
+        bendSections: [BendSection]? = nil,
+        prioritySection: MonochromeColor? = nil
     ) {
         self.minHue = minHue
         self.maxHue = maxHue
