@@ -16,6 +16,11 @@ struct HueSection {
 
 /// Section of the color slider with special conditions for saturation or brightness
 struct BendSection {
+    // Whether the bend goes to or from a target saturation or brightness (oneWay), or there and back (twoWay)
+    enum BendMode {
+        case oneWay, twoWay
+    }
+    
     let startHue: CGFloat
     let endHue: CGFloat
     
@@ -31,11 +36,6 @@ struct BendSection {
     
     var hueCount: CGFloat {
         endHue - startHue
-    }
-    
-    // Whether the bend goes to or from a target saturation or brightness (oneWay), or there and back (twoWay)
-    enum BendMode {
-        case oneWay, twoWay
     }
     
     var bendMode: BendMode
