@@ -1,6 +1,9 @@
 import Foundation
 
-// Main section of the color slider, for showing the full spectrum of color options
+/**
+ Main section of the color slider, for showing the full spectrum of color
+ options
+ */
 struct HueSection {
     let minHue: CGFloat
     let maxHue: CGFloat
@@ -14,7 +17,10 @@ struct HueSection {
     }
 }
 
-/// Section of the color slider with special conditions for saturation or brightness
+/**
+ Section of the color slider with special conditions for saturation or
+ brightness
+ */
 struct BendSection {
     // Whether the bend goes to or from a target saturation or brightness (oneWay), or there and back (twoWay)
     enum BendMode {
