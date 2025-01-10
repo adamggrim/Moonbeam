@@ -122,7 +122,7 @@ struct HSBColorSliderModel {
         }
     
     /**
-     While accounting for any brightness or saturation bends, generates an array
+     While accounting for any saturation or brightness bends, generates an array
      of `Color` objects representing a `MonochromeSection` blending into the
      start or end of a `HueSection`.
      
@@ -221,7 +221,7 @@ struct HSBColorSliderModel {
                                             endSaturation: defaultSaturation)
         
         /*
-         Adjust starting brightness and saturation values if the bend mode is
+         Adjust starting saturation and brightness values if the bend mode is
          one-way and the bendSection begins at minHue or ends at maxHue.
         */
         if let bendSections = bendSections {
