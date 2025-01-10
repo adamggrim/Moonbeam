@@ -1,6 +1,14 @@
 import Foundation
 
 /**
+ Whether the bend goes to a target saturation or brightness (oneWay), or there
+ and back (twoWay)
+ */
+enum BendMode {
+    case oneWay, twoWay
+}
+
+/**
  Main section of the color slider, for showing the full spectrum of color
  options
  */
@@ -22,11 +30,6 @@ struct HueSection {
  brightness
  */
 struct BendSection {
-    // Whether the bend goes to or from a target saturation or brightness (oneWay), or there and back (twoWay)
-    enum BendMode {
-        case oneWay, twoWay
-    }
-    
     let startHue: CGFloat
     let endHue: CGFloat
     
