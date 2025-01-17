@@ -402,6 +402,26 @@ struct HSBColorSliderModel {
         }
         return true
     }
+    
+    /**
+     Calculates the amount by which a given base value (i.e., saturation or
+     brightness) should be adjusted at a given hue.
+     
+     - Parameters:
+        - valueIncrement: The amount the value should change at each hue.
+        - offsetFromStartHue: The difference between the current hue and the
+        starting hue of the `BendSection`.
+     - Returns:
+        - The calculated number of increments, used to adjust the base value
+        (i.e., saturation or brightness).
+     */
+    func calculateNumberOfIncrements(
+        valueIncrement: CGFloat,
+        offsetFromStartHue: CGFloat
+    ) -> CGFloat {
+        return valueIncrement * offsetFromStartHue
+    }
+    
     func calculateHueColors(
         minHue: CGFloat,
         maxHue: CGFloat,
