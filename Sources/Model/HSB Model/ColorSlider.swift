@@ -144,10 +144,10 @@ struct HSBColorSliderModel {
         monochromeSection: MonochromeSection) -> [Color] {
         
         struct BendAdjustment {
-            var startBrightness: CGFloat
-            var endBrightness: CGFloat
             var startSaturation: CGFloat
             var endSaturation: CGFloat
+            var startBrightness: CGFloat
+            var endBrightness: CGFloat
         }
         
         /**
@@ -221,29 +221,39 @@ struct HSBColorSliderModel {
         
         let hue = monochromeSection.positionOnSlider == .start ? minHue : maxHue
         
-        var bendAdjustment = BendAdjustment(startBrightness: defaultBrightness,
-                                            endBrightness: defaultBrightness,
-                                            startSaturation: defaultSaturation,
-                                            endSaturation: defaultSaturation)
+        var bendAdjustment = BendAdjustment(
+            startSaturation: defaultSaturation,
+            endSaturation: defaultSaturation,
+            startBrightness: defaultBrightness,
+            endBrightness: defaultBrightness
+        )
         
         /*
          Adjust starting saturation and brightness values if the bend mode is
          one-way and the bendSection begins at minHue or ends at maxHue.
         */
         if let bendSections = bendSections {
-            for bendSection in bendSections where
+            for bendSection in bendSections {
+                guard bendSection.startHue == minHue ||
+                        bendSection.endHue == maxHue
+                else {
+                    continue
+                }
+                
+                if let oneWaySection = bendSection as? OneWayBendSection {
+                    if bendSection.startHue == minHue {
+                        bendAdjustment.startSaturation = bendSection.targetSaturation
+                        bendAdjustment.startBrightness = bendSection.targetBrightness
+                    }
+                    else if bendSection.endHue == maxHue {
+                        bendAdjustment.endSaturation = bendSection.targetSaturation
+                        bendAdjustment.endBrightness = bendSection.targetBrightness
+                    }
+                }
                 bendSection.bendMode == .oneWay &&
                 (bendSection.startHue == minHue
                     || bendSection.endHue == maxHue) {
                 
-                if bendSection.startHue == minHue {
-                    bendAdjustment.startBrightness = bendSection.targetBrightness
-                    bendAdjustment.startSaturation = bendSection.targetSaturation
-                }
-                else if bendSection.endHue == maxHue {
-                    bendAdjustment.endBrightness = bendSection.targetBrightness
-                    bendAdjustment.endSaturation = bendSection.targetSaturation
-                }
             }
         }
         
