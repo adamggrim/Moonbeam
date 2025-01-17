@@ -422,6 +422,53 @@ struct HSBColorSliderModel {
         return valueIncrement * offsetFromStartHue
     }
     
+    func calculateBendValues(
+        hue: CGFloat,
+        defaultValue: CGFloat,
+        bendSections: [BendSection]?,
+        bendableComponent: BendableComponent
+    ) throws -> CGFloat {
+        guard let bendSections = bendSections,
+              validateBendSections(bendSections: bendSections),
+              let relevantBendSection = bendSections.first(where: {
+                  $0.startHue <= hue && hue < $0.endHue
+              }) else {
+            throw InvalidBendSectionError()
+        }
+        
+        let valueIncrement = bendableComponent == .saturation
+            ? relevantBendSection.saturationIncrement
+            : relevantBendSection.brightnessIncrement
+        
+        let offsetFromStartHue = hue - relevantBendSection.startHue
+        
+        switch relevantBendSection {
+        case let oneWayBendSection as OneWayBendSection:
+            let numberOfIncrements = calculateNumberOfIncrements(
+                valueIncrement: valueIncrement,
+                offsetFromStartHue: offsetFromStartHue)
+            return CGFloat(defaultValue - numberOfIncrements)
+        
+        case let twoWayBendSection as TwoWayBendSection:
+            let middleHue = twoWayBendSection.middleHue
+            if twoWayBendSection.startHue < middleHue {
+                let numberOfIncrements = calculateNumberOfIncrements(
+                    valueIncrement: valueIncrement,
+                    offsetFromStartHue: offsetFromStartHue)
+                return CGFloat(defaultValue - numberOfIncrements)
+            } else if hue < twoWayBendSection.endHue {
+                return CGFloat(
+                    twoWayBendSection.targetSaturation
+                    + (valueIncrement * offsetFromStartHue
+                    - (twoWayBendSection.hueCount / 2)))
+            } else {
+                return defaultValue
+            }
+        default:
+            return defaultValue
+        }
+    }
+    
     func calculateHueColors(
         minHue: CGFloat,
         maxHue: CGFloat,
