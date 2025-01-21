@@ -81,26 +81,52 @@ struct OneWayBendSection: BendSection {
         self.brightnessIncrement = brightnessDelta / hueCount
     }
 }
+
+/// A bend section that occurs in the middle of a color slider.
+struct TwoWayBendSection: BendSection {
+    let startHue: CGFloat
+    let endHue: CGFloat
+
+    let targetSaturation: CGFloat
+    let defaultSaturation: CGFloat
+    let saturationDelta: CGFloat
+    let saturationIncrement: CGFloat
     
-    init(startHue: CGFloat, endHue: CGFloat, targetSaturation: CGFloat = 1.0, targetBrightness: CGFloat = 1.0) {
+    let targetBrightness: CGFloat
+    let defaultBrightness: CGFloat
+    let brightnessDelta: CGFloat
+    let brightnessIncrement: CGFloat
+    
+    let middleHue: CGFloat
+
+    var hueCount: CGFloat {
+        endHue - startHue
+    }
+
+    init(
+        startHue: CGFloat,
+        endHue: CGFloat,
+        targetSaturation: CGFloat,
+        defaultSaturation: CGFloat,
+        targetBrightness: CGFloat,
+        defaultBrightness: CGFloat
+    ) {
         self.startHue = startHue
         self.endHue = endHue
         
         self.targetSaturation = targetSaturation
+        self.defaultSaturation = defaultSaturation
         self.saturationDelta = defaultSaturation - targetSaturation
         
         self.targetBrightness = targetBrightness
+        self.defaultBrightness = defaultBrightness
         self.brightnessDelta = defaultBrightness - targetBrightness
         
-        // Take into account whether the bend section is one-way or two-way
-        let denominator: CGFloat = {
-            if let middleHue {
-                return abs(middleHue * 360 - startHue)
-            } else {
-                return CGFloat(hueCount)
-            }
-        }()
+        // Calculate middleHue for two-way
+        self.middleHue = (startHue + hueCount / 2) / 360
         
+        // Calculate increments based on half the hueCount for two-way
+        let denominator = abs(middleHue * 360 - startHue)
         self.saturationIncrement = saturationDelta / denominator
         self.brightnessIncrement = brightnessDelta / denominator
     }
