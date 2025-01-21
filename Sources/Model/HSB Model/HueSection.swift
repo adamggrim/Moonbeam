@@ -1,7 +1,24 @@
 import Foundation
 
 /**
+ A protocol for a section of the color slider with special conditions for
+ saturation or brightness.
  */
+protocol BendSection {
+    var startHue: CGFloat { get }
+    var endHue: CGFloat { get }
+    
+    var targetSaturation: CGFloat { get }
+    var saturationDelta: CGFloat { get }
+    var saturationIncrement: CGFloat { get }
+    var defaultSaturation: CGFloat { get }
+    
+    var targetBrightness: CGFloat { get }
+    var brightnessDelta: CGFloat { get }
+    var brightnessIncrement: CGFloat { get }
+    var defaultBrightness: CGFloat { get }
+    
+    var hueCount: CGFloat { get }
 }
 
 /**
