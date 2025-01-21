@@ -22,8 +22,8 @@ protocol BendSection {
 }
 
 /**
- Main section of the color slider, for showing the full spectrum of color
- options
+ The main section of the color slider, for showing the full spectrum of color
+ options.
  */
 struct HueSection {
     let minHue: CGFloat
