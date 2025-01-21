@@ -38,33 +38,49 @@ struct HueSection {
     }
 }
 
-/**
- Section of the color slider with special conditions for saturation or
- brightness
- */
-struct BendSection {
+
+/// A bend section that fades into the start or end of a color slider.
+struct OneWayBendSection: BendSection {
     let startHue: CGFloat
     let endHue: CGFloat
     
     let targetSaturation: CGFloat
+    let defaultSaturation: CGFloat
     let saturationDelta: CGFloat
     let saturationIncrement: CGFloat
-    let defaultSaturation: CGFloat
     
     let targetBrightness: CGFloat
+    let defaultBrightness: CGFloat
     let brightnessDelta: CGFloat
     let brightnessIncrement: CGFloat
-    let defaultBrightness: CGFloat
     
     var hueCount: CGFloat {
         endHue - startHue
     }
     
-    var bendMode: BendMode
-    var middleHue: CGFloat? {
-        guard bendMode == .twoWay else { return nil }
-        return CGFloat(startHue + (hueCount / 2)) / 360
+    init(
+        startHue: CGFloat,
+        endHue: CGFloat,
+        targetSaturation: CGFloat,
+        defaultSaturation: CGFloat,
+        targetBrightness: CGFloat,
+        defaultBrightness: CGFloat
+    ) {
+        self.startHue = startHue
+        self.endHue = endHue
+        
+        self.targetSaturation = targetSaturation
+        self.defaultSaturation = defaultSaturation
+        self.saturationDelta = defaultSaturation - targetSaturation
+        
+        self.targetBrightness = targetBrightness
+        self.defaultBrightness = defaultBrightness
+        self.brightnessDelta = defaultBrightness - targetBrightness
+        
+        self.saturationIncrement = saturationDelta / hueCount
+        self.brightnessIncrement = brightnessDelta / hueCount
     }
+}
     
     init(startHue: CGFloat, endHue: CGFloat, targetSaturation: CGFloat = 1.0, targetBrightness: CGFloat = 1.0) {
         self.startHue = startHue
