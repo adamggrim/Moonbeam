@@ -1,11 +1,7 @@
 import Foundation
 
 /**
- Whether the bend goes to a target saturation or brightness (oneWay), or there
- and back (twoWay)
  */
-enum BendMode {
-    case oneWay, twoWay
 }
 
 /**
