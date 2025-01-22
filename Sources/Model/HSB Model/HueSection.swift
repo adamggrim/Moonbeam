@@ -21,6 +21,13 @@ protocol BendSection {
     var hueCount: CGFloat { get }
 }
 
+/// An extension for computed properties shared between BendSection structs.
+extension BendSection {
+    var hueCount: CGFloat {endHue - startHue}
+    var saturationDelta: CGFloat {defaultSaturation - targetSaturation}
+    var brightnessDelta: CGFloat {defaultBrightness - targetBrightness}
+}
+
 /**
  The main section of the color slider, for showing the full spectrum of color
  options.
@@ -38,7 +45,6 @@ struct HueSection {
     }
 }
 
-
 /// A bend section that fades into the start or end of a color slider.
 struct OneWayBendSection: BendSection {
     let startHue: CGFloat
@@ -54,10 +60,6 @@ struct OneWayBendSection: BendSection {
     let brightnessDelta: CGFloat
     let brightnessIncrement: CGFloat
     
-    var hueCount: CGFloat {
-        endHue - startHue
-    }
-    
     init(
         startHue: CGFloat,
         endHue: CGFloat,
@@ -71,11 +73,9 @@ struct OneWayBendSection: BendSection {
         
         self.targetSaturation = targetSaturation
         self.defaultSaturation = defaultSaturation
-        self.saturationDelta = defaultSaturation - targetSaturation
         
         self.targetBrightness = targetBrightness
         self.defaultBrightness = defaultBrightness
-        self.brightnessDelta = defaultBrightness - targetBrightness
         
         self.saturationIncrement = saturationDelta / hueCount
         self.brightnessIncrement = brightnessDelta / hueCount
@@ -98,11 +98,7 @@ struct TwoWayBendSection: BendSection {
     let brightnessIncrement: CGFloat
     
     let middleHue: CGFloat
-
-    var hueCount: CGFloat {
-        endHue - startHue
-    }
-
+    
     init(
         startHue: CGFloat,
         endHue: CGFloat,
@@ -116,16 +112,15 @@ struct TwoWayBendSection: BendSection {
         
         self.targetSaturation = targetSaturation
         self.defaultSaturation = defaultSaturation
-        self.saturationDelta = defaultSaturation - targetSaturation
         
         self.targetBrightness = targetBrightness
         self.defaultBrightness = defaultBrightness
-        self.brightnessDelta = defaultBrightness - targetBrightness
         
-        // Calculate middleHue for two-way
         self.middleHue = (startHue + hueCount / 2) / 360
         
-        // Calculate increments based on half the hueCount for two-way
+        /* Calculate increments based on half the hueCount for
+         TwoWayBendSection.
+         */
         let denominator = abs(middleHue * 360 - startHue)
         self.saturationIncrement = saturationDelta / denominator
         self.brightnessIncrement = brightnessDelta / denominator
