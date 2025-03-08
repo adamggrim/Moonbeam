@@ -422,6 +422,26 @@ struct HSBColorSliderModel {
         return valueIncrement * offsetFromStartHue
     }
     
+    /**
+     Calculates the bend saturation or brightness for a given hue based on the
+     provided bend sections.
+     
+     - Parameters:
+        - hue: The hue for which to calculate the bend value.
+        - defaultValue: The default value where there is no valid bend section.
+        - bendSections: An optional array of `BendSection` objects defining the
+        bending behavior across the hue range. Throws an error if `nil` or if
+        bend sections overlap.
+        - bendableComponent: The HSB component for the bend (e.g., saturation
+        or brightness).
+     
+     - Throws:
+        - `InvalidBendSectionError`: If `bendSections` is `nil`, if
+        `validateBendSections` is false, or if no `BendSection` is found that
+        contains the provided `hue`.
+     
+     - Returns: The calculated bend value as a `CGFloat`.
+     */
     func calculateBendValues(
         hue: CGFloat,
         defaultValue: CGFloat,
