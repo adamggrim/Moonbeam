@@ -8,6 +8,7 @@ enum BendableComponent {
 
 /// Model for assembling the HSB color slider values into an array.
 struct HSBColorSliderModel {
+    /// Error for when `validateBendSections()` returns `false`
     struct InvalidBendSectionError: Error {
         let message: String
         init(message: String = "Invalid bend section") {
