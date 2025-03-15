@@ -29,7 +29,7 @@ struct HSBColorSliderModel {
         included in the returned array of `MonochromeSection`. The function
         returns an empty array if both sections are `nil`.
      */
-    func constructMonochromeSections(
+    func assembleMonochromeSections(
         blackSection: BlackSection?,
         whiteSection: WhiteSection?
     ) -> [MonochromeSection]? {
@@ -578,7 +578,7 @@ struct HSBColorSliderModel {
         self.bendSections = bendSections
         self.prioritySection = prioritySection
         
-        self.monochromeSections = constructMonochromeSections(
+        self.monochromeSections = assembleMonochromeSections(
             blackSection: self.blackSection,
             whiteSection: self.whiteSection
         )
