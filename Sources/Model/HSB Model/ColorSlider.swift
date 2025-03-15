@@ -18,16 +18,20 @@ struct HSBColorSliderModel {
     
     /**
      Combines an optional `BlackSection` and `WhiteSection` into an optional
-     array of `MonochromeSection`.
+     array of `MonochromeSection` objects.
+     
+     The order of the objects on the color slider is determined by the
+     `positionOnSlider` property of each `MonochromeSection`, not the section
+     order in the returned `monochromeSections` array.
      
      - Parameters:
         - blackSection: An optional `BlackSection` of the color slider.
         - whiteSection: An optional `WhiteSection` of the color slider.
-
+     
      - Returns:
-        An array of `MonochromeSection`. If either section exists, it is
-        included in the returned array of `MonochromeSection`. The function
-        returns an empty array if both sections are `nil`.
+        An array of `MonochromeSection` objects, or `nil` if both sections are
+        `nil`. If a section exists, it is included in the returned array of
+        `MonochromeSection`.
      */
     func assembleMonochromeSections(
         blackSection: BlackSection?,
