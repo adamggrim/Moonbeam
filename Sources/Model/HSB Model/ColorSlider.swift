@@ -58,19 +58,22 @@ struct HSBColorSliderModel {
 
      - Returns:
         A reordered array of `MonochromeSection` objects in which the
-        `prioritySection` is first, or the original optional array if
-        `monochromeSections` does not have exactly two elements.
+        `priorityColor` is first, or `nil` if `monochromeSections` does not
+        have exactly one or two elements.
      */
     func prioritizeMonochromeSections(
         monochromeSections: [MonochromeSection]?,
-        prioritySection: MonochromeColor?) -> [MonochromeSection]? {
-            guard let monochromeSections = monochromeSections,
-                  let prioritySection = prioritySection,
+        priorityColor: MonochromeColor?) -> [MonochromeSection]? {
+            guard let monochromeSections = monochromeSections else {
+                return nil
+            }
+            
+            guard let priorityColor = priorityColor,
                   monochromeSections.count == 2 else {
                 return monochromeSections
             }
             
-            if monochromeSections[0].color == prioritySection {
+            if monochromeSections[0].color == priorityColor {
                 return monochromeSections
             }
             else {
@@ -551,7 +554,7 @@ struct HSBColorSliderModel {
     let blackSection: BlackSection?
     let whiteSection: WhiteSection?
     let bendSections: [BendSection]?
-    let prioritySection: MonochromeColor?
+    let priorityColor: MonochromeColor?
     
     let monochromeSections: [MonochromeSection]?
     
@@ -570,7 +573,7 @@ struct HSBColorSliderModel {
         blackSection: BlackSection? = nil,
         whiteSection: WhiteSection? = nil,
         bendSections: [BendSection]? = nil,
-        prioritySection: MonochromeColor? = nil
+        priorityColor: MonochromeColor? = nil
     ) {
         self.minHue = minHue
         self.maxHue = maxHue
@@ -580,7 +583,7 @@ struct HSBColorSliderModel {
         self.blackSection = blackSection
         self.whiteSection = whiteSection
         self.bendSections = bendSections
-        self.prioritySection = prioritySection
+        self.priorityColor = priorityColor
         
         self.monochromeSections = assembleMonochromeSections(
             blackSection: self.blackSection,
@@ -590,13 +593,12 @@ struct HSBColorSliderModel {
             monochromeSections: self.monochromeSections?.filter {
                 $0.positionOnSlider == .start
             },
-            prioritySection: self.prioritySection
         )
         self.monochromeEndSections = prioritizeMonochromeSections(
             monochromeSections: self.monochromeSections?.filter {
                 $0.positionOnSlider == .end
             },
-            prioritySection: self.prioritySection
+            priorityColor: self.priorityColor
         )
         self.monochromeStartColors = processMonochromeSections(
             monochromeSections: self.monochromeStartSections
