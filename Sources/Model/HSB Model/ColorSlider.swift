@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-/// Represents the bendable components of the HSB color model
+/// Represents the HSB components on the color slider that can bend.
 enum BendableComponent {
     case saturation, brightness
 }
@@ -50,12 +50,9 @@ struct HSBColorSliderModel {
      prioritized `MonochromeColor` first.
      
      - Parameters:
-        - monochromeSections: An optional array containing two
-        `MonochromeSection` objects. If the array does not have exactly two
-        elements, it remains unchanged.
-        - prioritySection: An optional `MonochromeColor` to prioritize in the
-        array,
-
+        - monochromeSections: An optional array of `MonochromeSection` objects.
+        - priorityColor: An optional `MonochromeColor` to prioritize in the
+        array.
      - Returns:
         A reordered array of `MonochromeSection` objects in which the
         `priorityColor` is first, or `nil` if `monochromeSections` does not
@@ -160,7 +157,6 @@ struct HSBColorSliderModel {
         
         /**
          Generates an array of `Color` objects representing a
-         `MonochromeSection` blending into he start or end of a `HueSection`.
          
          The `color` property of the `MonochromeSection` determines whether the
          gradient to or from the monochrome color affects brightness (for black
