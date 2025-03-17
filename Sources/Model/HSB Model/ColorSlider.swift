@@ -46,17 +46,17 @@ struct HSBColorSliderModel {
     }
     
     /**
-     Reorders an optional array of two `MonochromeSection` objects to place the
+     Reorders an optional array of `MonochromeSection` objects to place the
      prioritized `MonochromeColor` first.
      
      - Parameters:
         - monochromeSections: An optional array of `MonochromeSection` objects.
         - priorityColor: An optional `MonochromeColor` to prioritize in the
         array.
+     
      - Returns:
         A reordered array of `MonochromeSection` objects in which the
-        `priorityColor` is first, or `nil` if `monochromeSections` does not
-        have exactly one or two elements.
+        `priorityColor` is first, or `nil` if `monochromeSections` is `nil`.
      */
     func prioritizeMonochromeSections(
         monochromeSections: [MonochromeSection]?,
@@ -157,6 +157,7 @@ struct HSBColorSliderModel {
         
         /**
          Generates an array of `Color` objects representing a
+         `MonochromeSection` blending into the start or end of a `HueSection`.
          
          The `color` property of the `MonochromeSection` determines whether the
          gradient to or from the monochrome color affects brightness (for black
