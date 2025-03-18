@@ -145,7 +145,7 @@ struct HSBColorSliderModel {
         An array of `Color` objects representing the `MonochromeSection`
         blending into the start or end of the `HueSection`.
      */
-    func calculateMonochromeIntoHueBlendColors(
+    func calculateMonochromeIntoHueColors(
         monochromeSection: MonochromeSection) -> [Color] {
         
         struct BendAdjustment {
@@ -284,7 +284,7 @@ struct HSBColorSliderModel {
      the adjacent `MonochromeSection`, it uses the function
      `calculateMonochromeIntoMonochromeColors`. To blend into the
      `HueSection`, it uses the function
-     `calculateMonochromeIntoHueBlendColors`.
+     `calculateMonochromeIntoHueColors`.
      
      - Parameter monochromeSections: An array of `MonochromeSection`.
      
@@ -313,7 +313,7 @@ struct HSBColorSliderModel {
                  HueSection.
                  */
                 if sectionIndex == (monochromeSections.count - 1) {
-                    sectionColors = calculateMonochromeIntoHueBlendColors(
+                    sectionColors = calculateMonochromeIntoHueColors(
                         monochromeSection: monochromeSections[sectionIndex]
                     )
                 }
@@ -330,7 +330,7 @@ struct HSBColorSliderModel {
                  HueSection.
                  */
                 if sectionIndex == 0 {
-                    sectionColors = calculateMonochromeIntoHueBlendColors(
+                    sectionColors = calculateMonochromeIntoHueColors(
                         monochromeSection: monochromeSections[sectionIndex]
                     )
                 }
@@ -367,7 +367,7 @@ struct HSBColorSliderModel {
             switch monochromeSections.count {
             case 1:
                 if let monochromeSection = monochromeSections.first {
-                    return calculateMonochromeIntoHueBlendColors(
+                    return calculateMonochromeIntoHueColors(
                         monochromeSection: monochromeSection
                     )
                 }
