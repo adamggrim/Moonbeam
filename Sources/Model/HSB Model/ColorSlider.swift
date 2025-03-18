@@ -233,10 +233,6 @@ struct HSBColorSliderModel {
             endBrightness: defaultBrightness
         )
         
-        /*
-         Adjust starting saturation and brightness values if the bend mode is
-         one-way and the bendSection begins at minHue or ends at maxHue.
-        */
         if let bendSections = bendSections {
             for bendSection in bendSections {
                 guard bendSection.startHue == minHue ||
@@ -245,6 +241,11 @@ struct HSBColorSliderModel {
                     continue
                 }
                 
+                /*
+                 Adjust starting saturation and brightness values if the bend
+                 mode is one-way and the bendSection begins at minHue or ends
+                 at maxHue.
+                */
                 if let oneWaySection = bendSection as? OneWayBendSection {
                     if bendSection.startHue == minHue {
                         bendAdjustment.startSaturation = bendSection.targetSaturation
