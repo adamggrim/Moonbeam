@@ -21,7 +21,7 @@ protocol BendSection {
     var hueCount: CGFloat { get }
 }
 
-/// An extension for computed properties shared between BendSection structs.
+/// An extension for computed properties shared among all BendSection structs.
 extension BendSection {
     var hueCount: CGFloat {endHue - startHue}
     var saturationDelta: CGFloat {defaultSaturation - targetSaturation}

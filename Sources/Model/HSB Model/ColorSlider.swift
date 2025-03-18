@@ -142,8 +142,8 @@ struct HSBColorSliderModel {
         color slider.
 
      - Returns:
-        An array of `Color` objects representing the colors of the
-        `MonochromeSection`.
+        An array of `Color` objects representing the `MonochromeSection`
+        blending into the start or end of the `HueSection`.
      */
     func calculateMonochromeIntoHueBlendColors(
         monochromeSection: MonochromeSection) -> [Color] {
@@ -160,7 +160,7 @@ struct HSBColorSliderModel {
          `MonochromeSection` blending into the start or end of a `HueSection`.
          
          The `color` property of the `MonochromeSection` determines whether the
-         gradient to or from the monochrome color affects brightness (for black
+         gradient to or from the `MonochromeColor` affects brightness (for black
          sections) or saturation (for white sections).
          
          - Parameters:
@@ -175,8 +175,8 @@ struct HSBColorSliderModel {
             color slider.
          
          - Returns:
-            An array of `Color` objects representing the colors of the
-            `MonochromeSection`.
+            An array of `Color` objects representing the `MonochromeSection`
+            blending into the start or end of the `HueSection`.
          */
         func blendIntoHue(
             startValue: CGFloat,
