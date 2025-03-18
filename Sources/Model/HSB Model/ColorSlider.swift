@@ -93,7 +93,7 @@ struct HSBColorSliderModel {
         An array of `Color` objects representing the `MonochromeSection`
         blending into an adjacent  `MonochromeSection`.
      */
-    func calculateMonochromeIntoMonochromeBlendColors(
+    func calculateMonochromeIntoMonochromeColors(
         hue: CGFloat,
         monochromeSection: MonochromeSection) -> [Color] {
             
@@ -282,7 +282,7 @@ struct HSBColorSliderModel {
      For each section, the function will  blend colors into either the adjacent
      `MonochromeSection` or the start or end of the `HueSection`. To blend into
      the adjacent `MonochromeSection`, it uses the function
-     `calculateMonochromeIntoMonochromeBlendColors`. To blend into the
+     `calculateMonochromeIntoMonochromeColors`. To blend into the
      `HueSection`, it uses the function
      `calculateMonochromeIntoHueBlendColors`.
      
@@ -319,7 +319,7 @@ struct HSBColorSliderModel {
                 }
                 // Otherwise, blend into the other monochromeSection.
                 else {
-                    sectionColors = calculateMonochromeIntoMonochromeBlendColors(
+                    sectionColors = calculateMonochromeIntoMonochromeColors(
                         hue: minHue,
                         monochromeSection: monochromeSections[sectionIndex]
                     )
@@ -336,7 +336,7 @@ struct HSBColorSliderModel {
                 }
                 // Otherwise, blend into the other monochromeSection.
                 else {
-                    sectionColors = calculateMonochromeIntoMonochromeBlendColors(
+                    sectionColors = calculateMonochromeIntoMonochromeColors(
                         hue: maxHue,
                         monochromeSection: monochromeSections[sectionIndex]
                     )
