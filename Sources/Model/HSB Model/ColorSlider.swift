@@ -83,13 +83,13 @@ struct HSBColorSliderModel {
      blending into an adjacent `MonochromeSection`.
      
      - Parameters:
-        - hue: The hue value for the entire `MonochromeSection`, equivalent to 
+        - hue: The hue value for the entire `MonochromeSection`, equivalent to
         the hue at either the start or end of the `HueSection`.
-        - monochromeSection: A `MonochromeSection` object representing the 
+        - monochromeSection: A `MonochromeSection` object representing the
         color,  position and step size for the monochrome section of the color
         slider.
      
-      - Returns:
+     - Returns:
         An array of `Color` objects representing the `MonochromeSection`
         blending into an adjacent  `MonochromeSection`.
      */
@@ -138,9 +138,9 @@ struct HSBColorSliderModel {
      start or end of a `HueSection`.
      
      - Parameter monochromeSection: A `MonochromeSection` object representing
-        the color, position and step size for the monochrome section of the
-        color slider.
-
+     the color, position and step size for the monochrome section of the color
+     slider.
+     
      - Returns:
         An array of `Color` objects representing the `MonochromeSection`
         blending into the start or end of the `HueSection`.
@@ -344,6 +344,7 @@ struct HSBColorSliderModel {
             }
             adjacentMonochromeColors.append(contentsOf: sectionColors)
         }
+        
         return adjacentMonochromeColors
     }
     
@@ -387,9 +388,9 @@ struct HSBColorSliderModel {
      least one `BendSection` and that no two `BendSection` objects overlap.
      
      - Parameter bendSections: An optional array of `BendSection` objects to
-        validate.
+     validate.
      - Returns: `true` if there is at least one `BendSection` and no
-        `BendSection` objects overlap. Otherwise, returns `false`.
+     `BendSection` objects overlap. Otherwise, returns `false`.
      */
     func validateBendSections(bendSections: [BendSection]?) -> Bool {
         guard let unwrappedBendSections = bendSections,

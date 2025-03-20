@@ -86,7 +86,7 @@ struct OneWayBendSection: BendSection {
 struct TwoWayBendSection: BendSection {
     let startHue: CGFloat
     let endHue: CGFloat
-
+    
     let targetSaturation: CGFloat
     let defaultSaturation: CGFloat
     let saturationDelta: CGFloat
