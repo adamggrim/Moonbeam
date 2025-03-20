@@ -147,7 +147,6 @@ struct HSBColorSliderModel {
      */
     func generateMonochromeIntoHueColors(
         monochromeSection: MonochromeSection) -> [Color] {
-        
         struct BendAdjustment {
             var startSaturation: CGFloat
             var endSaturation: CGFloat
@@ -245,7 +244,7 @@ struct HSBColorSliderModel {
                  Adjust starting saturation and brightness values if the bend
                  mode is one-way and the bendSection begins at minHue or ends
                  at maxHue.
-                */
+                 */
                 if let oneWaySection = bendSection as? OneWayBendSection {
                     if bendSection.startHue == minHue {
                         bendAdjustment.startSaturation = bendSection.targetSaturation
