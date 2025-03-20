@@ -409,8 +409,8 @@ struct HSBColorSliderModel {
     }
     
     /**
-     Calculates the amount by which a given base value (i.e., saturation or
-     brightness) should be adjusted at a given hue.
+     Calculates the amount by which a given value (i.e., saturation or
+     brightness) should change at each hue.
      
      - Parameters:
         - valueIncrement: The amount the value should change at each hue.
