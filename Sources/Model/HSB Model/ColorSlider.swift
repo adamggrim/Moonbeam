@@ -256,10 +256,6 @@ struct HSBColorSliderModel {
                         bendAdjustment.endBrightness = bendSection.targetBrightness
                     }
                 }
-                bendSection.bendMode == .oneWay &&
-                (bendSection.startHue == minHue
-                    || bendSection.endHue == maxHue) {
-                
             }
         }
         
