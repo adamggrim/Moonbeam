@@ -366,11 +366,16 @@ struct HSBColorSliderModel {
                 return generateMonochromeIntoHueColors(
                     monochromeSection: monochromeSection
                 )
-            default:
-                break
             }
-            
-            return nil
+        case 2:
+            return generateAdjacentMonochromeColors(
+                monochromeSections: monochromeSections
+            )
+        default:
+            break
+        }
+        
+        return nil
     }
     
     /**
