@@ -442,7 +442,7 @@ struct HSBColorSliderModel {
      
      - Throws:
         - `InvalidBendSectionError`: If `bendSections` is `nil`, if
-        `validateBendSections` is false, or if no `BendSection` is found that
+        `validateBendSections` is `false`, or if no `BendSection` is found that
         contains the provided `hue`.
      
      - Returns: The calculated bend value as a `CGFloat`.
@@ -455,6 +455,7 @@ struct HSBColorSliderModel {
     ) throws -> CGFloat {
         guard let bendSections = bendSections,
               validateBendSections(bendSections: bendSections),
+              // The bend section that bends the given hue.
               let relevantBendSection = bendSections.first(where: {
                   $0.startHue <= hue && hue < $0.endHue
               }) else {
