@@ -447,7 +447,7 @@ struct HSBColorSliderModel {
      
      - Returns: The calculated bend value as a `CGFloat`.
      */
-    func calculateBendValues(
+    func calculateBendValue(
         hue: CGFloat,
         defaultValue: CGFloat,
         bendSections: [BendSection]?,
