@@ -382,19 +382,17 @@ struct HSBColorSliderModel {
      Validates an array of `BendSection` objects to ensure that the array is
      not empty and no two `BendSection` objects overlap.
      
-     - Parameter bendSections: An optional array of `BendSection` objects.
+     - Parameter bendSections: An array of `BendSection` objects.
      - Returns: `true` no two `BendSection` objects overlap. Otherwise, returns
      `false`.
      */
-    func validateBendSections(bendSections: [BendSection]?) -> Bool {
-        // nil bendSections array is valid.
-        guard let unwrappedBendSections = bendSections else { return true }
+    func validateBendSections(bendSections: [BendSection]) -> Bool {
         // Empty bendSections array is invalid.
-        guard unwrappedBendSections.count > 0 else { return false }
+        guard bendSections.count > 0 else { return false }
         // A single bendSection is valid.
-        guard unwrappedBendSections.count > 1 else { return true }
+        guard bendSections.count > 1 else { return true }
         
-        let sortedBendSections = unwrappedBendSections.sorted {
+        let sortedBendSections = bendSections.sorted {
             $0.startHue < $1.startHue
         }
         
