@@ -430,7 +430,7 @@ struct HSBColorSliderModel {
     }
     
     /**
-     Calculates the bend saturation or brightness for a given hue based on the
+     Calculates the saturation or brightness for a given hue based on the
      provided bend sections.
      
      - Parameters:
@@ -439,8 +439,8 @@ struct HSBColorSliderModel {
         - bendSections: An optional array of `BendSection` objects defining the
         bending behavior across the hue range. Throws an error if `nil` or if
         bend sections overlap.
-        - bendableComponent: The HSB component for the bend (e.g., saturation
-        or brightness).
+        - bendableComponent: The HSB component calculated for the bend (e.g.,
+        saturation or brightness).
      
      - Throws:
         - `InvalidBendSectionError`: If `bendSections` is `nil`, if
