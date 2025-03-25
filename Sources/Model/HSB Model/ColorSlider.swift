@@ -387,7 +387,7 @@ struct HSBColorSliderModel {
      `false`.
      */
     func validateBendSections(bendSections: [BendSection]) -> Bool {
-        // Empty bendSections array is invalid.
+        // An empty bendSections array is invalid.
         guard bendSections.count > 0 else { return false }
         // A single bendSection is valid.
         guard bendSections.count > 1 else { return true }
@@ -400,7 +400,7 @@ struct HSBColorSliderModel {
             sortedBendSections,
             sortedBendSections.dropFirst()
         ) {
-            // Check whether the bend sections overlap
+            // Check whether the bend sections overlap.
             if currentSection.endHue > nextSection.startHue {
                 return false
             }
@@ -455,7 +455,6 @@ struct HSBColorSliderModel {
     ) throws -> CGFloat {
         guard let bendSections = bendSections,
               validateBendSections(bendSections: bendSections),
-              // The bend section that bends the given hue.
               let relevantBendSection = bendSections.first(where: {
                   $0.startHue <= hue && hue < $0.endHue
               }) else {
