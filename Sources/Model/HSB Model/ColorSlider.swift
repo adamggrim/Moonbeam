@@ -435,7 +435,7 @@ struct HSBColorSliderModel {
         - hue: The hue for which to calculate the bend value.
         - defaultValue: The default value where there is no valid bend section.
         - bendSections: An optional array of `BendSection` objects defining the
-        bending behavior across the hue range. Throws an error if any bend
+        bending behavior across the `HueSection`. Throws an error if any bend
         sections overlap.
         - bendableComponent: The HSB component calculated for the bend (e.g.,
         saturation or brightness).

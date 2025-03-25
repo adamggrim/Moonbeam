@@ -29,7 +29,7 @@ extension BendSection {
 }
 
 /**
- The main section of the color slider, for showing the full spectrum of color
+ The color section of the color slider, for showing the full spectrum of color
  options.
  */
 struct HueSection {
