@@ -455,12 +455,16 @@ struct HSBColorSliderModel {
         guard let bendSections = bendSections else {
             return defaultValue
         }
-        guard validateBendSections(bendSections: bendSections),
-              // The bend section that bends the given hue
-              let relevantBendSection = bendSections.first(where: {
-                  $0.startHue <= hue && hue < $0.endHue
-              }) else {
+        // Ensure that no two BendSection objects overlap.
+        guard validateBendSections(bendSections: bendSections) else {
             throw InvalidBendSectionError()
+        }
+        
+        // Find the bend section that bends the given hue.
+        guard let relevantBendSection = bendSections.first(where: {
+                $0.startHue <= hue && hue <= $0.endHue
+        }) else {
+            return defaultValue
         }
         
         let valueIncrement = bendableComponent == .saturation
