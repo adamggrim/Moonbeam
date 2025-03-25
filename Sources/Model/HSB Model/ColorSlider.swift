@@ -500,6 +500,22 @@ struct HSBColorSliderModel {
         }
     }
     
+    /**
+     Generates an array of `Color` objects for a given `HueSection`, accounting
+     for any bends in saturation or brightness.
+     
+     - Parameters:
+        - hueSection: A `HueSection` defining the `minHue`, `maxHue`, `range`
+        and `stepSize` for the `HueSection` of the color slider.
+        - bendSections: An optional array of `BendSection` objects defining the
+          bending behavior across the `HueSection`.
+     
+     - Throws:
+        - `InvalidBendSectionError`: If `validateBendSections` is `false`.
+     
+     - Returns: An array of `Color` objects representing the `HueSection` of
+     the color slider.
+     */
     func generateHueColors(
         hueSection: HueSection,
         bendSections: [BendSection]
