@@ -494,7 +494,7 @@ struct HSBColorSliderModel {
         }
     }
     
-    func calculateHueColors(
+    func generateHueColors(
         hueSection: HueSection,
         bendSections: [BendSection]
     ) -> [Color] {
