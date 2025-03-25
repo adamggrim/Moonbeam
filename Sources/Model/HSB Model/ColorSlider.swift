@@ -518,37 +518,31 @@ struct HSBColorSliderModel {
      */
     func generateHueColors(
         hueSection: HueSection,
-        bendSections: [BendSection]
-    ) -> [Color] {
-        stride(
+        bendSections: [BendSection]?
+    ) throws -> [Color] {
+        return try stride(
             from: minHue,
             to: maxHue,
             by: hueSection.stepSize
-        ).enumerated().map { (index, hue) in
+        ).enumerated().map { (index, hue) -> Color in
             let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
-            let calculatedSaturation: CGFloat
-            let calculatedBrightness: CGFloat
+            var calculatedSaturation: CGFloat = defaultSaturation
+            var calculatedBrightness: CGFloat = defaultBrightness
             
-            for component in components {
-                switch component {
-                case .saturation:
-                    calculatedSaturation = calculateValues(
-                        index: index,
-                        hue: normalizedHue,
-                        defaultValue: defaultSaturation,
-                        bendSections: bendSections
-                    )
-                    calculatedBrightness = defaultBrightness
-                case .brightness:
-                    calculatedSaturation = defaultSaturation
-                    calculatedBrightness = calculateValues(
-                        index: index,
-                        hue: normalizedHue,
-                        defaultValue: defaultBrightness,
-                        bendSections: bendSections
-                    )
-                }
-            }
+            do {
+                calculatedSaturation = try calculateBendValue(
+                    hue: normalizedHue,
+                    defaultValue: defaultSaturation,
+                    bendSections: bendSections,
+                    bendableComponent: .saturation
+                )
+                calculatedBrightness = try calculateBendValue(
+                    hue: normalizedHue,
+                    defaultValue: defaultBrightness,
+                    bendSections: bendSections,
+                    bendableComponent: .brightness
+                )
+            } catch { throw error }
             
             return Color(
                 hue: normalizedHue,
