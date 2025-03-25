@@ -453,8 +453,12 @@ struct HSBColorSliderModel {
         bendSections: [BendSection]?,
         bendableComponent: BendableComponent
     ) throws -> CGFloat {
-        guard let bendSections = bendSections,
-              validateBendSections(bendSections: bendSections),
+        // Return defaultValue if bendSections is nil.
+        guard let bendSections = bendSections else {
+            return defaultValue
+        }
+        guard validateBendSections(bendSections: bendSections),
+              // The bend section that bends the given hue
               let relevantBendSection = bendSections.first(where: {
                   $0.startHue <= hue && hue < $0.endHue
               }) else {
