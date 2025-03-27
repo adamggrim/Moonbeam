@@ -526,8 +526,8 @@ struct HSBColorSliderModel {
             by: hueSection.stepSize
         ).enumerated().map { (index, hue) -> Color in
             let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
-            var calculatedSaturation: CGFloat = defaultSaturation
-            var calculatedBrightness: CGFloat = defaultBrightness
+            let calculatedSaturation: CGFloat
+            let calculatedBrightness: CGFloat
             
             do {
                 calculatedSaturation = try calculateBendValue(
