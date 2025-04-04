@@ -187,45 +187,45 @@ struct HSBColorSliderModel {
             monochromeSection: MonochromeSection
         ) -> [Color] {
                 
-                /**
-                 An array for whatever value is changing (either brightness or
-                 saturation) as the `MonochromeSection` gets farther from the
-                 `HueSection`.
-                 */
-                let values: [CGFloat] = {
-                    switch monochromeSection.positionOnSlider {
-                    case .start:
-                        return Array(
-                            stride(from: 0.0,
-                                   through: startValue,
-                                   by: monochromeSection.stepSize))
-                    case .end:
-                        return Array(
-                            stride(from: endValue,
-                                   through: 0.0,
-                                   by: monochromeSection.stepSize))
-                    }
-                }()
-                
-                return values.map { value in
-                    switch monochromeSection.color {
-                    case .black:
-                        return Color(
-                            hue: hue,
-                            saturation: defaultSaturation,
-                            brightness: value,
-                            opacity: 1.0
-                        )
-                    case .white:
-                        return Color(
-                            hue: hue,
-                            saturation: value,
-                            brightness: defaultBrightness,
-                            opacity: 1.0
-                        )
-                    }
+            /**
+             An array for whatever value is changing (either brightness or
+             saturation) as the `MonochromeSection` gets farther from the
+             `HueSection`.
+             */
+            let values: [CGFloat] = {
+                switch monochromeSection.positionOnSlider {
+                case .start:
+                    return Array(
+                        stride(from: 0.0,
+                               through: startValue,
+                               by: monochromeSection.stepSize))
+                case .end:
+                    return Array(
+                        stride(from: endValue,
+                               through: 0.0,
+                               by: monochromeSection.stepSize))
+                }
+            }()
+            
+            return values.map { value in
+                switch monochromeSection.color {
+                case .black:
+                    return Color(
+                        hue: hue,
+                        saturation: defaultSaturation,
+                        brightness: value,
+                        opacity: 1.0
+                    )
+                case .white:
+                    return Color(
+                        hue: hue,
+                        saturation: value,
+                        brightness: defaultBrightness,
+                        opacity: 1.0
+                    )
                 }
             }
+        }
         
         let hue = monochromeSection.positionOnSlider == .start ? minHue : maxHue
         
