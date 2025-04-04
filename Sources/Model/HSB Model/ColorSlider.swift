@@ -60,7 +60,8 @@ struct HSBColorSliderModel {
      */
     func prioritizeMonochromeSections(
         monochromeSections: [MonochromeSection]?,
-        priorityColor: MonochromeColor?) -> [MonochromeSection]? {
+        priorityColor: MonochromeColor?
+    ) -> [MonochromeSection]? {
             guard let monochromeSections = monochromeSections else {
                 return nil
             }
@@ -95,7 +96,8 @@ struct HSBColorSliderModel {
      */
     func generateMonochromeIntoMonochromeColors(
         hue: CGFloat,
-        monochromeSection: MonochromeSection) -> [Color] {
+        monochromeSection: MonochromeSection
+    ) -> [Color] {
             
             /**
              An array for the brightness values as the `MonochromeSection` gets
@@ -146,7 +148,8 @@ struct HSBColorSliderModel {
         blending into the start or end of the `HueSection`.
      */
     func generateMonochromeIntoHueColors(
-        monochromeSection: MonochromeSection) -> [Color] {
+        monochromeSection: MonochromeSection
+    ) -> [Color] {
         struct BendAdjustment {
             var startSaturation: CGFloat
             var endSaturation: CGFloat
@@ -181,7 +184,8 @@ struct HSBColorSliderModel {
             startValue: CGFloat,
             endValue: CGFloat,
             hue: CGFloat,
-            monochromeSection: MonochromeSection) -> [Color] {
+            monochromeSection: MonochromeSection
+        ) -> [Color] {
                 
                 /**
                  An array for whatever value is changing (either brightness or
