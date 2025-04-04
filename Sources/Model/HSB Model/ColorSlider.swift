@@ -579,6 +579,37 @@ struct HSBColorSliderModel {
     let monochromeStartColors: [Color]?
     let monochromeEndColors: [Color]?
     
+    var sliderColors: [Color] {
+        get throws {
+            let hueColors: [Color] = try stride(
+                from: minHue,
+                to: maxHue,
+                by: hueSection.stepSize
+            ).enumerated().map { (index, hue) in
+                let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
+                let calculatedSaturation = try calculateBendValue(
+                    hue: normalizedHue,
+                    defaultValue: defaultSaturation,
+                    bendSections: bendSections,
+                    bendableComponent: .saturation
+                )
+                let calculatedBrightness = try calculateBendValue(
+                    hue: normalizedHue,
+                    defaultValue: defaultBrightness,
+                    bendSections: bendSections,
+                    bendableComponent: .brightness
+                )
+                
+                return Color(hue: normalizedHue,
+                             saturation: calculatedSaturation,
+                             brightness: calculatedBrightness,
+                             opacity: 1.0)
+            }
+        }
+    }
+    
+    return [monochromeStartColors, hueColors, monochromeEndColors].compactMap { $0 }.flatMap { $0 }
+    
     init(
         minHue: CGFloat,
         maxHue: CGFloat,
@@ -621,25 +652,8 @@ struct HSBColorSliderModel {
         self.monochromeEndColors = generateMonochromeColors(
             monochromeSections: self.monochromeEndSections
         )
-    }
-    
-    var sliderColors: [Color] {
-        let hueColors: [Color] = stride(
-            from: minHue,
-            to: maxHue,
-            by: hueSection.stepSize
-        ).enumerated().map { (index, hue) in
-            let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
-            let calculatedSaturation = calculateValues(
-                index: index,
-                hue: normalizedHue,
-                defaultSaturation: defaultSaturation,
-                bendSections: bendSections
-            )
-            
-            return Color(hue: normalizedHue, saturation: calculatedSaturation, brightness: 1.0, opacity: 1.0)
-        }
-        
-        return [monochromeStartColors, hueColors, monochromeEndColors].compactMap { $0 }.flatMap { $0 }
+        self.sliderColors = [monochromeStartColors, hueColors, monochromeEndColors]
+            .compactMap { $0 }
+            .flatMap { $0 }
     }
 }
