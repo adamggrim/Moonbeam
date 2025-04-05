@@ -639,6 +639,7 @@ struct HSBColorSliderModel {
             monochromeSections: self.monochromeSections?.filter {
                 $0.positionOnSlider == .start
             },
+            priorityColor: self.priorityColor
         )
         self.monochromeEndSections = prioritizeMonochromeSections(
             monochromeSections: self.monochromeSections?.filter {
