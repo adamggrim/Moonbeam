@@ -656,5 +656,7 @@ struct HSBColorSliderModel {
         self.sliderColors = [monochromeStartColors, hueColors, monochromeEndColors]
             .compactMap { $0 }
             .flatMap { $0 }
+        
+        var calculatedHueColors: [Color] = []
     }
 }
