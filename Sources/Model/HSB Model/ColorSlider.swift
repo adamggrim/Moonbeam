@@ -607,9 +607,7 @@ struct HSBColorSliderModel {
             }
         }
     }
-    
-    return [monochromeStartColors, hueColors, monochromeEndColors].compactMap { $0 }.flatMap { $0 }
-    
+        
     init(
         minHue: CGFloat,
         maxHue: CGFloat,
