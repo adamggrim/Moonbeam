@@ -580,35 +580,6 @@ struct HSBColorSliderModel {
     let monochromeEndColors: [Color]?
     let hueColors: [Color]
     
-    var sliderColors: [Color] {
-        get throws {
-            let hueColors: [Color] = try stride(
-                from: minHue,
-                to: maxHue,
-                by: hueSection.stepSize
-            ).enumerated().map { (index, hue) in
-                let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
-                let calculatedSaturation = try calculateBendValue(
-                    hue: normalizedHue,
-                    defaultValue: defaultSaturation,
-                    bendSections: bendSections,
-                    bendableComponent: .saturation
-                )
-                let calculatedBrightness = try calculateBendValue(
-                    hue: normalizedHue,
-                    defaultValue: defaultBrightness,
-                    bendSections: bendSections,
-                    bendableComponent: .brightness
-                )
-                
-                return Color(hue: normalizedHue,
-                             saturation: calculatedSaturation,
-                             brightness: calculatedBrightness,
-                             opacity: 1.0)
-            }
-        }
-    }
-        
     init(
         minHue: CGFloat,
         maxHue: CGFloat,
