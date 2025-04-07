@@ -578,6 +578,7 @@ struct HSBColorSliderModel {
     
     let monochromeStartColors: [Color]?
     let monochromeEndColors: [Color]?
+    let hueColors: [Color]
     
     var sliderColors: [Color] {
         get throws {
@@ -617,8 +618,9 @@ struct HSBColorSliderModel {
         blackSection: BlackSection? = nil,
         whiteSection: WhiteSection? = nil,
         bendSections: [BendSection]? = nil,
-        priorityColor: MonochromeColor? = nil
-    ) {
+        priorityColor: MonochromeColor? = nil,
+        hueColors: [Color]
+    ) throws {
         self.minHue = minHue
         self.maxHue = maxHue
         self.defaultSaturation = defaultSaturation
@@ -651,10 +653,11 @@ struct HSBColorSliderModel {
         self.monochromeEndColors = generateMonochromeColors(
             monochromeSections: self.monochromeEndSections
         )
-        self.sliderColors = [monochromeStartColors, hueColors, monochromeEndColors]
-            .compactMap { $0 }
-            .flatMap { $0 }
-        
-        var calculatedHueColors: [Color] = []
+        do {
+            self.hueColors = try generateHueColors(
+                hueSection: hueSection,
+                bendSections: bendSections
+            )
+        } catch { throw error }
     }
 }
