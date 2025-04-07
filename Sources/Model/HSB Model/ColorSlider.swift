@@ -557,6 +557,38 @@ struct HSBColorSliderModel {
         }
     }
     
+    /**
+     Generates an array of `Color` objects for the  color slider, combining
+     `monochromeStartColors`, `hueColors` and `monochromeEndColors`.
+     
+     - Parameters:
+        - monochromeStartColors: An optional array of `Color` objects
+        representing the `monochromeStartSections` of the color slider.
+        - monochromeEndColors: An optional array of `Color` objects
+        representing the `monochromeStartSections` of the color slider.
+        - hueColors: An array of `Color` objects representing the `HueSection`
+        of the color slider.
+     */
+    func generateSliderColors(
+        monochromeStartColors: [Color]?,
+        monochromeEndColors: [Color]?,
+        hueColors: [Color]
+    ) throws -> [Color] {
+        var sliderColors: [Color] = []
+        
+        if let startColors = monochromeStartColors {
+            sliderColors.append(contentsOf: startColors)
+        }
+        
+        sliderColors.append(contentsOf: hueColors)
+        
+        if let endColors = monochromeEndColors {
+            sliderColors.append(contentsOf: endColors)
+        }
+        
+        return sliderColors
+    }
+    
     let minHue: CGFloat
     let maxHue: CGFloat
     
