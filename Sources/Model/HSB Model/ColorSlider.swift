@@ -574,19 +574,10 @@ struct HSBColorSliderModel {
         monochromeEndColors: [Color]?,
         hueColors: [Color]
     ) throws -> [Color] {
-        var sliderColors: [Color] = []
+        let startColors = monochromeStartColors ?? []
+        let endColors = monochromeEndColors ?? []
         
-        if let startColors = monochromeStartColors {
-            sliderColors.append(contentsOf: startColors)
-        }
-        
-        sliderColors.append(contentsOf: hueColors)
-        
-        if let endColors = monochromeEndColors {
-            sliderColors.append(contentsOf: endColors)
-        }
-        
-        return sliderColors
+        return startColors + hueColors + endColors
     }
     
     let minHue: CGFloat
