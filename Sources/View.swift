@@ -7,10 +7,23 @@ struct ColorSliderView: View {
     let dimensions: ColorSliderDimensions
     let duration: Double
     
-    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat? = nil, thumbHeight: CGFloat? = nil, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat, startingColor: Color, thumbColor: Color = .white, thumbStyle: ThumbStyle = .capsule, previewHidden: Bool = true, duration: Double = 0.25) {
+    init(
+        sliderWidth: CGFloat,
+        sliderHeight: CGFloat,
+        thumbWidth: CGFloat? = nil,
+        thumbHeight: CGFloat? = nil,
+        previewWidth: CGFloat,
+        previewOffset: CGFloat,
+        shadowRadius: CGFloat,
+        startingColor: Color,
+        thumbColor: Color = .white,
+        thumbStyle: ThumbStyle = .capsule,
+        previewHidden: Bool = true,
+        duration: Double = 0.25
+    ) {
         
         let dimensions = ColorSliderDimensions(sliderWidth: sliderWidth, sliderHeight: sliderHeight, thumbWidth: thumbWidth, thumbHeight: thumbHeight, previewWidth: previewWidth, previewOffset: previewOffset, shadowRadius: shadowRadius)
-                
+        
         self.model = ColorSliderModel(maxWhite: <#T##Int#>, maxHue: <#T##Int#>, defaultSaturation: <#T##CGFloat#>)
         self.viewModel = ColorSliderViewModel(
             startingColor: startingColor,
@@ -68,8 +81,15 @@ struct ColorSliderView: View {
             // Floating color preview
             RoundedRectangle(cornerRadius: dimensions.previewCornerRadius)
                 .foregroundColor(viewModel.startingColor)
-                .frame(width: dimensions.previewWidth, height: dimensions.previewWidth)
-                .modifyPreview(isDragging: viewModel.isDragging, scaleRatio: dimensions.scaleRatio, previewHidden: viewModel.previewHidden)
+                .frame(
+                    width: dimensions.previewWidth,
+                    height: dimensions.previewWidth
+                )
+                .modifyPreview(
+                    isDragging: viewModel.isDragging,
+                    scaleRatio: dimensions.scaleRatio,
+                    previewHidden: viewModel.previewHidden
+                )
                 .shadow(radius: dimensions.shadowRadius)
                 .offset(x: viewModel.previewHorizontalOffset, y: dimensions.previewOffset)
         }
@@ -91,7 +111,11 @@ struct PreviewViewModifier: ViewModifier {
 }
 
 extension View {
-    func modifyPreview(isDragging: Bool, scaleRatio: CGFloat, previewHidden: Bool) -> some View {
+    func modifyPreview(
+        isDragging: Bool,
+        scaleRatio: CGFloat,
+        previewHidden: Bool
+    ) -> some View {
         self.modifier(PreviewViewModifier(isDragging: isDragging, scaleRatio: scaleRatio, previewHidden: previewHidden))
     }
 }
