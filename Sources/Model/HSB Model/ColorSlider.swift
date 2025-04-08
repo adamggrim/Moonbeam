@@ -650,14 +650,10 @@ struct HSBColorSliderModel {
         self.monochromeEndColors = generateMonochromeColors(
             monochromeSections: self.monochromeEndSections
         )
-        
-        do {
-            self.hueColors = try generateHueColors(
-                hueSection: hueSection,
-                bendSections: bendSections
-            )
-        } catch { throw error }
-        
+        self.hueColors = try generateHueColors(
+            hueSection: hueSection,
+            bendSections: bendSections
+        )
         self.sliderColors = generateSliderColors(
             monochromeStartColors: self.monochromeStartColors,
             monochromeEndColors: self.monochromeEndColors,
