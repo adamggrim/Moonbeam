@@ -9,7 +9,7 @@ enum BendableComponent {
 /// Model for assembling the HSB color slider values into an array.
 struct HSBColorSliderModel {
     /// Error for when `validateBendSections()` returns `false`
-    struct InvalidBendSectionError: Error {
+    private struct InvalidBendSectionError: Error {
         let message: String
         init(message: String = "Invalid bend section") {
             self.message = message
@@ -33,7 +33,7 @@ struct HSBColorSliderModel {
         `nil`. If a section exists, it is included in the returned array of
         `MonochromeSection`.
      */
-    func assembleMonochromeSections(
+    private func assembleMonochromeSections(
         blackSection: BlackSection?,
         whiteSection: WhiteSection?
     ) -> [MonochromeSection]? {
@@ -58,7 +58,7 @@ struct HSBColorSliderModel {
         A reordered array of `MonochromeSection` objects in which the
         `priorityColor` is first, or `nil` if `monochromeSections` is `nil`.
      */
-    func prioritizeMonochromeSections(
+    private func prioritizeMonochromeSections(
         monochromeSections: [MonochromeSection]?,
         priorityColor: MonochromeColor?
     ) -> [MonochromeSection]? {
@@ -94,7 +94,7 @@ struct HSBColorSliderModel {
         An array of `Color` objects representing the `MonochromeSection`
         blending into an adjacent  `MonochromeSection`.
      */
-    func generateMonochromeIntoMonochromeColors(
+    private func generateMonochromeIntoMonochromeColors(
         hue: CGFloat,
         monochromeSection: MonochromeSection
     ) -> [Color] {
@@ -147,7 +147,7 @@ struct HSBColorSliderModel {
         An array of `Color` objects representing the `MonochromeSection`
         blending into the start or end of the `HueSection`.
      */
-    func generateMonochromeIntoHueColors(
+    private func generateMonochromeIntoHueColors(
         monochromeSection: MonochromeSection
     ) -> [Color] {
         struct BendAdjustment {
@@ -291,7 +291,7 @@ struct HSBColorSliderModel {
         An array of `Color` objects representing the colors of both sections.
         Returns an empty array if `monochromeSections` is empty.
      */
-    func generateAdjacentMonochromeColors(
+    private func generateAdjacentMonochromeColors(
         monochromeSections: [MonochromeSection]
     ) -> [Color] {
         guard let positionOnSlider = monochromeSections.first?.positionOnSlider,
@@ -357,7 +357,7 @@ struct HSBColorSliderModel {
         Returns `nil` if the input `monochromeSections` is `nil`, or if the
         number of sections is not one or two.
      */
-    func generateMonochromeColors(
+    private func generateMonochromeColors(
         monochromeSections: [MonochromeSection]?
     ) -> [Color]? {
         guard let monochromeSections = monochromeSections else {
@@ -390,7 +390,9 @@ struct HSBColorSliderModel {
      - Returns: `true` no two `BendSection` objects overlap. Otherwise, returns
      `false`.
      */
-    func validateBendSections(bendSections: [BendSection]) -> Bool {
+    private func validateBendSections(
+        bendSections: [BendSection]
+    ) -> Bool {
         // An empty bendSections array is invalid.
         guard bendSections.count > 0 else { return false }
         // A single bendSection is valid.
@@ -424,7 +426,7 @@ struct HSBColorSliderModel {
         - The calculated number of increments, used to adjust the base value
         (i.e., saturation or brightness).
      */
-    func calculateNumberOfIncrements(
+    private func calculateNumberOfIncrements(
         valueIncrement: CGFloat,
         offsetFromStartHue: CGFloat
     ) -> CGFloat {
@@ -449,7 +451,7 @@ struct HSBColorSliderModel {
      
      - Returns: The calculated bend value as a `CGFloat`.
      */
-    func calculateBendValue(
+    private func calculateBendValue(
         hue: CGFloat,
         defaultValue: CGFloat,
         bendSections: [BendSection]?,
@@ -520,7 +522,7 @@ struct HSBColorSliderModel {
      - Returns: An array of `Color` objects representing the `HueSection` of
      the color slider.
      */
-    func generateHueColors(
+    private func generateHueColors(
         hueSection: HueSection,
         bendSections: [BendSection]?
     ) throws -> [Color] {
@@ -569,7 +571,7 @@ struct HSBColorSliderModel {
         - hueColors: An array of `Color` objects representing the `HueSection`
         of the color slider.
      */
-    func generateSliderColors(
+    private func generateSliderColors(
         monochromeStartColors: [Color]?,
         monochromeEndColors: [Color]?,
         hueColors: [Color]
@@ -580,28 +582,29 @@ struct HSBColorSliderModel {
         return startColors + hueColors + endColors
     }
     
-    let minHue: CGFloat
-    let maxHue: CGFloat
+    private let minHue: CGFloat
+    private let maxHue: CGFloat
     
     /// The saturation anywhere there is no saturation bend.
-    let defaultSaturation: CGFloat
+    private let defaultSaturation: CGFloat
     /// The brightness anywhere there is no brightness bend.
-    let defaultBrightness: CGFloat
+    private let defaultBrightness: CGFloat
     
-    let hueSection: HueSection
-    let blackSection: BlackSection?
-    let whiteSection: WhiteSection?
-    let bendSections: [BendSection]?
-    let priorityColor: MonochromeColor?
+    private let hueSection: HueSection
+    private let blackSection: BlackSection?
+    private let whiteSection: WhiteSection?
+    private let bendSections: [BendSection]?
+    private let priorityColor: MonochromeColor?
     
-    let monochromeSections: [MonochromeSection]?
+    private let monochromeSections: [MonochromeSection]?
     
-    let monochromeStartSections: [MonochromeSection]?
-    let monochromeEndSections: [MonochromeSection]?
+    private let monochromeStartSections: [MonochromeSection]?
+    private let monochromeEndSections: [MonochromeSection]?
     
-    let monochromeStartColors: [Color]?
-    let monochromeEndColors: [Color]?
-    let hueColors: [Color]
+    private let monochromeStartColors: [Color]?
+    private let monochromeEndColors: [Color]?
+    private let hueColors: [Color]
+    
     let sliderColors: [Color]
     
     init(
@@ -613,7 +616,7 @@ struct HSBColorSliderModel {
         blackSection: BlackSection? = nil,
         whiteSection: WhiteSection? = nil,
         bendSections: [BendSection]? = nil,
-        priorityColor: MonochromeColor? = nil,
+        priorityColor: MonochromeColor? = nil
     ) throws {
         self.minHue = minHue
         self.maxHue = maxHue
