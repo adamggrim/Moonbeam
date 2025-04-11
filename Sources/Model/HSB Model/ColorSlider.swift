@@ -586,9 +586,9 @@ struct HSBColorSliderModel {
     private let maxHue: CGFloat
     
     /// The saturation anywhere there is no saturation bend.
-    private let defaultSaturation: CGFloat
+    private let defaultSaturation: CGFloat = 1.0
     /// The brightness anywhere there is no brightness bend.
-    private let defaultBrightness: CGFloat
+    private let defaultBrightness: CGFloat = 1.0
     
     private let hueSection: HueSection
     private let blackSection: BlackSection?
@@ -610,8 +610,6 @@ struct HSBColorSliderModel {
     init(
         minHue: CGFloat,
         maxHue: CGFloat,
-        defaultSaturation: CGFloat,
-        defaultBrightness: CGFloat,
         hueSection: HueSection,
         blackSection: BlackSection? = nil,
         whiteSection: WhiteSection? = nil,
@@ -620,8 +618,6 @@ struct HSBColorSliderModel {
     ) throws {
         self.minHue = minHue
         self.maxHue = maxHue
-        self.defaultSaturation = defaultSaturation
-        self.defaultBrightness = defaultBrightness
         self.hueSection = hueSection
         self.blackSection = blackSection
         self.whiteSection = whiteSection
