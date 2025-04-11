@@ -52,33 +52,30 @@ struct OneWayBendSection: BendSection {
     
     let targetSaturation: CGFloat
     let defaultSaturation: CGFloat
-    let saturationDelta: CGFloat
-    let saturationIncrement: CGFloat
     
     let targetBrightness: CGFloat
     let defaultBrightness: CGFloat
-    let brightnessDelta: CGFloat
-    let brightnessIncrement: CGFloat
     
-    init(
-        startHue: CGFloat,
-        endHue: CGFloat,
-        targetSaturation: CGFloat,
-        defaultSaturation: CGFloat,
-        targetBrightness: CGFloat,
-        defaultBrightness: CGFloat
-    ) {
-        self.startHue = startHue
-        self.endHue = endHue
-        
-        self.targetSaturation = targetSaturation
-        self.defaultSaturation = defaultSaturation
-        
-        self.targetBrightness = targetBrightness
-        self.defaultBrightness = defaultBrightness
-        
-        self.saturationIncrement = saturationDelta / hueCount
-        self.brightnessIncrement = brightnessDelta / hueCount
+    var saturationDelta: CGFloat {
+        targetSaturation - defaultSaturation
+    }
+    
+    var brightnessDelta: CGFloat {
+        targetBrightness - defaultBrightness
+    }
+    
+    var hueCount: CGFloat {
+        endHue - startHue
+    }
+    
+    var saturationIncrement: CGFloat {
+        guard hueCount != 0 else { return 0 }
+        return saturationDelta / hueCount
+    }
+    
+    var brightnessIncrement: CGFloat {
+        guard hueCount != 0 else { return 0 }
+        return brightnessDelta / hueCount
     }
 }
 
@@ -89,40 +86,26 @@ struct TwoWayBendSection: BendSection {
     
     let targetSaturation: CGFloat
     let defaultSaturation: CGFloat
-    let saturationDelta: CGFloat
-    let saturationIncrement: CGFloat
     
     let targetBrightness: CGFloat
     let defaultBrightness: CGFloat
-    let brightnessDelta: CGFloat
-    let brightnessIncrement: CGFloat
     
-    let middleHue: CGFloat
+    var middleHue: CGFloat {
+        (startHue + endHue / 2) / 360
+    }
     
-    init(
-        startHue: CGFloat,
-        endHue: CGFloat,
-        targetSaturation: CGFloat,
-        defaultSaturation: CGFloat,
-        targetBrightness: CGFloat,
-        defaultBrightness: CGFloat
-    ) {
-        self.startHue = startHue
-        self.endHue = endHue
-        
-        self.targetSaturation = targetSaturation
-        self.defaultSaturation = defaultSaturation
-        
-        self.targetBrightness = targetBrightness
-        self.defaultBrightness = defaultBrightness
-        
-        self.middleHue = (startHue + hueCount / 2) / 360
-        
-        /* Calculate increments based on half the hueCount for
-         TwoWayBendSection.
-         */
-        let denominator = abs(middleHue * 360 - startHue)
-        self.saturationIncrement = saturationDelta / denominator
-        self.brightnessIncrement = brightnessDelta / denominator
+    /* Calculate increments based on half the hueCount for
+     TwoWayBendSection.
+     */
+    var denominator: CGFloat {
+        abs(middleHue * 360 - startHue)
+    }
+    
+    var saturationIncrement: CGFloat {
+        saturationDelta / denominator
+    }
+
+    var brightnessIncrement: CGFloat {
+        brightnessDelta / denominator
     }
 }
