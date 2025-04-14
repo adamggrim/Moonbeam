@@ -6,8 +6,8 @@ enum BendableComponent {
     case saturation, brightness
 }
 
-/// Model for assembling the HSB color slider values into an array.
-struct HSBColorSliderModel {
+/// Model for assembling spectrum colors into an array.
+struct SpectrumColorSliderModel {
     /// Error for when `validateBendSections()` returns `false`
     private struct InvalidBendSectionError: Error {
         let message: String
