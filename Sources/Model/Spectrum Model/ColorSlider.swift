@@ -7,7 +7,7 @@ enum BendableComponent {
 }
 
 /// Model for assembling spectrum colors into an array.
-struct SpectrumColorSliderModel {
+struct SpectrumColorSliderModel: ColorSliderDataSource {
     /// Error for when `validateBendSections()` returns `false`
     private struct InvalidBendSectionError: Error {
         let message: String
