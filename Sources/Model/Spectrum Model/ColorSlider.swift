@@ -24,19 +24,15 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
      `positionOnSlider` property of each `MonochromeSection`, not the order in
      the returned `monochromeSections` array.
      
-     - Parameters:
-        - blackSection: An optional `BlackSection` of the color slider.
-        - whiteSection: An optional `WhiteSection` of the color slider.
+     This function uses the optional `blackSection` and `whiteSection`
+     properties associated with this instance of `SpectrumColorSliderModel`.
      
      - Returns:
         An array of `MonochromeSection` objects, or `nil` if both sections are
         `nil`. If a section exists, it is included in the returned array of
         `MonochromeSection`.
      */
-    private func assembleMonochromeSections(
-        blackSection: BlackSection?,
-        whiteSection: WhiteSection?
-    ) -> [MonochromeSection]? {
+    private func assembleMonochromeSections() -> [MonochromeSection]? {
         let monochromeSections = [
             blackSection as MonochromeSection?,
             whiteSection as MonochromeSection?
@@ -350,16 +346,15 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
     /**
      Extracts a list of `Color` objects from an array of `MonochromeSection`.
      
-     - Parameter monochromeSections: An optional array of `MonochromeSection`.
+     This function uses the `monochromeSections` property associated with this
+     instance of `SpectrumColorSliderModel`.
      
      - Returns:
         An optional array of `Color` objects representing the extracted colors.
         Returns `nil` if `monochromeSections` is `nil`, or if the number of
         sections is not one or two.
      */
-    private func generateMonochromeColors(
-        monochromeSections: [MonochromeSection]?
-    ) -> [Color]? {
+    private func generateMonochromeColors() -> [Color]? {
         guard let monochromeSections = monochromeSections else {
             return nil
         }
@@ -439,12 +434,12 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
      Calculates the saturation or brightness for a given hue based on the
      provided bend sections.
      
+     This function uses the `monochromeSections` property associated with this
+     instance of `SpectrumColorSliderModel`.
+     
      - Parameters:
         - hue: The hue for which to calculate the bend value.
         - defaultValue: The default value where there is no valid bend section.
-        - bendSections: An optional array of `BendSection` objects defining the
-        bending behavior across the `HueSection`. Throws an error if any bend
-        sections overlap.
         - bendableComponent: The HSB component calculated for the bend (e.g.,
         saturation or brightness).
      
@@ -456,7 +451,6 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
     private func calculateBendValue(
         hue: CGFloat,
         defaultValue: CGFloat,
-        bendSections: [BendSection]?,
         bendableComponent: BendableComponent
     ) throws -> CGFloat {
         // Return defaultValue if bendSections is nil.
@@ -512,11 +506,8 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
      Generates an array of `Color` objects for a given `HueSection`, accounting
      for any bends in saturation or brightness.
      
-     - Parameters:
-        - hueSection: A `HueSection` defining the `minHue`, `maxHue`, `range`
-        and `stepSize` for the `HueSection` of the color slider.
-        - bendSections: An optional array of `BendSection` objects defining the
-          bending behavior across the `HueSection`.
+     This function uses the `hueSection` and `bendSections` properties
+     associated with this instance of `SpectrumColorSliderModel`.
      
      - Throws:
         - `InvalidBendSectionError`: If `validateBendSections` is `false`.
@@ -526,8 +517,6 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
         slider.
      */
     private func generateHueColors(
-        hueSection: HueSection,
-        bendSections: [BendSection]?
     ) throws -> [Color] {
         return try stride(
             from: minHue,
@@ -542,13 +531,11 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
                 calculatedSaturation = try calculateBendValue(
                     hue: normalizedHue,
                     defaultValue: defaultSaturation,
-                    bendSections: bendSections,
                     bendableComponent: .saturation
                 )
                 calculatedBrightness = try calculateBendValue(
                     hue: normalizedHue,
                     defaultValue: defaultBrightness,
-                    bendSections: bendSections,
                     bendableComponent: .brightness
                 )
             } catch { throw error }
@@ -566,19 +553,11 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
      Generates an array of `Color` objects for the  color slider, combining
      `monochromeStartColors`, `hueColors` and `monochromeEndColors`.
      
-     - Parameters:
-        - monochromeStartColors: An optional array of `Color` objects
-        representing the `monochromeStartSections` of the color slider.
-        - monochromeEndColors: An optional array of `Color` objects
-        representing the `monochromeStartSections` of the color slider.
-        - hueColors: An array of `Color` objects representing the `HueSection`
-        of the color slider.
+     This function uses the `monochromeStartColors`, `monochromeEndColors` and
+     `hueColors` properties associated with this instance of
+     `SpectrumColorSliderModel`.
      */
-    private func generateSliderColors(
-        monochromeStartColors: [Color]?,
-        monochromeEndColors: [Color]?,
-        hueColors: [Color]
-    ) -> [Color] {
+    private func generateSliderColors() -> [Color] {
         let startColors = monochromeStartColors ?? []
         let endColors = monochromeEndColors ?? []
         
@@ -627,10 +606,7 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
         self.bendSections = bendSections
         self.priorityColor = priorityColor
         
-        self.monochromeSections = assembleMonochromeSections(
-            blackSection: self.blackSection,
-            whiteSection: self.whiteSection
-        )
+        self.monochromeSections = assembleMonochromeSections()
         self.monochromeStartSections = prioritizeMonochromeSections(
             monochromeSections: self.monochromeSections?.filter {
                 $0.positionOnSlider == .start
@@ -643,20 +619,9 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
             },
             priorityColor: self.priorityColor
         )
-        self.monochromeStartColors = generateMonochromeColors(
-            monochromeSections: self.monochromeStartSections
-        )
-        self.monochromeEndColors = generateMonochromeColors(
-            monochromeSections: self.monochromeEndSections
-        )
-        self.hueColors = try generateHueColors(
-            hueSection: hueSection,
-            bendSections: bendSections
-        )
-        self.sliderColors = generateSliderColors(
-            monochromeStartColors: self.monochromeStartColors,
-            monochromeEndColors: self.monochromeEndColors,
-            hueColors: self.hueColors
-        )
+        self.monochromeStartColors = generateMonochromeColors()
+        self.monochromeEndColors = generateMonochromeColors()
+        self.hueColors = try generateHueColors()
+        self.sliderColors = generateSliderColors()
     }
 }
