@@ -387,6 +387,7 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
      not empty and that no two `BendSection` objects overlap.
      
      - Parameter bendSections: An array of `BendSection` objects.
+     
      - Returns: `true` no two `BendSection` objects overlap. Otherwise, returns
      `false`.
      */
@@ -422,6 +423,7 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
         - valueIncrement: The amount the value should change at each hue.
         - offsetFromStartHue: The difference between the current hue and the
         starting hue of the `BendSection`.
+     
      - Returns:
         - The calculated number of increments, used to adjust the base value
         (i.e., saturation or brightness).
@@ -519,8 +521,9 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
      - Throws:
         - `InvalidBendSectionError`: If `validateBendSections` is `false`.
      
-     - Returns: An array of `Color` objects representing the `HueSection` of
-     the color slider.
+     - Returns:
+        An array of `Color` objects representing the `HueSection` of the color
+        slider.
      */
     private func generateHueColors(
         hueSection: HueSection,

@@ -21,7 +21,7 @@ class ColorSliderViewModel {
     let thumbInset: CGFloat
     let previewHidden: Bool
     let dimensions: ColorSliderDimensions
-
+    
     init(startingColor: Color, thumbColor: Color, thumbStyle: ThumbStyle, previewHidden: Bool, dimensions: ColorSliderDimensions) {
         self.startingColor = startingColor
         self.thumbColor = thumbColor
@@ -93,7 +93,7 @@ class ColorSliderViewModel {
             }
         }
     }
-        
+    
     var thumbOffset: CGFloat {
         let leftBound = thumbInset
         let rightBound = dimensions.sliderWidth - dimensions.thumbWidth - thumbInset
