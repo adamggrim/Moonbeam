@@ -21,8 +21,8 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
      array of `MonochromeSection` objects.
      
      The order of the objects on the color slider is determined by the
-     `positionOnSlider` property of each `MonochromeSection`, not the section
-     order in the returned `monochromeSections` array.
+     `positionOnSlider` property of each `MonochromeSection`, not the order in
+     the returned `monochromeSections` array.
      
      - Parameters:
         - blackSection: An optional `BlackSection` of the color slider.
@@ -354,8 +354,8 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
      
      - Returns:
         An optional array of `Color` objects representing the extracted colors.
-        Returns `nil` if the input `monochromeSections` is `nil`, or if the
-        number of sections is not one or two.
+        Returns `nil` if `monochromeSections` is `nil`, or if the number of
+        sections is not one or two.
      */
     private func generateMonochromeColors(
         monochromeSections: [MonochromeSection]?
@@ -384,7 +384,7 @@ struct SpectrumColorSliderModel: ColorSliderDataSource {
     
     /**
      Validates an array of `BendSection` objects to ensure that the array is
-     not empty and no two `BendSection` objects overlap.
+     not empty and that no two `BendSection` objects overlap.
      
      - Parameter bendSections: An array of `BendSection` objects.
      - Returns: `true` no two `BendSection` objects overlap. Otherwise, returns
