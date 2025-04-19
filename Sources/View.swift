@@ -22,7 +22,15 @@ struct ColorSliderView: View {
         duration: Double = 0.25
     ) {
         
-        let dimensions = ColorSliderDimensions(sliderWidth: sliderWidth, sliderHeight: sliderHeight, thumbWidth: thumbWidth, thumbHeight: thumbHeight, previewWidth: previewWidth, previewOffset: previewOffset, shadowRadius: shadowRadius)
+        let dimensions = ColorSliderDimensions(
+            sliderWidth: sliderWidth,
+            sliderHeight: sliderHeight,
+            thumbWidth: thumbWidth,
+            thumbHeight: thumbHeight,
+            previewWidth: previewWidth,
+            previewOffset: previewOffset,
+            shadowRadius: shadowRadius
+        )
         
         self.model = ColorSliderDataSource()
         self.viewModel = ColorSliderViewModel(
