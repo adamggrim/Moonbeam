@@ -675,15 +675,54 @@ struct SpectrumModel: ColorSliderDataSource {
     private let bendSections: [BendSection]?
     private let priorityColor: MonochromeColor?
     
-    private let monochromeSections: [MonochromeSection]?
+    private lazy var monochromeSections: [MonochromeSection]? = {
+        return SpectrumModel.assembleMonochromeSections(
+            blackSection: self.blackSection,
+            whiteSection: self.whiteSection
+        )
+    }()
     
-    private let monochromeStartSections: [MonochromeSection]?
-    private let monochromeEndSections: [MonochromeSection]?
+    private lazy var monochromeStartSections: [MonochromeSection]? = {
+        return Self.prioritizeMonochromeSections(
+            monochromeSections: self.monochromeSections?.filter {
+                $0.positionOnSlider == .start
+            },
+            priorityColor: self.priorityColor
+        )
+    }()
     
-    private let monochromeStartColors: [Color]?
-    private let monochromeEndColors: [Color]?
+    private lazy var monochromeEndSections: [MonochromeSection]? = {
+        return Self.prioritizeMonochromeSections(
+            monochromeSections: self.monochromeSections?.filter {
+                $0.positionOnSlider == .end
+            },
+            priorityColor: self.priorityColor
+        )
+    }()
+    
+    private lazy var monochromeStartColors: [Color]? = {
+        return Self.generateMonochromeColors(
+            monochromeSections: self.monochromeStartSections,
+            minHue: self.minHue,
+            maxHue: self.maxHue,
+            bendSections: self.bendSections,
+            defaultSaturation: self.defaultSaturation,
+            defaultBrightness: self.defaultBrightness
+        )
+    }()
+    
+    private lazy var monochromeEndColors: [Color]? = {
+        return Self.generateMonochromeColors(
+            monochromeSections: self.monochromeEndSections,
+            minHue: self.minHue,
+            maxHue: self.maxHue,
+            bendSections: self.bendSections,
+            defaultSaturation: self.defaultSaturation,
+            defaultBrightness: self.defaultBrightness
+        )
+    }()
+    
     private let hueColors: [Color]
-    
     let sliderColors: [Color]
     
     init(
