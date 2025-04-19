@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ColorSliderView: View {
     
-    var model: ColorSliderModel
+    var model: ColorSliderDataSource
     var viewModel: ColorSliderViewModel
     let dimensions: ColorSliderDimensions
     let duration: Double
@@ -24,7 +24,7 @@ struct ColorSliderView: View {
         
         let dimensions = ColorSliderDimensions(sliderWidth: sliderWidth, sliderHeight: sliderHeight, thumbWidth: thumbWidth, thumbHeight: thumbHeight, previewWidth: previewWidth, previewOffset: previewOffset, shadowRadius: shadowRadius)
         
-        self.model = ColorSliderModel(maxWhite: <#T##Int#>, maxHue: <#T##Int#>, defaultSaturation: <#T##CGFloat#>)
+        self.model = ColorSliderDataSource()
         self.viewModel = ColorSliderViewModel(
             startingColor: startingColor,
             thumbColor: thumbColor,
