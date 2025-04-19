@@ -1,8 +1,6 @@
 import SwiftUI
 
-/**
- Protocol shared by `SpectrumColorSliderModel` and `GradientColorSliderModel`.
- **/
+/// Protocol shared by `SpectrumModel` and `GradientModel`.
 protocol ColorSliderDataSource {
     var sliderColors: [Color] { get }
 }

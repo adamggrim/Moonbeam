@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 /// Model for assembling gradient colors into an array.
-struct GradientColorSliderModel: ColorSliderDataSource {
+struct GradientModel: ColorSliderDataSource {
     let startColor: Color
     let endColor: Color
     
