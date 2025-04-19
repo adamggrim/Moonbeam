@@ -24,15 +24,19 @@ struct SpectrumModel: ColorSliderDataSource {
      `positionOnSlider` property of each `MonochromeSection`, not the order in
      the returned `monochromeSections` array.
      
-     This function uses the optional `blackSection` and `whiteSection`
-     properties associated with this instance of `SpectrumColorSliderModel`.
+     - Parameters:
+        - blackSection: An optional `BlackSection` of the color slider.
+        - whiteSection: An optional `WhiteSection` of the color slider.
      
      - Returns:
         An array of `MonochromeSection` objects, or `nil` if both sections are
         `nil`. If a section exists, it is included in the returned array of
         `MonochromeSection`.
      */
-    private func assembleMonochromeSections() -> [MonochromeSection]? {
+    private static func assembleMonochromeSections(
+        blackSection: BlackSection?,
+        whiteSection: WhiteSection?
+    ) -> [MonochromeSection]? {
         let monochromeSections = [
             blackSection as MonochromeSection?,
             whiteSection as MonochromeSection?
@@ -54,7 +58,7 @@ struct SpectrumModel: ColorSliderDataSource {
         A reordered array of `MonochromeSection` objects in which the
         `priorityColor` is first, or `nil` if `monochromeSections` is `nil`.
      */
-    private func prioritizeMonochromeSections(
+    private static func prioritizeMonochromeSections(
         monochromeSections: [MonochromeSection]?,
         priorityColor: MonochromeColor?
     ) -> [MonochromeSection]? {
@@ -90,7 +94,7 @@ struct SpectrumModel: ColorSliderDataSource {
         An array of `Color` objects representing the `MonochromeSection`
         blending into an adjacent  `MonochromeSection`.
      */
-    private func generateMonochromeIntoMonochromeColors(
+    private static func generateMonochromeIntoMonochromeColors(
         hue: CGFloat,
         monochromeSection: MonochromeSection
     ) -> [Color] {
@@ -135,16 +139,27 @@ struct SpectrumModel: ColorSliderDataSource {
      of `Color` objects representing a `MonochromeSection` blending into the
      start or end of a `HueSection`.
      
-     - Parameter monochromeSection: A `MonochromeSection` object representing
-     the color, position and step size for the monochrome section of the color
-     slider.
+     - Parameters:
+        - monochromeSection: A `MonochromeSection` object representing the
+        color, position and step size for the monochrome section of the color
+        slider.
+        - minHue: The minimum hue represented in the array of `Color` objects.
+        - maxHue: The maximum hue represented in the array of `Color` objects.
+        - bendSections: An optional array of objects conforming to the
+        `BendSection` protocol, with special conditions for saturation or
+        brightness.
      
      - Returns:
         An array of `Color` objects representing the `MonochromeSection`
         blending into the start or end of the `HueSection`.
      */
-    private func generateMonochromeIntoHueColors(
-        monochromeSection: MonochromeSection
+    private static func generateMonochromeIntoHueColors(
+        monochromeSection: MonochromeSection,
+        minHue: CGFloat,
+        maxHue: CGFloat,
+        bendSections: [BendSection]?,
+        defaultSaturation: CGFloat,
+        defaultBrightness: CGFloat
     ) -> [Color] {
         struct BendAdjustment {
             var startSaturation: CGFloat
@@ -171,6 +186,10 @@ struct SpectrumModel: ColorSliderDataSource {
             - monochromeSection: A `MonochromeSection` object representing the
             color, position and step size for the monochrome section of the
             color slider.
+            - defaultSaturation: The saturation anywhere there is no saturation
+            bend.
+            - defaultBrightness: The brightness anywhere there is no brightness
+            bend.
          
          - Returns:
             An array of `Color` objects representing the `MonochromeSection`
@@ -180,7 +199,9 @@ struct SpectrumModel: ColorSliderDataSource {
             startValue: CGFloat,
             endValue: CGFloat,
             hue: CGFloat,
-            monochromeSection: MonochromeSection
+            monochromeSection: MonochromeSection,
+            defaultSaturation: CGFloat,
+            defaultBrightness: CGFloat
         ) -> [Color] {
                 
             /**
@@ -266,7 +287,9 @@ struct SpectrumModel: ColorSliderDataSource {
                 ? bendAdjustment.endBrightness
                 : bendAdjustment.endSaturation,
             hue: hue,
-            monochromeSection: monochromeSection
+            monochromeSection: monochromeSection,
+            defaultSaturation: defaultSaturation,
+            defaultBrightness: defaultBrightness
         )
     }
     
@@ -281,14 +304,29 @@ struct SpectrumModel: ColorSliderDataSource {
      `HueSection`, it uses the function
      `generateMonochromeIntoHueColors`.
      
-     - Parameter monochromeSections: An array of `MonochromeSection`.
-     
+     - Parameters:
+        - monochromeSections: An array of `MonochromeSection`.
+        - minHue: The minimum hue represented in the array of `Color` objects.
+        - maxHue: The maximum hue represented in the array of `Color` objects.
+        - bendSections: An optional array of objects conforming to the
+        `BendSection` protocol, with special conditions for saturation or
+        brightness.
+        - defaultSaturation: The saturation anywhere there is no saturation
+        bend.
+        - defaultBrightness: The brightness anywhere there is no brightness
+        bend.
+
      - Returns:
         An array of `Color` objects representing the colors of both sections.
         Returns an empty array if `monochromeSections` is empty.
      */
-    private func generateAdjacentMonochromeColors(
-        monochromeSections: [MonochromeSection]
+    private static func generateAdjacentMonochromeColors(
+        monochromeSections: [MonochromeSection],
+        minHue: CGFloat,
+        maxHue: CGFloat,
+        bendSections: [BendSection]?,
+        defaultSaturation: CGFloat,
+        defaultBrightness: CGFloat
     ) -> [Color] {
         guard let positionOnSlider = monochromeSections.first?.positionOnSlider,
               monochromeSections.allSatisfy({ $0.positionOnSlider == positionOnSlider }) else {
@@ -309,7 +347,12 @@ struct SpectrumModel: ColorSliderDataSource {
                  */
                 if sectionIndex == (monochromeSections.count - 1) {
                     sectionColors = generateMonochromeIntoHueColors(
-                        monochromeSection: monochromeSections[sectionIndex]
+                        monochromeSection: monochromeSections[sectionIndex],
+                        minHue: minHue,
+                        maxHue: maxHue,
+                        bendSections: bendSections,
+                        defaultSaturation: defaultSaturation,
+                        defaultBrightness: defaultBrightness
                     )
                 }
                 // Otherwise, blend into the other monochromeSection.
@@ -326,7 +369,12 @@ struct SpectrumModel: ColorSliderDataSource {
                  */
                 if sectionIndex == 0 {
                     sectionColors = generateMonochromeIntoHueColors(
-                        monochromeSection: monochromeSections[sectionIndex]
+                        monochromeSection: monochromeSections[sectionIndex],
+                        minHue: minHue,
+                        maxHue: maxHue,
+                        bendSections: bendSections,
+                        defaultSaturation: defaultSaturation,
+                        defaultBrightness: defaultBrightness
                     )
                 }
                 // Otherwise, blend into the other monochromeSection.
@@ -346,15 +394,31 @@ struct SpectrumModel: ColorSliderDataSource {
     /**
      Extracts a list of `Color` objects from an array of `MonochromeSection`.
      
-     This function uses the `monochromeSections` property associated with this
-     instance of `SpectrumColorSliderModel`.
-     
+     - Parameters:
+        - monochromeSections: An optional array of `MonochromeSection`.
+        - minHue: The minimum hue represented in the array of `Color` objects.
+        - maxHue: The maximum hue represented in the array of `Color` objects.
+        - bendSections: An optional array of objects conforming to the
+        `BendSection` protocol, with special conditions for saturation or
+        brightness.
+        - defaultSaturation: The saturation anywhere there is no saturation
+        bend.
+        - defaultBrightness: The brightness anywhere there is no brightness
+        bend.
+
      - Returns:
         An optional array of `Color` objects representing the extracted colors.
         Returns `nil` if `monochromeSections` is `nil`, or if the number of
         sections is not one or two.
      */
-    private func generateMonochromeColors() -> [Color]? {
+    private static func generateMonochromeColors(
+        monochromeSections: [MonochromeSection]?,
+        minHue: CGFloat,
+        maxHue: CGFloat,
+        bendSections: [BendSection]?,
+        defaultSaturation: CGFloat,
+        defaultBrightness: CGFloat
+    ) -> [Color]? {
         guard let monochromeSections = monochromeSections else {
             return nil
         }
@@ -363,12 +427,22 @@ struct SpectrumModel: ColorSliderDataSource {
         case 1:
             if let monochromeSection = monochromeSections.first {
                 return generateMonochromeIntoHueColors(
-                    monochromeSection: monochromeSection
+                    monochromeSection: monochromeSection,
+                    minHue: minHue,
+                    maxHue: maxHue,
+                    bendSections: bendSections,
+                    defaultSaturation: defaultSaturation,
+                    defaultBrightness: defaultBrightness
                 )
             }
         case 2:
             return generateAdjacentMonochromeColors(
-                monochromeSections: monochromeSections
+                monochromeSections: monochromeSections,
+                minHue: minHue,
+                maxHue: maxHue,
+                bendSections: bendSections,
+                defaultSaturation: defaultSaturation,
+                defaultBrightness: defaultBrightness
             )
         default:
             break
@@ -386,7 +460,7 @@ struct SpectrumModel: ColorSliderDataSource {
      - Returns: `true` no two `BendSection` objects overlap. Otherwise, returns
      `false`.
      */
-    private func validateBendSections(
+    private static func validateBendSections(
         bendSections: [BendSection]
     ) -> Bool {
         // An empty bendSections array is invalid.
@@ -423,7 +497,7 @@ struct SpectrumModel: ColorSliderDataSource {
         - The calculated number of increments, used to adjust the base value
         (i.e., saturation or brightness).
      */
-    private func calculateNumberOfIncrements(
+    private static func calculateNumberOfIncrements(
         valueIncrement: CGFloat,
         offsetFromStartHue: CGFloat
     ) -> CGFloat {
@@ -434,12 +508,12 @@ struct SpectrumModel: ColorSliderDataSource {
      Calculates the saturation or brightness for a given hue based on the
      provided bend sections.
      
-     This function uses the `monochromeSections` property associated with this
-     instance of `SpectrumColorSliderModel`.
-     
      - Parameters:
         - hue: The hue for which to calculate the bend value.
         - defaultValue: The default value where there is no valid bend section.
+        - bendSections: An optional array of objects conforming to the
+        `BendSection` protocol, with special conditions for saturation or
+        brightness.
         - bendableComponent: The HSB component calculated for the bend (e.g.,
         saturation or brightness).
      
@@ -448,9 +522,10 @@ struct SpectrumModel: ColorSliderDataSource {
      
      - Returns: The calculated bend value as a `CGFloat`.
      */
-    private func calculateBendValue(
+    private static func calculateBendValue(
         hue: CGFloat,
         defaultValue: CGFloat,
+        bendSections: [BendSection]?,
         bendableComponent: BendableComponent
     ) throws -> CGFloat {
         // Return defaultValue if bendSections is nil.
@@ -506,8 +581,16 @@ struct SpectrumModel: ColorSliderDataSource {
      Generates an array of `Color` objects for a given `HueSection`, accounting
      for any bends in saturation or brightness.
      
-     This function uses the `hueSection` and `bendSections` properties
-     associated with this instance of `SpectrumColorSliderModel`.
+     - Parameters:
+        - hueSection: A `HueSection` object representing the minimum hue,
+        maximum hue, count and step size for the hue section of the color slider.
+        - bendSections: An optional array of objects conforming to the
+        `BendSection` protocol, with special conditions for saturation or
+        brightness.
+        - defaultSaturation: The saturation anywhere there is no saturation
+        bend.
+        - defaultBrightness: The brightness anywhere there is no brightness
+        bend.
      
      - Throws:
         - `InvalidBendSectionError`: If `validateBendSections` is `false`.
@@ -516,14 +599,18 @@ struct SpectrumModel: ColorSliderDataSource {
         An array of `Color` objects representing the `HueSection` of the color
         slider.
      */
-    private func generateHueColors(
+    private static func generateHueColors(
+        hueSection: HueSection,
+        bendSections: [BendSection]?,
+        defaultSaturation: CGFloat,
+        defaultBrightness: CGFloat
     ) throws -> [Color] {
         return try stride(
-            from: minHue,
-            to: maxHue,
+            from: hueSection.minHue,
+            to: hueSection.maxHue,
             by: hueSection.stepSize
         ).enumerated().map { (index, hue) -> Color in
-            let normalizedHue = CGFloat(hue) / CGFloat(maxHue)
+            let normalizedHue = CGFloat(hue) / CGFloat(hueSection.maxHue)
             let calculatedSaturation: CGFloat
             let calculatedBrightness: CGFloat
             
@@ -531,11 +618,13 @@ struct SpectrumModel: ColorSliderDataSource {
                 calculatedSaturation = try calculateBendValue(
                     hue: normalizedHue,
                     defaultValue: defaultSaturation,
+                    bendSections: bendSections,
                     bendableComponent: .saturation
                 )
                 calculatedBrightness = try calculateBendValue(
                     hue: normalizedHue,
                     defaultValue: defaultBrightness,
+                    bendSections: bendSections,
                     bendableComponent: .brightness
                 )
             } catch { throw error }
@@ -553,11 +642,19 @@ struct SpectrumModel: ColorSliderDataSource {
      Generates an array of `Color` objects for the  color slider, combining
      `monochromeStartColors`, `hueColors` and `monochromeEndColors`.
      
-     This function uses the `monochromeStartColors`, `monochromeEndColors` and
-     `hueColors` properties associated with this instance of
-     `SpectrumColorSliderModel`.
+     - Parameters:
+         - `monochromeStartColors`: An optional array of `Color` objects
+         representing the `monochromeStartSections` of the color slider.
+         - `monochromeEndColors`: An optional array of `Color` objects
+         representing the `monochromeStartSections` of the color slider.
+         - `hueColors`: An array of `Color` objects representing the
+        `HueSection` of the color slider.
      */
-    private func generateSliderColors() -> [Color] {
+    private static func generateSliderColors(
+        monochromeStartColors: [Color]?,
+        monochromeEndColors: [Color]?,
+        hueColors: [Color]
+    ) -> [Color] {
         let startColors = monochromeStartColors ?? []
         let endColors = monochromeEndColors ?? []
         
@@ -606,22 +703,16 @@ struct SpectrumModel: ColorSliderDataSource {
         self.bendSections = bendSections
         self.priorityColor = priorityColor
         
-        self.monochromeSections = assembleMonochromeSections()
-        self.monochromeStartSections = prioritizeMonochromeSections(
-            monochromeSections: self.monochromeSections?.filter {
-                $0.positionOnSlider == .start
-            },
-            priorityColor: self.priorityColor
+        self.hueColors = try Self.generateHueColors(
+            hueSection: self.hueSection,
+            bendSections: self.bendSections,
+            defaultSaturation: self.defaultSaturation,
+            defaultBrightness: self.defaultBrightness
         )
-        self.monochromeEndSections = prioritizeMonochromeSections(
-            monochromeSections: self.monochromeSections?.filter {
-                $0.positionOnSlider == .end
-            },
-            priorityColor: self.priorityColor
+        self.sliderColors = Self.generateSliderColors(
+            monochromeStartColors: self.monochromeStartColors,
+            monochromeEndColors: self.monochromeEndColors,
+            hueColors: self.hueColors
         )
-        self.monochromeStartColors = generateMonochromeColors()
-        self.monochromeEndColors = generateMonochromeColors()
-        self.hueColors = try generateHueColors()
-        self.sliderColors = generateSliderColors()
     }
 }
