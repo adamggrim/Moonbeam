@@ -16,10 +16,20 @@ struct GradientModel: ColorSliderDataSource {
      contains only `startColor`. If `count` is 0 or less, it returns an empty
      array.
      
-     - Returns: An array of `Color` objects representing the gradient from
+     - Parameters:
+        - startColor: The starting color of the gradient.
+        - endColor: The ending color of the gradient.
+        - count: The number of colors in the slider, including `startColor`
+        and `endColor`.
+     
+     - Returns: An array of `Color` objects representing a gradient from
      `startColor` to `endColor`.
      */
-    private func generateSliderColors() -> [Color] {
+    private static func generateSliderColors(
+        startColor: Color,
+        endColor: Color,
+        count: Int
+    ) -> [Color] {
         guard count > 0 else { return [] }
         
         if count == 1 { return [startColor] }
@@ -37,5 +47,18 @@ struct GradientModel: ColorSliderDataSource {
         }
         
         return colors
+    }
+    
+    let sliderColors: [Color]
+    
+    init(startColor: Color, endColor: Color, count: Int) {
+        self.startColor = startColor
+        self.endColor = endColor
+        self.count = count
+        self.sliderColors = Self.generateSliderColors(
+            startColor: self.startColor,
+            endColor: self.endColor,
+            count: self.count
+        )
     }
 }
