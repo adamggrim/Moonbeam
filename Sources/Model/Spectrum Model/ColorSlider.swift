@@ -675,52 +675,13 @@ struct SpectrumModel: ColorSliderDataSource {
     private let bendSections: [BendSection]?
     private let priorityColor: MonochromeColor?
     
-    private lazy var monochromeSections: [MonochromeSection]? = {
-        return SpectrumModel.assembleMonochromeSections(
-            blackSection: self.blackSection,
-            whiteSection: self.whiteSection
-        )
-    }()
+    private let monochromeSections: [MonochromeSection]?
     
-    private lazy var monochromeStartSections: [MonochromeSection]? = {
-        return Self.prioritizeMonochromeSections(
-            monochromeSections: self.monochromeSections?.filter {
-                $0.positionOnSlider == .start
-            },
-            priorityColor: self.priorityColor
-        )
-    }()
+    private let monochromeStartSections: [MonochromeSection]?
+    private let monochromeEndSections: [MonochromeSection]?
     
-    private lazy var monochromeEndSections: [MonochromeSection]? = {
-        return Self.prioritizeMonochromeSections(
-            monochromeSections: self.monochromeSections?.filter {
-                $0.positionOnSlider == .end
-            },
-            priorityColor: self.priorityColor
-        )
-    }()
-    
-    private lazy var monochromeStartColors: [Color]? = {
-        return Self.generateMonochromeColors(
-            monochromeSections: self.monochromeStartSections,
-            minHue: self.minHue,
-            maxHue: self.maxHue,
-            bendSections: self.bendSections,
-            defaultSaturation: self.defaultSaturation,
-            defaultBrightness: self.defaultBrightness
-        )
-    }()
-    
-    private lazy var monochromeEndColors: [Color]? = {
-        return Self.generateMonochromeColors(
-            monochromeSections: self.monochromeEndSections,
-            minHue: self.minHue,
-            maxHue: self.maxHue,
-            bendSections: self.bendSections,
-            defaultSaturation: self.defaultSaturation,
-            defaultBrightness: self.defaultBrightness
-        )
-    }()
+    private let monochromeStartColors: [Color]?
+    private let monochromeEndColors: [Color]?
     
     private let hueColors: [Color]
     let sliderColors: [Color]
@@ -741,6 +702,45 @@ struct SpectrumModel: ColorSliderDataSource {
         self.whiteSection = whiteSection
         self.bendSections = bendSections
         self.priorityColor = priorityColor
+        
+        self.monochromeSections = Self.assembleMonochromeSections(
+            blackSection: self.blackSection,
+            whiteSection: self.whiteSection
+        )
+        
+        let startSections = self.monochromeSections?.filter {
+            $0.positionOnSlider == .start
+        }
+        monochromeStartSections = Self.prioritizeMonochromeSections(
+            monochromeSections: startSections,
+            priorityColor: self.priorityColor
+        )
+        
+        let endSections = self.monochromeSections?.filter {
+            $0.positionOnSlider == .end
+        }
+        self.monochromeEndSections = Self.prioritizeMonochromeSections(
+            monochromeSections: endSections,
+            priorityColor: self.priorityColor
+        )
+        
+        self.monochromeStartColors = Self.generateMonochromeColors(
+            monochromeSections: monochromeStartSections,
+            minHue: self.minHue,
+            maxHue: self.maxHue,
+            bendSections: self.bendSections,
+            defaultSaturation: self.defaultSaturation,
+            defaultBrightness: self.defaultBrightness
+        )
+        
+        self.monochromeEndColors = Self.generateMonochromeColors(
+            monochromeSections: self.monochromeEndSections,
+            minHue: self.minHue,
+            maxHue: self.maxHue,
+            bendSections: self.bendSections,
+            defaultSaturation: self.defaultSaturation,
+            defaultBrightness: self.defaultBrightness
+        )
         
         self.hueColors = try Self.generateHueColors(
             hueSection: self.hueSection,
