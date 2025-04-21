@@ -715,7 +715,7 @@ struct SpectrumSliderModel: ColorSliderDataSource {
         let startSections = self.monochromeSections?.filter {
             $0.positionOnSlider == .start
         }
-        monochromeStartSections = Self.prioritizeMonochromeSections(
+        self.monochromeStartSections = Self.prioritizeMonochromeSections(
             monochromeSections: startSections,
             priorityColor: self.priorityColor
         )
