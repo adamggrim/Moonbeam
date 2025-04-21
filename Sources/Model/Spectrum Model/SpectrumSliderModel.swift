@@ -52,7 +52,7 @@ struct SpectrumSliderModel: ColorSliderDataSource {
      - Parameters:
         - monochromeSections: An optional array of `MonochromeSection` objects.
         - priorityColor: An optional `MonochromeColor` to prioritize in the
-        array.
+        `monochromeSections` array.
      
      - Returns:
         A reordered array of `MonochromeSection` objects in which the
@@ -673,6 +673,10 @@ struct SpectrumSliderModel: ColorSliderDataSource {
     private let blackSection: BlackSection?
     private let whiteSection: WhiteSection?
     private let bendSections: [BendSection]?
+    /**
+     An optional `MonochromeColor` to prioritize in the monochromeSections`
+     array.
+     */
     private let priorityColor: MonochromeColor?
     
     private let monochromeSections: [MonochromeSection]?
