@@ -36,12 +36,21 @@ struct HueSection {
     let minHue: CGFloat
     let maxHue: CGFloat
     
-    var count: CGFloat {
-        maxHue - minHue
-    }
+    let count: CGFloat
+    let stepSize: CGFloat
     
-    var stepSize: CGFloat {
-        1.0 / CGFloat(count - 1)
+    init(minHue: CGFloat, maxHue: CGFloat) {
+        self.minHue = minHue
+        self.maxHue = maxHue
+        
+        let calculatedCount = maxHue - minHue
+        self.count = calculatedCount
+        
+        if calculatedCount - 1 > 0 {
+            self.stepSize = 1.0 / (calculatedCount - 1)
+        } else {
+            self.stepSize = 0.0
+        }
     }
 }
 
