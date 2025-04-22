@@ -67,7 +67,10 @@ struct ColorSliderView: View {
                 }
             }
             .foregroundColor(viewModel.thumbColor)
-            .frame(width: dimensions.thumbWidth, height: dimensions.thumbHeight)
+            .frame(
+                width: dimensions.thumbWidth,
+                height: dimensions.thumbHeight
+            )
             .shadow(radius: dimensions.shadowRadius)
             .offset(x: viewModel.thumbOffset)
             .gesture(
@@ -100,7 +103,10 @@ struct ColorSliderView: View {
                     previewHidden: viewModel.previewHidden
                 )
                 .shadow(radius: dimensions.shadowRadius)
-                .offset(x: viewModel.previewHorizontalOffset, y: dimensions.previewOffset)
+                .offset(
+                    x: viewModel.previewHorizontalOffset,
+                    y: dimensions.previewOffset
+                )
         }
         .frame(width: dimensions.sliderWidth, height: dimensions.thumbHeight)
     }
@@ -125,7 +131,11 @@ extension View {
         scaleRatio: CGFloat,
         previewHidden: Bool
     ) -> some View {
-        self.modifier(PreviewViewModifier(isDragging: isDragging, scaleRatio: scaleRatio, previewHidden: previewHidden))
+        self.modifier(PreviewViewModifier(
+            isDragging: isDragging,
+            scaleRatio: scaleRatio,
+            previewHidden: previewHidden
+        ))
     }
 }
 
@@ -140,7 +150,15 @@ struct ColorSliderDimensions {
     let shadowRadius: CGFloat
     let scaleRatio: CGFloat = 0.25
     
-    init(sliderWidth: CGFloat, sliderHeight: CGFloat, thumbWidth: CGFloat? = nil, thumbHeight: CGFloat? = nil, previewWidth: CGFloat, previewOffset: CGFloat, shadowRadius: CGFloat) {
+    init(
+        sliderWidth: CGFloat,
+        sliderHeight: CGFloat,
+        thumbWidth: CGFloat? = nil,
+        thumbHeight: CGFloat? = nil,
+        previewWidth: CGFloat,
+        previewOffset: CGFloat,
+        shadowRadius: CGFloat
+    ) {
         self.sliderWidth = sliderWidth
         self.sliderHeight = sliderHeight
         self.thumbWidth = thumbWidth ?? sliderHeight
