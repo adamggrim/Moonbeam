@@ -668,8 +668,6 @@ struct SpectrumSliderModel: ColorSliderDataSource {
     private let defaultSaturation: CGFloat = 1.0
     /// The brightness anywhere there is no brightness bend.
     private let defaultBrightness: CGFloat = 1.0
-    
-    private let hueSection: HueSection
     private let blackSection: BlackSection?
     private let whiteSection: WhiteSection?
     private let bendSections: [BendSection]?
@@ -679,15 +677,14 @@ struct SpectrumSliderModel: ColorSliderDataSource {
      */
     private let priorityColor: MonochromeColor?
     
+    private let hueSection: HueSection
     private let monochromeSections: [MonochromeSection]?
-    
     private let monochromeStartSections: [MonochromeSection]?
     private let monochromeEndSections: [MonochromeSection]?
-    
     private let monochromeStartColors: [Color]?
     private let monochromeEndColors: [Color]?
-    
     private let hueColors: [Color]
+    
     let sliderColors: [Color]
     
     init(
