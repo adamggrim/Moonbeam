@@ -582,8 +582,9 @@ struct SpectrumSliderModel: ColorSliderDataSource {
      for any bends in saturation or brightness.
      
      - Parameters:
-        - hueSection: A `HueSection` object representing the minimum hue,
-        maximum hue, count and step size for the hue section of the color slider.
+        - hueSection: A `HueSection` object representing the `minHue`,
+        `maxHue`, `count` and `stepSize` for the hue section of the color
+        slider.
         - bendSections: An optional array of objects conforming to the
         `BendSection` protocol, with special conditions for saturation or
         brightness.
