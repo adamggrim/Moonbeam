@@ -690,7 +690,6 @@ struct SpectrumSliderModel: ColorSliderDataSource {
     init(
         minHue: CGFloat,
         maxHue: CGFloat,
-        hueSection: HueSection,
         blackSection: BlackSection? = nil,
         whiteSection: WhiteSection? = nil,
         bendSections: [BendSection]? = nil,
@@ -698,11 +697,12 @@ struct SpectrumSliderModel: ColorSliderDataSource {
     ) throws {
         self.minHue = minHue
         self.maxHue = maxHue
-        self.hueSection = hueSection
         self.blackSection = blackSection
         self.whiteSection = whiteSection
         self.bendSections = bendSections
         self.priorityColor = priorityColor
+        
+        self.hueSection = HueSection(minHue: self.minHue, maxHue: self.maxHue)
         
         self.monochromeSections = Self.assembleMonochromeSections(
             blackSection: self.blackSection,
