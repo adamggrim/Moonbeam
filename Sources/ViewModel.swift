@@ -7,9 +7,14 @@ import Observation
 class ColorSliderViewModel {
     
     var isDragging: Bool = false
-    // Drag variable to get the color of the color preview (different from persistedDrag whenever the drag extends to the width of the thumb at the end of the slider)
-    private var colorDrag: CGFloat = .zero
     
+    /**
+     Drag variable for the color of the color preview.
+     
+     This is different from `persistedDrag` whenever the drag extends beyond
+     the width of the thumb at the end of the slider.
+     */
+    private var colorDrag: CGFloat = .zero
     private var persistedDrag: CGFloat = .zero
     private var sliderDrag: CGFloat = .zero
     private var containerDrag: CGFloat = .zero
@@ -52,9 +57,12 @@ class ColorSliderViewModel {
         let rightBound = dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
         // Clamp the persistedDrag value within the left and right bounds.
         let clampedValue = min(max(persistedDrag, leftBound), rightBound)
-        // Offset to center the floating color preview above the thumb
+        /// Offset to center the floating color preview above the thumb.
         let halfThumbOffset = thumbOffset + halfThumbWidth
-        // Offset to offset the floating color preview at one quarter the length of the thumb
+        /**
+         Offset to offset the floating color preview at one quarter the length
+         of the thumb.
+         */
         let quarterThumbOffset = thumbOffset + quarterThumbWidth
         
         if previewHidden && thumbStyle == .capsule {
