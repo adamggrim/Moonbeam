@@ -5,7 +5,6 @@ import Observation
 
 @Observable
 class ColorSliderViewModel {
-    
     var isDragging: Bool = false
     
     /**
@@ -20,18 +19,26 @@ class ColorSliderViewModel {
     private var containerDrag: CGFloat = .zero
     private var currentDrag: CGFloat = .zero
     
-    var startingColor: Color
-    let thumbColor: Color
     let thumbStyle: ThumbStyle
-    let thumbInset: CGFloat
+    let sliderColors: [Color]
     let previewHidden: Bool
     let dimensions: ColorSliderDimensions
     
-    init(startingColor: Color, thumbColor: Color, thumbStyle: ThumbStyle, previewHidden: Bool, dimensions: ColorSliderDimensions) {
-        self.startingColor = startingColor
-        self.thumbColor = thumbColor
+    let thumbInset: CGFloat
+    
+    init(
+        thumbStyle: ThumbStyle,
+        sliderColors: [Color],
+        previewHidden: Bool,
+        dimensions: ColorSliderDimensions
+    ) {
+        self.sliderColors = sliderColors
         self.thumbStyle = thumbStyle
-        self.thumbInset = (thumbStyle == .capsule) ? 0.0 : (dimensions.sliderHeight - dimensions.thumbWidth) / 2
+        if thumbStyle == .capsule {
+            self.thumbInset = 0.0
+        } else {
+            self.thumbInset = (dimensions.sliderHeight - dimensions.thumbWidth) / 2
+        }
         self.previewHidden = previewHidden
         self.dimensions = dimensions
         
@@ -48,7 +55,7 @@ class ColorSliderViewModel {
         let colorIndex = min(sliderColors.count - 1, Int(CGFloat(sliderColors.count) * (colorDrag / dimensions.sliderWidth)))
         return sliderColors[colorIndex]
     }
-    
+
     var previewHorizontalOffset: CGFloat {
         let halfPreviewWidth = dimensions.previewWidth / 2
         let halfThumbWidth = dimensions.thumbWidth / 2
