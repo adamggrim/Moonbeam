@@ -52,8 +52,11 @@ class ColorSliderViewModel {
     }
     
     var calculatedColor: Color {
-        let colorIndex = min(sliderColors.count - 1, Int(CGFloat(sliderColors.count) * (colorDrag / dimensions.sliderWidth)))
-        return sliderColors[colorIndex]
+        let calculatedIndex = Int(
+            CGFloat(sliderColors.count) * (colorDrag / dimensions.sliderWidth)
+        )
+        let clampedIndex = max(0, min(sliderColors.count - 1, calculatedIndex))
+        return sliderColors[clampedIndex]
     }
 
     var previewHorizontalOffset: CGFloat {
