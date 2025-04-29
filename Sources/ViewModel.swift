@@ -127,7 +127,10 @@ class ColorSliderViewModel {
     func onDragChanged(_ value: DragGesture.Value) {
         containerDrag = value.translation.width
         currentDrag = sliderDrag + containerDrag
-        // Clamp to prevent the drag gesture from displacing the thumb on rebound from the left and right edges of the slider.
+        /*
+         Clamp to prevent the drag gesture from displacing the thumb on rebound
+         from the left and right edges of the slider.
+       */
         colorDrag = min(max(currentDrag, 0), dimensions.sliderWidth)
         persistedDrag = min(max(currentDrag, 0 + thumbInset), dimensions.sliderWidth - dimensions.thumbWidth - thumbInset)
     }
