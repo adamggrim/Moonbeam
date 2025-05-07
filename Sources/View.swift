@@ -141,11 +141,13 @@ extension View {
         scaleRatio: CGFloat,
         previewHidden: Bool
     ) -> some View {
-        self.modifier(PreviewViewModifier(
-            isDragging: isDragging,
-            scaleRatio: scaleRatio,
-            previewHidden: previewHidden
-        ))
+        self.modifier(
+            PreviewViewModifier(
+                isDragging: isDragging,
+                scaleRatio: scaleRatio,
+                previewHidden: previewHidden
+            )
+        )
     }
 }
 
