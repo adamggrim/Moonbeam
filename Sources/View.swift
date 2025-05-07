@@ -1,5 +1,15 @@
 import SwiftUI
 
+/// Whether the thumb is a capsule or circle.
+enum ThumbStyle {
+    case capsule, circle
+}
+
+/// The orientation of the color slider.
+enum Orientation {
+    case horizontal, vertical
+}
+
 struct ColorSliderView: View {
     
     var model: any ColorSliderDataSource
@@ -170,10 +180,4 @@ struct ColorSliderDimensions {
     }
 }
 
-enum ThumbStyle {
-    case capsule, circle
-}
-
-enum Orientation {
-    case horizontal, vertical
 }
