@@ -2,7 +2,7 @@
 
 `Moonbeam` is a Swift package for color sliders with floating color previews.
 
-For a given hue range on a color spectrum, `Moonbeam` lets you bend saturation or brightness in specific sections. It also supports gradients and customizable sizing and presentation options.
+For a given hue range on a color spectrum, `Moonbeam` lets you bend saturation or brightness in specific sections. It also supports gradients and customizable presentation options.
 
 ## Requirements
 
@@ -18,11 +18,11 @@ For a given hue range on a color spectrum, `Moonbeam` lets you bend saturation o
 
 ## Variations
 
-`Moonbeam` supports two color slider modes—spectrum (HSB-based) and gradient (color mixing-based).
+`Moonbeam` supports two color slider modes—spectrum (HSB-based) and gradient (SwiftUI color mixing-based).
 
 - For spectrum sliders, you can bend saturation or brightness in specific sections to improve legibility:
 
-- With gradient sliders, you can create a precise mix between any two colors:
+- With gradient sliders, you can create a precise gradient between any two colors:
 
 `Moonbeam` also offers two slider thumb styles—capsule and circle.
 
@@ -37,7 +37,7 @@ This example demonstrates how to create a spectrum slider using `Moonbeam`.
 1. **Create the slider**
 
 
-2. **Choose the slider thumb style and hues**
+2. **Choose the slider thumb style and color**
 
 
 3. **Bend the saturation or brightness**
@@ -54,7 +54,7 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
 1. **Create the slider**
 
 
-2. **Choose the slider thumb style and hues**
+2. **Choose the slider thumb style and color**
 
 
 3. **Use the slider**
