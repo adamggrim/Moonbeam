@@ -43,7 +43,10 @@ class ColorSliderViewModel {
         self.dimensions = dimensions
         
         let hue: CGFloat = 0
-        let dragValue = calculateDrag(hue: hue, sliderWidth: dimensions.sliderWidth)
+        let dragValue = calculateDrag(
+            hue: hue,
+            sliderWidth: dimensions.sliderWidth
+        )
         
         self.persistedDrag = dragValue
         self.sliderDrag = dragValue
@@ -80,7 +83,8 @@ class ColorSliderViewModel {
             if !isDragging && halfThumbOffset < halfPreviewWidth {
                 return -halfPreviewWidth + halfThumbOffset
             // Right edge of the slider
-            } else if !isDragging && halfThumbOffset > dimensions.sliderWidth - halfPreviewWidth {
+            } else if !isDragging && halfThumbOffset >
+                        dimensions.sliderWidth - halfPreviewWidth {
                 return dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
             } else {
                 return clampedValue - halfPreviewWidth + halfThumbWidth
@@ -92,7 +96,8 @@ class ColorSliderViewModel {
             if !isDragging && halfThumbOffset < halfPreviewWidth {
                 return -halfPreviewWidth + quarterThumbOffset
             // Right edge of the slider
-            } else if !isDragging && halfThumbOffset > dimensions.sliderWidth - halfPreviewWidth {
+            } else if !isDragging && halfThumbOffset >
+                        dimensions.sliderWidth - halfPreviewWidth {
                 return dimensions.sliderWidth - halfPreviewWidth - quarterThumbWidth
             } else {
                 return clampedValue - halfPreviewWidth + halfThumbWidth
@@ -132,7 +137,10 @@ class ColorSliderViewModel {
          from the left and right edges of the slider.
        */
         colorDrag = min(max(currentDrag, 0), dimensions.sliderWidth)
-        persistedDrag = min(max(currentDrag, 0 + thumbInset), dimensions.sliderWidth - dimensions.thumbWidth - thumbInset)
+        persistedDrag = min(
+            max(currentDrag, 0 + thumbInset),
+            dimensions.sliderWidth - dimensions.thumbWidth - thumbInset
+        )
     }
     
     func onDragEnded() {
