@@ -16,6 +16,7 @@ struct ColorSliderView: View {
     var viewModel: ColorSliderViewModel
     let dimensions: ColorSliderDimensions
     let duration: Double
+    let thumbColor: Color
     
     init(
         model: any ColorSliderDataSource,
@@ -46,7 +47,6 @@ struct ColorSliderView: View {
         
         self.viewModel = ColorSliderViewModel(
             startingColor: startingColor,
-            thumbColor: thumbColor,
             thumbStyle: thumbStyle,
             previewHidden: previewHidden,
             dimensions: dimensions)
@@ -76,7 +76,7 @@ struct ColorSliderView: View {
                     Circle()
                 }
             }
-            .foregroundColor(viewModel.thumbColor)
+            .foregroundColor(thumbColor)
             .frame(
                 width: dimensions.thumbWidth,
                 height: dimensions.thumbHeight
