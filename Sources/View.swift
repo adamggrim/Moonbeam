@@ -12,14 +12,12 @@ enum Orientation {
 
 struct ColorSliderView: View {
     
-    var model: any ColorSliderDataSource
     var viewModel: ColorSliderViewModel
     let dimensions: ColorSliderDimensions
     let duration: Double
     let thumbColor: Color
     
     init(
-        model: any ColorSliderDataSource,
         sliderWidth: CGFloat,
         sliderHeight: CGFloat,
         thumbWidth: CGFloat? = nil,
@@ -33,8 +31,6 @@ struct ColorSliderView: View {
         previewHidden: Bool = true,
         duration: Double = 0.25
     ) {
-        self.model = model
-        
         let dimensions = ColorSliderDimensions(
             sliderWidth: sliderWidth,
             sliderHeight: sliderHeight,
@@ -60,7 +56,7 @@ struct ColorSliderView: View {
             // Color gradient capsule
             Capsule().fill(
                 LinearGradient(
-                    gradient: Gradient(colors: model.sliderColors),
+                    gradient: Gradient(colors: viewModel.sliderColors),
                     startPoint: .leading,
                     endPoint: .trailing
                 )
