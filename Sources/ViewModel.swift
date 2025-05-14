@@ -25,11 +25,11 @@ class ColorSliderViewModel {
     
     private let thumbInset: CGFloat
     
-    init<DataSource: ColorSliderDataSource>(
-        dataSource: DataSource,
+    init(
         thumbStyle: ThumbStyle,
         previewHidden: Bool,
-        dimensions: ColorSliderDimensions
+        dimensions: ColorSliderDimensions,
+        dataSource: ColorSliderDataSource
     ) {
         self.sliderColors = dataSource.sliderColors
         self.thumbStyle = thumbStyle
