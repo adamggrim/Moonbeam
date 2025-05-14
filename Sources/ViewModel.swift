@@ -1,5 +1,4 @@
 import Foundation
-
 import SwiftUI
 import Observation
 
@@ -8,7 +7,7 @@ class ColorSliderViewModel {
     var isDragging: Bool = false
     
     /**
-     Drag variable for the color of the color preview.
+     Drag variable to determine the color of the color preview.
      
      This is different from `persistedDrag` whenever the drag extends beyond
      the width of the thumb at the end of the slider.
