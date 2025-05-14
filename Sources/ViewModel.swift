@@ -24,7 +24,7 @@ class ColorSliderViewModel {
     let previewHidden: Bool
     let dimensions: ColorSliderDimensions
     
-    let thumbInset: CGFloat
+    private let thumbInset: CGFloat
     
     init<DataSource: ColorSliderDataSource>(
         dataSource: DataSource,
@@ -124,7 +124,7 @@ class ColorSliderViewModel {
         return min(max(persistedDrag, leftBound), rightBound)
     }
     
-    func calculateDrag(hue: CGFloat, sliderWidth: CGFloat) -> CGFloat {
+    private func calculateDrag(hue: CGFloat, sliderWidth: CGFloat) -> CGFloat {
         let calculatedDrag = hue * sliderWidth
         return calculatedDrag
     }
