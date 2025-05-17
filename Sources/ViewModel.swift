@@ -124,9 +124,15 @@ class ColorSliderViewModel {
         return min(max(persistedDrag, leftBound), rightBound)
     }
     
-    private func calculateDrag(hue: CGFloat, sliderWidth: CGFloat) -> CGFloat {
-        let calculatedDrag = hue * sliderWidth
-        return calculatedDrag
+    /**
+     Calculates the horizontal position of the selected color in the slider.
+     */
+    private func calculatePosition(
+        positionRatio: CGFloat,
+        sliderWidth: CGFloat
+    ) -> CGFloat {
+        let calculatedPosition = positionRatio * sliderWidth
+        return calculatedPosition
     }
     
     func onDragChanged(_ value: DragGesture.Value) {
