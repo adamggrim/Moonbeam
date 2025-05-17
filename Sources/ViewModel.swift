@@ -26,11 +26,13 @@ class ColorSliderViewModel {
     private let thumbInset: CGFloat
     
     init(
+        positionRatio: CGFloat,
         thumbStyle: ThumbStyle,
         previewHidden: Bool,
         dimensions: ColorSliderDimensions,
         dataSource: ColorSliderDataSource
     ) {
+        self.positionRatio = positionRatio
         self.sliderColors = dataSource.sliderColors
         self.thumbStyle = thumbStyle
         if thumbStyle == .capsule {
@@ -41,16 +43,15 @@ class ColorSliderViewModel {
         self.previewHidden = previewHidden
         self.dimensions = dimensions
         
-        let hue: CGFloat = 0
-        let dragValue = calculateDrag(
-            hue: hue,
+        let position = calculatePosition(
+            positionRatio: positionRatio,
             sliderWidth: dimensions.sliderWidth
         )
         
-        self.persistedDrag = dragValue
-        self.sliderDrag = dragValue
-        self.containerDrag = dragValue
-        self.currentDrag = dragValue
+        self.persistedDrag = position
+        self.sliderDrag = position
+        self.containerDrag = position
+        self.currentDrag = position
     }
     
     var calculatedColor: Color {
