@@ -78,33 +78,36 @@ class ColorSliderViewModel {
          */
         let quarterThumbOffset = thumbOffset + quarterThumbWidth
         
-        if previewHidden && thumbStyle == .capsule {
-            // Left edge of the slider
-            if !isDragging && halfThumbOffset < halfPreviewWidth {
-                return -halfPreviewWidth + halfThumbOffset
-            // Right edge of the slider
-            } else if !isDragging && halfThumbOffset >
-                        dimensions.sliderWidth - halfPreviewWidth {
-                return dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
-            } else {
-                return clampedValue - halfPreviewWidth + halfThumbWidth
-            }
-        }
+        let leftEdgeLimit: CGFloat
+        let rightEdgeLimit: CGFloat
+        let offsetAdjustment: CGFloat
         
-        else if previewHidden && thumbStyle == .circle {
-            // Left edge of the slider
-            if !isDragging && halfThumbOffset < halfPreviewWidth {
-                return -halfPreviewWidth + quarterThumbOffset
-            // Right edge of the slider
-            } else if !isDragging && halfThumbOffset >
-                        dimensions.sliderWidth - halfPreviewWidth {
-                return dimensions.sliderWidth - halfPreviewWidth - quarterThumbWidth
-            } else {
-                return clampedValue - halfPreviewWidth + halfThumbWidth
+        if previewHidden {
+            switch thumbStyle {
+            case .capsule:
+                leftEdgeLimit = -halfPreviewWidth + halfThumbOffset
+                rightEdgeLimit = (
+                    dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
+                )
+                offsetAdjustment = halfThumbWidth
+            case .circle:
+                leftEdgeLimit = -halfPreviewWidth + quarterThumbOffset
+                rightEdgeLimit = (
+                    dimensions.sliderWidth - halfPreviewWidth - quarterThumbWidth
+                )
+                offsetAdjustment = halfThumbWidth
             }
-        }
-        
-        else {
+            
+            if !isDragging && halfThumbOffset < halfPreviewWidth {
+                return leftEdgeLimit
+            } else if (
+                !isDragging && halfThumbOffset > dimensions.sliderWidth - halfPreviewWidth
+            ) {
+                return rightEdgeLimit
+            } else {
+                return clampedValue - halfPreviewWidth + offsetAdjustment
+            }
+        } else {
             if halfThumbOffset < halfPreviewWidth {
                 // Clamp the color preview to the left edge of the slider.
                 return 0
