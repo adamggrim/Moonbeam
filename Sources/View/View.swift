@@ -147,7 +147,3 @@ extension View {
         )
     }
 }
-
-    
-    }
-}
