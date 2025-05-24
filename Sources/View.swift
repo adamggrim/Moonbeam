@@ -11,11 +11,11 @@ enum Orientation {
 }
 
 struct ColorSliderView: View {
+    @State private var viewModel: ColorSliderViewModel
     
-    var viewModel: ColorSliderViewModel
     let dimensions: ColorSliderDimensions
-    let duration: Double
     let thumbColor: Color
+    let duration: Double
     
     init(
         sliderWidth: CGFloat,
@@ -25,11 +25,11 @@ struct ColorSliderView: View {
         previewWidth: CGFloat,
         previewOffset: CGFloat,
         shadowRadius: CGFloat,
-        startingColor: Color,
         thumbColor: Color = .white,
         thumbStyle: ThumbStyle = .capsule,
         previewHidden: Bool = true,
-        duration: Double = 0.25
+        duration: Double = 0.25,
+        dataSource: ColorSliderDataSource
     ) {
         let dimensions = ColorSliderDimensions(
             sliderWidth: sliderWidth,
@@ -40,12 +40,13 @@ struct ColorSliderView: View {
             previewOffset: previewOffset,
             shadowRadius: shadowRadius
         )
-        
-        self.viewModel = ColorSliderViewModel(
-            startingColor: startingColor,
+                
+        self._viewModel = State(initialValue: ColorSliderViewModel(
             thumbStyle: thumbStyle,
             previewHidden: previewHidden,
-            dimensions: dimensions)
+            dimensions: dimensions,
+            dataSource: dataSource
+        ))
         self.dimensions = dimensions
         self.duration = duration
     }
@@ -149,6 +150,4 @@ extension View {
 
     
     }
-}
-
 }
