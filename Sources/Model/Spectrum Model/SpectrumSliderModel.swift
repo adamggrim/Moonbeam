@@ -650,6 +650,9 @@ struct SpectrumSliderModel: ColorSliderDataSource {
          representing the `monochromeStartSections` of the color slider.
          - `hueColors`: An array of `Color` objects representing the
         `HueSection` of the color slider.
+     
+     - Returns:
+        An array of `Color` combining `startColors`, `hueColors` and `endColors`.
      */
     private static func generateSliderColors(
         monochromeStartColors: [Color]?,

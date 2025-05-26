@@ -207,7 +207,7 @@ class ColorSliderViewModel {
      
      - Parameters:
        - positionRatio: A `CGFloat` representing the normalized position on the
-        slider—0.0 for the left end, 1.0 for the right.
+        slider: 0.0 for the left edge, 1.0 for the right.
        - sliderWidth: The width of the slider in points.
      - Returns:
         A `CGFloat` representing the calculated horizontal offset in points
