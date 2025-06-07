@@ -2,16 +2,17 @@ import SwiftUI
 
 enum ColorSourceProvider {
     /**
-     Provides colors as a pre-computed array.
+     Provides colors as a precomputed array.
      
-     Used for hard-edge colors.
+     Used for hard-edge color color sliders.
      */
-    case precomputed([Color])
+    case array([Color])
     
     /**
-     Dynamically calculates a color based on normalized position (0.0 to 1.0).
+     Dynamically calculates a color based on normalized position (i.e., 0.0 to
+     1.0).
     
-     Used for spectrums and gradients.
+     Used for spectrum and gradient color sliders.
      */
     case dynamic((_ position: Double) -> Color)
 }
@@ -19,5 +20,4 @@ enum ColorSourceProvider {
 /// Protocol shared by `SpectrumSliderModel` and `GradientSliderModel`.
 protocol ColorSliderDataSource {
     var colorSource: ColorSourceProvider { get }
-
 }
