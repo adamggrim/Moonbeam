@@ -691,6 +691,10 @@ struct SpectrumSliderModel: ColorSliderDataSource {
     
     let sliderColors: [Color]
     
+    var colorSource: ColorSourceProvider {
+        return .array(sliderColors)
+    }
+    
     init(
         minHue: CGFloat,
         maxHue: CGFloat,

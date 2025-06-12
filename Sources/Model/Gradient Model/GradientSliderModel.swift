@@ -51,6 +51,10 @@ struct GradientSliderModel: ColorSliderDataSource {
     
     let sliderColors: [Color]
     
+    var colorSource: ColorSourceProvider {
+        return .array(sliderColors)
+    }
+    
     init(startColor: Color, endColor: Color, count: Int) {
         self.startColor = startColor
         self.endColor = endColor
