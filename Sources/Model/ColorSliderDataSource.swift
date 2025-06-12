@@ -4,7 +4,7 @@ enum ColorSourceProvider {
     /**
      Provides colors as a precomputed array.
      
-     Used for hard-edge color color sliders.
+     Used for hard-edge color sliders.
      */
     case array([Color])
     

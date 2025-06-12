@@ -640,7 +640,7 @@ struct SpectrumSliderModel: ColorSliderDataSource {
     }
     
     /**
-     Generates an array of `Color` objects for the  color slider, combining
+     Generates an array of `Color` objects for the color slider, combining
      `monochromeStartColors`, `hueColors` and `monochromeEndColors`.
      
      - Parameters:
