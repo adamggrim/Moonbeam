@@ -4,7 +4,7 @@ enum ColorSourceProvider {
     /**
      Provides colors as a precomputed array.
      
-     Used for hard-edge color sliders.
+     Designed for hard-edge color sliders.
      */
     case array([Color])
     
@@ -12,9 +12,9 @@ enum ColorSourceProvider {
      Dynamically calculates a color based on normalized position (i.e., 0.0 to
      1.0).
     
-     Used for spectrum and gradient color sliders.
+     Designed for spectrum and gradient color sliders.
      */
-    case dynamic((_ position: Double) -> Color)
+    case function((_ position: Double) -> Color)
 }
 
 /// Protocol shared by `SpectrumSliderModel` and `GradientSliderModel`.
