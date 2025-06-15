@@ -54,8 +54,9 @@ struct ColorSliderView: View {
     var body: some View {
         ZStack(alignment: .leading) {
             
-            // Color gradient capsule
+            // Capsule of selectable colors
             Capsule().fill(
+                // Render the sliderColors array as a smooth gradient.
                 LinearGradient(
                     gradient: Gradient(colors: viewModel.sliderColors),
                     startPoint: .leading,
