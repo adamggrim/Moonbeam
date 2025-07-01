@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// Represents whether the colors are defined by an array or function.
 enum ColorSourceProvider {
     /**
      Provides colors as a precomputed array.

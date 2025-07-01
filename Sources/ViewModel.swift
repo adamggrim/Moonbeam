@@ -8,23 +8,22 @@ class ColorSliderViewModel {
     var isDragging: Bool = false
     
     /**
-     Represents the current horizontal drag within the parent container view,
-     equivalent to the `value.translation.width` of the `DragGesture`.
+     The current horizontal drag within the parent container view, equivalent
+     to the `value.translation.width` of the `DragGesture`.
      
      Can extend beyond the end of the slider.
      */
     private var liveContainerDrag: CGFloat = .zero
     
     /**
-     Represents the persisted horizontal position of the start of the thumb on
-     the slider.
+     The persisted horizontal position of the start of the thumb on the slider.
      
      Cannot extend beyond the thumb's leading edge at the end of the slider.
      */
     private var persistedThumbPosition: CGFloat = .zero
     
     /**
-     Represents the current `liveContainerDrag` combined with the
+     The current `liveContainerDrag` combined with the
      `persistedThumbPosition`. Equivalent to the horizontal position of the
      thumb's leading edge during a `DragGesture`.
      
@@ -35,8 +34,8 @@ class ColorSliderViewModel {
     private var liveContainerThumbDrag: CGFloat = .zero
     
     /**
-     Represents the clamped horizontal position of the current selected color
-     on the slider.
+     The clamped horizontal position of the current selected color on the
+     slider.
      
      For most of the slider, corresponds with the horizontal position of the
      thumb's center. At the start or end of the slider, can extend beyond the
@@ -45,16 +44,16 @@ class ColorSliderViewModel {
     private var liveColorPosition: CGFloat = .zero
     
     /**
-     Represents the clamped horizontal position of the start of the thumb
-     during an active drag.
+     The clamped horizontal position of the start of the thumb during an active
+     drag.
      
      Cannot extend beyond the thumb's leading edge at the end of the slider.
      */
     private var liveThumbPosition: CGFloat = .zero
     
     /**
-     Represents the position of the selected color in the slider, normalized to
-     a range from 0.0 to 1.0.
+     The position of the selected color in the slider, normalized to a range
+     from 0.0 to 1.0.
      */
     private var positionRatio: CGFloat
     
@@ -125,7 +124,7 @@ class ColorSliderViewModel {
     }
     
     /**
-     Calculates the horizontal offset for the color preview.
+     The horizontal offset for the color preview.
      
      Except at the ends of the slider, the color preview is centered above the
      thumb's center.
@@ -139,14 +138,13 @@ class ColorSliderViewModel {
         let clampedValue = min(max(liveThumbPosition, leftBound), rightBound)
         
         /**
-         Represents the offset that centers the floating color preview above
-         the thumb.
+         The offset that centers the floating color preview above the thumb.
          */
         let halfThumbOffset = thumbOffset + halfThumbWidth
         
         /**
-         Represents the offset that positions the floating color preview at one
-         quarter the length of the thumb.
+         The offset that positions the floating color preview at one quarter
+         the length of the thumb.
          
          Used when `thumbStyle` is `.circle`.
          */
@@ -194,7 +192,7 @@ class ColorSliderViewModel {
         }
     }
     
-    /// Represents the offset of the thumb's leading edge.
+    /// The offset of the thumb's leading edge.
     var thumbOffset: CGFloat {
         let leftBound = thumbInset
         let rightBound = dimensions.sliderWidth - dimensions.thumbWidth - thumbInset
