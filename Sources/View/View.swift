@@ -5,11 +5,6 @@ enum ThumbStyle {
     case capsule, circle
 }
 
-/// The orientation of the color slider.
-enum Orientation {
-    case horizontal, vertical
-}
-
 struct ColorSliderView: View {
     @State private var viewModel: ColorSliderViewModel
     
