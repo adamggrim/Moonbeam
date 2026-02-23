@@ -1,7 +1,7 @@
 import Foundation
 
 /**
- Encapsulates various layout dimensions for a color slider and its components.
+ Encapsulates various layout dimensions for the color slider and its components.
 
  The initializer provides default logic for `thumbWidth`, `thumbHeight`, and
  `previewCornerRadius`.
