@@ -2,7 +2,7 @@
 
 `Moonbeam` is a Swift package for color sliders with floating color previews.
 
-For a given hue range, `Moonbeam` lets you bend saturation or brightness in specific sections. It also supports gradients and custom thumb styles.
+For a given hue range, `Moonbeam` lets you bend saturation or brightness in specific sections. It also supports custom gradients and thumb styles.
 
 ## Requirements
 
