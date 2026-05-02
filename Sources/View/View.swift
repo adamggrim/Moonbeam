@@ -37,6 +37,7 @@ struct ColorSliderView: View {
         )
                 
         self._viewModel = State(initialValue: ColorSliderViewModel(
+            positionRatio: 0.0,
             thumbStyle: thumbStyle,
             previewHidden: previewHidden,
             dimensions: dimensions,
@@ -44,6 +45,8 @@ struct ColorSliderView: View {
         ))
         self.dimensions = dimensions
         self.duration = duration
+        
+        self.thumbColor = thumbColor
     }
     
     var body: some View {
@@ -53,7 +56,7 @@ struct ColorSliderView: View {
             Capsule().fill(
                 // Render the dynamically calculated gradient.
                 LinearGradient(
-                    gradient: Gradient(colors: viewModel.sliderColors),
+                    gradient: viewModel.trackGradient,
                     startPoint: .leading,
                     endPoint: .trailing
                 )
@@ -79,23 +82,24 @@ struct ColorSliderView: View {
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        withAnimation(.easeInOut(duration: duration)) {
-                            viewModel.isDragging = true
+                        if !viewModel.isDragging {
+                            withAnimation(.easeInOut(duration: duration)) {
+                                viewModel.isDragging = true
+                            }
                         }
-                        viewModel.startingColor = viewModel.calculatedColor
                         viewModel.onDragChanged(value)
                     }
                     .onEnded { value in
                         withAnimation(.easeInOut(duration: duration)) {
                             viewModel.isDragging = false
+                            viewModel.onDragEnded()
                         }
-                        viewModel.onDragEnded()
                     }
             )
             
             // Floating color preview
             RoundedRectangle(cornerRadius: dimensions.previewCornerRadius)
-                .foregroundColor(viewModel.startingColor)
+                .foregroundColor(viewModel.calculatedColor)
                 .frame(
                     width: dimensions.previewWidth,
                     height: dimensions.previewWidth
