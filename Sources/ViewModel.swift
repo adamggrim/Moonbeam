@@ -57,7 +57,7 @@ class ColorSliderViewModel {
      */
     private var positionRatio: CGFloat
     
-    private let previewHidden: Bool
+    let previewHidden: Bool
     
     /**
      Stores various layout dimensions for the color slider, as defined by
@@ -75,8 +75,10 @@ class ColorSliderViewModel {
     
     /// Whether the thumb is a `.capsule` or `.circle`.
     let thumbStyle: ThumbStyle
-    /// An array of the colors in the slider.
-    let sliderColors: [Color]
+    /// The dynamically calculated gradient mapped to the slider's pixel width.
+    let trackGradient: Gradient
+    /// The source providing color data (either an array or a function).
+    let dataSource: ColorSliderDataSource
     
     init(
         positionRatio: CGFloat,
@@ -86,7 +88,6 @@ class ColorSliderViewModel {
         dataSource: ColorSliderDataSource
     ) {
         self.positionRatio = positionRatio
-        self.sliderColors = dataSource.sliderColors
         self.thumbStyle = thumbStyle
         if thumbStyle == .capsule {
             self.thumbInset = 0.0
@@ -95,6 +96,22 @@ class ColorSliderViewModel {
         }
         self.previewHidden = previewHidden
         self.dimensions = dimensions
+        
+        self.dataSource = dataSource
+        
+        switch dataSource.colorSource {
+        case .array(let colors):
+            self.trackGradient = Gradient(colors: colors)
+            
+        case .function(let colorGenerator):
+            let exactPixelWidth = max(1, Int(dimensions.sliderWidth))
+            
+            let stops = (0...exactPixelWidth).map { i -> Gradient.Stop in
+                let ratio = Double(i) / Double(exactPixelWidth)
+                return Gradient.Stop(color: colorGenerator(ratio), location: CGFloat(ratio))
+            }
+            self.trackGradient = Gradient(stops: stops)
+        }
         
         self.halfThumbWidth = dimensions.thumbWidth / 2
         
@@ -116,11 +133,17 @@ class ColorSliderViewModel {
      current position.
      */
     var calculatedColor: Color {
-        let calculatedIndex = Int(
-            CGFloat(sliderColors.count) * (liveColorPosition / dimensions.sliderWidth)
-        )
-        let clampedIndex = max(0, min(sliderColors.count - 1, calculatedIndex))
-        return sliderColors[clampedIndex]
+        let clampedRatio = max(0.0, min(1.0, liveColorPosition / dimensions.sliderWidth))
+        
+        switch dataSource.colorSource {
+        case .array(let colors):
+            let calculatedIndex = Int(CGFloat(colors.count) * clampedRatio)
+            let clampedIndex = max(0, min(colors.count - 1, calculatedIndex))
+            return colors[clampedIndex]
+            
+        case .function(let colorGenerator):
+            return colorGenerator(clampedRatio)
+        }
     }
     
     /**
@@ -158,15 +181,12 @@ class ColorSliderViewModel {
             switch thumbStyle {
             case .capsule:
                 leftEdgeLimit = -halfPreviewWidth + halfThumbOffset
-                rightEdgeLimit = (
-                    dimensions.sliderWidth - halfPreviewWidth - halfThumbWidth
-                )
+                rightEdgeLimit = -halfPreviewWidth + halfThumbOffset
                 offsetAdjustment = halfThumbWidth
             case .circle:
                 leftEdgeLimit = -halfPreviewWidth + quarterThumbOffset
-                rightEdgeLimit = (
-                    dimensions.sliderWidth - halfPreviewWidth - quarterThumbWidth
-                )
+                let threeQuarterThumbOffset = thumbOffset + dimensions.thumbWidth - quarterThumbWidth
+                rightEdgeLimit = -halfPreviewWidth + threeQuarterThumbOffset
                 offsetAdjustment = halfThumbWidth
             }
             
