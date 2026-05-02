@@ -6,6 +6,23 @@ enum BendableComponent {
     case saturation, brightness
 }
 
+/// A declarative builder for assembling bend sections.
+@resultBuilder
+public struct BendSectionBuilder {
+    public static func buildBlock(_ components: BendSection...) -> [BendSection] {
+        return Array(components)
+    }
+    public static func buildOptional(_ component: [BendSection]?) -> [BendSection] {
+        return component ?? []
+    }
+    public static func buildEither(first component: [BendSection]) -> [BendSection] {
+        return component
+    }
+    public static func buildEither(second component: [BendSection]) -> [BendSection] {
+        return component
+    }
+}
+
 /// Model for calculating spectrum colors dynamically.
 struct SpectrumSliderModel: ColorSliderDataSource {
     /// Error for when `validateBendSections()` returns `false`
