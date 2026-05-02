@@ -51,7 +51,7 @@ struct ColorSliderView: View {
             
             // Capsule of selectable colors
             Capsule().fill(
-                // Render the sliderColors array as a smooth gradient.
+                // Render the dynamically calculated gradient.
                 LinearGradient(
                     gradient: Gradient(colors: viewModel.sliderColors),
                     startPoint: .leading,
