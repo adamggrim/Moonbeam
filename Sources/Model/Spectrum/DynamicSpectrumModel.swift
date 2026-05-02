@@ -116,7 +116,7 @@ struct SpectrumGenerator {
         
         if let bendSections = bendSections {
             for bend in bendSections {
-                if let oneWay = bend as? OneWayBendSection {
+                if let oneWay = bend as? OneWayBend {
                     if oneWay.startHue == minHue {
                         startTargetSaturation = oneWay.targetSaturation
                         startTargetBrightness = oneWay.targetBrightness
@@ -183,30 +183,30 @@ struct SpectrumGenerator {
         guard let bendSections = bendSections, !bendSections.isEmpty else { return defaultValue }
         guard validateBendSections(bendSections: bendSections) else { throw InvalidBendSectionError() }
         guard let relevantBend = bendSections.first(where: { $0.startHue <= hue && hue <= $0.endHue }) else { return defaultValue }
-        
-        if let oneWay = relevantBend as? OneWayBendSection {
-            let valueIncrement = bendableComponent == .saturation ? oneWay.saturationIncrement : oneWay.brightnessIncrement
-            let offset = hue - oneWay.startHue
+
+        let targetValue = bendableComponent == .saturation ? relevantBend.targetSaturation : relevantBend.targetBrightness
+        let valueDelta = defaultValue - targetValue
+        let offset = hue - relevantBend.startHue
+
+        if let oneWay = relevantBend as? OneWayBend {
+            let valueIncrement = oneWay.hueCount != 0 ? (valueDelta / oneWay.hueCount) : 0
             
             if oneWay.startHue == minHue {
-                let target = bendableComponent == .saturation ? oneWay.targetSaturation : oneWay.targetBrightness
-                return target + (valueIncrement * offset)
+                // If starting at the minimum end, interpolate up to the default value.
+                return targetValue + (valueIncrement * offset)
             } else {
+                // Otherwise, interpolate down.
                 let numIncrements = valueIncrement * offset
                 return defaultValue - numIncrements
             }
-        } else if let twoWay = relevantBend as? TwoWayBendSection {
+        } else if let twoWay = relevantBend as? TwoWayBend {
+            // Smooth sine-wave interpolation for TwoWayBends
             let position = (hue - twoWay.startHue) / twoWay.hueCount
-            
             let curveProgress = sin(position * .pi)
             
-            let totalDelta = bendableComponent == .saturation
-                ? (twoWay.baseSaturation - twoWay.targetSaturation)
-                : (twoWay.baseBrightness - twoWay.targetBrightness)
-            
-            return defaultValue - (totalDelta * curveProgress)
+            return defaultValue - (valueDelta * curveProgress)
         }
-        
+
         return defaultValue
     }
 }
