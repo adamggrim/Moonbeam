@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import Observation
 
+@MainActor
 @Observable
 class ColorSliderViewModel {
     /// Indicates whether a drag gesture is currently active.
