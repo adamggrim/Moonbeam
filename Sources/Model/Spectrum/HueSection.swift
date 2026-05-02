@@ -9,12 +9,10 @@ protocol BendSection {
     var endHue: CGFloat { get }
     
     var targetSaturation: CGFloat { get }
-    var defaultSaturation: CGFloat { get }
-    var saturationIncrement: CGFloat { get }
+    var baseSaturation: CGFloat { get }
     
     var targetBrightness: CGFloat { get }
-    var defaultBrightness: CGFloat { get }
-    var brightnessIncrement: CGFloat { get }
+    var baseBrightness: CGFloat { get }
     
     var hueCount: CGFloat { get }
 }
@@ -51,11 +49,11 @@ struct OneWayBendSection: BendSection {
     let endHue: CGFloat
     
     let targetSaturation: CGFloat
-    let defaultSaturation: CGFloat
+    let baseSaturation: CGFloat
     let saturationIncrement: CGFloat
     
     let targetBrightness: CGFloat
-    let defaultBrightness: CGFloat
+    let baseBrightness: CGFloat
     let brightnessIncrement: CGFloat
     
     let hueCount: CGFloat
@@ -64,23 +62,23 @@ struct OneWayBendSection: BendSection {
         startHue: CGFloat,
         endHue: CGFloat,
         targetSaturation: CGFloat,
-        defaultSaturation: CGFloat,
+        baseSaturation: CGFloat,
         targetBrightness: CGFloat,
-        defaultBrightness: CGFloat
+        baseBrightness: CGFloat
     ) {
         let hueCount = endHue - startHue
-        let saturationDelta = defaultSaturation - targetSaturation
-        let brightnessDelta = defaultBrightness - targetBrightness
+        let saturationDelta = baseSaturation - targetSaturation
+        let brightnessDelta = baseBrightness - targetBrightness
         
         self.startHue = startHue
         self.endHue = endHue
         
         self.targetSaturation = targetSaturation
-        self.defaultSaturation = defaultSaturation
+        self.baseSaturation = baseSaturation
         self.saturationIncrement = hueCount != 0 ? saturationDelta / hueCount : 0
         
         self.targetBrightness = targetBrightness
-        self.defaultBrightness = defaultBrightness
+        self.baseBrightness = baseBrightness
         self.brightnessIncrement = hueCount != 0 ? brightnessDelta / hueCount : 0
         
         self.hueCount = hueCount
@@ -93,42 +91,30 @@ struct TwoWayBendSection: BendSection {
     let endHue: CGFloat
     
     let targetSaturation: CGFloat
-    let defaultSaturation: CGFloat
-    let saturationIncrement: CGFloat
+    let baseSaturation: CGFloat
     
     let targetBrightness: CGFloat
-    let defaultBrightness: CGFloat
-    let brightnessIncrement: CGFloat
+    let baseBrightness: CGFloat
     
     let hueCount: CGFloat
-    let middleHue: CGFloat
     
     init(
         startHue: CGFloat,
         endHue: CGFloat,
         targetSaturation: CGFloat,
-        defaultSaturation: CGFloat,
+        baseSaturation: CGFloat,
         targetBrightness: CGFloat,
-        defaultBrightness: CGFloat
+        baseBrightness: CGFloat
     ) {
-        let hueCount = endHue - startHue
-        let middleHue: CGFloat = (startHue + hueCount) / 2
-        let denominator = abs(middleHue * 360 - startHue)
-        let saturationDelta = defaultSaturation - targetSaturation
-        let brightnessDelta = defaultBrightness - targetBrightness
-        
         self.startHue = startHue
         self.endHue = endHue
         
         self.targetSaturation = targetSaturation
-        self.defaultSaturation = defaultSaturation
-        self.saturationIncrement = denominator != 0 ? saturationDelta / denominator : 0
+        self.baseSaturation = baseSaturation
         
         self.targetBrightness = targetBrightness
-        self.defaultBrightness = defaultBrightness
-        self.brightnessIncrement = denominator != 0 ? brightnessDelta / denominator : 0
+        self.baseBrightness = baseBrightness
         
-        self.hueCount = hueCount
-        self.middleHue = middleHue
+        self.hueCount = endHue - startHue
     }
 }
