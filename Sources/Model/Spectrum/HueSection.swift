@@ -1,9 +1,7 @@
 import Foundation
 
-/**
- A protocol for a section of the color slider with special conditions for
- saturation or brightness.
- */
+
+/// A protocol for a section of the color slider with special conditions for saturation or brightness.
 public protocol BendSection {
     var startHue: CGFloat { get }
     var endHue: CGFloat { get }
@@ -14,28 +12,30 @@ public protocol BendSection {
     var hueCount: CGFloat { get }
 }
 
-/**
- The color section of the color slider, for showing the full spectrum of color
- options.
- */
-public struct HueSection {
-    let minHue: CGFloat
-    let maxHue: CGFloat
-    let count: CGFloat
-    let stepSize: CGFloat
+/// The core component representing the colorful spectrum of the slider.
+public struct HueSection: SliderComponent {
+    public let minHue: CGFloat
+    public let maxHue: CGFloat
+    public let baseSaturation: CGFloat
+    public let baseBrightness: CGFloat
+    public let bendSections: [BendSection]?
+    public let count: CGFloat
 
-    public init(minHue: CGFloat, maxHue: CGFloat) {
+    public init(
+        minHue: CGFloat,
+        maxHue: CGFloat,
+        baseSaturation: CGFloat = 1.0,
+        baseBrightness: CGFloat = 1.0,
+        @BendSectionBuilder bends: () -> [BendSection] = { [] }
+    ) {
         self.minHue = minHue
         self.maxHue = maxHue
+        self.baseSaturation = baseSaturation
+        self.baseBrightness = baseBrightness
 
-        let calculatedCount = maxHue - minHue
-        self.count = calculatedCount
-
-        if calculatedCount - 1 > 0 {
-            self.stepSize = 1.0 / (calculatedCount - 1)
-        } else {
-            self.stepSize = 0.0
-        }
+        let evaluatedBends = bends()
+        self.bendSections = evaluatedBends.isEmpty ? nil : evaluatedBends
+        self.count = maxHue - minHue
     }
 }
 

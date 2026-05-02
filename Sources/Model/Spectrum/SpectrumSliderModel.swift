@@ -6,34 +6,32 @@ public enum BendableComponent {
     case saturation, brightness
 }
 
-/// A declarative builder for assembling bend sections.
 @resultBuilder
 public struct BendSectionBuilder {
-    public static func buildBlock(_ components: BendSection...) -> [BendSection] {
-        return Array(components)
-    }
-    public static func buildOptional(_ component: [BendSection]?) -> [BendSection] {
-        return component ?? []
-    }
-    public static func buildEither(first component: [BendSection]) -> [BendSection] {
-        return component
-    }
-    public static func buildEither(second component: [BendSection]) -> [BendSection] {
-        return component
-    }
+    public static func buildBlock(_ components: BendSection...) -> [BendSection] { return Array(components) }
+    public static func buildOptional(_ component: [BendSection]?) -> [BendSection] { return component ?? [] }
+    public static func buildEither(first component: [BendSection]) -> [BendSection] { return component }
+    public static func buildEither(second component: [BendSection]) -> [BendSection] { return component }
+}
+
+@resultBuilder
+public struct SpectrumComponentBuilder {
+    public static func buildBlock(_ components: SliderComponent...) -> [SliderComponent] { return Array(components) }
+    public static func buildOptional(_ component: [SliderComponent]?) -> [SliderComponent] { return component ?? [] }
+    public static func buildEither(first component: [SliderComponent]) -> [SliderComponent] { return component }
+    public static func buildEither(second component: [SliderComponent]) -> [SliderComponent] { return component }
 }
 
 /// Model for calculating spectrum colors dynamically.
 public struct SpectrumSliderModel: ColorSliderDataSource {
-    private struct InvalidBendSectionError: Error {
+    private struct InvalidArchitectureError: Error {
         let message: String
-        init(message: String = "Invalid bend section") {
+        init(message: String = "Slider architecture is invalid.") {
             self.message = message
         }
     }
 
     private static func validateBendSections(bendSections: [BendSection]) -> Bool {
-        guard bendSections.count > 0 else { return false }
         guard bendSections.count > 1 else { return true }
 
         let sortedBendSections = bendSections.sorted { $0.startHue < $1.startHue }
@@ -45,54 +43,39 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
         return true
     }
 
-    private let minHue: CGFloat
-    private let maxHue: CGFloat
-    private let baseSaturation: CGFloat
-    private let baseBrightness: CGFloat
-    private let blackSection: BlackSection?
-    private let whiteSection: WhiteSection?
-    private let bendSections: [BendSection]?
-    private let priorityColor: MonochromeColor?
+    private let startSections: [MonochromeSection]
+    private let endSections: [MonochromeSection]
+    private let hueSection: HueSection
 
     public var colorSource: ColorSourceProvider {
         return .function { position in
             SpectrumGenerator.color(
                 at: position,
-                minHue: minHue,
-                maxHue: maxHue,
-                blackSection: blackSection,
-                whiteSection: whiteSection,
-                bendSections: bendSections,
-                priorityColor: priorityColor,
-                baseSaturation: baseSaturation,
-                baseBrightness: baseBrightness
+                startSections: startSections,
+                endSections: endSections,
+                hueSection: hueSection
             )
         }
     }
 
-    public init(
-        minHue: CGFloat,
-        maxHue: CGFloat,
-        baseSaturation: CGFloat = 1.0,
-        baseBrightness: CGFloat = 1.0,
-        blackSection: BlackSection? = nil,
-        whiteSection: WhiteSection? = nil,
-        priorityColor: MonochromeColor? = nil,
-        @BendSectionBuilder bendSections: () -> [BendSection] = { [] }
-    ) throws {
-        let evaluatedBends = bendSections()
+    public init(@SpectrumComponentBuilder components: () -> [SliderComponent]) throws {
+        let evaluatedComponents = components()
         
-        if !evaluatedBends.isEmpty, !Self.validateBendSections(bendSections: evaluatedBends) {
-            throw InvalidBendSectionError()
+        let hueSections = evaluatedComponents.compactMap { $0 as? HueSection }
+        guard let mainHueSection = hueSections.first, hueSections.count == 1 else {
+            throw InvalidArchitectureError(message: "Slider must contain exactly one HueSection.")
         }
-
-        self.minHue = minHue
-        self.maxHue = maxHue
-        self.baseSaturation = baseSaturation
-        self.baseBrightness = baseBrightness
-        self.blackSection = blackSection
-        self.whiteSection = whiteSection
-        self.bendSections = evaluatedBends.isEmpty ? nil : evaluatedBends
-        self.priorityColor = priorityColor
+        
+        if let bends = mainHueSection.bendSections, !Self.validateBendSections(bendSections: bends) {
+            throw InvalidArchitectureError(message: "Bend sections are overlapping.")
+        }
+        
+        let hueIndex = evaluatedComponents.firstIndex { $0 is HueSection }!
+        let beforeHue = evaluatedComponents.prefix(upTo: hueIndex).compactMap { $0 as? MonochromeSection }
+        let afterHue = evaluatedComponents.suffix(from: hueIndex + 1).compactMap { $0 as? MonochromeSection }
+        
+        self.hueSection = mainHueSection
+        self.startSections = beforeHue
+        self.endSections = afterHue
     }
 }
