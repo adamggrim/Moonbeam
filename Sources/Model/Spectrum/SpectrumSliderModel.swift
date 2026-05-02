@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 /// Represents the HSB components on the color slider that can bend.
-enum BendableComponent {
+public enum BendableComponent {
     case saturation, brightness
 }
 
@@ -24,8 +24,7 @@ public struct BendSectionBuilder {
 }
 
 /// Model for calculating spectrum colors dynamically.
-struct SpectrumSliderModel: ColorSliderDataSource {
-    /// Error for when `validateBendSections()` returns `false`
+public struct SpectrumSliderModel: ColorSliderDataSource {
     private struct InvalidBendSectionError: Error {
         let message: String
         init(message: String = "Invalid bend section") {
@@ -33,20 +32,12 @@ struct SpectrumSliderModel: ColorSliderDataSource {
         }
     }
 
-    private static func validateBendSections(
-        bendSections: [BendSection]
-    ) -> Bool {
+    private static func validateBendSections(bendSections: [BendSection]) -> Bool {
         guard bendSections.count > 0 else { return false }
         guard bendSections.count > 1 else { return true }
 
-        let sortedBendSections = bendSections.sorted {
-            $0.startHue < $1.startHue
-        }
-
-        for (currentSection, nextSection) in zip(
-            sortedBendSections,
-            sortedBendSections.dropFirst()
-        ) {
+        let sortedBendSections = bendSections.sorted { $0.startHue < $1.startHue }
+        for (currentSection, nextSection) in zip(sortedBendSections, sortedBendSections.dropFirst()) {
             if currentSection.endHue > nextSection.startHue {
                 return false
             }
@@ -56,14 +47,14 @@ struct SpectrumSliderModel: ColorSliderDataSource {
 
     private let minHue: CGFloat
     private let maxHue: CGFloat
-    private let baseSaturation: CGFloat = 1.0
-    private let baseBrightness: CGFloat = 1.0
+    private let baseSaturation: CGFloat
+    private let baseBrightness: CGFloat
     private let blackSection: BlackSection?
     private let whiteSection: WhiteSection?
     private let bendSections: [BendSection]?
     private let priorityColor: MonochromeColor?
 
-    var colorSource: ColorSourceProvider {
+    public var colorSource: ColorSourceProvider {
         return .function { position in
             SpectrumGenerator.color(
                 at: position,
@@ -79,23 +70,29 @@ struct SpectrumSliderModel: ColorSliderDataSource {
         }
     }
 
-    init(
+    public init(
         minHue: CGFloat,
         maxHue: CGFloat,
+        baseSaturation: CGFloat = 1.0,
+        baseBrightness: CGFloat = 1.0,
         blackSection: BlackSection? = nil,
         whiteSection: WhiteSection? = nil,
-        bendSections: [BendSection]? = nil,
-        priorityColor: MonochromeColor? = nil
+        priorityColor: MonochromeColor? = nil,
+        @BendSectionBuilder bendSections: () -> [BendSection] = { [] }
     ) throws {
-        if let bendSections = bendSections, !Self.validateBendSections(bendSections: bendSections) {
+        let evaluatedBends = bendSections()
+        
+        if !evaluatedBends.isEmpty, !Self.validateBendSections(bendSections: evaluatedBends) {
             throw InvalidBendSectionError()
         }
-        
+
         self.minHue = minHue
         self.maxHue = maxHue
+        self.baseSaturation = baseSaturation
+        self.baseBrightness = baseBrightness
         self.blackSection = blackSection
         self.whiteSection = whiteSection
-        self.bendSections = bendSections
+        self.bendSections = evaluatedBends.isEmpty ? nil : evaluatedBends
         self.priorityColor = priorityColor
     }
 }

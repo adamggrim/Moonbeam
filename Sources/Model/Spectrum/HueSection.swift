@@ -4,16 +4,13 @@ import Foundation
  A protocol for a section of the color slider with special conditions for
  saturation or brightness.
  */
-protocol BendSection {
+public protocol BendSection {
     var startHue: CGFloat { get }
     var endHue: CGFloat { get }
-    
+
     var targetSaturation: CGFloat { get }
-    var baseSaturation: CGFloat { get }
-    
     var targetBrightness: CGFloat { get }
-    var baseBrightness: CGFloat { get }
-    
+
     var hueCount: CGFloat { get }
 }
 
@@ -21,20 +18,19 @@ protocol BendSection {
  The color section of the color slider, for showing the full spectrum of color
  options.
  */
-struct HueSection {
+public struct HueSection {
     let minHue: CGFloat
     let maxHue: CGFloat
-    
     let count: CGFloat
     let stepSize: CGFloat
-    
-    init(minHue: CGFloat, maxHue: CGFloat) {
+
+    public init(minHue: CGFloat, maxHue: CGFloat) {
         self.minHue = minHue
         self.maxHue = maxHue
-        
+
         let calculatedCount = maxHue - minHue
         self.count = calculatedCount
-        
+
         if calculatedCount - 1 > 0 {
             self.stepSize = 1.0 / (calculatedCount - 1)
         } else {

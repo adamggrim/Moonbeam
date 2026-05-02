@@ -1,39 +1,49 @@
 import Foundation
 
-enum MonochromeColor {
+public enum MonochromeColor {
     case black, white
 }
 
-enum PositionOnSlider {
+public enum PositionOnSlider {
     case start, end
 }
 
 /// Section of the color slider that fades to or from a monochrome color
-protocol MonochromeSection {
+public protocol MonochromeSection {
     var color: MonochromeColor { get }
-    
+
     /// Number of monochrome gradations added to the hue section (each equal in width to a single hue)
     var count: CGFloat { get }
     var positionOnSlider: PositionOnSlider { get }
-    
+
     var stepSize: CGFloat { get }
 }
 
-extension MonochromeSection {
+public extension MonochromeSection {
     var stepSize: CGFloat {
         guard count > 1 else { return 1.0 }
         return 1.0 / (count - 1)
     }
 }
 
-struct BlackSection: MonochromeSection {
-    let color: MonochromeColor = .black
-    let count: CGFloat
-    let positionOnSlider: PositionOnSlider
+public struct BlackSection: MonochromeSection {
+    public let color: MonochromeColor = .black
+    public let count: CGFloat
+    public let positionOnSlider: PositionOnSlider
+    
+    public init(count: CGFloat, positionOnSlider: PositionOnSlider) {
+        self.count = count
+        self.positionOnSlider = positionOnSlider
+    }
 }
 
-struct WhiteSection: MonochromeSection {
-    let color: MonochromeColor = .white
-    let count: CGFloat
-    let positionOnSlider: PositionOnSlider
+public struct WhiteSection: MonochromeSection {
+    public let color: MonochromeColor = .white
+    public let count: CGFloat
+    public let positionOnSlider: PositionOnSlider
+    
+    public init(count: CGFloat, positionOnSlider: PositionOnSlider) {
+        self.count = count
+        self.positionOnSlider = positionOnSlider
+    }
 }
