@@ -31,23 +31,23 @@ struct SpectrumGenerator {
         hueSection: HueSection
     ) -> Color {
         
-        let startCount = startSections.reduce(0) { $0 + $1.count }
-        let hueCount = hueSection.count
-        let endCount = endSections.reduce(0) { $0 + $1.count }
-        let totalCount = startCount + hueCount + endCount
+        let startWeight = startSections.reduce(0) { $0 + $1.weight }
+        let hueWeight = hueSection.weight
+        let endWeight = endSections.reduce(0) { $0 + $1.weight }
+        let totalWeight = startWeight + hueWeight + endWeight
 
-        guard totalCount > 0 else {
+        guard totalWeight > 0 else {
             return .clear
         }
 
-        let startBoundary = startCount / totalCount
-        let hueBoundary = (startCount + hueCount) / totalCount
+        let startBoundary = startWeight / totalWeight
+        let hueBoundary = (startWeight + hueWeight) / totalWeight
         let clampedPosition = max(0.0, min(1.0, position))
 
         if clampedPosition < startBoundary {
             var cumulativeStart: CGFloat = 0.0
             for (index, section) in startSections.enumerated() {
-                let sectionEnd = cumulativeStart + (section.count / totalCount)
+                let sectionEnd = cumulativeStart + (section.weight / totalWeight)
                 if clampedPosition < sectionEnd {
                     let relativePos = (clampedPosition - cumulativeStart) / (sectionEnd - cumulativeStart)
                     let isLastStartSection = (index == startSections.count - 1)
@@ -70,7 +70,7 @@ struct SpectrumGenerator {
         } else {
             var cumulativeEnd = hueBoundary
             for (index, section) in endSections.enumerated() {
-                let sectionEnd = cumulativeEnd + (section.count / totalCount)
+                let sectionEnd = cumulativeEnd + (section.weight / totalWeight)
                 let isLastSection = (index == endSections.count - 1)
 
                 if clampedPosition <= sectionEnd || isLastSection {
