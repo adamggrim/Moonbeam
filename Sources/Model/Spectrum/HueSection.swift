@@ -19,7 +19,7 @@ public struct HueSection: SliderComponent {
     public let baseSaturation: CGFloat
     public let baseBrightness: CGFloat
     public let bendSections: [BendSection]?
-    public let count: CGFloat
+    public let weight: CGFloat
 
     public init(
         minHue: CGFloat,
@@ -35,7 +35,7 @@ public struct HueSection: SliderComponent {
 
         let evaluatedBends = bends()
         self.bendSections = evaluatedBends.isEmpty ? nil : evaluatedBends
-        self.count = maxHue - minHue
+        self.weight = maxHue - minHue
     }
 }
 
