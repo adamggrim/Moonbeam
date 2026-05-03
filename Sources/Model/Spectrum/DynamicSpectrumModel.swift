@@ -2,10 +2,9 @@ import SwiftUI
 
 /// A model for generating a spectrum color for a given position, suitable for shaders.
 struct SpectrumGenerator {
-    
-    /// Error for when `validateBendSections()` returns `false`
+
     private struct InvalidBendSectionError: Error {}
-    
+
     /**
      Calculates the color at a specific normalized position on the spectrum.
      
@@ -52,9 +51,10 @@ struct SpectrumGenerator {
                 if clampedPosition < sectionEnd {
                     let relativePos = (clampedPosition - cumulativeStart) / (sectionEnd - cumulativeStart)
                     let isLastStartSection = (index == startSections.count - 1)
+                    
                     return isLastStartSection
                         ? monoToHueColor(relativePosition: relativePos, isStart: true, monochromeSection: section, hueSection: hueSection)
-                        : monoToMonoColor(relativePosition: relativePos, isFadingIn: true, monochromeSection: section, hue: hueSection.minHue)
+                        : monoToMonoColor(relativePosition: relativePos, fromColor: section.color, toColor: startSections[index + 1].color, hue: hueSection.minHue)
                 }
                 cumulativeStart = sectionEnd
             }
@@ -80,7 +80,7 @@ struct SpectrumGenerator {
 
                     return isFirstEndSection
                         ? monoToHueColor(relativePosition: clampedRelativePos, isStart: false, monochromeSection: section, hueSection: hueSection)
-                        : monoToMonoColor(relativePosition: clampedRelativePos, isFadingIn: false, monochromeSection: section, hue: hueSection.maxHue)
+                        : monoToMonoColor(relativePosition: clampedRelativePos, fromColor: endSections[index - 1].color, toColor: section.color, hue: hueSection.maxHue)
                 }
                 cumulativeEnd = sectionEnd
             }
@@ -90,8 +90,7 @@ struct SpectrumGenerator {
     }
 
     // MARK: - Private Helper Functions
-    
-    /// Generates a color for a monochrome section blending into the main hue spectrum.
+
     private static func monoToHueColor(relativePosition: CGFloat, isStart: Bool, monochromeSection: MonochromeSection, hueSection: HueSection) -> Color {
         let hue = isStart ? hueSection.minHue : hueSection.maxHue
         let interpolationFactor = isStart ? relativePosition : (1.0 - relativePosition)
@@ -125,8 +124,12 @@ struct SpectrumGenerator {
         }
     }
 
-    private static func monoToMonoColor(relativePosition: CGFloat, isFadingIn: Bool, monochromeSection: MonochromeSection, hue: CGFloat) -> Color {
-        let brightness = isFadingIn ? relativePosition : (1.0 - relativePosition)
+    /// Generates a smooth gradient directly between two monochrome sections.
+    private static func monoToMonoColor(relativePosition: CGFloat, fromColor: MonochromeColor, toColor: MonochromeColor, hue: CGFloat) -> Color {
+        let startBrightness: CGFloat = (fromColor == .white) ? 1.0 : 0.0
+        let endBrightness: CGFloat = (toColor == .white) ? 1.0 : 0.0
+        
+        let brightness = startBrightness + (endBrightness - startBrightness) * relativePosition
         return Color(hue: hue, saturation: 0.0, brightness: brightness)
     }
 
