@@ -60,20 +60,20 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
 
     public init(@SpectrumComponentBuilder components: () -> [SliderComponent]) throws {
         let evaluatedComponents = components()
-        
+
         let hueSections = evaluatedComponents.compactMap { $0 as? HueSection }
         guard let mainHueSection = hueSections.first, hueSections.count == 1 else {
             throw InvalidArchitectureError(message: "Slider must contain exactly one HueSection.")
         }
-        
+
         if let bends = mainHueSection.bendSections, !Self.validateBendSections(bendSections: bends) {
             throw InvalidArchitectureError(message: "Bend sections are overlapping.")
         }
-        
+
         let hueIndex = evaluatedComponents.firstIndex { $0 is HueSection }!
         let beforeHue = evaluatedComponents.prefix(upTo: hueIndex).compactMap { $0 as? MonochromeSection }
         let afterHue = evaluatedComponents.suffix(from: hueIndex + 1).compactMap { $0 as? MonochromeSection }
-        
+
         self.hueSection = mainHueSection
         self.startSections = beforeHue
         self.endSections = afterHue

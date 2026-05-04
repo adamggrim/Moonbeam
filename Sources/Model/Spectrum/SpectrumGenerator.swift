@@ -7,11 +7,11 @@ struct SpectrumGenerator {
 
     /**
      Calculates the color at a specific normalized position on the spectrum.
-     
+
      This function re-implements the logic from `SpectrumSliderModel` to calculate a single
      color on-demand without pre-generating an array, making it suitable for use in
      a SwiftUI `Shader`.
-     
+
      - Parameters:
      - position: The normalized position (0.0 to 1.0) on the slider.
      - minHue: The minimum hue of the main color spectrum.
@@ -30,7 +30,7 @@ struct SpectrumGenerator {
         endSections: [MonochromeSection],
         hueSection: HueSection
     ) -> Color {
-        
+
         let startWeight = startSections.reduce(0) { $0 + $1.weight }
         let hueWeight = hueSection.weight
         let endWeight = endSections.reduce(0) { $0 + $1.weight }
@@ -51,7 +51,7 @@ struct SpectrumGenerator {
                 if clampedPosition < sectionEnd {
                     let relativePos = (clampedPosition - cumulativeStart) / (sectionEnd - cumulativeStart)
                     let isLastStartSection = (index == startSections.count - 1)
-                    
+
                     return isLastStartSection
                         ? monoToHueColor(relativePosition: relativePos, isStart: true, monochromeSection: section, hueSection: hueSection)
                         : monoToMonoColor(relativePosition: relativePos, fromColor: section.color, toColor: startSections[index + 1].color, hue: hueSection.minHue)
@@ -128,7 +128,7 @@ struct SpectrumGenerator {
     private static func monoToMonoColor(relativePosition: CGFloat, fromColor: MonochromeColor, toColor: MonochromeColor, hue: CGFloat) -> Color {
         let startBrightness: CGFloat = (fromColor == .white) ? 1.0 : 0.0
         let endBrightness: CGFloat = (toColor == .white) ? 1.0 : 0.0
-        
+
         let brightness = startBrightness + (endBrightness - startBrightness) * relativePosition
         return Color(hue: hue, saturation: 0.0, brightness: brightness)
     }
