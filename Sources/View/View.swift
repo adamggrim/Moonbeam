@@ -11,6 +11,8 @@ struct ColorSliderView: View {
     let dimensions: ColorSliderDimensions
     let thumbColor: Color
     let duration: Double
+    let disableLiquidGlass: Bool
+    let enableThumbScale: Bool
 
     init(
         axis: Axis = .horizontal,
@@ -24,6 +26,8 @@ struct ColorSliderView: View {
         thumbColor: Color = .white,
         thumbStyle: ThumbStyle = .capsule,
         previewHidden: Bool = true,
+        disableLiquidGlass: Bool = false,
+        enableThumbScale: Bool? = nil,
         duration: Double = 0.25,
         dataSource: ColorSliderDataSource
     ) {
@@ -49,12 +53,22 @@ struct ColorSliderView: View {
         self.dimensions = dimensions
         self.duration = duration
         self.thumbColor = thumbColor
+        self.disableLiquidGlass = disableLiquidGlass
+        
+        if let explicitScale = enableThumbScale {
+            self.enableThumbScale = explicitScale
+        } else {
+            if #available(iOS 26.0, *) {
+                self.enableThumbScale = !disableLiquidGlass
+            } else {
+                self.enableThumbScale = false
+            }
+        }
     }
 
     var body: some View {
         ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
 
-            // Track Gradient
             Capsule().fill(
                 LinearGradient(
                     gradient: viewModel.trackGradient,
@@ -66,11 +80,24 @@ struct ColorSliderView: View {
                 width: axis == .horizontal ? dimensions.length : dimensions.thickness,
                 height: axis == .horizontal ? dimensions.thickness : dimensions.length
             )
+            
+            let thumbShape = viewModel.thumbStyle == .capsule ? AnyShape(Capsule()) : AnyShape(Circle())
 
             Group {
-                switch viewModel.thumbStyle {
-                case .capsule: Capsule()
-                case .circle: Circle()
+                if #available(iOS 26.0, *), !disableLiquidGlass {
+                    Color.clear
+                        .glassEffect(
+                            viewModel.isDragging ? .regular.interactive(true) : .identity,
+                            in: thumbShape
+                        )
+                        .overlay(
+                            thumbShape
+                                .fill(thumbColor)
+                                .opacity(viewModel.isDragging ? 0.0 : 1.0)
+                        )
+                } else {
+                    thumbShape
+                        .fill(thumbColor)
                 }
             }
             .foregroundColor(thumbColor)
@@ -78,16 +105,19 @@ struct ColorSliderView: View {
                 width: axis == .horizontal ? dimensions.thumbThickness : dimensions.thumbLength,
                 height: axis == .horizontal ? dimensions.thumbLength : dimensions.thumbThickness
             )
+            .scaleEffect(viewModel.isDragging && enableThumbScale ? 1.25 : 1.0)
             .shadow(radius: dimensions.shadowRadius)
             .offset(
                 x: axis == .horizontal ? viewModel.thumbOffset : 0,
                 y: axis == .horizontal ? 0 : -viewModel.thumbOffset
             )
             .gesture(
-                DragGesture()
+                DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         if !viewModel.isDragging {
-                            withAnimation(.easeInOut(duration: duration)) { viewModel.isDragging = true }
+                            withAnimation(.easeInOut(duration: duration)) {
+                                viewModel.isDragging = true
+                            }
                         }
                         viewModel.onDragChanged(value)
                     }
@@ -147,6 +177,8 @@ extension View {
 private struct PreviewContainer: View {
     let dataSource: ColorSliderDataSource
     var axis: Axis = .horizontal
+    var thumbStyle: ThumbStyle = .capsule
+    var disableLiquidGlass: Bool = false
 
     var body: some View {
         ZStack {
@@ -159,6 +191,8 @@ private struct PreviewContainer: View {
                 previewSize: 100,
                 previewOffset: -95,
                 shadowRadius: 5,
+                thumbStyle: thumbStyle,
+                disableLiquidGlass: disableLiquidGlass,
                 dataSource: dataSource
             )
         }
