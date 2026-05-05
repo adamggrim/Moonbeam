@@ -17,21 +17,22 @@ public struct ColorSliderView: View {
 
     public init(
         selectedColor: Binding<Color>,
+        dataSource: ColorSliderDataSource,
+        
         axis: Axis = .horizontal,
-        length: CGFloat,
-        thickness: CGFloat,
+        length: CGFloat = 300,
+        thickness: CGFloat = 25,
         thumbLength: CGFloat? = nil,
         thumbThickness: CGFloat? = nil,
-        previewSize: CGFloat,
-        previewOffset: CGFloat,
-        shadowRadius: CGFloat,
+        previewSize: CGFloat = 60,
+        previewOffset: CGFloat = -70,
+        shadowRadius: CGFloat = 5,
         thumbColor: Color = .white,
         thumbStyle: ThumbStyle = .capsule,
         previewHidden: Bool = true,
         disableLiquidGlass: Bool = false,
         enableThumbScale: Bool? = nil,
-        duration: Double = 0.25,
-        dataSource: ColorSliderDataSource
+        duration: Double = 0.25
     ) {
         let dimensions = ColorSliderDimensions(
             length: length,
@@ -193,6 +194,8 @@ private struct PreviewContainer: View {
 
             ColorSliderView(
                 selectedColor: $selectedColor,
+                dataSource: dataSource,
+                
                 axis: axis,
                 length: 300,
                 thickness: 25,
@@ -200,8 +203,7 @@ private struct PreviewContainer: View {
                 previewOffset: -95,
                 shadowRadius: 5,
                 thumbStyle: thumbStyle,
-                disableLiquidGlass: disableLiquidGlass,
-                dataSource: dataSource
+                disableLiquidGlass: disableLiquidGlass
             )
         }
     }
