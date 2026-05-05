@@ -1,10 +1,10 @@
 import SwiftUI
 
-enum ThumbStyle {
+public enum ThumbStyle {
     case capsule, circle
 }
 
-struct ColorSliderView: View {
+public struct ColorSliderView: View {
     @State private var viewModel: ColorSliderViewModel
 
     @Binding var selectedColor: Color
@@ -15,7 +15,7 @@ struct ColorSliderView: View {
     let disableLiquidGlass: Bool
     let enableThumbScale: Bool
 
-    init(
+    public init(
         selectedColor: Binding<Color>,
         axis: Axis = .horizontal,
         length: CGFloat,
@@ -69,7 +69,7 @@ struct ColorSliderView: View {
         }
     }
 
-    var body: some View {
+    public var body: some View {
         ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
 
             Capsule().fill(
