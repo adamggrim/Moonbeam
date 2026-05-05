@@ -180,32 +180,3 @@ extension View {
         self.modifier(PreviewViewModifier(isDragging: isDragging, scaleRatio: scaleRatio, previewHidden: previewHidden, anchor: anchor))
     }
 }
-
-private struct PreviewContainer: View {
-    let dataSource: ColorSliderDataSource
-    var axis: Axis = .horizontal
-    var thumbStyle: ThumbStyle = .capsule
-    var disableLiquidGlass: Bool = false
-    
-    @State private var selectedColor: Color = .clear
-
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            ColorSliderView(
-                selectedColor: $selectedColor,
-                dataSource: dataSource,
-                
-                axis: axis,
-                length: 300,
-                thickness: 25,
-                previewSize: 100,
-                previewOffset: -95,
-                shadowRadius: 5,
-                thumbStyle: thumbStyle,
-                disableLiquidGlass: disableLiquidGlass
-            )
-        }
-    }
-}
