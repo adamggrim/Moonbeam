@@ -7,6 +7,7 @@ enum ThumbStyle {
 struct ColorSliderView: View {
     @State private var viewModel: ColorSliderViewModel
 
+    @Binding var selectedColor: Color
     let axis: Axis
     let dimensions: ColorSliderDimensions
     let thumbColor: Color
@@ -15,6 +16,7 @@ struct ColorSliderView: View {
     let enableThumbScale: Bool
 
     init(
+        selectedColor: Binding<Color>,
         axis: Axis = .horizontal,
         length: CGFloat,
         thickness: CGFloat,
@@ -49,6 +51,7 @@ struct ColorSliderView: View {
             dimensions: dimensions,
             dataSource: dataSource
         ))
+        self._selectedColor = selectedColor
         self.axis = axis
         self.dimensions = dimensions
         self.duration = duration
@@ -149,6 +152,8 @@ struct ColorSliderView: View {
             width: axis == .horizontal ? dimensions.length : dimensions.thumbLength,
             height: axis == .horizontal ? dimensions.thumbLength : dimensions.length
         )
+        .onChange(of: viewModel.calculatedColor, initial: true) { _, newValue in selectedColor = newValue
+        }
     }
 }
 
@@ -179,12 +184,15 @@ private struct PreviewContainer: View {
     var axis: Axis = .horizontal
     var thumbStyle: ThumbStyle = .capsule
     var disableLiquidGlass: Bool = false
+    
+    @State private var selectedColor: Color = .clear
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
             ColorSliderView(
+                selectedColor: $selectedColor,
                 axis: axis,
                 length: 300,
                 thickness: 25,
