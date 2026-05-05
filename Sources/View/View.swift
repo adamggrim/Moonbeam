@@ -6,6 +6,7 @@ public enum ThumbStyle {
 
 public struct ColorSliderView: View {
     @State private var viewModel: ColorSliderViewModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @Binding var selectedColor: Color
     let axis: Axis
@@ -119,14 +120,14 @@ public struct ColorSliderView: View {
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         if !viewModel.isDragging {
-                            withAnimation(.easeInOut(duration: duration)) {
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: duration)) {
                                 viewModel.isDragging = true
                             }
                         }
                         viewModel.onDragChanged(value)
                     }
                     .onEnded { _ in
-                        withAnimation(.easeInOut(duration: duration)) {
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: duration)) {
                             viewModel.isDragging = false
                             viewModel.onDragEnded()
                         }
