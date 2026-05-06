@@ -207,3 +207,117 @@ extension View {
         self.modifier(PreviewViewModifier(isDragging: isDragging, scaleRatio: scaleRatio, previewHidden: previewHidden, anchor: anchor))
     }
 }
+
+private struct PreviewContainer: View {
+    let dataSource: ColorSliderDataSource
+    var axis: Axis = .horizontal
+    var thumbStyle: ThumbStyle = .capsule
+    var disableLiquidGlass: Bool = false
+    
+    @State private var selectedColor: Color = .clear
+
+    var body: some View {
+        ZStack {
+            Color.white.ignoresSafeArea()
+
+            ColorSliderView(
+                selectedColor: $selectedColor,
+                dataSource: dataSource,
+                axis: axis,
+                length: 300,
+                thickness: 25,
+                previewSize: 100,
+                previewOffset: -95,
+                shadowRadius: 5,
+                thumbStyle: thumbStyle,
+                disableLiquidGlass: disableLiquidGlass
+            )
+        }
+    }
+}
+
+#Preview("Horizontal Slider") {
+    let spectrumModel = try! SpectrumSliderModel {
+        BlackSection()
+        HueSection(minHue: 0.0, maxHue: 1.0)
+        WhiteSection()
+    }
+    return PreviewContainer(dataSource: spectrumModel)
+}
+
+#Preview("Vertical Slider") {
+    let spectrumModel = try! SpectrumSliderModel {
+        BlackSection()
+        HueSection(minHue: 0.0, maxHue: 1.0)
+        WhiteSection()
+    }
+    return PreviewContainer(dataSource: spectrumModel, axis: .vertical)
+}
+
+
+#Preview("Spectrum with BendSections") {
+    let spectrumModel = try! SpectrumSliderModel {
+        HueSection(minHue: 0.0, maxHue: 1.0) {
+            OneWayBend(hue: 0.0...(40.0 / 360), saturation: 0.5)
+            TwoWayBend(hue: (200.0 / 360)...(280.0 / 360), saturation: 0.3)
+        }
+    }
+
+    return PreviewContainer(dataSource: spectrumModel)
+}
+
+#Preview("Spectrum with MonochromeSections") {
+    let spectrumModel = try! SpectrumSliderModel {
+        BlackSection()
+        WhiteSection()
+
+        HueSection(minHue: 0.0, maxHue: 1.0)
+
+        BlackSection()
+        WhiteSection()
+
+    }
+
+    return PreviewContainer(dataSource: spectrumModel)
+}
+
+#Preview("Gradient") {
+    let gradientModel = GradientSliderModel(
+        startColor: .cyan,
+        endColor: .purple
+    )
+
+    return PreviewContainer(dataSource: gradientModel)
+}
+
+#Preview("Circle Thumb (Horizontal)") {
+    let spectrumModel = try! SpectrumSliderModel {
+        BlackSection()
+        HueSection(minHue: 0.0, maxHue: 1.0)
+        WhiteSection()
+    }
+    return PreviewContainer(dataSource: spectrumModel, axis: .horizontal, thumbStyle: .circle)
+}
+
+#Preview("Circle Thumb (Vertical)") {
+    let spectrumModel = try! SpectrumSliderModel {
+        BlackSection()
+        HueSection(minHue: 0.0, maxHue: 1.0)
+        WhiteSection()
+    }
+    return PreviewContainer(dataSource: spectrumModel, axis: .vertical, thumbStyle: .circle)
+}
+
+#Preview("BendSections (Glass Disabled)") {
+    let spectrumModel = try! SpectrumSliderModel {
+        HueSection(minHue: 0.0, maxHue: 1.0) {
+            OneWayBend(hue: 0.0...(40.0 / 360), saturation: 0.5)
+            TwoWayBend(hue: (200.0 / 360)...(280.0 / 360), saturation: 0.3)
+        }
+    }
+
+    return PreviewContainer(
+        dataSource: spectrumModel,
+        disableLiquidGlass: true
+    )
+}
