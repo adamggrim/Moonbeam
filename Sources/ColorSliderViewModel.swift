@@ -56,7 +56,7 @@ class ColorSliderViewModel {
      The position of the selected color in the slider, normalized to a range
      from 0.0 to 1.0.
      */
-    private var positionRatio: CGFloat
+    var positionRatio: CGFloat
 
     let axis: Axis
     let previewHidden: Bool
