@@ -9,6 +9,7 @@ public struct ColorSliderView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @Binding var selectedColor: Color
+    let label: LocalizedStringKey
     let axis: Axis
     let dimensions: ColorSliderDimensions
     let thumbColor: Color
@@ -19,7 +20,7 @@ public struct ColorSliderView: View {
     public init(
         selectedColor: Binding<Color>,
         dataSource: ColorSliderDataSource,
-        
+        label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal,
         length: CGFloat = 300,
         thickness: CGFloat = 25,
@@ -71,9 +72,7 @@ public struct ColorSliderView: View {
         }
     }
 
-    public var body: some View {
-        ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
-
+    private var trackView: some View {
             Capsule().fill(
                 LinearGradient(
                     gradient: viewModel.trackGradient,
@@ -85,7 +84,10 @@ public struct ColorSliderView: View {
                 width: axis == .horizontal ? dimensions.length : dimensions.thickness,
                 height: axis == .horizontal ? dimensions.thickness : dimensions.length
             )
-            
+        }
+        
+        @ViewBuilder
+        private var thumbView: some View {
             let thumbShape = viewModel.thumbStyle == .capsule ? AnyShape(Capsule()) : AnyShape(Circle())
 
             Group {
@@ -133,7 +135,9 @@ public struct ColorSliderView: View {
                         }
                     }
             )
-
+        }
+        
+        private var previewView: some View {
             // Color preview
             RoundedRectangle(cornerRadius: dimensions.previewCornerRadius)
                 .foregroundColor(viewModel.calculatedColor)
@@ -150,13 +154,36 @@ public struct ColorSliderView: View {
                     y: axis == .horizontal ? dimensions.previewOffset : -viewModel.previewMainAxisOffset
                 )
         }
-        .frame(
-            width: axis == .horizontal ? dimensions.length : dimensions.thumbLength,
-            height: axis == .horizontal ? dimensions.thumbLength : dimensions.length
-        )
-        .onChange(of: viewModel.calculatedColor, initial: true) { _, newValue in selectedColor = newValue
+
+        // MARK: - Main Body
+
+        public var body: some View {
+            ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
+                trackView
+                thumbView
+                previewView
+            }
+            .frame(
+                width: axis == .horizontal ? dimensions.length : dimensions.thumbLength,
+                height: axis == .horizontal ? dimensions.thumbLength : dimensions.length
+            )
+            .onChange(of: viewModel.calculatedColor, initial: true) { _, newValue in
+                selectedColor = newValue
+            }
+            .accessibilityElement(children: .ignore) // Hides individual shapes from VoiceOver.
+            .accessibilityValue((viewModel.positionRatio).formatted(.percent))
+            .accessibilityAdjustableAction { direction in
+                switch direction {
+                case .increment:
+                    viewModel.accessibilityAdjust(by: 0.05)
+                case .decrement:
+                    viewModel.accessibilityAdjust(by: -0.05)
+                @unknown default:
+                    break
+                }
+            }
+            .accessibilityLabel(label)
         }
-    }
 }
 
 // MARK: - Modifiers & Previews
