@@ -237,6 +237,9 @@ class ColorSliderViewModel {
             max(liveContainerThumbDrag, 0 + thumbInset),
             dimensions.length - dimensions.thumbThickness - thumbInset
         )
+        
+        // Update the ratio so VoiceOver knows where the gesture finished.
+        positionRatio = liveColorPosition / dimensions.length
     }
 
     /**
@@ -248,4 +251,21 @@ class ColorSliderViewModel {
         persistedThumbPosition = liveThumbPosition
         liveContainerDrag = .zero
     }
+    
+    /**
+     Adjusts the slider by a specific percentage step (for VoiceOver).
+     */
+    func accessibilityAdjust(by percentageStep: CGFloat) {
+            let stepDelta = dimensions.length * percentageStep
+            liveContainerThumbDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensions.length)
+            
+            liveColorPosition = min(max(liveContainerThumbDrag + halfThumbThickness, 0), dimensions.length)
+            liveThumbPosition = min(
+                max(liveContainerThumbDrag, thumbInset),
+                dimensions.length - dimensions.thumbThickness - thumbInset
+            )
+            
+            persistedThumbPosition = liveThumbPosition
+            positionRatio = liveColorPosition / dimensions.length
+        }
 }
