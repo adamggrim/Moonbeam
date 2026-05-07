@@ -172,7 +172,7 @@ public struct ColorSliderView: View {
                 selectedColor = newValue
             }
             .accessibilityElement(children: .ignore) // Hides individual shapes from VoiceOver.
-            .accessibilityValue((viewModel.positionRatio).formatted(.percent))
+            .accessibilityValue(Double(viewModel.positionRatio).formatted(.percent))
             .accessibilityAdjustableAction { direction in
                 switch direction {
                 case .increment:
