@@ -55,6 +55,7 @@ public struct ColorSliderView: View {
             dataSource: dataSource
         ))
         self._selectedColor = selectedColor
+        self.label = label
         self.axis = axis
         self.dimensions = dimensions
         self.duration = duration
