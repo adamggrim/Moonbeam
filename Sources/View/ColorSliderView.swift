@@ -36,6 +36,11 @@ public struct ColorSliderView: View {
         enableThumbScale: Bool? = nil,
         duration: Double = 0.25
     ) {
+        let resolvedThumbThickness = thumbThickness ?? thickness
+        let resolvedThumbLength = thumbStyle == .circle ? resolvedThumbThickness : (thumbLength ?? thickness * 2) // Prevent a rectangular bounding box.
+        
+        let resolvedPreviewOffset = previewOffset ?? (axis == .horizontal ? -70 : 70)
+        
         let dimensions = ColorSliderDimensions(
             thickness: thickness,
             length: length,
