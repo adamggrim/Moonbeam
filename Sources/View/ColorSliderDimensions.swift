@@ -1,5 +1,9 @@
 import Foundation
 
+public enum ThumbStyle {
+    case capsule, circle
+}
+
 /// Encapsulates various layout dimensions for the color slider and its components.
 struct ColorSliderDimensions {
     let thickness: CGFloat

@@ -1,8 +1,5 @@
 import SwiftUI
 
-public enum ThumbStyle {
-    case capsule, circle
-}
 
 public struct ColorSliderView: View {
     @State private var viewModel: ColorSliderViewModel
