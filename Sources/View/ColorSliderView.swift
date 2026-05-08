@@ -17,6 +17,26 @@ public struct ColorSliderView: View {
     let disableLiquidGlass: Bool
     let enableThumbScale: Bool
 
+    /// Initializes a customizable color slider.
+        ///
+        /// - Parameters:
+        ///   - selectedColor: A binding to the currently selected color.
+        ///   - dataSource: The model providing the gradient or spectrum data.
+        ///   - label: A localized string key used for VoiceOver accessibility. Defaults to "Color Slider".
+        ///   - axis: The layout orientation of the slider. Defaults to `.horizontal`.
+        ///   - thickness: The thickness of the slider. Defaults to 25.
+        ///   - length: The length of the slider. Defaults to 300.
+        ///   - thumbThickness: The thickness of the draggable thumb. Defaults to the slider thickness.
+        ///   - thumbLength: The length of the draggable thumb. Defaults to twice slider thickness for capsules.
+        ///   - previewSize: The width and height of the floating color preview. Defaults to 60.
+        ///   - previewOffset: The offset of the preview from the slider. Defaults to -70.
+        ///   - shadowRadius: The blur radius for the shadows applied to the thumb and preview. Defaults to 5.
+        ///   - thumbColor: The fill color of the draggable thumb. Defaults to `.white`.
+        ///   - thumbStyle: The visual shape of the thumb (`.capsule` or `.circle`). Defaults to `.capsule`.
+        ///   - previewHidden: A boolean determining if the preview should only appear during active dragging. Defaults to `true`.
+        ///   - disableLiquidGlass: Set to `true` to disable the liquid glass styling on the thumb. On OS versions that do not support Liquid Glass, this flag is ignored and falls back to a standard filled shape. Defaults to `false`.
+        ///   - enableThumbScale: Set to `true` to scale the thumb up during a drag gesture. Defaults to `true` if liquid glass is supported and enabled.
+        ///   - duration: The duration of the state-change animations. Defaults to 0.25.
     public init(
         selectedColor: Binding<Color>,
         dataSource: ColorSliderDataSource,
