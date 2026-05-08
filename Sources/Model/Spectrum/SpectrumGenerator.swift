@@ -5,25 +5,23 @@ struct SpectrumGenerator {
 
     private struct InvalidBendSectionError: Error {}
 
-    /**
-     Calculates the color at a specific normalized position on the spectrum.
-
-     This function re-implements the logic from `SpectrumSliderModel` to calculate a single
-     color on-demand without pre-generating an array, making it suitable for use in
-     a SwiftUI `Shader`.
-
-     - Parameters:
-     - position: The normalized position (0.0 to 1.0) on the slider.
-     - minHue: The minimum hue of the main color spectrum.
-     - maxHue: The maximum hue of the main color spectrum.
-     - blackSection: An optional configuration for a black monochrome section.
-     - whiteSection: An optional configuration for a white monochrome section.
-     - bendSections: An optional array of sections that modify saturation/brightness.
-     - priorityColor: An optional monochrome color to place first if both black and white sections exist at the same end.
-     - baseSaturation: The saturation for areas with no bends.
-     - baseBrightness: The brightness for areas with no bends.
-     - Returns: A `SwiftUI.Color` for the specified position.
-     */
+    /// Calculates the color at a specific normalized position on the spectrum.
+    ///
+    /// This function re-implements the logic from `SpectrumSliderModel` to calculate a single
+    /// color on-demand without pre-generating an array, making it suitable for use in
+    /// a SwiftUI `Shader`.
+    ///
+    /// - Parameters:
+    ///   - position: The normalized position (0.0 to 1.0) on the slider.
+    ///   - minHue: The minimum hue of the main color spectrum.
+    ///   - maxHue: The maximum hue of the main color spectrum.
+    ///   - blackSection: An optional configuration for a black monochrome section.
+    ///   - whiteSection: An optional configuration for a white monochrome section.
+    ///   - bendSections: An optional array of sections that modify saturation/brightness.
+    ///   - priorityColor: An optional monochrome color to place first if both black and white sections exist at the same end.
+    ///   - baseSaturation: The saturation for areas with no bends.
+    ///   - baseBrightness: The brightness for areas with no bends.
+    ///   - Returns: A `SwiftUI.Color` for the specified position.
     static func color(
         at position: CGFloat,
         startSections: [MonochromeSection],

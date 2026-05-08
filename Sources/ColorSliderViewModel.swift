@@ -8,71 +8,57 @@ class ColorSliderViewModel {
     /// Indicates whether a drag gesture is currently active.
     var isDragging: Bool = false
 
-    /**
-     The current horizontal drag within the parent container view, equivalent
-     to the `value.translation.width` of the `DragGesture`.
-
-     Can extend beyond the end of the slider.
-     */
+    ///  The current horizontal drag within the parent container view, equivalent
+    ///  to the `value.translation.width` of the `DragGesture`.
+    ///
+    ///  Can extend beyond the end of the slider.
     private var liveContainerDrag: CGFloat = .zero
 
-    /**
-     The persisted horizontal position of the start of the thumb on the slider.
-
-     Cannot extend beyond the thumb's leading edge at the end of the slider.
-     */
+    /// The persisted horizontal position of the start of the thumb on the slider.
+    ///
+    /// Cannot extend beyond the thumb's leading edge at the end of the slider.
     private var persistedThumbPosition: CGFloat = .zero
 
-    /**
-     The current `liveContainerDrag` combined with the
-     `persistedThumbPosition`. Equivalent to the horizontal position of the
-     thumb's leading edge during a `DragGesture`.
-
-     This is an intermediate value calculated during an active drag.
-
-     Like `liveContainerDrag`, can extend beyond the end of the slider.
-     */
+    /// The current `liveContainerDrag` combined with the
+    /// `persistedThumbPosition`. Equivalent to the horizontal position of the
+    /// thumb's leading edge during a `DragGesture`.
+    ///
+    /// This is an intermediate value calculated during an active drag.
+    ///
+    /// Like `liveContainerDrag`, can extend beyond the end of the slider.
     private var liveContainerThumbDrag: CGFloat = .zero
 
-    /**
-     The clamped horizontal position of the current selected color on the
-     slider.
-
-     For most of the slider, corresponds with the horizontal position of the
-     thumb's center. At the start or end of the slider, can extend beyond the
-     thumb's center to the start or end of the thumb.
-     */
+    /// The clamped horizontal position of the current selected color on the
+    ///     slider.
+    ///
+    ///     For most of the slider, corresponds with the horizontal position of the
+    ///     thumb's center. At the start or end of the slider, can extend beyond the
+    ///     thumb's center to the start or end of the thumb.
     private var liveColorPosition: CGFloat = .zero
 
-    /**
-     The clamped horizontal position of the start of the thumb during an active
-     drag.
 
-     Cannot extend beyond the thumb's leading edge at the end of the slider.
-     */
+    /// The clamped horizontal position of the start of the thumb during an active
+    /// drag.
+    ///
+    /// Cannot extend beyond the thumb's leading edge at the end of the slider.
     private var liveThumbPosition: CGFloat = .zero
 
-    /**
-     The position of the selected color in the slider, normalized to a range
-     from 0.0 to 1.0.
-     */
+
+    /// The position of the selected color in the slider, normalized to a range
+    /// from 0.0 to 1.0.
     var positionRatio: CGFloat
 
     let axis: Axis
     let previewHidden: Bool
 
-    /**
-     Stores various layout dimensions for the color slider, as defined by
-     `ColorSliderDimensions`.
-     */
+    /// Stores various layout dimensions for the color slider, as defined by
+    /// `ColorSliderDimensions`.
     private let dimensions: ColorSliderDimensions
     private let halfThumbThickness: CGFloat
 
-    /**
-     Inset to adjust the left and right bounds of the thumb.
-
-     Used when `thumbStyle` is `.circle`.
-     */
+    /// Inset to adjust the left and right bounds of the thumb.
+    ///
+    /// Used when `thumbStyle` is `.circle`.
     private let thumbInset: CGFloat
 
     /// Whether the thumb is a `.capsule` or `.circle`.
@@ -125,12 +111,10 @@ class ColorSliderViewModel {
         self.liveThumbPosition = position
     }
 
-    /**
-     The color calculated from the current `liveColorPosition` on the slider.
-
-     Determines which color from `sliderColors` corresponds with the thumb's
-     current position.
-     */
+    /// The color calculated from the current `liveColorPosition` on the slider.
+    ///
+    /// Determines which color from `sliderColors` corresponds with the thumb's
+    /// current position.
     var calculatedColor: Color {
         let clampedRatio = max(0.0, min(1.0, liveColorPosition / dimensions.length))
         switch dataSource.colorSource {
@@ -143,12 +127,10 @@ class ColorSliderViewModel {
         }
     }
 
-    /**
-     The horizontal offset for the color preview.
-
-     Except at the ends of the slider, the color preview is centered above the
-     thumb's center.
-     */
+    /// The horizontal offset for the color preview.
+    ///
+    /// Except at the ends of the slider, the color preview is centered above the
+    /// thumb's center.
     var previewMainAxisOffset: CGFloat {
         let halfPreviewSize = dimensions.previewSize / 2
         let quarterThumbThickness = halfThumbThickness / 2
@@ -159,12 +141,11 @@ class ColorSliderViewModel {
         /// The offset that centers the floating color preview above the thumb.
         let halfThumbOffset = thumbOffset + halfThumbThickness
 
-        /**
-         The offset that positions the floating color preview at one quarter
-         the length of the thumb.
 
-         Used when `thumbStyle` is `.circle`.
-         */
+        /// The offset that positions the floating color preview at one quarter
+        /// the length of the thumb.
+        ///
+        /// Used when `thumbStyle` is `.circle`.
         let quarterThumbOffset = thumbOffset + quarterThumbThickness
 
         let startEdgeLimit: CGFloat
@@ -211,25 +192,22 @@ class ColorSliderViewModel {
         return min(max(liveThumbPosition, leftBound), rightBound)
     }
 
-    /**
-     Updates the ViewModel's state when the position of the `DragGesture`
-     changes.
 
-     Called continuously while the user is dragging the thumb. Calculates
-     `liveContainerThumbDrag`, `liveColorPosition` and`liveThumbPosition`.
-
-     - Parameter value: The current value of the `DragGesture`.
-     */
+    /// Updates the ViewModel's state when the position of the `DragGesture`
+    /// changes.
+    ///
+    /// Called continuously while the user is dragging the thumb. Calculates
+    /// `liveContainerThumbDrag`, `liveColorPosition` and`liveThumbPosition`.
+    ///
+    /// - Parameter value: The current value of the `DragGesture`.
     func onDragChanged(_ value: DragGesture.Value) {
         let translation = axis == .horizontal ? value.translation.width : -value.translation.height
 
         liveContainerDrag = translation
         liveContainerThumbDrag = persistedThumbPosition + liveContainerDrag
 
-        /*
-         Clamp to prevent the drag gesture from displacing the thumb on rebound
-         from the left and right edges of the slider.
-        */
+        /// Clamped value to prevent the drag gesture from displacing the thumb on rebound
+        /// from the left and right edges of the slider.
         liveColorPosition = min(
             max(liveContainerThumbDrag + halfThumbThickness, 0), dimensions.length
         )
@@ -242,19 +220,15 @@ class ColorSliderViewModel {
         positionRatio = liveColorPosition / dimensions.length
     }
 
-    /**
-     Finalizes the ViewModel's state when the drag gesture ends, updating
-     `persistedThumbPosition` with the thumb's last valid clamped position
-     and resetting `liveContainerDrag` to zero.
-     */
+    /// Finalizes the ViewModel's state when the drag gesture ends, updating
+    /// `persistedThumbPosition` with the thumb's last valid clamped position
+    /// and resetting `liveContainerDrag` to zero.
     func onDragEnded() {
         persistedThumbPosition = liveThumbPosition
         liveContainerDrag = .zero
     }
-    
-    /**
-     Adjusts the slider by a specific percentage step (for VoiceOver).
-     */
+
+    /// Adjusts the slider by a specific percentage step (for VoiceOver).
     func accessibilityAdjust(by percentageStep: CGFloat) {
             let stepDelta = dimensions.length * percentageStep
             liveContainerThumbDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensions.length)
