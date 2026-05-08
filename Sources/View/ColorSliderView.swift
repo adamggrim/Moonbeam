@@ -270,7 +270,7 @@ private struct PreviewContainer: View {
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
     }
-    return PreviewContainer(dataSource: spectrumModel)
+    PreviewContainer(dataSource: spectrumModel)
 }
 
 #Preview("Vertical Slider") {
@@ -279,7 +279,7 @@ private struct PreviewContainer: View {
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
     }
-    return PreviewContainer(dataSource: spectrumModel, axis: .vertical)
+    PreviewContainer(dataSource: spectrumModel, axis: .vertical)
 }
 
 
@@ -295,7 +295,7 @@ private struct PreviewContainer: View {
         )
     }
 
-    return PreviewContainer(dataSource: spectrumModel)
+    PreviewContainer(dataSource: spectrumModel)
 }
 
 #Preview("Spectrum with MonochromeSections") {
@@ -310,7 +310,7 @@ private struct PreviewContainer: View {
 
     }
 
-    return PreviewContainer(dataSource: spectrumModel)
+    PreviewContainer(dataSource: spectrumModel)
 }
 
 #Preview("Gradient") {
@@ -319,7 +319,24 @@ private struct PreviewContainer: View {
         endColor: .purple
     )
 
-    return PreviewContainer(dataSource: gradientModel)
+    PreviewContainer(dataSource: gradientModel)
+}
+
+#Preview("Overlapping Bends (Saturation & Brightness)") {
+    let spectrumModel = try! SpectrumSliderModel {
+        HueSection(
+            minHue: 0.0,
+            maxHue: 1.0,
+            saturationBends: {
+                TwoWayBend(hue: (120.0 / 360)...(240.0 / 360), target: 0.3)
+            },
+            brightnessBends: {
+                TwoWayBend(hue: (200.0 / 360)...(300.0 / 360), target: 0.4)
+            }
+        )
+    }
+
+    PreviewContainer(dataSource: spectrumModel)
 }
 
 #Preview("Circle Thumb (Horizontal)") {
@@ -328,7 +345,7 @@ private struct PreviewContainer: View {
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
     }
-    return PreviewContainer(dataSource: spectrumModel, axis: .horizontal, thumbStyle: .circle)
+    PreviewContainer(dataSource: spectrumModel, axis: .horizontal, thumbStyle: .circle)
 }
 
 #Preview("Circle Thumb (Vertical)") {
@@ -337,7 +354,7 @@ private struct PreviewContainer: View {
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
     }
-    return PreviewContainer(dataSource: spectrumModel, axis: .vertical, thumbStyle: .circle)
+    PreviewContainer(dataSource: spectrumModel, axis: .vertical, thumbStyle: .circle)
 }
 
 #Preview("BendSections (Glass Disabled)") {
@@ -352,7 +369,7 @@ private struct PreviewContainer: View {
         )
     }
 
-    return PreviewContainer(
+    PreviewContainer(
         dataSource: spectrumModel,
         disableLiquidGlass: true
     )
@@ -364,11 +381,10 @@ private struct PreviewContainer: View {
         endColor: .yellow
     )
 
-    return PreviewContainer(
+    PreviewContainer(
         dataSource: gradientModel,
         thickness: 40,
         length: 200,
-        previewSize: 80,
         previewOffset: -100
     )
 }
