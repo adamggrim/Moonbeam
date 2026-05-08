@@ -1,16 +1,48 @@
 import Foundation
 
+// MARK: - Core Protocols
+public protocol SliderComponent {}
+
+public enum MonochromeColor {
+    case black, white
+}
+
+/// Section of the color slider that fades to or from a monochrome color.
+public protocol MonochromeSection: SliderComponent {
+    var color: MonochromeColor { get }
+
+    /// The number of monochrome gradations added to the hue section (each equal in width to a single hue).
+    var weight: CGFloat { get }
+}
 
 /// A protocol for a section of the color slider with special conditions for saturation or brightness.
 public protocol BendSection {
     var startHue: CGFloat { get }
     var endHue: CGFloat { get }
-
     var targetValue: CGFloat { get }
-
     var hueCount: CGFloat { get }
 }
 
+// MARK: - Monochrome Sections
+public struct BlackSection: MonochromeSection {
+    public let color: MonochromeColor = .black
+    public let weight: CGFloat
+
+    public init(weight: CGFloat = 1.0 / 6.0) {
+        self.weight = weight
+    }
+}
+
+public struct WhiteSection: MonochromeSection {
+    public let color: MonochromeColor = .white
+    public let weight: CGFloat
+
+    public init(weight: CGFloat = 1.0 / 6.0) {
+        self.weight = weight
+    }
+}
+
+// MARK: - Hue Section
 /// The core component representing the colorful spectrum of the slider.
 public struct HueSection: SliderComponent {
     public let minHue: CGFloat
@@ -43,6 +75,7 @@ public struct HueSection: SliderComponent {
     }
 }
 
+// MARK: - Bend Sections
 /// A bend section that fades into the start or end of a color slider.
 public struct OneWayBend: BendSection {
     public let startHue: CGFloat
