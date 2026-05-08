@@ -22,12 +22,12 @@ public struct ColorSliderView: View {
         dataSource: ColorSliderDataSource,
         label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal,
-        length: CGFloat = 300,
         thickness: CGFloat = 25,
-        thumbLength: CGFloat? = nil,
+        length: CGFloat = 300,
         thumbThickness: CGFloat? = nil,
+        thumbLength: CGFloat? = nil,
         previewSize: CGFloat = 60,
-        previewOffset: CGFloat = -70,
+        previewOffset: CGFloat? = nil,
         shadowRadius: CGFloat = 5,
         thumbColor: Color = .white,
         thumbStyle: ThumbStyle = .capsule,
@@ -37,12 +37,12 @@ public struct ColorSliderView: View {
         duration: Double = 0.25
     ) {
         let dimensions = ColorSliderDimensions(
-            length: length,
             thickness: thickness,
-            thumbLength: thumbLength,
-            thumbThickness: thumbThickness,
+            length: length,
+            thumbThickness: resolvedThumbThickness,
+            thumbLength: resolvedThumbLength,
             previewSize: previewSize,
-            previewOffset: previewOffset,
+            previewOffset: resolvedPreviewOffset,
             shadowRadius: shadowRadius
         )
 
