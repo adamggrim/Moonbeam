@@ -1,11 +1,6 @@
 import Foundation
 import SwiftUI
 
-/// Represents the HSB components on the color slider that can bend.
-public enum BendableComponent {
-    case saturation, brightness
-}
-
 @resultBuilder
 public struct BendSectionBuilder {
     public static func buildBlock(_ components: BendSection...) -> [BendSection] { return Array(components) }
@@ -66,8 +61,11 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
             throw InvalidArchitectureError(message: "Slider must contain exactly one HueSection.")
         }
 
-        if let bends = mainHueSection.bendSections, !Self.validateBendSections(bendSections: bends) {
-            throw InvalidArchitectureError(message: "Bend sections are overlapping.")
+        if let saturationBends = mainHueSection.saturationBends, !Self.validateBendSections(bendSections: saturationBends) {
+            throw InvalidArchitectureError(message: "Saturation bend sections are overlapping.")
+        }
+        if let brightnessBends = mainHueSection.brightnessBends, !Self.validateBendSections(bendSections: brightnessBends) {
+            throw InvalidArchitectureError(message: "Brightness bend sections are overlapping.")
         }
 
         let hueIndex = evaluatedComponents.firstIndex { $0 is HueSection }!

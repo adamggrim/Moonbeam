@@ -6,8 +6,7 @@ public protocol BendSection {
     var startHue: CGFloat { get }
     var endHue: CGFloat { get }
 
-    var targetSaturation: CGFloat { get }
-    var targetBrightness: CGFloat { get }
+    var targetValue: CGFloat { get }
 
     var hueCount: CGFloat { get }
 }
@@ -18,7 +17,8 @@ public struct HueSection: SliderComponent {
     public let maxHue: CGFloat
     public let baseSaturation: CGFloat
     public let baseBrightness: CGFloat
-    public let bendSections: [BendSection]?
+    public let saturationBends: [BendSection]?
+    public let brightnessBends: [BendSection]?
     public let weight: CGFloat
 
     public init(
@@ -26,16 +26,20 @@ public struct HueSection: SliderComponent {
         maxHue: CGFloat,
         baseSaturation: CGFloat = 1.0,
         baseBrightness: CGFloat = 1.0,
-        @BendSectionBuilder bends: () -> [BendSection] = { [] }
-    ) {
-        self.minHue = minHue
-        self.maxHue = maxHue
-        self.baseSaturation = baseSaturation
-        self.baseBrightness = baseBrightness
+        @BendSectionBuilder saturationBends: () -> [BendSection] = { [] },
+            @BendSectionBuilder brightnessBends: () -> [BendSection] = { [] }
+        ) {
+            self.minHue = minHue
+            self.maxHue = maxHue
+            self.baseSaturation = baseSaturation
+            self.baseBrightness = baseBrightness
 
-        let evaluatedBends = bends()
-        self.bendSections = evaluatedBends.isEmpty ? nil : evaluatedBends
-        self.weight = maxHue - minHue
+            let evaluatedSatBends = saturationBends()
+            let evaluatedBrightBends = brightnessBends()
+            
+            self.saturationBends = evaluatedSatBends.isEmpty ? nil : evaluatedSatBends
+            self.brightnessBends = evaluatedBrightBends.isEmpty ? nil : evaluatedBrightBends
+            self.weight = maxHue - minHue
     }
 }
 
@@ -43,15 +47,13 @@ public struct HueSection: SliderComponent {
 public struct OneWayBend: BendSection {
     public let startHue: CGFloat
     public let endHue: CGFloat
-    public let targetSaturation: CGFloat
-    public let targetBrightness: CGFloat
+    public let targetValue: CGFloat
     public let hueCount: CGFloat
 
-    public init(hue range: ClosedRange<CGFloat>, saturation: CGFloat = 1.0, brightness: CGFloat = 1.0) {
+    public init(hue range: ClosedRange<CGFloat>, target: CGFloat) {
         self.startHue = range.lowerBound
         self.endHue = range.upperBound
-        self.targetSaturation = saturation
-        self.targetBrightness = brightness
+        self.targetValue = target
         self.hueCount = range.upperBound - range.lowerBound
     }
 }
@@ -60,16 +62,14 @@ public struct OneWayBend: BendSection {
 public struct TwoWayBend: BendSection {
     public let startHue: CGFloat
     public let endHue: CGFloat
-    public let targetSaturation: CGFloat
-    public let targetBrightness: CGFloat
+    public let targetValue: CGFloat
     public let hueCount: CGFloat
     public let middleHue: CGFloat
 
-    public init(hue range: ClosedRange<CGFloat>, saturation: CGFloat = 1.0, brightness: CGFloat = 1.0) {
+    public init(hue range: ClosedRange<CGFloat>, target: CGFloat) {
         self.startHue = range.lowerBound
         self.endHue = range.upperBound
-        self.targetSaturation = saturation
-        self.targetBrightness = brightness
+        self.targetValue = target
         self.hueCount = range.upperBound - range.lowerBound
         self.middleHue = (self.startHue + self.hueCount) / 2
     }

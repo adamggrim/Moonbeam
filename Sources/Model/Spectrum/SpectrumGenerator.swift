@@ -60,8 +60,8 @@ struct SpectrumGenerator {
             let relativeHuePos = (hueBoundary > startBoundary) ? (clampedPosition - startBoundary) / (hueBoundary - startBoundary) : 0.0
             let currentHue = hueSection.minHue + relativeHuePos * (hueSection.maxHue - hueSection.minHue)
 
-            let saturation = (try? calculateBendValue(hue: currentHue, defaultValue: hueSection.baseSaturation, bendSections: hueSection.bendSections, bendableComponent: .saturation, hueSection: hueSection)) ?? hueSection.baseSaturation
-            let brightness = (try? calculateBendValue(hue: currentHue, defaultValue: hueSection.baseBrightness, bendSections: hueSection.bendSections, bendableComponent: .brightness, hueSection: hueSection)) ?? hueSection.baseBrightness
+            let saturation = (try? calculateBendValue(hue: currentHue, defaultValue: hueSection.baseSaturation, bendSections: hueSection.saturationBends, hueSection: hueSection)) ?? hueSection.baseSaturation
+            let brightness = (try? calculateBendValue(hue: currentHue, defaultValue: hueSection.baseBrightness, bendSections: hueSection.brightnessBends, hueSection: hueSection)) ?? hueSection.baseBrightness
 
             return Color(hue: currentHue, saturation: saturation, brightness: brightness)
 
@@ -96,16 +96,20 @@ struct SpectrumGenerator {
         var startTargetSat = hueSection.baseSaturation, startTargetBright = hueSection.baseBrightness
         var endTargetSat = hueSection.baseSaturation, endTargetBright = hueSection.baseBrightness
 
-        if let bends = hueSection.bendSections {
-            for bend in bends {
+        if let saturationBends = hueSection.saturationBends {
+            for bend in saturationBends {
                 if let oneWay = bend as? OneWayBend {
-                    if oneWay.startHue == hueSection.minHue {
-                        startTargetSat = oneWay.targetSaturation
-                        startTargetBright = oneWay.targetBrightness
-                    } else if oneWay.endHue == hueSection.maxHue {
-                        endTargetSat = oneWay.targetSaturation
-                        endTargetBright = oneWay.targetBrightness
-                    }
+                    if oneWay.startHue == hueSection.minHue { startTargetSat = oneWay.targetValue }
+                    else if oneWay.endHue == hueSection.maxHue { endTargetSat = oneWay.targetValue }
+                }
+            }
+        }
+        
+        if let brightnessBends = hueSection.brightnessBends {
+            for bend in brightnessBends {
+                if let oneWay = bend as? OneWayBend {
+                    if oneWay.startHue == hueSection.minHue { startTargetBright = oneWay.targetValue }
+                    else if oneWay.endHue == hueSection.maxHue { endTargetBright = oneWay.targetValue }
                 }
             }
         }
@@ -144,14 +148,13 @@ struct SpectrumGenerator {
         hue: CGFloat,
         defaultValue: CGFloat,
         bendSections: [BendSection]?,
-        bendableComponent: BendableComponent,
         hueSection: HueSection
     ) throws -> CGFloat {
         guard let bends = bendSections, !bends.isEmpty else { return defaultValue }
         guard validateBendSections(bendSections: bends) else { throw InvalidBendSectionError() }
         guard let bend = bends.first(where: { $0.startHue <= hue && hue <= $0.endHue }) else { return defaultValue }
 
-        let targetValue = bendableComponent == .saturation ? bend.targetSaturation : bend.targetBrightness
+        let targetValue = bend.targetValue
         let valueDelta = defaultValue - targetValue
         let offset = hue - bend.startHue
 
