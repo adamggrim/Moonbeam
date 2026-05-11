@@ -18,57 +18,121 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 
 ## Variations
 
-`Moonbeam` supports two color slider modes—spectrum (HSB-based) and gradient (SwiftUI color mixing-based).
+`Moonbeam` supports two color slider modes—spectrum (HSB-based) and gradient (color mixing-based).
 
-- For spectrum sliders, you can bend saturation or brightness in specific sections to improve legibility:
+- **For spectrum sliders:** To improve the legibility of certain colors against a light or dark background, bend the saturation or brightness in specific sections. `Moonbeam` also supports black or white fade-ins and fade-outs (e.g., starting the spectrum with white).
 
-- With gradient sliders, you can create a precise gradient between any two colors:
+- **For gradient sliders**: Create a precise gradient between any two colors.
 
-`Moonbeam` also offers two slider thumb styles—capsule and circle.
+`Moonbeam` also offers layout and thumb style customization:
 
-- For capsules, you can customize by width and height:
-
-- With circles, you can customize by width:
+- **Orientation:** Render sliders either horizontally or vertically.
+- **Thumb styles:** Choose between a capsule (customizable by width and height) or a circle (customizable by width).
 
 ## Example (Spectrum)
 
 This example demonstrates how to create a spectrum slider using `Moonbeam`.
 
 1. **Create the slider**
+    ```swift
+    @State private var selectedColor: Color = .white
+    ```
 
+2. **Build the spectrum model:** Use the result builder to add black or white sections and bend saturation or brightness.
 
-2. **Choose the slider thumb style and color**
+    ```swift
+    let spectrumModel = try! SpectrumSliderModel {
+        BlackSection() // Fade from black
 
+        HueSection(
+            minHue: 0.0,
+            maxHue: 1.0,
+            saturationBends: {
+                OneWayBend(hue: 0.0...(40.0 / 360), target: 0.5)
+            }
+        )
 
-3. **Bend the saturation or brightness**
+        WhiteSection() // Fade to white
+    }
+    ```
 
+3. **Choose slider styles**
 
-4. **Use the slider**
-
-To improve legibility of certain colors against a light or dark background, you can bend the saturation or brightness in specific sections.
+    ```swift
+    ColorSliderView(
+        selectedColor: $selectedColor,
+        dataSource: spectrumModel,
+        axis: .horizontal
+    )
+    .colorSliderThumbStyle(.circle)
+    .colorSliderThumbColor(.white)
+    ```
 
 ## Example (Gradient)
 
 This example demonstrates how to create a gradient slider using `Moonbeam`.
 
 1. **Create the slider**
+    ```swift
+    @State private var selectedColor: Color = .cyan
+    ```
 
+2. **Create the gradient model**
 
-2. **Choose the slider thumb style and color**
+    ```swift
+    let gradientModel = GradientSliderModel(startColor: .cyan, endColor: .purple)
+    ```
+3. **Choose slider styles**
 
+    ```swift
+    ColorSliderView(
+        selectedColor: $selectedColor,
+        dataSource: gradientModel,
+        axis: .vertical
+    )
+    .colorSliderThumbStyle(.capsule)
+    ```
 
-3. **Use the slider**
+## Structure
 
+```
+Moonbeam/
+├── Environment/
+│ └── ColorSliderViewModifiers.swift: SwiftUI environment keys and view modifiers for slider customization
+├── Models/
+│ ├── Gradient/
+│ │ └── GradientSliderModel.swift: Model for calculating linear gradient colors
+│ ├── Spectrum/
+│ │ ├── SpectrumBuilders.swift: Result builders for building spectrum components
+│ │ ├── SpectrumComponents.swift: Definitions for hue, monochrome and bend sections
+│ │ ├── SpectrumGenerator.swift: Core logic for generating spectrums
+│ │ └── SpectrumSliderModel.swift: Model for calculating spectrums
+│ └── ColorSliderDataSource.swift: Protocols and enumerations defining color data sources
+└── Views/
+  ├── ColorPreviewViewModifier.swift: View modifier handling floating color previews
+  ├── ColorSliderView.swift: The interactive SwiftUI color slider
+  └── ColorSliderViewPreviews.swift: Slider SwiftUI previews and test containers
+```
 
 ## Usage
 
-Follow these steps to run `Moonbeam`:
+Follow these steps to integrate `Moonbeam` into your project:
 
-1. **Install Xcode**: 
+1. **Install Xcode:** Ensure you are running Xcode 16 or later to support Swift 6.0 and iOS 18.
 
-3. **Install the package**:
+2. **Install the package:** Add `Moonbeam` to your `Package.swift` dependencies:
 
-4. **Use the package in your program**: 
+    ```swift
+    dependencies: [
+        .package(url: "https://github.com/adamggrim/Moonbeam.git", from: "1.0.0")
+    ]
+    ```
+
+3. Use the package in your project:
+
+    ```swift
+    import Moonbeam
+    ```
 
 ## License
 
