@@ -3,28 +3,17 @@ import SwiftUI
 private struct PreviewContainer: View {
     let dataSource: ColorSliderDataSource
     var axis: Axis = .horizontal
-    var thumbStyle: ThumbStyle = .capsule
-    var disableLiquidGlass: Bool = false
-    
-    var thickness: CGFloat? = nil
-    var length: CGFloat? = nil
-    var previewOffset: CGFloat? = nil
-    
+
     @State private var selectedColor: Color = .clear
 
     var body: some View {
         ZStack {
             Color.white.ignoresSafeArea()
-
+            
             ColorSliderView(
                 selectedColor: $selectedColor,
                 dataSource: dataSource,
-                axis: axis,
-                thickness: thickness ?? 25,
-                length: length ?? 300,
-                previewOffset: previewOffset,
-                thumbStyle: thumbStyle,
-                disableLiquidGlass: disableLiquidGlass
+                axis: axis
             )
         }
     }
@@ -47,7 +36,6 @@ private struct PreviewContainer: View {
     }
     PreviewContainer(dataSource: spectrumModel, axis: .vertical)
 }
-
 
 #Preview("Spectrum with BendSections") {
     let spectrumModel = try! SpectrumSliderModel {
@@ -111,7 +99,8 @@ private struct PreviewContainer: View {
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
     }
-    PreviewContainer(dataSource: spectrumModel, axis: .horizontal, thumbStyle: .circle)
+    PreviewContainer(dataSource: spectrumModel)
+        .colorSliderThumbStyle(.circle)
 }
 
 #Preview("Circle Thumb (Vertical)") {
@@ -120,25 +109,17 @@ private struct PreviewContainer: View {
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
     }
-    PreviewContainer(dataSource: spectrumModel, axis: .vertical, thumbStyle: .circle)
+    PreviewContainer(dataSource: spectrumModel, axis: .vertical)
+        .colorSliderThumbStyle(.circle)
 }
 
-#Preview("BendSections (Glass Disabled)") {
+#Preview("Glass Disabled") {
     let spectrumModel = try! SpectrumSliderModel {
-        HueSection(
-            minHue: 0.0,
-            maxHue: 1.0,
-            saturationBends: {
-                OneWayBend(hue: 0.0...(40.0 / 360), target: 0.5)
-                TwoWayBend(hue: (200.0 / 360)...(280.0 / 360), target: 0.3)
-            }
-        )
+        HueSection(minHue: 0.0, maxHue: 1.0)
     }
 
-    PreviewContainer(
-        dataSource: spectrumModel,
-        disableLiquidGlass: true
-    )
+    PreviewContainer(dataSource: spectrumModel)
+        .colorSliderDisableLiquidGlass(true)
 }
 
 #Preview("Custom Dimensions") {
@@ -147,10 +128,10 @@ private struct PreviewContainer: View {
         endColor: .yellow
     )
 
-    PreviewContainer(
-        dataSource: gradientModel,
-        thickness: 40,
-        length: 200,
-        previewOffset: -100
-    )
+    PreviewContainer(dataSource: gradientModel)
+        .colorSliderDimensions(
+            thickness: 40,
+            length: 200,
+            previewOffset: -100
+        )
 }
