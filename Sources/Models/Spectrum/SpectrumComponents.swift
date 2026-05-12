@@ -1,8 +1,11 @@
 import Foundation
 
 // MARK: - Core Protocols
+
+/// A baseline protocol representing any structural block within a spectrum slider.
 public protocol SliderComponent {}
 
+/// Represents the lightest and darkest endpoints of a spectrum.
 public enum MonochromeColor {
     case black, white
 }
@@ -24,10 +27,14 @@ public protocol BendSection {
 }
 
 // MARK: - Monochrome Sections
+
+/// A spectrum section that resolves to pure black.
 public struct BlackSection: MonochromeSection {
     public let color: MonochromeColor = .black
     public let weight: CGFloat
 
+    /// Initializes a black section.
+    ///   - Parameter weight: The proportionate width of the section relative to a single hue.
     public init(weight: CGFloat = 1.0 / 6.0) {
         self.weight = weight
     }
@@ -37,6 +44,8 @@ public struct WhiteSection: MonochromeSection {
     public let color: MonochromeColor = .white
     public let weight: CGFloat
 
+    /// Initializes a white section.
+    /// - Parameter weight: The proportionate width of the section relative to a single hue.
     public init(weight: CGFloat = 1.0 / 6.0) {
         self.weight = weight
     }
