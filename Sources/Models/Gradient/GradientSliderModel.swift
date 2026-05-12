@@ -7,9 +7,7 @@ public struct GradientSliderModel: ColorSliderDataSource {
     public let endColor: Color
 
     public var colorSource: ColorSourceProvider {
-        return .function { position in
-            startColor.mix(with: endColor, by: position)
-        }
+        return .array([startColor, endColor])
     }
 
     public init(startColor: Color, endColor: Color) {
