@@ -3,8 +3,6 @@ import SwiftUI
 /// A model for generating a spectrum color for a given position, suitable for shaders.
 struct SpectrumGenerator {
 
-    private struct InvalidBendSectionError: Error {}
-
     /// Calculates the color at a specific normalized position on the spectrum.
     ///
     /// This function re-implements the logic from `SpectrumSliderModel` to calculate a single
@@ -60,8 +58,8 @@ struct SpectrumGenerator {
             let relativeHuePos = (hueBoundary > startBoundary) ? (clampedPosition - startBoundary) / (hueBoundary - startBoundary) : 0.0
             let currentHue = hueSection.minHue + relativeHuePos * (hueSection.maxHue - hueSection.minHue)
 
-            let saturation = (try? calculateBendValue(hue: currentHue, defaultValue: hueSection.baseSaturation, bendSections: hueSection.saturationBends, hueSection: hueSection)) ?? hueSection.baseSaturation
-            let brightness = (try? calculateBendValue(hue: currentHue, defaultValue: hueSection.baseBrightness, bendSections: hueSection.brightnessBends, hueSection: hueSection)) ?? hueSection.baseBrightness
+            let saturation = calculateBendValue(hue: currentHue, defaultValue: hueSection.baseSaturation, bendSections: hueSection.saturationBends, hueSection: hueSection)
+            let brightness = calculateBendValue(hue: currentHue, defaultValue: hueSection.baseBrightness, bendSections: hueSection.brightnessBends, hueSection: hueSection)
 
             return Color(hue: currentHue, saturation: saturation, brightness: brightness)
 
@@ -135,24 +133,14 @@ struct SpectrumGenerator {
         return Color(hue: hue, saturation: 0.0, brightness: brightness)
     }
 
-    private static func validateBendSections(bendSections: [BendSection]) -> Bool {
-        guard bendSections.count > 1 else { return true }
-        let sorted = bendSections.sorted { $0.startHue < $1.startHue }
-        for (current, next) in zip(sorted, sorted.dropFirst()) {
-            if current.endHue > next.startHue { return false }
-        }
-        return true
-    }
-
     private static func calculateBendValue(
-        hue: CGFloat,
-        defaultValue: CGFloat,
-        bendSections: [BendSection]?,
-        hueSection: HueSection
-    ) throws -> CGFloat {
-        guard let bends = bendSections, !bends.isEmpty else { return defaultValue }
-        guard validateBendSections(bendSections: bends) else { throw InvalidBendSectionError() }
-        guard let bend = bends.first(where: { $0.startHue <= hue && hue <= $0.endHue }) else { return defaultValue }
+            hue: CGFloat,
+            defaultValue: CGFloat,
+            bendSections: [BendSection]?,
+            hueSection: HueSection
+        ) -> CGFloat {
+            guard let bends = bendSections, !bends.isEmpty else { return defaultValue }
+            guard let bend = bends.first(where: { $0.startHue <= hue && hue <= $0.endHue }) else { return defaultValue }
 
         let targetValue = bend.targetValue
         let valueDelta = defaultValue - targetValue
