@@ -3,13 +3,6 @@ import SwiftUI
 
 /// Model for calculating spectrum colors dynamically.
 public struct SpectrumSliderModel: ColorSliderDataSource {
-    private struct InvalidArchitectureError: Error {
-        let message: String
-        init(message: String = "Slider architecture is invalid.") {
-            self.message = message
-        }
-    }
-
     private static func validateBendSections(bendSections: [BendSection]) -> Bool {
         guard bendSections.count > 1 else { return true }
 
@@ -37,19 +30,23 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
         }
     }
 
-    public init(@SpectrumComponentBuilder components: () -> [SliderComponent]) throws {
+    public init(@SpectrumComponentBuilder components: () -> [SliderComponent]) {
         let evaluatedComponents = components()
 
         let hueSections = evaluatedComponents.compactMap { $0 as? HueSection }
         guard let mainHueSection = hueSections.first, hueSections.count == 1 else {
-            throw InvalidArchitectureError(message: "Slider must contain exactly one HueSection.")
+            assertionFailure("Slider must contain exactly one HueSection.")
+            self.hueSection = HueSection(minHue: 0, maxHue: 1)
+            self.startSections = []
+            self.endSections = []
+            return
         }
 
         if let saturationBends = mainHueSection.saturationBends, !Self.validateBendSections(bendSections: saturationBends) {
-            throw InvalidArchitectureError(message: "Saturation bend sections are overlapping.")
+            assertionFailure("Saturation bend sections are overlapping.")
         }
         if let brightnessBends = mainHueSection.brightnessBends, !Self.validateBendSections(bendSections: brightnessBends) {
-            throw InvalidArchitectureError(message: "Brightness bend sections are overlapping.")
+            assertionFailure("Brightness bend sections are overlapping.")
         }
 
         let hueIndex = evaluatedComponents.firstIndex { $0 is HueSection }!
