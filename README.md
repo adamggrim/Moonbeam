@@ -24,6 +24,8 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 
 - **For gradient sliders**: Create a precise gradient between any two colors.
 
+- **For hard-edge sliders**: Create a slider with discrete color blocks.
+
 `Moonbeam` also offers layout and thumb style customization:
 
 - **Orientation:** Render sliders either horizontally or vertically.
@@ -41,7 +43,7 @@ This example demonstrates how to create a spectrum slider using `Moonbeam`.
 2. **Build the spectrum model:** Use the result builder to add black or white sections and bend saturation or brightness.
 
     ```swift
-    let spectrumModel = try! SpectrumSliderModel {
+    let spectrumModel = SpectrumSliderModel {
         BlackSection() // Fade from black
 
         HueSection(
@@ -93,6 +95,56 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
     .colorSliderThumbStyle(.capsule)
     ```
 
+## Example (Hard-Edge)
+
+This example demonstrates how to create a hard-edge slider with discrete color blocks. `Moonbeam` supports two types of hard-edge sliders—implicit and explicit. Explicit sliders initialize the slider using a custom array of `Color` objects. Implicit sliders convert a `SpectrumSliderModel` or `GradientSliderModel` into discrete color blocks.
+
+### Explicit
+
+1. **Create the data source**
+    ```swift
+    let customStops = HardEdgeSliderModel(colors: [
+        .green, .yellow, .orange, .red, .purple, .blue
+    ])
+    ```
+
+2. **Create the slider**
+    ```swift
+    @State private var selectedColor: Color = .green
+
+    var body: some View {
+        ColorSliderView(
+            selectedColor: $selectedColor,
+            dataSource: customStops,
+            axis: .horizontal
+        )
+    }
+    ```
+
+### Implicit
+
+1. **Create a smooth model and discretize it**
+    ```swift
+    // Creates a smooth gradient, then automatically calculates and converts it into 6 distinct blocks
+    let chunkyGradient = GradientSliderModel(
+        startColor: .cyan, 
+        endColor: .purple
+    ).hardEdge(into: 6)
+    ```
+
+2. **Create the slider**
+    ```swift
+    @State private var selectedColor: Color = .cyan
+
+    var body: some View {
+        ColorSliderView(
+            selectedColor: $selectedColor,
+            dataSource: chunkyGradient,
+            axis: .horizontal
+        )
+    }
+    ```
+
 ## Structure
 
 ```
@@ -102,6 +154,8 @@ Moonbeam/
 ├── Models/
 │ ├── Gradient/
 │ │ └── GradientSliderModel.swift: Model for calculating linear gradient colors
+| ├── HardEdge/
+│ │ └── HardEdgeSliderModel.swift: Model for a slider with discrete color blocks
 │ ├── Spectrum/
 │ │ ├── SpectrumBuilders.swift: Result builders for building spectrum components
 │ │ ├── SpectrumComponents.swift: Definitions for hue, monochrome and bend sections
