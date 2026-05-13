@@ -20,7 +20,7 @@ private struct PreviewContainer: View {
 }
 
 #Preview("Horizontal Slider") {
-    let spectrumModel = try! SpectrumSliderModel {
+    let spectrumModel = SpectrumSliderModel {
         BlackSection()
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
@@ -29,7 +29,7 @@ private struct PreviewContainer: View {
 }
 
 #Preview("Vertical Slider") {
-    let spectrumModel = try! SpectrumSliderModel {
+    let spectrumModel = SpectrumSliderModel {
         BlackSection()
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
@@ -38,7 +38,7 @@ private struct PreviewContainer: View {
 }
 
 #Preview("Spectrum with BendSections") {
-    let spectrumModel = try! SpectrumSliderModel {
+    let spectrumModel = SpectrumSliderModel {
         HueSection(
             minHue: 0.0,
             maxHue: 1.0,
@@ -53,7 +53,7 @@ private struct PreviewContainer: View {
 }
 
 #Preview("Spectrum with MonochromeSections") {
-    let spectrumModel = try! SpectrumSliderModel {
+    let spectrumModel = SpectrumSliderModel {
         BlackSection()
         WhiteSection()
 
@@ -77,7 +77,7 @@ private struct PreviewContainer: View {
 }
 
 #Preview("Overlapping Bends (Saturation & Brightness)") {
-    let spectrumModel = try! SpectrumSliderModel {
+    let spectrumModel = SpectrumSliderModel {
         HueSection(
             minHue: 0.0,
             maxHue: 1.0,
@@ -94,7 +94,7 @@ private struct PreviewContainer: View {
 }
 
 #Preview("Circle Thumb (Horizontal)") {
-    let spectrumModel = try! SpectrumSliderModel {
+    let spectrumModel = SpectrumSliderModel {
         BlackSection()
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
@@ -104,7 +104,7 @@ private struct PreviewContainer: View {
 }
 
 #Preview("Circle Thumb (Vertical)") {
-    let spectrumModel = try! SpectrumSliderModel {
+    let spectrumModel = SpectrumSliderModel {
         BlackSection()
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
@@ -114,7 +114,7 @@ private struct PreviewContainer: View {
 }
 
 #Preview("Glass Disabled") {
-    let spectrumModel = try! SpectrumSliderModel {
+    let spectrumModel = SpectrumSliderModel {
         HueSection(minHue: 0.0, maxHue: 1.0)
     }
 
