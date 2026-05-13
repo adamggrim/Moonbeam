@@ -112,7 +112,19 @@ public struct ColorSliderView: View {
     private var trackGradient: Gradient {
         switch dataSource.colorSource {
         case .array(let colors):
-            return Gradient(colors: colors)
+            guard !colors.isEmpty else { return Gradient(colors: [.clear]) }
+            
+            let stepSize = 1.0 / CGFloat(colors.count)
+            var stops: [Gradient.Stop] = []
+            
+            for (index, color) in colors.enumerated() {
+                let startLoc = CGFloat(index) * stepSize
+                let endLoc = CGFloat(index + 1) * stepSize
+                stops.append(Gradient.Stop(color: color, location: startLoc))
+                stops.append(Gradient.Stop(color: color, location: endLoc))
+            }
+            return Gradient(stops: stops)
+            
         case .function(let colorGenerator):
             let exactPixelLength = max(1, Int(dimensionsEnv.length))
             let stops = (0...exactPixelLength).map { i -> Gradient.Stop in

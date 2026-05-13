@@ -17,3 +17,23 @@ public enum ColorSourceProvider {
 public protocol ColorSliderDataSource {
     var colorSource: ColorSourceProvider { get }
 }
+
+public extension ColorSliderDataSource {
+    /// Converts a continuous color slider into a hard-edge slider with discrete color blocks.
+    func hardEdge(into steps: Int) -> HardEdgeSliderModel {
+        guard steps > 1 else { return HardEdgeSliderModel(colors: [.clear]) }
+        
+        switch self.colorSource {
+        case .array(let colors):
+            return HardEdgeSliderModel(colors: colors)
+            
+        case .function(let colorGenerator):
+            let generatedColors = (0..<steps).map { i in
+                // Sample from the center of the block's position on the spectrum.
+                let position = (Double(i) + 0.5) / Double(steps)
+                return colorGenerator(position)
+            }
+            return HardEdgeSliderModel(colors: generatedColors)
+        }
+    }
+}
