@@ -76,6 +76,48 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: gradientModel)
 }
 
+#Preview("Hard-Edge (Explicit)") {
+    let customStops = HardEdgeSliderModel(colors: [
+        .green, .yellow, .orange, .red, .purple, .blue
+    ])
+
+    PreviewContainer(dataSource: customStops)
+}
+
+#Preview("Hard-Edge Spectrum (Implicit)") {
+    let chunkySpectrum = SpectrumSliderModel {
+        HueSection(minHue: 0.0, maxHue: 1.0)
+    }.hardEdge(into: 10)
+    
+    PreviewContainer(dataSource: chunkySpectrum)
+}
+
+#Preview("Hard-Edge Gradient (Implicit)") {
+    let chunkyGradient = GradientSliderModel(
+        startColor: .cyan,
+        endColor: .purple
+    ).hardEdge(into: 6)
+
+    PreviewContainer(dataSource: chunkyGradient)
+}
+
+#Preview("Hard-Edge Spectrum with BendSections") {
+    let bentSpectrum = SpectrumSliderModel {
+        HueSection(
+            minHue: 0.0,
+            maxHue: 1.0,
+            saturationBends: {
+                TwoWayBend(hue: (120.0 / 360)...(240.0 / 360), target: 0.3)
+            },
+            brightnessBends: {
+                TwoWayBend(hue: (200.0 / 360)...(300.0 / 360), target: 0.4)
+            }
+        )
+    }
+    .hardEdge(into: 8)
+
+    PreviewContainer(dataSource: bentSpectrum)
+}
 #Preview("Overlapping Bends (Saturation & Brightness)") {
     let spectrumModel = SpectrumSliderModel {
         HueSection(
