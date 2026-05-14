@@ -13,6 +13,7 @@ public struct ColorSliderView: View {
     @Environment(\.colorSliderPreviewHidden) private var previewHidden
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
     @Environment(\.colorSliderDimensions) private var dimensionsEnv
+    @Environment(\.colorSliderHardEdgeInnerShadow) private var enableInnerShadow
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Indicates whether a drag gesture is currently active.
@@ -220,18 +221,56 @@ public struct ColorSliderView: View {
         .accessibilityLabel(label)
     }
 
+    @ViewBuilder
     private var trackView: some View {
-        Capsule().fill(
-            LinearGradient(
-                gradient: trackGradient,
-                startPoint: axis == .horizontal ? .leading : .bottom,
-                endPoint: axis == .horizontal ? .trailing : .top
-            )
-        )
+        Group {
+            switch dataSource.colorSource {
+            case .array(let colors) where enableInnerShadow:
+                // Render discrete blocks with an inner shadow.
+                hardEdgeTrackView(colors: colors)
+            default:
+                // Fallback to the standard continuous gradient.
+                Capsule().fill(
+                    LinearGradient(
+                        gradient: trackGradient,
+                        startPoint: axis == .horizontal ? .leading : .bottom,
+                        endPoint: axis == .horizontal ? .trailing : .top
+                    )
+                )
+            }
+        }
         .frame(
             width: axis == .horizontal ? dimensionsEnv.length : dimensionsEnv.thickness,
             height: axis == .horizontal ? dimensionsEnv.thickness : dimensionsEnv.length
         )
+        .clipShape(Capsule())
+    }
+
+    @ViewBuilder
+    private func hardEdgeTrackView(colors: [Color]) -> some View {
+        let isHorizontal = axis == .horizontal
+        let orderedIndices = isHorizontal ? Array(colors.indices) : Array(colors.indices.reversed())
+
+        if isHorizontal {
+            HStack(spacing: 0) {
+                ForEach(orderedIndices, id: \.self) { index in
+                    innerShadowBlock(for: colors[index])
+                }
+            }
+        } else {
+            VStack(spacing: 0) {
+                ForEach(orderedIndices, id: \.self) { index in
+                    innerShadowBlock(for: colors[index])
+                }
+            }
+        }
+    }
+
+    private func innerShadowBlock(for color: Color) -> some View {
+        Rectangle()
+            .fill(
+                color.shadow(.inner(color: .black.opacity(0.3), radius: 3, x: 0, y: 0))
+            )
     }
 
     @ViewBuilder

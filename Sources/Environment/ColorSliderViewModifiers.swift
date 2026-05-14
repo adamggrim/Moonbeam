@@ -25,6 +25,7 @@ private struct ThumbColorKey: EnvironmentKey { static let defaultValue: Color = 
 private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool = true }
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
+private struct HardEdgeInnerShadowKey: EnvironmentKey { static let defaultValue: Bool = true }
 
 extension EnvironmentValues {
     var colorSliderThumbStyle: ThumbStyle {
@@ -47,6 +48,10 @@ extension EnvironmentValues {
         get { self[DimensionsKey.self] }
         set { self[DimensionsKey.self] = newValue }
     }
+    var colorSliderHardEdgeInnerShadow: Bool {
+            get { self[HardEdgeInnerShadowKey.self] }
+            set { self[HardEdgeInnerShadowKey.self] = newValue }
+        }
 }
 
 // MARK: - View Modifiers
@@ -101,4 +106,9 @@ public extension View {
         )
         return environment(\.colorSliderDimensions, dim)
     }
+    
+    /// Adds an inset shadow to each discrete color block in a hard-edge slider. Defaults to `true`.
+        func colorSliderHardEdgeInnerShadow(_ enabled: Bool = true) -> some View {
+            environment(\.colorSliderHardEdgeInnerShadow, enabled)
+        }
 }
