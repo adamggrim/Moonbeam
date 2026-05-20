@@ -75,11 +75,11 @@ public struct HueSection: SliderComponent {
             self.baseSaturation = baseSaturation
             self.baseBrightness = baseBrightness
 
-            let evaluatedSatBends = saturationBends()
-            let evaluatedBrightBends = brightnessBends()
+            let evaluatedSaturationBends = saturationBends()
+            let evaluatedBrightnessBends = brightnessBends()
             
-            self.saturationBends = evaluatedSatBends.isEmpty ? nil : evaluatedSatBends
-            self.brightnessBends = evaluatedBrightBends.isEmpty ? nil : evaluatedBrightBends
+            self.saturationBends = evaluatedSaturationBends.isEmpty ? nil : evaluatedSaturationBends
+            self.brightnessBends = evaluatedBrightnessBends.isEmpty ? nil : evaluatedBrightnessBends
             self.weight = maxHue - minHue
     }
 }
