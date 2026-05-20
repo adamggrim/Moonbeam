@@ -3,12 +3,13 @@ import SwiftUI
 private struct PreviewContainer: View {
     let dataSource: ColorSliderDataSource
     var axis: Axis = .horizontal
+    var backgroundColor: Color = .black
 
     @State private var selectedColor: Color = .clear
 
     var body: some View {
         ZStack {
-            Color.white.ignoresSafeArea()
+            backgroundColor.ignoresSafeArea()
             
             ColorSliderView(
                 selectedColor: $selectedColor,
