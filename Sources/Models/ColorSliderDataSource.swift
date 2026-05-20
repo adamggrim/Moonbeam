@@ -7,7 +7,7 @@ public enum ColorSourceProvider {
     /// Designed for hard-edge color sliders.
     case array([Color])
 
-    //// Dynamically calculates a color based on normalized position (i.e., 0.0 to 1.0).
+    /// Dynamically calculates a color based on normalized position (i.e., 0.0 to 1.0).
     ///
     /// Designed for spectrum and gradient color sliders.
     case function((_ position: Double) -> Color)

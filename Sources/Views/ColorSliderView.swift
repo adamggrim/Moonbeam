@@ -137,6 +137,7 @@ public struct ColorSliderView: View {
     }
 
     /// The horizontal offset for the color preview.
+    /// The main axis offset for the color preview.
     ///
     /// Except at the ends of the slider, the color preview is centered above the
     /// thumb's center.

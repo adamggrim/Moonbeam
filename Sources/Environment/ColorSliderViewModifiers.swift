@@ -71,7 +71,7 @@ public extension View {
         environment(\.colorSliderPreviewHidden, hidden)
     }
     
-    /// Set to `true` to disable the liquid glass styling on the thumb. On OS versions that do not support Liquid Glass, this flag is ignored and falls back to a standard filled shape. Defaults to `false`.
+    /// Set to `true` to disable the liquid glass styling on the thumb. On operating systems that do not support Liquid Glass, this flag is ignored and falls back to a standard filled shape. Defaults to `false`.
     func colorSliderDisableLiquidGlass(_ disable: Bool) -> some View {
         environment(\.colorSliderDisableLiquidGlass, disable)
     }
