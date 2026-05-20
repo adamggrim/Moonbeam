@@ -7,9 +7,18 @@ public struct GradientSliderModel: ColorSliderDataSource {
     public let endColor: Color
 
     public var colorSource: ColorSourceProvider {
-        return .function { position in
+        let fallback: (Double) -> Color = { position in
             startColor.mix(with: endColor, by: position)
         }
+
+        return .shader(generator: { size, isVertical in
+            ShaderLibrary.bundle(.module).gradientShader(
+                .float2(size.width, size.height),
+                .color(startColor),
+                .color(endColor),
+                .float(isVertical ? 1.0 : 0.0)
+            )
+        }, fallback: fallback)
     }
 
     public init(startColor: Color, endColor: Color) {
