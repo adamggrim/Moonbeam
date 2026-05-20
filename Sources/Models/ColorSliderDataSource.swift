@@ -11,6 +11,9 @@ public enum ColorSourceProvider {
     ///
     /// Designed for spectrum and gradient color sliders.
     case function((_ position: Double) -> Color)
+
+    /// Renders the background using a Metal shader.
+    case shader(generator: (_ size: CGSize, _ isVertical: Bool) -> Shader, fallback: (_ position: Double) -> Color)
 }
 
 /// Protocol shared by `SpectrumSliderModel` and `GradientSliderModel`.
@@ -27,7 +30,7 @@ public extension ColorSliderDataSource {
         case .array(let colors):
             return HardEdgeSliderModel(colors: colors)
             
-        case .function(let colorGenerator):
+        case .function(let colorGenerator), .shader(_, let colorGenerator):
             let generatedColors = (0..<steps).map { i in
                 // Sample from the center of the block's position on the spectrum.
                 let position = (Double(i) + 0.5) / Double(steps)
