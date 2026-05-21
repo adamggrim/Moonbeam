@@ -6,7 +6,7 @@ public enum ThumbStyle: Sendable {
 
 /// Encapsulates various layout dimensions for the color slider and its components.
 public struct ColorSliderDimensions: Sendable {
-    public var thickness: CGFloat = 25
+    public var thickness: CGFloat = 24
     public var length: CGFloat = 300
     public var thumbThickness: CGFloat? = nil
     public var thumbLength: CGFloat? = nil
@@ -79,15 +79,15 @@ public extension View {
     /// Customizes the layout dimensions of the color slider.
     ///
     /// - Parameters:
-    ///   - thickness: The thickness of the slider. Defaults to 25.
+    ///   - thickness: The thickness of the slider. Defaults to 24.
     ///   - length: The length of the slider. Defaults to 300.
     ///   - thumbThickness: The thickness of the draggable thumb. Defaults to the slider thickness.
     ///   - thumbLength: The length of the draggable thumb. Defaults to twice slider thickness for capsules.
     ///   - previewSize: The width and height of the floating color preview. Defaults to 60.
-    ///   - previewOffset: The offset of the preview from the slider. Defaults to -70.
+    ///   - previewOffset: The offset of the preview from the slider. Defaults to 66.
     ///   - shadowRadius: The blur radius for the shadows applied to the thumb and preview. Defaults to 5.
     func colorSliderDimensions(
-        thickness: CGFloat = 25,
+        thickness: CGFloat = 24,
         length: CGFloat = 300,
         thumbThickness: CGFloat? = nil,
         thumbLength: CGFloat? = nil,
