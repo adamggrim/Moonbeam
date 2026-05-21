@@ -122,6 +122,7 @@ public struct ColorSliderView: View {
         let clampedRatio = max(0.0, min(1.0, liveColorPosition / dimensionsEnv.length))
         switch dataSource.colorSource {
         case .array(let colors):
+            guard !colors.isEmpty else { return .clear }
             let calculatedIndex = Int(CGFloat(colors.count) * clampedRatio)
             let clampedIndex = max(0, min(colors.count - 1, calculatedIndex))
             return colors[clampedIndex]
@@ -337,7 +338,7 @@ public struct ColorSliderView: View {
         }
         liveContainerDrag = axis == .horizontal ? value.translation.width : -value.translation.height
         // Update the ratio so VoiceOver knows where the gesture finished.
-        positionRatio = liveColorPosition / dimensionsEnv.length
+        positionRatio = dimensionsEnv.length > 0 ? liveColorPosition / dimensionsEnv.length : 0.0
     }
 
     /// Finalizes the view's state when the drag gesture ends, updating
@@ -357,6 +358,6 @@ public struct ColorSliderView: View {
         let newDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensionsEnv.length)
         persistedThumbPosition = min(max(newDrag, thumbInset), dimensionsEnv.length - resolvedThumbThickness - thumbInset)
         liveContainerDrag = .zero
-        positionRatio = liveColorPosition / dimensionsEnv.length
+        positionRatio = dimensionsEnv.length > 0 ? liveColorPosition / dimensionsEnv.length : 0.0
     }
 }

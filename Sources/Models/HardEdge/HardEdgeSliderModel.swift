@@ -14,6 +14,6 @@ public struct HardEdgeSliderModel: ColorSliderDataSource {
     }
     
     public init(colors: [Color]) {
-        self.colors = colors
+        self.colors = colors.isEmpty ? [.clear] : colors
     }
 }
