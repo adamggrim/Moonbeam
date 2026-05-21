@@ -130,6 +130,8 @@ public struct ColorSliderView: View {
             return colors[clampedIndex]
         case .function(let colorGenerator):
             return colorGenerator(clampedRatio)
+        case .shader(_, let fallback):
+            return fallback(clampedRatio)
         }
     }
 
