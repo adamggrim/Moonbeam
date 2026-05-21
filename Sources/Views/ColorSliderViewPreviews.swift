@@ -178,3 +178,19 @@ private struct PreviewContainer: View {
             previewOffset: -100
         )
 }
+
+#Preview("Preview Position (Horizontal Bottom)") {
+    let spectrumModel = SpectrumSliderModel {
+        HueSection(minHue: 0.0, maxHue: 1.0)
+    }
+    PreviewContainer(dataSource: spectrumModel)
+        .colorSliderPreviewPosition(.bottom, spacing: 20)
+}
+
+#Preview("Preview Position (Vertical Leading)") {
+    let spectrumModel = SpectrumSliderModel {
+        HueSection(minHue: 0.0, maxHue: 1.0)
+    }
+    PreviewContainer(dataSource: spectrumModel, axis: .vertical)
+        .colorSliderPreviewPosition(.leading)
+}
