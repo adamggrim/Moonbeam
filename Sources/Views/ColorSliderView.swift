@@ -133,34 +133,6 @@ public struct ColorSliderView: View {
         }
     }
 
-    /// The dynamically calculated gradient mapped to the slider's pixel width.
-    private var trackGradient: Gradient {
-        switch dataSource.colorSource {
-        case .array(let colors):
-            guard !colors.isEmpty else { return Gradient(colors: [.clear]) }
-            
-            let stepSize = 1.0 / CGFloat(colors.count)
-            var stops: [Gradient.Stop] = []
-            
-            for (index, color) in colors.enumerated() {
-                let startLoc = CGFloat(index) * stepSize
-                let endLoc = CGFloat(index + 1) * stepSize
-                stops.append(Gradient.Stop(color: color, location: startLoc))
-                stops.append(Gradient.Stop(color: color, location: endLoc))
-            }
-            return Gradient(stops: stops)
-            
-        case .function(let colorGenerator):
-            let exactPixelLength = max(1, Int(dimensionsEnv.length))
-            let stops = (0...exactPixelLength).map { i -> Gradient.Stop in
-                let ratio = Double(i) / Double(exactPixelLength)
-                return Gradient.Stop(color: colorGenerator(ratio), location: CGFloat(ratio))
-            }
-            return Gradient(stops: stops)
-        }
-    }
-
-    /// The horizontal offset for the color preview.
     /// The main axis offset for the color preview.
     ///
     /// Except at the ends of the slider, the color preview is centered above the
