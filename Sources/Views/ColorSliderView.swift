@@ -220,27 +220,25 @@ public struct ColorSliderView: View {
 
     @ViewBuilder
     private var trackView: some View {
-        Group {
-            switch dataSource.colorSource {
-            case .array(let colors) where enableInnerShadow:
-                // Render discrete blocks with an inner shadow.
-                hardEdgeTrackView(colors: colors)
-            default:
-                // Fallback to the standard continuous gradient.
-                Capsule().fill(
-                    LinearGradient(
-                        gradient: trackGradient,
-                        startPoint: axis == .horizontal ? .leading : .bottom,
-                        endPoint: axis == .horizontal ? .trailing : .top
-                    )
-                )
-            }
-        }
-        .frame(
+        let size = CGSize(
             width: axis == .horizontal ? dimensionsEnv.length : dimensionsEnv.thickness,
             height: axis == .horizontal ? dimensionsEnv.thickness : dimensionsEnv.length
         )
-        .clipShape(Capsule())
+
+        Group {
+            switch dataSource.colorSource {
+            case .array(let colors):
+                hardEdgeTrackView(colors: colors)
+                    .clipShape(Capsule())
+            case .function(let colorGenerator):
+                Capsule().fill(colorGenerator(0.5))
+            case .shader(let shaderGenerator, _):
+                Capsule()
+                    .fill(Color.white) // Pixels for Metal to paint on.
+                    .colorEffect(shaderGenerator(size, axis == .vertical))
+            }
+        }
+        .frame(width: size.width, height: size.height)
     }
 
     @ViewBuilder
