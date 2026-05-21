@@ -4,6 +4,11 @@ public enum ThumbStyle: Sendable {
     case capsule, circle
 }
 
+/// The placement of the color preview relative to the slider.
+public enum PreviewPosition: Sendable {
+    case top, bottom, leading, trailing
+}
+
 /// Encapsulates various layout dimensions for the color slider and its components.
 public struct ColorSliderDimensions: Sendable {
     public var thickness: CGFloat = 24
@@ -26,6 +31,8 @@ private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool 
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
 private struct HardEdgeInnerShadowKey: EnvironmentKey { static let defaultValue: Bool = true }
+private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: PreviewPosition? = nil }
+private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
 
 extension EnvironmentValues {
     var colorSliderThumbStyle: ThumbStyle {
@@ -49,9 +56,17 @@ extension EnvironmentValues {
         set { self[DimensionsKey.self] = newValue }
     }
     var colorSliderHardEdgeInnerShadow: Bool {
-            get { self[HardEdgeInnerShadowKey.self] }
-            set { self[HardEdgeInnerShadowKey.self] = newValue }
-        }
+        get { self[HardEdgeInnerShadowKey.self] }
+        set { self[HardEdgeInnerShadowKey.self] = newValue }
+    }
+    var colorSliderPreviewPosition: PreviewPosition? {
+        get { self[PreviewPositionKey.self] }
+        set { self[PreviewPositionKey.self] = newValue }
+    }
+    var colorSliderPreviewSpacing: CGFloat? {
+        get { self[PreviewSpacingKey.self] }
+        set { self[PreviewSpacingKey.self] = newValue }
+    }
 }
 
 // MARK: - View Modifiers
@@ -108,7 +123,12 @@ public extension View {
     }
     
     /// Adds an inset shadow to each discrete color block in a hard-edge slider. Defaults to `true`.
-        func colorSliderHardEdgeInnerShadow(_ enabled: Bool = true) -> some View {
-            environment(\.colorSliderHardEdgeInnerShadow, enabled)
-        }
+    func colorSliderHardEdgeInnerShadow(_ enabled: Bool = true) -> some View {
+        environment(\.colorSliderHardEdgeInnerShadow, enabled)
+    }
+    
+    func colorSliderPreviewPosition(_ position: PreviewPosition, spacing: CGFloat? = nil) -> some View {
+        self.environment(\.colorSliderPreviewPosition, position)
+            .environment(\.colorSliderPreviewSpacing, spacing)
+    }
 }
