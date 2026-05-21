@@ -60,7 +60,29 @@ public struct ColorSliderView: View {
 
     private var resolvedThumbThickness: CGFloat { dimensionsEnv.thumbThickness ?? dimensionsEnv.thickness }
     private var resolvedThumbLength: CGFloat { thumbStyle == .circle ? resolvedThumbThickness : (dimensionsEnv.thumbLength ?? dimensionsEnv.thickness * 2) } // Prevent a rectangular bounding box.
-    private var resolvedPreviewOffset: CGFloat { dimensionsEnv.previewOffset ?? (axis == .horizontal ? -70 : 70) }
+    private var resolvedPreviewOffset: CGFloat {
+        if let rawOffset = dimensionsEnv.previewOffset, previewPosition == nil {
+            return rawOffset
+        }
+        
+        let baseDistance: CGFloat = 66 + (previewSpacing ?? 0)
+        
+        if axis == .horizontal {
+            let placement = previewPosition ?? .top
+            switch placement {
+            case .top: return -baseDistance
+            case .bottom: return baseDistance
+            case .leading, .trailing: return -baseDistance
+            }
+        } else {
+            let placement = previewPosition ?? .trailing
+            switch placement {
+            case .trailing: return baseDistance
+            case .leading: return -baseDistance
+            case .top, .bottom: return baseDistance
+            }
+        }
+    }
     private var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
     
     /// Inset to adjust the left and right bounds of the thumb.
@@ -316,7 +338,9 @@ public struct ColorSliderView: View {
                 isDragging: isDragging,
                 scaleRatio: dimensionsEnv.scaleRatio,
                 previewHidden: previewHidden,
-                anchor: axis == .horizontal ? .bottom : (resolvedPreviewOffset < 0 ? .trailing : .leading)
+                anchor: axis == .horizontal
+                    ? (resolvedPreviewOffset < 0 ? .bottom : .top)
+                    : (resolvedPreviewOffset < 0 ? .trailing : .leading)
             )
             .shadow(radius: dimensionsEnv.shadowRadius)
             .offset(
