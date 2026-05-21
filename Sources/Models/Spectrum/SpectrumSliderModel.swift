@@ -62,9 +62,28 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
         let beforeHue = evaluatedComponents.prefix(upTo: hueIndex).compactMap { $0 as? MonochromeSection }
         let afterHue = evaluatedComponents.suffix(from: hueIndex + 1).compactMap { $0 as? MonochromeSection }
 
-        self.hueSection = mainHueSection
-        self.startSections = beforeHue
-        self.endSections = afterHue
+        let saturationBends = mainHueSection.saturationBends ?? []
+        let brightnessBends = mainHueSection.brightnessBends ?? []
+        
+        // Truncate arrays at the Metal shader's hardcoded limits.
+        if saturationBends.count > 20 { assertionFailure("No more than 20 saturation bends allowed. Truncating...") }
+        if brightnessBends.count > 20 { assertionFailure("No more than 20 brightness bends allowed. Truncating...") }
+        if beforeHue.count > 2 { assertionFailure("No more than two start sections allowed. Truncating...") }
+        if afterHue.count > 2 { assertionFailure("No more than two end sections allowed. Truncating...") }
+
+        let saturationClosure: () -> [BendSection] = { Array(saturationBends.prefix(20)) }
+        let brightnessClosure: () -> [BendSection] = { Array(brightnessBends.prefix(20)) }
+
+        self.hueSection = HueSection(
+            minHue: mainHueSection.minHue,
+            maxHue: mainHueSection.maxHue,
+            baseSaturation: mainHueSection.baseSaturation,
+            baseBrightness: mainHueSection.baseBrightness,
+            saturationBends: saturationClosure,
+            brightnessBends: brightnessClosure
+        )
+        self.startSections = Array(beforeHue.prefix(2))
+        self.endSections = Array(afterHue.prefix(2))
     }
 
     /// Flattens the color spectrum into a single `Float` array for Metal shaders.
