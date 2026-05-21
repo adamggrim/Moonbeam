@@ -118,9 +118,6 @@ public struct ColorSliderView: View {
     }
 
     /// The color calculated from the current `liveColorPosition` on the slider.
-    ///
-    /// Determines which color from `sliderColors` corresponds with the thumb's
-    /// current position.
     private var calculatedColor: Color {
         let clampedRatio = max(0.0, min(1.0, liveColorPosition / dimensionsEnv.length))
         switch dataSource.colorSource {
