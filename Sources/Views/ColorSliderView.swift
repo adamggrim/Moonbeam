@@ -263,11 +263,17 @@ public struct ColorSliderView: View {
         }
     }
 
+    @ViewBuilder
     private func innerShadowBlock(for color: Color) -> some View {
-        Rectangle()
-            .fill(
-                color.shadow(.inner(color: .black.opacity(0.3), radius: 3, x: 0, y: 0))
-            )
+        if enableInnerShadow {
+            Rectangle()
+                .fill(
+                    color.shadow(.inner(color: .black.opacity(0.3), radius: 3, x: 0, y: 0))
+                )
+        } else {
+            Rectangle()
+                .fill(color)
+        }
     }
 
     @ViewBuilder
