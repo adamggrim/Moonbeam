@@ -119,7 +119,8 @@ public struct ColorSliderView: View {
 
     /// The color calculated from the current `liveColorPosition` on the slider.
     private var calculatedColor: Color {
-        let clampedRatio = max(0.0, min(1.0, liveColorPosition / dimensionsEnv.length))
+        let safeLength = dimensionsEnv.length > 0 ? dimensionsEnv.length : 0.001
+        let clampedRatio = max(0.0, min(1.0, liveColorPosition / safeLength))
         switch dataSource.colorSource {
         case .array(let colors):
             guard !colors.isEmpty else { return .clear }
