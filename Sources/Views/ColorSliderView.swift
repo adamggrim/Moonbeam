@@ -14,6 +14,8 @@ public struct ColorSliderView: View {
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
     @Environment(\.colorSliderDimensions) private var dimensionsEnv
     @Environment(\.colorSliderHardEdgeInnerShadow) private var enableInnerShadow
+    @Environment(\.colorSliderPreviewPosition) private var previewPosition
+    @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Indicates whether a drag gesture is currently active.
