@@ -123,11 +123,10 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 
 ### Implicit
 
-1. **Create a smooth model and discretize it**
+1. **Create a smooth model and convert it into discrete blocks**
     ```swift
-    // Creates a smooth gradient, then automatically calculates and converts it into 6 distinct blocks
     let chunkyGradient = GradientSliderModel(
-        startColor: .cyan, 
+        startColor: .cyan,
         endColor: .purple
     ).hardEdge(into: 6)
     ```
@@ -149,23 +148,25 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 
 ```
 Moonbeam/
-├── Environment/
-│ └── ColorSliderViewModifiers.swift: SwiftUI environment keys and view modifiers for slider customization
-├── Models/
-│ ├── Gradient/
-│ │ └── GradientSliderModel.swift: Model for calculating linear gradient colors
-| ├── HardEdge/
-│ │ └── HardEdgeSliderModel.swift: Model for a slider with discrete color blocks
-│ ├── Spectrum/
-│ │ ├── SpectrumBuilders.swift: Result builders for building spectrum components
-│ │ ├── SpectrumComponents.swift: Definitions for hue, monochrome and bend sections
-│ │ ├── SpectrumGenerator.swift: Core logic for generating spectrums
-│ │ └── SpectrumSliderModel.swift: Model for calculating spectrums
-│ └── ColorSliderDataSource.swift: Protocols and enumerations defining color data sources
-└── Views/
-  ├── ColorPreviewViewModifier.swift: View modifier handling floating color previews
-  ├── ColorSliderView.swift: The interactive SwiftUI color slider
-  └── ColorSliderViewPreviews.swift: Slider SwiftUI previews and test containers
+└── Sources/
+  ├── Environment/
+  │ └── ColorSliderViewModifiers.swift: SwiftUI environment keys and view modifiers for customization
+  ├── Models/
+  │ ├── Gradient/
+  │ │ └── GradientSliderModel.swift: Model for calculating linear gradient colors
+  │ ├── HardEdge/
+  │ │ └── HardEdgeSliderModel.swift: Model for a slider with discrete color blocks
+  │ ├── Spectrum/
+  │ │ ├── SpectrumBuilders.swift: Result builders for building spectrum components
+  │ │ ├── SpectrumComponents.swift: Definitions for hue, monochrome and bend sections
+  │ │ ├── SpectrumGenerator.swift: Core logic for generating spectrums
+  │ │ └── SpectrumSliderModel.swift: Model for calculating spectrums
+  │ └── ColorSliderDataSource.swift: Protocols and enumerations defining color data sources
+  ├── Shaders/
+  │   └── ColorSliderShaders.metal: Metal shaders for gradient and spectrum rendering
+  └── Views/
+      ├── ColorSliderView.swift: The interactive SwiftUI color slider
+      └── ColorSliderViewPreviews.swift: SwiftUI previews and test containers
 ```
 
 ## Usage
