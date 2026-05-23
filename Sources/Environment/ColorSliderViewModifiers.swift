@@ -1,9 +1,5 @@
 import SwiftUI
 
-public enum ThumbStyle: Sendable {
-    case capsule, circle
-}
-
 /// The placement of the color preview relative to the slider.
 public enum PreviewPosition: Sendable {
     case top, bottom, leading, trailing
