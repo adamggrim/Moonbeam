@@ -25,19 +25,29 @@ public struct ColorSliderDimensions: Sendable {
     }
 }
 
-private struct ThumbStyleKey: EnvironmentKey { static let defaultValue: ThumbStyle = .capsule }
+public struct SliderStroke: Sendable {
+    public var style: AnyShapeStyle
+    public var lineWidth: CGFloat
+}
+
+// MARK: - Environment Keys
+
+private struct ThumbShapeKey: EnvironmentKey { static let defaultValue = AnyShape(Capsule()) }
+private struct TrackStrokeKey: EnvironmentKey { static let defaultValue: SliderStroke? = nil }
+private struct ThumbStrokeKey: EnvironmentKey { static let defaultValue: SliderStroke? = nil }
 private struct ThumbColorKey: EnvironmentKey { static let defaultValue: Color = .white }
 private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool = true }
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
 private struct HardEdgeInnerShadowKey: EnvironmentKey { static let defaultValue: Bool = true }
+private struct AnimationKey: EnvironmentKey { static let defaultValue: Animation = .easeInOut(duration: 0.25) }
 private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: PreviewPosition? = nil }
 private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
 
 extension EnvironmentValues {
-    var colorSliderThumbStyle: ThumbStyle {
-        get { self[ThumbStyleKey.self] }
-        set { self[ThumbStyleKey.self] = newValue }
+    var colorSliderThumbShape: AnyShape {
+        get { self[ThumbShapeKey.self] }
+        set { self[ThumbShapeKey.self] = newValue }
     }
     var colorSliderThumbColor: Color {
         get { self[ThumbColorKey.self] }
@@ -59,6 +69,18 @@ extension EnvironmentValues {
         get { self[HardEdgeInnerShadowKey.self] }
         set { self[HardEdgeInnerShadowKey.self] = newValue }
     }
+    var colorSliderAnimation: Animation {
+        get { self[AnimationKey.self] }
+        set { self[AnimationKey.self] = newValue }
+    }
+    var colorSliderTrackStroke: SliderStroke? {
+        get { self[TrackStrokeKey.self] }
+        set { self[TrackStrokeKey.self] = newValue }
+    }
+    var colorSliderThumbStroke: SliderStroke? {
+        get { self[ThumbStrokeKey.self] }
+        set { self[ThumbStrokeKey.self] = newValue }
+    }
     var colorSliderPreviewPosition: PreviewPosition? {
         get { self[PreviewPositionKey.self] }
         set { self[PreviewPositionKey.self] = newValue }
@@ -71,9 +93,9 @@ extension EnvironmentValues {
 
 // MARK: - View Modifiers
 public extension View {
-    /// The visual shape of the thumb (`.capsule` or `.circle`). Defaults to `.capsule`.
-    func colorSliderThumbStyle(_ style: ThumbStyle) -> some View {
-        environment(\.colorSliderThumbStyle, style)
+    /// The visual shape of the thumb. Defaults to `Capsule`.
+    func colorSliderThumbShape<S: Shape>(_ shape: S) -> some View {
+        environment(\.colorSliderThumbShape, AnyShape(shape))
     }
     
     /// The fill color of the draggable thumb. Defaults to `.white`.
@@ -122,7 +144,24 @@ public extension View {
     
     /// Adds an inset shadow to each discrete color block in a hard-edge slider. Defaults to `true`.
     func colorSliderHardEdgeInnerShadow(_ enabled: Bool = true) -> some View {
-        environment(\.colorSliderHardEdgeInnerShadow, enabled)
+            environment(\.colorSliderHardEdgeInnerShadow, enabled)
+        }
+
+    /// Sets the animation used when the drag gesture starts and ends.
+    func colorSliderAnimation(_ animation: Animation) -> some View {
+        environment(\.colorSliderAnimation, animation)
+    }
+
+    /// Adds a stroke to the slider track.
+    func colorSliderTrackStroke<S: ShapeStyle>(_ style: S, lineWidth: CGFloat = 1) -> some View {
+        let stroke = SliderStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
+        return environment(\.colorSliderTrackStroke, stroke)
+    }
+
+    /// Adds a stroke to the draggable thumb.
+    func colorSliderThumbStroke<S: ShapeStyle>(_ style: S, lineWidth: CGFloat = 1) -> some View {
+        let stroke = SliderStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
+        return environment(\.colorSliderThumbStroke, stroke)
     }
     
     func colorSliderPreviewPosition(_ position: PreviewPosition, spacing: CGFloat? = nil) -> some View {

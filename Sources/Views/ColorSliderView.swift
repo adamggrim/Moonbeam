@@ -8,14 +8,17 @@ public struct ColorSliderView: View {
     public let label: LocalizedStringKey
     public let axis: Axis
 
-    @Environment(\.colorSliderThumbStyle) private var thumbStyle
+    @Environment(\.colorSliderThumbShape) private var thumbShape
     @Environment(\.colorSliderThumbColor) private var thumbColor
+    @Environment(\.colorSliderTrackStroke) private var trackStroke
+    @Environment(\.colorSliderThumbStroke) private var thumbStroke
     @Environment(\.colorSliderPreviewHidden) private var previewHidden
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
     @Environment(\.colorSliderDimensions) private var dimensionsEnv
-    @Environment(\.colorSliderHardEdgeInnerShadow) private var enableInnerShadow
     @Environment(\.colorSliderPreviewPosition) private var previewPosition
     @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
+    @Environment(\.colorSliderHardEdgeInnerShadow) private var enableInnerShadow
+    @Environment(\.colorSliderAnimation) private var animation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // MARK: - State
