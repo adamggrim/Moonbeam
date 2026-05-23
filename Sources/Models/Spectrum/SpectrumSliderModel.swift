@@ -3,6 +3,9 @@ import SwiftUI
 
 /// Model for calculating spectrum colors dynamically.
 public struct SpectrumSliderModel: ColorSliderDataSource {
+    /// The maximum number of monochrome sections allowed at either end of the spectrum.
+    public static let maxMonochromeSections = 2
+    
     private static func validateBendSections(bendSections: [BendSection]) -> Bool {
         guard bendSections.count > 1 else { return true }
 
@@ -42,8 +45,9 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
     public init(@SpectrumComponentBuilder components: () -> [SliderComponent]) {
         let evaluatedComponents = components()
 
-        let hueSections = evaluatedComponents.compactMap { $0 as? HueSection }
-        guard let mainHueSection = hueSections.first, hueSections.count == 1 else {
+        guard let hueIndex = evaluatedComponents.firstIndex(where: { $0 is HueSection }),
+              let mainHueSection = evaluatedComponents[hueIndex] as? HueSection,
+              evaluatedComponents.filter({ $0 is HueSection }).count == 1 else {
             assertionFailure("Slider must contain exactly one HueSection.")
             self.hueSection = HueSection(minHue: 0, maxHue: 1)
             self.startSections = []
@@ -65,10 +69,10 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
         let brightnessBends = mainHueSection.brightnessBends ?? []
         
         // Truncate arrays at the Metal shader's hardcoded limits.
-        if beforeHue.count > 2 { assertionFailure("No more than two start sections allowed. Truncating...") }
-        if afterHue.count > 2 { assertionFailure("No more than two end sections allowed. Truncating...") }
         if saturationBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) saturation bends allowed. Please remove any additional bends.") }
         if brightnessBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) brightness bends allowed. Please remove any additional bends.") }
+        if beforeHue.count > SpectrumSliderModel.maxMonochromeSections { assertionFailure("No more than \(SpectrumSliderModel.maxMonochromeSections) start sections allowed. Please remove any additional sections.") }
+        if afterHue.count > SpectrumSliderModel.maxMonochromeSections { assertionFailure("No more than \(SpectrumSliderModel.maxMonochromeSections) end sections allowed. Please remove any additional sections.") }
 
         let saturationClosure: () -> [BendSection] = { Array(saturationBends.prefix(HueSection.maxBends)) }
         let brightnessClosure: () -> [BendSection] = { Array(brightnessBends.prefix(HueSection.maxBends)) }
@@ -81,8 +85,8 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
             saturationBends: saturationClosure,
             brightnessBends: brightnessClosure
         )
-        self.startSections = Array(beforeHue.prefix(2))
-        self.endSections = Array(afterHue.prefix(2))
+        self.startSections = Array(beforeHue.prefix(SpectrumSliderModel.maxMonochromeSections))
+        self.endSections = Array(afterHue.prefix(SpectrumSliderModel.maxMonochromeSections))
     }
 
     // MARK: - Shader Serialization
