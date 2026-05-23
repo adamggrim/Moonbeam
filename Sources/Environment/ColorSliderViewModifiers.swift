@@ -160,6 +160,7 @@ public extension View {
         return environment(\.colorSliderThumbStroke, stroke)
     }
     
+    /// The position of the color preview in relation to the slider.
     func colorSliderPreviewPosition(_ position: PreviewPosition, spacing: CGFloat? = nil) -> some View {
         self.environment(\.colorSliderPreviewPosition, position)
             .environment(\.colorSliderPreviewSpacing, spacing)
