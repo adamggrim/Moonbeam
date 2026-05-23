@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The placement of the color preview relative to the slider.
+/// The placement of the floating color preview relative to the slider.
 public enum PreviewPosition: Sendable {
     case top, bottom, leading, trailing
 }
@@ -160,7 +160,7 @@ public extension View {
         return environment(\.colorSliderThumbStroke, stroke)
     }
     
-    /// The position of the color preview in relation to the slider.
+    /// The position of the floating color preview in relation to the slider.
     func colorSliderPreviewPosition(_ position: PreviewPosition, spacing: CGFloat? = nil) -> some View {
         self.environment(\.colorSliderPreviewPosition, position)
             .environment(\.colorSliderPreviewSpacing, spacing)
