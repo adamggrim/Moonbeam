@@ -18,6 +18,8 @@ public struct ColorSliderView: View {
     @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    // MARK: - State
+    
     /// Indicates whether a drag gesture is currently active.
     @State private var isDragging: Bool = false
     
@@ -57,6 +59,8 @@ public struct ColorSliderView: View {
         self.label = label
         self.axis = axis
     }
+    
+    // MARK: - Layout Calculations
 
     private var resolvedThumbThickness: CGFloat { dimensionsEnv.thumbThickness ?? dimensionsEnv.thickness }
     private var resolvedThumbLength: CGFloat { thumbStyle == .circle ? resolvedThumbThickness : (dimensionsEnv.thumbLength ?? dimensionsEnv.thickness * 2) } // Prevent a rectangular bounding box.
@@ -325,6 +329,8 @@ public struct ColorSliderView: View {
                 y: axis == .horizontal ? resolvedPreviewOffset : -previewMainAxisOffset
             )
     }
+    
+    // MARK: - Drag Event Handlers
 
     /// Updates the view's state when the position of the `DragGesture`
     /// changes.

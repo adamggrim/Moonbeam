@@ -14,7 +14,7 @@ public enum MonochromeColor {
 public protocol MonochromeSection: SliderComponent {
     var color: MonochromeColor { get }
 
-    /// The number of monochrome gradations added to the hue section (each equal in width to a single hue).
+    /// The number of monochrome steps added to the hue section (each equal in width to a single hue).
     var weight: CGFloat { get }
 }
 

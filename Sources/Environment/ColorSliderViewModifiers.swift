@@ -96,11 +96,9 @@ public extension View {
     /// - Parameters:
     ///   - thickness: The thickness of the slider. Defaults to 24.
     ///   - length: The length of the slider. Defaults to 300.
-    ///   - thumbThickness: The thickness of the draggable thumb. Defaults to the slider thickness.
-    ///   - thumbLength: The length of the draggable thumb. Defaults to twice slider thickness for capsules.
+    ///   - thumbThickness: The thickness of the draggable thumb. If `nil`, defaults to the slider thickness.
+    ///   - thumbLength: The length of the draggable thumb. If `nil`, defaults to twice the slider thickness.
     ///   - previewSize: The width and height of the floating color preview. Defaults to 60.
-    ///   - previewOffset: The offset of the preview from the slider. Defaults to 66.
-    ///   - shadowRadius: The blur radius for the shadows applied to the thumb and preview. Defaults to 5.
     func colorSliderDimensions(
         thickness: CGFloat = 24,
         length: CGFloat = 300,

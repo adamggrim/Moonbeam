@@ -5,7 +5,7 @@ import SwiftUI
 ///
 ///Supports explicit and implicit hard-edge sliders:
 /// 1. **Explicit**: Initialize the slider using a custom array of `Color` objects.
-/// 2. **Implicit**: Apply the `.hardEdge(into:)` modifier to convert a `SpectrumSliderModel` or `GradientSliderModel` into discrete color blocks.
+/// 2. **Implicit**: Apply the `.hardEdge(into:)` modifier to convert a `SpectrumSliderModel` or `GradientSliderModel` into discrete color blocks sampled from the center of each block.
 public struct HardEdgeSliderModel: ColorSliderDataSource {
     public let colors: [Color]
     

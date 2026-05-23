@@ -86,6 +86,8 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
         self.endSections = Array(afterHue.prefix(2))
     }
 
+    // MARK: - Shader Serialization
+    
     /// Flattens the color spectrum into a single `Float` array for Metal shaders.
     private func encodeToFloatArray() -> [Float] {
         var data: [Float] = []
