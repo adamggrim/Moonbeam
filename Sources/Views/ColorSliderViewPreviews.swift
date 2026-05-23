@@ -119,7 +119,7 @@ private struct PreviewContainer: View {
 
     PreviewContainer(dataSource: bentSpectrum)
 }
-#Preview("Overlapping Bends (Saturation & Brightness)") {
+#Preview("Simultaneous Bends (Saturation & Brightness)") {
     let spectrumModel = SpectrumSliderModel {
         HueSection(
             minHue: 0.0,
@@ -143,7 +143,8 @@ private struct PreviewContainer: View {
         WhiteSection()
     }
     PreviewContainer(dataSource: spectrumModel)
-        .colorSliderThumbStyle(.circle)
+        .colorSliderThumbShape(Circle())
+        .colorSliderDimensions(thumbLength: 25)
 }
 
 #Preview("Circle Thumb (Vertical)") {
@@ -153,7 +154,8 @@ private struct PreviewContainer: View {
         WhiteSection()
     }
     PreviewContainer(dataSource: spectrumModel, axis: .vertical)
-        .colorSliderThumbStyle(.circle)
+        .colorSliderThumbShape(Circle())
+        .colorSliderDimensions(thumbLength: 25)
 }
 
 #Preview("Glass Disabled") {
