@@ -14,7 +14,7 @@ public struct ColorSliderView: View {
     @Environment(\.colorSliderThumbStroke) private var thumbStroke
     @Environment(\.colorSliderPreviewHidden) private var previewHidden
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
-    @Environment(\.colorSliderDimensions) private var dimensionsEnv
+    @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.colorSliderPreviewPosition) private var previewPosition
     @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
     @Environment(\.colorSliderHardEdgeInnerShadow) private var enableInnerShadow
@@ -69,13 +69,13 @@ public struct ColorSliderView: View {
     
     // MARK: - Layout Calculations
 
-    private var resolvedThumbThickness: CGFloat { dimensionsEnv.thumbThickness ?? dimensionsEnv.thickness }
-    private var resolvedThumbLength: CGFloat { dimensionsEnv.thumbLength ?? dimensionsEnv.thickness * 2 }
-    private var resolvedPreviewOffset: CGFloat { dimensionsEnv.previewOffset ?? (axis == .horizontal ? -Metrics.defaultPreviewOffset : Metrics.defaultPreviewOffset) }
+    private var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? dimensions.thickness }
+    private var resolvedThumbLength: CGFloat { dimensions.thumbLength ?? dimensions.thickness * 2 }
+    private var resolvedPreviewOffset: CGFloat { dimensions.previewOffset ?? (axis == .horizontal ? -Metrics.defaultPreviewOffset : Metrics.defaultPreviewOffset) }
     private var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
         
     /// Inset to adjust the left and right bounds of the thumb if it is thinner than the track.
-    private var thumbInset: CGFloat { (dimensionsEnv.thickness - resolvedThumbThickness) / 2 }
+    private var thumbInset: CGFloat { (dimensions.thickness - resolvedThumbThickness) / 2 }
     
     /// The current `liveContainerDrag` combined with the
     /// `persistedThumbPosition`. Equivalent to the horizontal position of the
@@ -93,7 +93,7 @@ public struct ColorSliderView: View {
     ///     thumb's center. At the start or end of the slider, can extend beyond the
     ///     thumb's center to the start or end of the thumb.
     private var liveColorPosition: CGFloat {
-        min(max(liveContainerThumbDrag + halfThumbThickness, 0), dimensionsEnv.length)
+        min(max(liveContainerThumbDrag + halfThumbThickness, 0), dimensions.length)
     }
     
     /// The clamped horizontal position of the start of the thumb during an active
@@ -101,12 +101,12 @@ public struct ColorSliderView: View {
     ///
     /// Cannot extend beyond the thumb's leading edge at the end of the slider.
     private var liveThumbPosition: CGFloat {
-        min(max(liveContainerThumbDrag, 0 + thumbInset), dimensionsEnv.length - resolvedThumbThickness - thumbInset)
+        min(max(liveContainerThumbDrag, 0 + thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
     }
 
     /// The color calculated from the current `liveColorPosition` on the slider.
     private var calculatedColor: Color {
-        let safeLength = dimensionsEnv.length > 0 ? dimensionsEnv.length : 0.001
+        let safeLength = dimensions.length > 0 ? dimensions.length : 0.001
         let clampedRatio = max(0.0, min(1.0, liveColorPosition / safeLength))
         switch dataSource.colorSource {
         case .array(let colors):
@@ -126,9 +126,9 @@ public struct ColorSliderView: View {
     /// Except at the ends of the slider, the color preview is centered above the
     /// thumb's center.
     private var previewMainAxisOffset: CGFloat {
-        let halfPreviewSize = dimensionsEnv.previewSize / 2
+        let halfPreviewSize = dimensions.previewSize / 2
         let leftBound = halfPreviewSize - halfThumbThickness
-        let rightBound = dimensionsEnv.length - halfPreviewSize - halfThumbThickness
+        let rightBound = dimensions.length - halfPreviewSize - halfThumbThickness
         let clampedValue = min(max(liveThumbPosition, leftBound), rightBound)
 
         /// The offset that centers the floating color preview above the thumb.
@@ -144,7 +144,7 @@ public struct ColorSliderView: View {
 
             if !isDragging && halfThumbOffset < halfPreviewSize {
                 return startEdgeLimit
-            } else if (!isDragging && halfThumbOffset > dimensionsEnv.length - halfPreviewSize) {
+            } else if (!isDragging && halfThumbOffset > dimensions.length - halfPreviewSize) {
                 return endEdgeLimit
             } else {
                 return clampedValue - halfPreviewSize + offsetAdjustment
@@ -153,8 +153,8 @@ public struct ColorSliderView: View {
             if halfThumbOffset < halfPreviewSize {
                 // Clamp the color preview to the starting edge of the slider.
                 return 0
-            } else if halfThumbOffset > dimensionsEnv.length - halfPreviewSize {
-                return dimensionsEnv.length - dimensionsEnv.previewSize
+            } else if halfThumbOffset > dimensions.length - halfPreviewSize {
+                return dimensions.length - dimensions.previewSize
             } else {
                 // Clamp the color preview to the ending edge of the slider.
                 return clampedValue - halfPreviewSize + halfThumbThickness
@@ -164,7 +164,7 @@ public struct ColorSliderView: View {
 
     /// The offset of the thumb's leading edge.
     private var thumbOffset: CGFloat {
-        min(max(liveThumbPosition, thumbInset), dimensionsEnv.length - resolvedThumbThickness - thumbInset)
+        min(max(liveThumbPosition, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
     }
 
     /// Set to `true` to scale the thumb up during a drag gesture. Defaults to `true` if liquid glass is supported and enabled.
@@ -181,8 +181,8 @@ public struct ColorSliderView: View {
             colorPreviewView
         }
         .frame(
-            width: axis == .horizontal ? dimensionsEnv.length : resolvedThumbLength,
-            height: axis == .horizontal ? resolvedThumbLength : dimensionsEnv.length
+            width: axis == .horizontal ? dimensions.length : resolvedThumbLength,
+            height: axis == .horizontal ? resolvedThumbLength : dimensions.length
         )
         .onChange(of: calculatedColor, initial: true) { _, newValue in
             selectedColor = newValue
@@ -196,8 +196,8 @@ public struct ColorSliderView: View {
     @ViewBuilder
     private var trackView: some View {
         let size = CGSize(
-            width: axis == .horizontal ? dimensionsEnv.length : dimensionsEnv.thickness,
-            height: axis == .horizontal ? dimensionsEnv.thickness : dimensionsEnv.length
+            width: axis == .horizontal ? dimensions.length : dimensions.thickness,
+            height: axis == .horizontal ? dimensions.thickness : dimensions.length
         )
 
         Group {
@@ -271,7 +271,7 @@ public struct ColorSliderView: View {
             height: axis == .horizontal ? resolvedThumbLength : resolvedThumbThickness
         )
         .scaleEffect(isDragging && enableThumbScale ? Metrics.dragScaleMultiplier : 1.0)
-        .shadow(radius: dimensionsEnv.shadowRadius)
+        .shadow(radius: dimensions.shadowRadius)
         .overlay {
             if let stroke = thumbStroke {
                 thumbShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
@@ -289,15 +289,15 @@ public struct ColorSliderView: View {
     }
 
     private var colorPreviewView: some View {
-        RoundedRectangle(cornerRadius: dimensionsEnv.previewCornerRadius)
+        RoundedRectangle(cornerRadius: dimensions.previewCornerRadius)
             .foregroundColor(calculatedColor)
-            .frame(width: dimensionsEnv.previewSize, height: dimensionsEnv.previewSize)
+            .frame(width: dimensions.previewSize, height: dimensions.previewSize)
             .scaleEffect(
-                previewHidden && !isDragging ? dimensionsEnv.scaleRatio : 1.0,
+                previewHidden && !isDragging ? dimensions.scaleRatio : 1.0,
                 anchor: axis == .horizontal ? .bottom : (resolvedPreviewOffset < 0 ? .trailing : .leading)
             )
             .opacity(previewHidden && !isDragging ? 0 : 1.0)
-            .shadow(radius: dimensionsEnv.shadowRadius)
+            .shadow(radius: dimensions.shadowRadius)
             .offset(
                 x: axis == .horizontal ? previewMainAxisOffset : resolvedPreviewOffset,
                 y: axis == .horizontal ? resolvedPreviewOffset : -previewMainAxisOffset
@@ -319,7 +319,7 @@ public struct ColorSliderView: View {
         }
         liveContainerDrag = axis == .horizontal ? value.translation.width : -value.translation.height
         // Update the ratio so VoiceOver knows where the gesture finished.
-        positionRatio = dimensionsEnv.length > 0 ? liveColorPosition / dimensionsEnv.length : 0.0
+        positionRatio = dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0
     }
 
     /// Finalizes the view's state when the drag gesture ends, updating
@@ -335,10 +335,10 @@ public struct ColorSliderView: View {
 
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
-        let stepDelta = dimensionsEnv.length * (direction == .increment ? Metrics.accessibilityStepPercentage : -Metrics.accessibilityStepPercentage)
-        let newDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensionsEnv.length)
-        persistedThumbPosition = min(max(newDrag, thumbInset), dimensionsEnv.length - resolvedThumbThickness - thumbInset)
+        let stepDelta = dimensions.length * (direction == .increment ? Metrics.accessibilityStepPercentage : -Metrics.accessibilityStepPercentage)
+        let newDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensions.length)
+        persistedThumbPosition = min(max(newDrag, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
         liveContainerDrag = .zero
-        positionRatio = dimensionsEnv.length > 0 ? liveColorPosition / dimensionsEnv.length : 0.0
+        positionRatio = dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0
     }
 }
