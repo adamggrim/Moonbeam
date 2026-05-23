@@ -21,6 +21,13 @@ public struct ColorSliderView: View {
     @Environment(\.colorSliderAnimation) private var animation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    // MARK: - Constants
+    private enum Metrics {
+        static let defaultPreviewOffset: CGFloat = 70.0
+        static let dragScaleMultiplier: CGFloat = 1.1
+        static let accessibilityStepPercentage: CGFloat = 0.05
+    }
+    
     // MARK: - State
     
     /// Indicates whether a drag gesture is currently active.
@@ -66,36 +73,12 @@ public struct ColorSliderView: View {
     // MARK: - Layout Calculations
 
     private var resolvedThumbThickness: CGFloat { dimensionsEnv.thumbThickness ?? dimensionsEnv.thickness }
-    private var resolvedThumbLength: CGFloat { thumbStyle == .circle ? resolvedThumbThickness : (dimensionsEnv.thumbLength ?? dimensionsEnv.thickness * 2) } // Prevent a rectangular bounding box.
-    private var resolvedPreviewOffset: CGFloat {
-        if let rawOffset = dimensionsEnv.previewOffset, previewPosition == nil {
-            return rawOffset
-        }
-        
-        let baseDistance: CGFloat = 66 + (previewSpacing ?? 0)
-        
-        if axis == .horizontal {
-            let placement = previewPosition ?? .top
-            switch placement {
-            case .top: return -baseDistance
-            case .bottom: return baseDistance
-            case .leading, .trailing: return -baseDistance
-            }
-        } else {
-            let placement = previewPosition ?? .trailing
-            switch placement {
-            case .trailing: return baseDistance
-            case .leading: return -baseDistance
-            case .top, .bottom: return baseDistance
-            }
-        }
-    }
+    private var resolvedThumbLength: CGFloat { dimensionsEnv.thumbLength ?? dimensionsEnv.thickness * 2 }
+    private var resolvedPreviewOffset: CGFloat { dimensionsEnv.previewOffset ?? (axis == .horizontal ? -Metrics.defaultPreviewOffset : Metrics.defaultPreviewOffset) }
     private var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
-    
-    /// Inset to adjust the left and right bounds of the thumb.
-    ///
-    /// Used when `thumbStyle` is `.circle`.
-    private var thumbInset: CGFloat { thumbStyle == .capsule ? 0.0 : (dimensionsEnv.thickness - resolvedThumbThickness) / 2 }
+        
+    /// Inset to adjust the left and right bounds of the thumb if it is thinner than the track.
+    private var thumbInset: CGFloat { (dimensionsEnv.thickness - resolvedThumbThickness) / 2 }
     
     /// The current `liveContainerDrag` combined with the
     /// `persistedThumbPosition`. Equivalent to the horizontal position of the
@@ -147,7 +130,6 @@ public struct ColorSliderView: View {
     /// thumb's center.
     private var previewMainAxisOffset: CGFloat {
         let halfPreviewSize = dimensionsEnv.previewSize / 2
-        let quarterThumbThickness = halfThumbThickness / 2
         let leftBound = halfPreviewSize - halfThumbThickness
         let rightBound = dimensionsEnv.length - halfPreviewSize - halfThumbThickness
         let clampedValue = min(max(liveThumbPosition, leftBound), rightBound)
@@ -155,25 +137,13 @@ public struct ColorSliderView: View {
         /// The offset that centers the floating color preview above the thumb.
         let halfThumbOffset = thumbOffset + halfThumbThickness
 
-        /// The offset that positions the floating color preview at one quarter
-        /// the length of the thumb.
-        ///
-        /// Used when `thumbStyle` is `.circle`.
-        let quarterThumbOffset = thumbOffset + quarterThumbThickness
-
         if previewHidden {
             let startEdgeLimit: CGFloat
             let endEdgeLimit: CGFloat
             let offsetAdjustment: CGFloat = halfThumbThickness
 
-            if thumbStyle == .capsule {
-                startEdgeLimit = -halfPreviewSize + halfThumbOffset
-                endEdgeLimit = -halfPreviewSize + halfThumbOffset
-            } else {
-                startEdgeLimit = -halfPreviewSize + quarterThumbOffset
-                let threeQuarterThumbOffset = thumbOffset + resolvedThumbThickness - quarterThumbThickness
-                endEdgeLimit = -halfPreviewSize + threeQuarterThumbOffset
-            }
+            startEdgeLimit = -halfPreviewSize + halfThumbOffset
+            endEdgeLimit = -halfPreviewSize + halfThumbOffset
 
             if !isDragging && halfThumbOffset < halfPreviewSize {
                 return startEdgeLimit
@@ -211,7 +181,7 @@ public struct ColorSliderView: View {
         ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
             trackView
             thumbView
-            previewView
+            colorPreviewView
         }
         .frame(
             width: axis == .horizontal ? dimensionsEnv.length : resolvedThumbLength,
@@ -247,6 +217,11 @@ public struct ColorSliderView: View {
             }
         }
         .frame(width: size.width, height: size.height)
+        .overlay {
+            if let stroke = trackStroke {
+                Capsule().stroke(stroke.style, lineWidth: stroke.lineWidth)
+            }
+        }
     }
 
     @ViewBuilder
@@ -284,8 +259,6 @@ public struct ColorSliderView: View {
 
     @ViewBuilder
     private var thumbView: some View {
-        let thumbShape = thumbStyle == .capsule ? AnyShape(Capsule()) : AnyShape(Circle())
-
         Group {
             if #available(iOS 26.0, *), !disableLiquidGlass {
                 Color.clear
@@ -300,8 +273,13 @@ public struct ColorSliderView: View {
             width: axis == .horizontal ? resolvedThumbThickness : resolvedThumbLength,
             height: axis == .horizontal ? resolvedThumbLength : resolvedThumbThickness
         )
-        .scaleEffect(isDragging && enableThumbScale ? 1.1 : 1.0)
+        .scaleEffect(isDragging && enableThumbScale ? Metrics.dragScaleMultiplier : 1.0)
         .shadow(radius: dimensionsEnv.shadowRadius)
+        .overlay {
+            if let stroke = thumbStroke {
+                thumbShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
+            }
+        }
         .offset(
             x: axis == .horizontal ? thumbOffset : 0,
             y: axis == .horizontal ? 0 : -thumbOffset
@@ -364,7 +342,7 @@ public struct ColorSliderView: View {
 
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
-        let stepDelta = dimensionsEnv.length * (direction == .increment ? 0.05 : -0.05)
+        let stepDelta = dimensionsEnv.length * (direction == .increment ? Metrics.accessibilityStepPercentage : -Metrics.accessibilityStepPercentage)
         let newDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensionsEnv.length)
         persistedThumbPosition = min(max(newDrag, thumbInset), dimensionsEnv.length - resolvedThumbThickness - thumbInset)
         liveContainerDrag = .zero
