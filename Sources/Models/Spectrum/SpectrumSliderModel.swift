@@ -58,7 +58,6 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
             assertionFailure("Brightness bend sections are overlapping.")
         }
 
-        let hueIndex = evaluatedComponents.firstIndex { $0 is HueSection }!
         let beforeHue = evaluatedComponents.prefix(upTo: hueIndex).compactMap { $0 as? MonochromeSection }
         let afterHue = evaluatedComponents.suffix(from: hueIndex + 1).compactMap { $0 as? MonochromeSection }
 
@@ -66,13 +65,13 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
         let brightnessBends = mainHueSection.brightnessBends ?? []
         
         // Truncate arrays at the Metal shader's hardcoded limits.
-        if saturationBends.count > 20 { assertionFailure("No more than 20 saturation bends allowed. Truncating...") }
-        if brightnessBends.count > 20 { assertionFailure("No more than 20 brightness bends allowed. Truncating...") }
         if beforeHue.count > 2 { assertionFailure("No more than two start sections allowed. Truncating...") }
         if afterHue.count > 2 { assertionFailure("No more than two end sections allowed. Truncating...") }
+        if saturationBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) saturation bends allowed. Please remove any additional bends.") }
+        if brightnessBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) brightness bends allowed. Please remove any additional bends.") }
 
-        let saturationClosure: () -> [BendSection] = { Array(saturationBends.prefix(20)) }
-        let brightnessClosure: () -> [BendSection] = { Array(brightnessBends.prefix(20)) }
+        let saturationClosure: () -> [BendSection] = { Array(saturationBends.prefix(HueSection.maxBends)) }
+        let brightnessClosure: () -> [BendSection] = { Array(brightnessBends.prefix(HueSection.maxBends)) }
 
         self.hueSection = HueSection(
             minHue: mainHueSection.minHue,

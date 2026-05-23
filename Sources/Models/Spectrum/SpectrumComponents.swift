@@ -60,6 +60,9 @@ public struct WhiteSection: MonochromeSection {
 // MARK: - Hue Section
 /// The core component representing the colorful spectrum of the slider.
 public struct HueSection: SliderComponent {
+    /// The maximum number of bend sections supported by the GPU shader.
+    public static let maxBends = 20
+    
     public let minHue: CGFloat
     public let maxHue: CGFloat
     public let baseSaturation: CGFloat
