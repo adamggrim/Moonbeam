@@ -48,9 +48,6 @@ public struct ColorSliderView: View {
     /// from 0.0 to 1.0.
     @State private var positionRatio: CGFloat = 0.0
 
-    /// The duration of the state-change animations. Defaults to 0.25.
-    private let duration: Double = 0.25
-
     /// Initializes a customizable color slider.
     ///
     /// - Parameters:
@@ -291,19 +288,15 @@ public struct ColorSliderView: View {
         )
     }
 
-    private var previewView: some View {
-        // Color preview
+    private var colorPreviewView: some View {
         RoundedRectangle(cornerRadius: dimensionsEnv.previewCornerRadius)
             .foregroundColor(calculatedColor)
             .frame(width: dimensionsEnv.previewSize, height: dimensionsEnv.previewSize)
-            .modifyColorPreview(
-                isDragging: isDragging,
-                scaleRatio: dimensionsEnv.scaleRatio,
-                previewHidden: previewHidden,
-                anchor: axis == .horizontal
-                    ? (resolvedPreviewOffset < 0 ? .bottom : .top)
-                    : (resolvedPreviewOffset < 0 ? .trailing : .leading)
+            .scaleEffect(
+                previewHidden && !isDragging ? dimensionsEnv.scaleRatio : 1.0,
+                anchor: axis == .horizontal ? .bottom : (resolvedPreviewOffset < 0 ? .trailing : .leading)
             )
+            .opacity(previewHidden && !isDragging ? 0 : 1.0)
             .shadow(radius: dimensionsEnv.shadowRadius)
             .offset(
                 x: axis == .horizontal ? previewMainAxisOffset : resolvedPreviewOffset,
@@ -322,7 +315,7 @@ public struct ColorSliderView: View {
     /// - Parameter value: The current value of the `DragGesture`.
     private func onDragChanged(_ value: DragGesture.Value) {
         if !isDragging {
-            withAnimation(reduceMotion ? nil : .easeInOut(duration: duration)) { isDragging = true }
+            withAnimation(reduceMotion ? nil : animation) { isDragging = true }
         }
         liveContainerDrag = axis == .horizontal ? value.translation.width : -value.translation.height
         // Update the ratio so VoiceOver knows where the gesture finished.
@@ -333,7 +326,7 @@ public struct ColorSliderView: View {
     /// `persistedThumbPosition` with the thumb's last valid clamped position
     /// and resetting `liveContainerDrag` to zero.
     private func onDragEnded(_ value: DragGesture.Value) {
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: duration)) {
+            withAnimation(reduceMotion ? nil : animation) {
             isDragging = false
             persistedThumbPosition = liveThumbPosition
             liveContainerDrag = .zero
