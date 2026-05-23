@@ -18,6 +18,12 @@ public protocol MonochromeSection: SliderComponent {
     var weight: CGFloat { get }
 }
 
+/// Provides shared default values shared across all monochrome sections.
+public extension MonochromeSection {
+    /// The default proportionate width of a monochrome step (1/6th of a standard hue).
+    static var defaultWeight: CGFloat { 1.0 / 6.0 }
+}
+
 /// A protocol for a section of the color slider with special conditions for saturation or brightness.
 public protocol BendSection {
     var startHue: CGFloat { get }
@@ -35,7 +41,7 @@ public struct BlackSection: MonochromeSection {
 
     /// Initializes a black section.
     ///   - Parameter weight: The proportionate width of the section relative to a single hue.
-    public init(weight: CGFloat = 1.0 / 6.0) {
+    public init(weight: CGFloat = Self.defaultWeight) {
         self.weight = weight
     }
 }
@@ -46,7 +52,7 @@ public struct WhiteSection: MonochromeSection {
 
     /// Initializes a white section.
     /// - Parameter weight: The proportionate width of the section relative to a single hue.
-    public init(weight: CGFloat = 1.0 / 6.0) {
+    public init(weight: CGFloat = Self.defaultWeight) {
         self.weight = weight
     }
 }
