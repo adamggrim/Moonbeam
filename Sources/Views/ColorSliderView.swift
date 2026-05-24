@@ -51,7 +51,7 @@ public struct ColorSliderView: View {
     
     /// The position of the selected color in the slider, normalized to a range
     /// from 0.0 to 1.0.
-    @State private var positionRatio: CGFloat = 0.0
+    @State private var progress: CGFloat = 0.0
 
     /// Initializes a customizable color slider.
     ///
@@ -193,7 +193,7 @@ public struct ColorSliderView: View {
             selectedColor = newValue
         }
         .accessibilityElement(children: .ignore) // Hides individual shapes from VoiceOver.
-        .accessibilityValue(Double(positionRatio).formatted(.percent))
+        .accessibilityValue(Double(progress).formatted(.percent))
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
     }
@@ -331,7 +331,7 @@ public struct ColorSliderView: View {
         }
         liveContainerDrag = axis == .horizontal ? value.translation.width : -value.translation.height
         // Update the ratio so VoiceOver knows where the gesture finished.
-        positionRatio = dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0
+        progress = dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0
     }
 
     /// Finalizes the view's state when the drag gesture ends, updating
@@ -351,6 +351,6 @@ public struct ColorSliderView: View {
         let newDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensions.length)
         persistedThumbPosition = min(max(newDrag, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
         liveContainerDrag = .zero
-        positionRatio = dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0
+        progress = dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0
     }
 }
