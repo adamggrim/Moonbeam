@@ -2,7 +2,9 @@
 #include <SwiftUI/SwiftUI_Metal.h>
 using namespace metal;
 
+// This value must match `HueSection.maxBends` in SpectrumComponents.swift.
 constant int MAX_BENDS = 20;
+// This value must match `maxMonochromeSections` in SpectrumSliderModel.swift.
 constant int MAX_MONOCHROME_SECTIONS = 2;
 
 // MARK: – HSB to RGB
