@@ -8,15 +8,20 @@ public struct ColorSliderView: View {
     public let label: LocalizedStringKey
     public let axis: Axis
 
+    @Environment(\.colorSliderTrackStroke) private var trackStroke
+    
     @Environment(\.colorSliderThumbShape) private var thumbShape
     @Environment(\.colorSliderThumbColor) private var thumbColor
-    @Environment(\.colorSliderTrackStroke) private var trackStroke
     @Environment(\.colorSliderThumbStroke) private var thumbStroke
-    @Environment(\.colorSliderPreviewHidden) private var previewHidden
-    @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
-    @Environment(\.colorSliderDimensions) private var dimensions
+    
+    @Environment(\.colorSliderPreviewShape) private var previewShape
+    @Environment(\.colorSliderPreviewStroke) private var previewStroke
     @Environment(\.colorSliderPreviewPosition) private var previewPosition
     @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
+    @Environment(\.colorSliderPreviewHidden) private var previewHidden
+    
+    @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
+    @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.colorSliderHardEdgeInnerShadow) private var enableInnerShadow
     @Environment(\.colorSliderAnimation) private var animation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -289,7 +294,9 @@ public struct ColorSliderView: View {
     }
 
     private var colorPreviewView: some View {
-        RoundedRectangle(cornerRadius: dimensions.previewCornerRadius)
+        let resolvedShape = previewShape ?? AnyShape(RoundedRectangle(cornerRadius: dimensions.previewCornerRadius))
+        
+        return resolvedShape
             .foregroundColor(calculatedColor)
             .frame(width: dimensions.previewSize, height: dimensions.previewSize)
             .scaleEffect(
@@ -298,6 +305,11 @@ public struct ColorSliderView: View {
             )
             .opacity(previewHidden && !isDragging ? 0 : 1.0)
             .shadow(radius: dimensions.shadowRadius)
+            .overlay {
+                if let stroke = previewStroke {
+                    resolvedShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
+                }
+            }
             .offset(
                 x: axis == .horizontal ? previewMainAxisOffset : resolvedPreviewOffset,
                 y: axis == .horizontal ? resolvedPreviewOffset : -previewMainAxisOffset
