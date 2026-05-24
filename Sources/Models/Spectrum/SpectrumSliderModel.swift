@@ -57,35 +57,33 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
             return
         }
 
-        if let saturationBends = mainHueSection.saturationBends, !Self.validateBendSections(bendSections: saturationBends) {
-            assertionFailure("Saturation bend sections are overlapping.")
+        if let primaryBends = mainHueSection.primaryBends, !Self.validateBendSections(bendSections: primaryBends) {
+            assertionFailure("Primary bend sections are overlapping.")
         }
-        if let brightnessBends = mainHueSection.brightnessBends, !Self.validateBendSections(bendSections: brightnessBends) {
-            assertionFailure("Brightness bend sections are overlapping.")
+        if let secondaryBends = mainHueSection.secondaryBends, !Self.validateBendSections(bendSections: secondaryBends) {
+            assertionFailure("Secondary bend sections are overlapping.")
         }
 
         let beforeHue = evaluatedComponents.prefix(upTo: hueIndex).compactMap { $0 as? MonochromeSection }
         let afterHue = evaluatedComponents.suffix(from: hueIndex + 1).compactMap { $0 as? MonochromeSection }
 
-        let saturationBends = mainHueSection.saturationBends ?? []
-        let brightnessBends = mainHueSection.brightnessBends ?? []
-        
+        let primaryBends = mainHueSection.primaryBends ?? []
+        let secondaryBends = mainHueSection.secondaryBends ?? []
+
         // Truncate arrays at the Metal shader's hardcoded limits.
-        if saturationBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) saturation bends allowed. Please remove any additional bends.") }
-        if brightnessBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) brightness bends allowed. Please remove any additional bends.") }
+        if primaryBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) primary bends allowed. Please remove any additional bends.") }
+        if secondaryBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) secondary bends allowed. Please remove any additional bends.") }
         if beforeHue.count > SpectrumSliderModel.maxMonochromeSections { assertionFailure("No more than \(SpectrumSliderModel.maxMonochromeSections) start sections allowed. Please remove any additional sections.") }
         if afterHue.count > SpectrumSliderModel.maxMonochromeSections { assertionFailure("No more than \(SpectrumSliderModel.maxMonochromeSections) end sections allowed. Please remove any additional sections.") }
-
-        let saturationClosure: () -> [BendSection] = { Array(saturationBends.prefix(HueSection.maxBends)) }
-        let brightnessClosure: () -> [BendSection] = { Array(brightnessBends.prefix(HueSection.maxBends)) }
 
         self.hueSection = HueSection(
             minHue: mainHueSection.minHue,
             maxHue: mainHueSection.maxHue,
-            baseSaturation: mainHueSection.baseSaturation,
-            baseBrightness: mainHueSection.baseBrightness,
-            saturationBends: saturationClosure,
-            brightnessBends: brightnessClosure
+            colorSpace: mainHueSection.colorSpace,
+            primaryValue: mainHueSection.primaryValue,
+            secondaryValue: mainHueSection.secondaryValue,
+            primaryBends: Array(primaryBends.prefix(HueSection.maxBends)),
+            secondaryBends: Array(secondaryBends.prefix(HueSection.maxBends))
         )
         self.startSections = Array(beforeHue.prefix(SpectrumSliderModel.maxMonochromeSections))
         self.endSections = Array(afterHue.prefix(SpectrumSliderModel.maxMonochromeSections))
@@ -106,8 +104,9 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
         data.append(Float((startWeight + hueWeight) / totalWeight))
         data.append(Float(hueSection.minHue))
         data.append(Float(hueSection.maxHue))
-        data.append(Float(hueSection.baseSaturation))
-        data.append(Float(hueSection.baseBrightness))
+        data.append(Float(hueSection.primaryValue))
+        data.append(Float(hueSection.secondaryValue))
+        data.append(hueSection.colorSpace == .oklch ? 1.0 : 0.0)
 
         data.append(Float(startSections.count))
         var cumulativeStart = 0.0
@@ -125,7 +124,7 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
             data.append(Float(cumulativeEnd))
         }
 
-        let sBends = hueSection.saturationBends ?? []
+        let sBends = hueSection.primaryBends ?? []
         data.append(Float(sBends.count))
         for b in sBends {
             data.append(b is OneWayBend ? 1.0 : 2.0)
@@ -135,7 +134,7 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
             data.append(Float(b.hueCount))
         }
 
-        let bBends = hueSection.brightnessBends ?? []
+        let bBends = hueSection.secondaryBends ?? []
         data.append(Float(bBends.count))
         for b in bBends {
             data.append(b is OneWayBend ? 1.0 : 2.0)
