@@ -21,15 +21,14 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 `Moonbeam` supports two color slider modes—spectrum (HSB-based) and gradient (color mixing-based).
 
 - **For spectrum sliders:** To improve the legibility of certain colors against a light or dark background, bend the saturation or brightness in specific sections. `Moonbeam` also supports black or white fade-ins and fade-outs (e.g., starting the spectrum with white).
-
 - **For gradient sliders**: Create a precise gradient between any two colors.
-
 - **For hard-edge sliders**: Create a slider with discrete color blocks.
 
 `Moonbeam` also offers layout and thumb style customization:
 
 - **Orientation:** Render sliders either horizontally or vertically.
-- **Thumb styles:** Choose between a capsule (customizable by width and height) or a circle (customizable by width).
+- **Thumb styles:** Choose any shape (`Capsule` by default) and an optional stroke.
+- **Preview styles:** Choose any shape (`RoundedRectangle` by default) and an optional stroke.
 
 ## Example (Spectrum)
 
