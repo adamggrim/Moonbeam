@@ -7,8 +7,8 @@ public enum PreviewPosition: Sendable {
 
 /// Encapsulates various layout dimensions for the color slider and its components.
 public struct ColorSliderDimensions: Sendable {
-    public var thickness: CGFloat = 24
     public var length: CGFloat = 300
+    public var thickness: CGFloat = 24
     public var thumbThickness: CGFloat? = nil
     public var thumbLength: CGFloat? = nil
     public var previewSize: CGFloat = 60
@@ -166,8 +166,8 @@ public extension View {
     
     /// Customizes the layout dimensions of the color slider.
     func colorSliderDimensions(
-        thickness: CGFloat = 24,
         length: CGFloat = 300,
+        thickness: CGFloat = 24,
         thumbThickness: CGFloat? = nil,
         thumbLength: CGFloat? = nil,
         previewSize: CGFloat = 60,
@@ -175,8 +175,8 @@ public extension View {
         shadowRadius: CGFloat = 5
     ) -> some View {
         let dim = ColorSliderDimensions(
-            thickness: thickness,
             length: length,
+            thickness: thickness,
             thumbThickness: thumbThickness,
             thumbLength: thumbLength,
             previewSize: previewSize,
