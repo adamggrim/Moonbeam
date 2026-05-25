@@ -2,16 +2,13 @@ import Foundation
 
 // MARK: - Core Protocols
 
-/// A baseline protocol representing any structural block within a spectrum slider.
-public protocol SliderComponent {}
-
 /// Represents the lightest and darkest endpoints of a spectrum.
 public enum MonochromeColor {
     case black, white
 }
 
 /// Section of the color slider that fades to or from a monochrome color.
-public protocol MonochromeSection: SliderComponent {
+public protocol MonochromeSection {
     var color: MonochromeColor { get }
 
     /// The number of monochrome steps added to the hue section (each equal in width to a single hue).
