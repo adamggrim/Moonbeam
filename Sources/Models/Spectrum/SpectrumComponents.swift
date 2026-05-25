@@ -57,11 +57,6 @@ public struct WhiteSection: MonochromeSection {
     }
 }
 
-/// The color space used to render the spectrum.
-public enum SpectrumColorSpace {
-    case hsb, oklch
-}
-
 // MARK: - Hue Section
 /// The core component representing the colorful spectrum of the slider.
 public struct HueSection: SliderComponent {
