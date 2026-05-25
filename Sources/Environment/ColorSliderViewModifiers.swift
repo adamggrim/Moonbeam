@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The placement of the floating color preview relative to the slider.
+/// The position of the floating color preview relative to the slider.
 public enum PreviewPosition: Sendable {
     case top, bottom, leading, trailing
 }
@@ -42,8 +42,8 @@ private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool 
 
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
-private struct HardEdgeInnerShadowRadiusKey: EnvironmentKey { static let defaultValue: CGFloat = 3 }
-private struct HardEdgeInnerShadowOpacityKey: EnvironmentKey { static let defaultValue: Double = 0.3 }
+private struct HardEdgeInnerShadowRadiusKey: EnvironmentKey { static let defaultValue: CGFloat = 0 }
+private struct HardEdgeInnerShadowOpacityKey: EnvironmentKey { static let defaultValue: Double = 0 }
 private struct AnimationKey: EnvironmentKey { static let defaultValue: Animation = .easeInOut(duration: 0.25) }
 
 extension EnvironmentValues {
@@ -186,10 +186,10 @@ public extension View {
         return environment(\.colorSliderDimensions, dim)
     }
 
-    /// Adds an inset shadow to each discrete color block in a hard-edge slider.
+    /// Adds an inset shadow to each discrete color block in a hard-edge slider. By default, sliders do not have an inner shadow.
     /// - Parameters:
-    ///   - radius: The blur radius of the inner shadow. Defaults to `3`. Set to `0` to disable.
-    ///   - opacity: The opacity of the black shadow. Defaults to `0.3`. Set to `0` to disable.
+    ///   - radius: The blur radius of the inner shadow. Defaults to `3`.
+    ///   - opacity: The opacity of the black shadow. Defaults to `0.3`.
     func colorSliderHardEdgeInnerShadow(radius: CGFloat = 3, opacity: Double = 0.3) -> some View {
         self.environment(\.colorSliderHardEdgeInnerShadowRadius, radius)
             .environment(\.colorSliderHardEdgeInnerShadowOpacity, opacity)

@@ -111,15 +111,6 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: customStops)
 }
 
-#Preview("Hard-Edge Spectrum (Implicit) (No Shadow)") {
-    let chunkySpectrum = SpectrumSliderModel {
-        HueSection(minHue: 0.0, maxHue: 1.0)
-    }.hardEdge(into: 10)
-    
-    PreviewContainer(dataSource: chunkySpectrum)
-        .colorSliderHardEdgeInnerShadow(radius: 0)
-}
-
 #Preview("Hard-Edge Gradient (Implicit) (Custom Shadow)") {
     let chunkyGradient = GradientSliderModel(
         startColor: .cyan,
