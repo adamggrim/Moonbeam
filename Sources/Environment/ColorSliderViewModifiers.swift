@@ -9,6 +9,7 @@ public enum PreviewPosition: Sendable, Equatable {
 public struct ColorSliderDimensions: Sendable, Equatable {
     public var length: CGFloat = 300
     public var thickness: CGFloat = 24
+    public var cornerRadius: CGFloat? = nil
     public var thumbThickness: CGFloat? = nil
     public var thumbLength: CGFloat? = nil
     public var previewSize: CGFloat = 60
@@ -117,6 +118,13 @@ public extension View {
         let stroke = SliderStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
         return environment(\.colorSliderTrackStroke, stroke)
     }
+    
+    /// Changes the corner radius so the slider track appears as a `RoundedRectangle` instead of a `Capsule`.
+    func colorSliderCornerRadius(_ radius: CGFloat) -> some View {
+            var newDimensions = ColorSliderDimensions()
+            newDimensions.cornerRadius = radius
+            return environment(\.colorSliderDimensions, newDimensions)
+        }
 
     // MARK: Thumb Modifiers
     /// The visual shape of the thumb. Defaults to `Capsule`.
