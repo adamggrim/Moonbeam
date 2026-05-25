@@ -33,6 +33,7 @@ public struct ColorSliderView: View {
     @Environment(\.colorSliderHardEdgeInnerShadowOpacity) private var innerShadowOpacity
     @Environment(\.colorSliderAnimation) private var animation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.self) private var environment
 
     // MARK: - Constants
     private enum Metrics {
@@ -381,7 +382,7 @@ public struct ColorSliderView: View {
         }
         liveContainerDrag = axis == .horizontal ? value.translation.width : -value.translation.height
         progress = Double(dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0)
-        selectedColor = calculatedColor.cgColor ?? CGColor(gray: 0, alpha: 0)
+        selectedColor = calculatedColor.resolve(in: environment).cgColor
     }
 
     /// Finalizes the view's state when the drag gesture ends, updating
@@ -402,6 +403,7 @@ public struct ColorSliderView: View {
         persistedThumbPosition = min(max(newDrag, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
         liveContainerDrag = .zero
         progress = Double(dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0)
+        selectedColor = calculatedColor.resolve(in: environment).cgColor
         selectedColor = calculatedColor.cgColor ?? CGColor(gray: 0, alpha: 0)
     }
 }
