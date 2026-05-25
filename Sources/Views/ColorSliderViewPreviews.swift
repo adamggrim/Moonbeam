@@ -5,14 +5,16 @@ private struct PreviewContainer: View {
     var axis: Axis = .horizontal
     var backgroundColor: Color = .black
 
-    @State private var selectedColor: Color = .clear
+    @State private var selectedColor: CGColor = CGColor(gray: 1, alpha: 1)
+    @State private var progress: Double = 0.5
 
     var body: some View {
         ZStack {
             backgroundColor.ignoresSafeArea()
-            
+
             ColorSliderView(
                 selectedColor: $selectedColor,
+                progress: $progress,
                 dataSource: dataSource,
                 axis: axis
             )
@@ -119,6 +121,7 @@ private struct PreviewContainer: View {
 
     PreviewContainer(dataSource: bentSpectrum)
 }
+
 #Preview("Simultaneous Bends (Saturation & Brightness)") {
     let spectrumModel = SpectrumSliderModel {
         HueSection(

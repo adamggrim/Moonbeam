@@ -3,8 +3,15 @@ import SwiftUI
 /// A customizable, interactive view that allows users to select a color
 /// from a dynamically generated spectrum or gradient.
 public struct ColorSliderView: View {
-    @Binding public var selectedColor: Color
+    @Binding public var selectedColor: CGColor
+    
+    /// The position of the selected color in the slider, normalized to a range
+    /// from 0.0 to 1.0.
+    @Binding public var progress: Double
+    
     public let dataSource: ColorSliderDataSource
+    public let spectrumIdentifier: AnyHashable?
+    public let onSpectrumChanged: ((CGColor) -> Double)?
     public let label: LocalizedStringKey
     public let axis: Axis
 
@@ -49,30 +56,35 @@ public struct ColorSliderView: View {
     ///
     /// Cannot extend beyond the thumb's leading edge at the end of the slider.
     @State private var persistedThumbPosition: CGFloat = .zero
-    
-    /// The position of the selected color in the slider, normalized to a range
-    /// from 0.0 to 1.0.
-    @State private var progress: CGFloat = 0.0
 
     /// Initializes a customizable color slider.
     ///
     /// - Parameters:
-    ///   - selectedColor: A binding to the currently selected color.
+    ///   - selectedColor: A binding to the currently absolute selected color.
+    ///   - progress: A binding to the slider's normalized position (0.0 to 1.0).
     ///   - dataSource: The model providing the gradient or spectrum data.
+    ///   - spectrumIdentifier: An optional identifier to trigger a spectrum change.
+    ///   - onSpectrumChanged: An optional callback defining the thumb's behavior when the spectrum changes.
     ///   - label: A localized string key used for VoiceOver accessibility. Defaults to "Color Slider".
     ///   - axis: The layout orientation of the slider. Defaults to `.horizontal`.
     public init(
-        selectedColor: Binding<Color>,
+        selectedColor: Binding<CGColor>,
+        progress: Binding<Double>,
         dataSource: ColorSliderDataSource,
+        spectrumIdentifier: AnyHashable? = nil,
+        onSpectrumChanged: ((CGColor) -> Double)? = nil,
         label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal
     ) {
         self._selectedColor = selectedColor
+        self._progress = progress
         self.dataSource = dataSource
+        self.spectrumIdentifier = spectrumIdentifier
+        self.onSpectrumChanged = onSpectrumChanged
         self.label = label
         self.axis = axis
     }
-    
+
     // MARK: - Layout Calculations
 
     private var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? dimensions.thickness }
@@ -190,8 +202,26 @@ public struct ColorSliderView: View {
             width: axis == .horizontal ? dimensions.length : resolvedThumbLength,
             height: axis == .horizontal ? resolvedThumbLength : dimensions.length
         )
-        .onChange(of: calculatedColor, initial: true) { _, newValue in
-            selectedColor = newValue
+        .onAppear {
+            let initialTrackPosition = CGFloat(progress) * dimensions.length
+            persistedThumbPosition = min(max(initialTrackPosition - halfThumbThickness, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
+        }
+        .onChange(of: spectrumIdentifier) { _, _ in
+            if let onSpectrumChanged = onSpectrumChanged {
+                progress = onSpectrumChanged(selectedColor)
+            }
+            let newTrackPosition = CGFloat(progress) * dimensions.length
+            withAnimation(reduceMotion ? nil : animation) {
+                persistedThumbPosition = min(max(newTrackPosition - halfThumbThickness, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
+            }
+        }
+        .onChange(of: progress) { _, newValue in
+            if !isDragging {
+                let newTrackPosition = CGFloat(newValue) * dimensions.length
+                withAnimation(reduceMotion ? nil : animation) {
+                    persistedThumbPosition = min(max(newTrackPosition - halfThumbThickness, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
+                }
+            }
         }
         .accessibilityElement(children: .ignore) // Hides individual shapes from VoiceOver.
         .accessibilityValue(Double(progress).formatted(.percent))
@@ -296,9 +326,9 @@ public struct ColorSliderView: View {
 
     private var colorPreviewView: some View {
         let resolvedShape = previewShape ?? AnyShape(RoundedRectangle(cornerRadius: dimensions.previewCornerRadius))
-        
+
         return resolvedShape
-            .foregroundColor(calculatedColor)
+            .foregroundColor(Color(selectedColor))
             .frame(width: dimensions.previewSize, height: dimensions.previewSize)
             .scaleEffect(
                 previewHidden && !isDragging ? dimensions.scaleRatio : 1.0,
@@ -331,8 +361,8 @@ public struct ColorSliderView: View {
             withAnimation(reduceMotion ? nil : animation) { isDragging = true }
         }
         liveContainerDrag = axis == .horizontal ? value.translation.width : -value.translation.height
-        // Update the ratio so VoiceOver knows where the gesture finished.
-        progress = dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0
+        progress = Double(dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0)
+        selectedColor = calculatedColor.cgColor ?? CGColor(gray: 0, alpha: 0)
     }
 
     /// Finalizes the view's state when the drag gesture ends, updating
@@ -352,6 +382,7 @@ public struct ColorSliderView: View {
         let newDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensions.length)
         persistedThumbPosition = min(max(newDrag, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
         liveContainerDrag = .zero
-        progress = dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0
+        progress = Double(dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0)
+        selectedColor = calculatedColor.cgColor ?? CGColor(gray: 0, alpha: 0)
     }
 }
