@@ -62,9 +62,9 @@ public struct OneWayBend: BendSection {
     public let targetValue: CGFloat
     public let hueCount: CGFloat
 
-    public init(hue range: ClosedRange<CGFloat>, target: CGFloat) {
-        self.startHue = range.lowerBound
-        self.endHue = range.upperBound
+    public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat) {
+        self.startHue = startHue
+        self.endHue = endHue
         self.targetValue = target
         self.hueCount = range.upperBound - range.lowerBound
     }
@@ -78,9 +78,9 @@ public struct TwoWayBend: BendSection {
     public let hueCount: CGFloat
     public let middleHue: CGFloat
 
-    public init(hue range: ClosedRange<CGFloat>, target: CGFloat) {
-        self.startHue = range.lowerBound
-        self.endHue = range.upperBound
+    public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat) {
+        self.startHue = startHue
+        self.endHue = endHue
         self.targetValue = target
         self.hueCount = range.upperBound - range.lowerBound
         self.middleHue = (self.startHue + self.hueCount) / 2
