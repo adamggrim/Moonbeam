@@ -89,7 +89,25 @@ public struct ColorSliderView: View {
 
     private var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? dimensions.thickness }
     private var resolvedThumbLength: CGFloat { dimensions.thumbLength ?? dimensions.thickness * 2 }
-    private var resolvedPreviewOffset: CGFloat { dimensions.previewOffset ?? (axis == .horizontal ? -Metrics.defaultPreviewOffset : Metrics.defaultPreviewOffset) }
+    private var resolvedPreviewOffset: CGFloat {
+        // Use absolute offset to avoid overwriting position modifiers with a negative offset.
+        let fallbackOffset = abs(dimensions.previewOffset ?? Metrics.defaultPreviewOffset)
+        
+        let spacingOffset: CGFloat
+        if let spacing = previewSpacing {
+            spacingOffset = (dimensions.thickness / 2) + (dimensions.previewSize / 2) + abs(spacing)
+        } else {
+            spacingOffset = fallbackOffset
+        }
+        
+        if axis == .horizontal {
+            // Negative is top, positive is bottom.
+            return previewPosition == .bottom ? spacingOffset : -spacingOffset
+        } else {
+            // Negative is leading, positive is trailing.
+            return previewPosition == .leading ? -spacingOffset : spacingOffset
+        }
+    }
     private var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
         
     /// Inset to adjust the left and right bounds of the thumb if it is thinner than the track.
@@ -332,7 +350,8 @@ public struct ColorSliderView: View {
             .frame(width: dimensions.previewSize, height: dimensions.previewSize)
             .scaleEffect(
                 previewHidden && !isDragging ? dimensions.scaleRatio : 1.0,
-                anchor: axis == .horizontal ? .bottom : (resolvedPreviewOffset < 0 ? .trailing : .leading)
+                // Dynamically flip the anchor based on offset.
+                anchor: axis == .horizontal ? (resolvedPreviewOffset > 0 ? .top : .bottom) : (resolvedPreviewOffset > 0 ? .leading : .trailing)
             )
             .opacity(previewHidden && !isDragging ? 0 : 1.0)
             .shadow(radius: dimensions.shadowRadius)
