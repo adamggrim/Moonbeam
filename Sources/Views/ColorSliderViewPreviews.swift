@@ -31,13 +31,15 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: spectrumModel)
 }
 
-#Preview("Vertical Slider") {
+#Preview("Vertical Slider (AnyShape)") {
     let spectrumModel = SpectrumSliderModel {
         BlackSection()
         HueSection(minHue: 0.0, maxHue: 1.0)
         WhiteSection()
     }
     PreviewContainer(dataSource: spectrumModel, axis: .vertical)
+        .colorSliderThumbShape(Rectangle())
+        .colorSliderPreviewShape(Circle())
 }
 
 #Preview("Spectrum with BendSections") {
@@ -64,16 +66,38 @@ private struct PreviewContainer: View {
 
         BlackSection()
         WhiteSection()
-
     }
 
     PreviewContainer(dataSource: spectrumModel)
 }
 
-#Preview("Gradient") {
+#Preview("OKLCH Spectrum") {
+    let oklchModel = SpectrumSliderModel {
+        HueSection(
+            oklchMinHue: 0.0,
+            maxHue: 1.0,
+            chroma: 0.8,
+            lightness: 0.75
+        )
+    }
+
+    PreviewContainer(dataSource: oklchModel)
+}
+
+#Preview("RGB Gradient") {
     let gradientModel = GradientSliderModel(
-        startColor: .cyan,
-        endColor: .purple
+        startColor: .orange,
+        endColor: .blue
+    )
+
+    PreviewContainer(dataSource: gradientModel)
+}
+
+#Preview("OKLAB Gradient") {
+    let gradientModel = GradientSliderModel(
+        startColor: .blue,
+        endColor: .red,
+        colorSpace: .oklab
     )
 
     PreviewContainer(dataSource: gradientModel)
@@ -87,21 +111,23 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: customStops)
 }
 
-#Preview("Hard-Edge Spectrum (Implicit)") {
+#Preview("Hard-Edge Spectrum (Implicit) (No Shadow)") {
     let chunkySpectrum = SpectrumSliderModel {
         HueSection(minHue: 0.0, maxHue: 1.0)
     }.hardEdge(into: 10)
     
     PreviewContainer(dataSource: chunkySpectrum)
+        .colorSliderHardEdgeInnerShadow(radius: 0)
 }
 
-#Preview("Hard-Edge Gradient (Implicit)") {
+#Preview("Hard-Edge Gradient (Implicit) (Custom Shadow)") {
     let chunkyGradient = GradientSliderModel(
         startColor: .cyan,
         endColor: .purple
     ).hardEdge(into: 6)
 
     PreviewContainer(dataSource: chunkyGradient)
+        .colorSliderHardEdgeInnerShadow(radius: 8, opacity: 0.6)
 }
 
 #Preview("Hard-Edge Spectrum with BendSections") {
