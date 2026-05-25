@@ -9,12 +9,3 @@ public struct BendSectionBuilder {
     public static func buildEither(first component: [BendSection]) -> [BendSection] { return component }
     public static func buildEither(second component: [BendSection]) -> [BendSection] { return component }
 }
-
-/// A result builder used to construct a spectrum slider using `SliderComponent` blocks.
-@resultBuilder
-public struct SpectrumComponentBuilder {
-    public static func buildBlock(_ components: SliderComponent...) -> [SliderComponent] { return Array(components) }
-    public static func buildOptional(_ component: [SliderComponent]?) -> [SliderComponent] { return component ?? [] }
-    public static func buildEither(first component: [SliderComponent]) -> [SliderComponent] { return component }
-    public static func buildEither(second component: [SliderComponent]) -> [SliderComponent] { return component }
-}
