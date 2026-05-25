@@ -22,7 +22,8 @@ public struct ColorSliderView: View {
     
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
     @Environment(\.colorSliderDimensions) private var dimensions
-    @Environment(\.colorSliderHardEdgeInnerShadow) private var enableInnerShadow
+    @Environment(\.colorSliderHardEdgeInnerShadowRadius) private var innerShadowRadius
+    @Environment(\.colorSliderHardEdgeInnerShadowOpacity) private var innerShadowOpacity
     @Environment(\.colorSliderAnimation) private var animation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -248,10 +249,10 @@ public struct ColorSliderView: View {
 
     @ViewBuilder
     private func innerShadowBlock(for color: Color) -> some View {
-        if enableInnerShadow {
+        if innerShadowRadius > 0 && innerShadowOpacity > 0 {
             Rectangle()
                 .fill(
-                    color.shadow(.inner(color: .black.opacity(0.3), radius: 3, x: 0, y: 0))
+                    color.shadow(.inner(color: .black.opacity(innerShadowOpacity), radius: innerShadowRadius, x: 0, y: 0))
                 )
         } else {
             Rectangle()

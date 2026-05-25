@@ -42,7 +42,8 @@ private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool 
 
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
-private struct HardEdgeInnerShadowKey: EnvironmentKey { static let defaultValue: Bool = true }
+private struct HardEdgeInnerShadowRadiusKey: EnvironmentKey { static let defaultValue: CGFloat = 3 }
+private struct HardEdgeInnerShadowOpacityKey: EnvironmentKey { static let defaultValue: Double = 0.3 }
 private struct AnimationKey: EnvironmentKey { static let defaultValue: Animation = .easeInOut(duration: 0.25) }
 
 extension EnvironmentValues {
@@ -93,9 +94,13 @@ extension EnvironmentValues {
         get { self[DimensionsKey.self] }
         set { self[DimensionsKey.self] = newValue }
     }
-    var colorSliderHardEdgeInnerShadow: Bool {
-        get { self[HardEdgeInnerShadowKey.self] }
-        set { self[HardEdgeInnerShadowKey.self] = newValue }
+    var colorSliderHardEdgeInnerShadowRadius: CGFloat {
+        get { self[HardEdgeInnerShadowRadiusKey.self] }
+        set { self[HardEdgeInnerShadowRadiusKey.self] = newValue }
+    }
+    var colorSliderHardEdgeInnerShadowOpacity: Double {
+        get { self[HardEdgeInnerShadowOpacityKey.self] }
+        set { self[HardEdgeInnerShadowOpacityKey.self] = newValue }
     }
     var colorSliderAnimation: Animation {
         get { self[AnimationKey.self] }
@@ -181,9 +186,13 @@ public extension View {
         return environment(\.colorSliderDimensions, dim)
     }
 
-    /// Adds an inset shadow to each discrete color block in a hard-edge slider. Defaults to `true`.
-    func colorSliderHardEdgeInnerShadow(_ enabled: Bool = true) -> some View {
-        environment(\.colorSliderHardEdgeInnerShadow, enabled)
+    /// Adds an inset shadow to each discrete color block in a hard-edge slider.
+    /// - Parameters:
+    ///   - radius: The blur radius of the inner shadow. Defaults to `3`. Set to `0` to disable.
+    ///   - opacity: The opacity of the black shadow. Defaults to `0.3`. Set to `0` to disable.
+    func colorSliderHardEdgeInnerShadow(radius: CGFloat = 3, opacity: Double = 0.3) -> some View {
+        self.environment(\.colorSliderHardEdgeInnerShadowRadius, radius)
+            .environment(\.colorSliderHardEdgeInnerShadowOpacity, opacity)
     }
 
     /// Sets the animation used when the drag gesture starts and ends.
