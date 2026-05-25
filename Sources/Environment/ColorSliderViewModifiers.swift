@@ -1,12 +1,12 @@
 import SwiftUI
 
 /// The position of the floating color preview relative to the slider.
-public enum PreviewPosition: Sendable {
+public enum PreviewPosition: Sendable, Equatable {
     case top, bottom, leading, trailing
 }
 
 /// Encapsulates various layout dimensions for the color slider and its components.
-public struct ColorSliderDimensions: Sendable {
+public struct ColorSliderDimensions: Sendable, Equatable {
     public var length: CGFloat = 300
     public var thickness: CGFloat = 24
     public var thumbThickness: CGFloat? = nil
