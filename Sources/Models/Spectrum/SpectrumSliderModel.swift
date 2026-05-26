@@ -5,22 +5,20 @@ public enum SpectrumColorSpace {
     case hsb, oklch
 }
 
+// MARK: - Constants & Validation
+
+/// Global bounds for shader data structures.
+internal enum spectrumConstants {
     /// The maximum number of monochrome sections allowed at either end of the spectrum.
     ///
-    /// This value must match `MAX_MONOCHROME_SECTIONS` in ColorSliderShaders.metal.
-    public static let maxMonochromeSections = 2
-    
-    private static func validateBendSections(bendSections: [BendSection]) -> Bool {
-        guard bendSections.count > 1 else { return true }
-
-        let sortedBendSections = bendSections.sorted { $0.startHue < $1.startHue }
-        for (currentSection, nextSection) in zip(sortedBendSections, sortedBendSections.dropFirst()) {
-            if currentSection.endHue > nextSection.startHue {
-                return false
-            }
-        }
-        return true
-    }
+    /// This value must match `MAX_MONOCHROME_SECTIONS` in `ColorSliderShaders.metal`.
+    static let maxMonochromeSections = 2
+ 
+    /// The maximum number of bends sections allowed in the spectrum.
+    ///
+    /// This value must match `MAX_BENDS` in `ColorSliderShaders.metal`.
+    static let maxBends = 20
+}
 
     private let startSections: [MonochromeSection]
     private let endSections: [MonochromeSection]
