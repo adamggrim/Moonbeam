@@ -185,7 +185,7 @@ private struct PreviewContainer: View {
             length: 200,
             thickness: 40,
             previewSize: 100,
-            previewOffset: -100
+            previewOffset: 110
         )
 }
 
