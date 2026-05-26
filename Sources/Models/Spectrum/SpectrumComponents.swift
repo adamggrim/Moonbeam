@@ -29,6 +29,14 @@ public protocol BendSection {
     var hueCount: CGFloat { get }
 }
 
+public extension BendSection {
+    /// Helper to calculate the shortest distance between two hues in a wraparound (circular) hue range.
+    static func calculateHueCount(start: CGFloat, end: CGFloat) -> CGFloat {
+        let diff = abs(end - start)
+        return diff > 0.5 ? 1.0 - diff : diff
+    }
+}
+
 // MARK: - Monochrome Sections
 
 /// A spectrum section that resolves to pure black.
@@ -66,7 +74,7 @@ public struct OneWayBend: BendSection {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target
-        self.hueCount = range.upperBound - range.lowerBound
+        self.hueCount = Self.calculateHueCount(start: startHue, end: endHue)
     }
 }
 
@@ -82,7 +90,7 @@ public struct TwoWayBend: BendSection {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target
-        self.hueCount = range.upperBound - range.lowerBound
-        self.middleHue = (self.startHue + self.hueCount) / 2
+        self.hueCount = Self.calculateHueCount(start: startHue, end: endHue)
+        self.middleHue = (self.startHue + self.endHue) / 2
     }
 }
