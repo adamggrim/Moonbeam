@@ -116,13 +116,24 @@ public struct SpectrumSliderModel: ColorSliderDataSource {
             data.append(Float(cumulativeStart))
         }
 
-        data.append(Float(endSections.count))
-        var cumulativeEnd = (startWeight + hueWeight) / totalWeight
-        for sec in endSections {
-            cumulativeEnd += sec.weight / totalWeight
-            data.append(sec.color == .white ? 1.0 : 0.0)
-            data.append(Float(cumulativeEnd))
-        }
+fileprivate func encodeSpectrumData(
+    startSections: [MonochromeSection], endSections: [MonochromeSection],
+    startHue: Double, endHue: Double, primaryValue: Double, secondaryValue: Double,
+    colorSpace: SpectrumColorSpace, primaryBends: [BendSection], secondaryBends: [BendSection]
+) -> Data {
+    let hueWeight = abs(endHue - startHue)
+    let startWeight = startSections.reduce(0) { $0 + $1.weight }
+    let endWeight = endSections.reduce(0) { $0 + $1.weight }
+    let totalWeight = startWeight + hueWeight + endWeight
+
+    var startData = simd_float4(0, 0, 0, 0)
+    var cumulativeStart = 0.0
+    for (i, sec) in startSections.enumerated() {
+        if i >= spectrumConstants.maxMonochromeSections { break }
+        cumulativeStart += sec.weight / totalWeight
+        startData[i*2] = sec.color == .white ? 1.0 : 0.0
+        startData[i*2 + 1] = Float(cumulativeStart)
+    }
 
         let sBends = hueSection.primaryBends ?? []
         data.append(Float(sBends.count))
