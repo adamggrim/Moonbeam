@@ -1,8 +1,10 @@
 import Foundation
 import SwiftUI
 
-/// Model for calculating spectrum colors dynamically.
-public struct SpectrumSliderModel: ColorSliderDataSource {
+public enum SpectrumColorSpace {
+    case hsb, oklch
+}
+
     /// The maximum number of monochrome sections allowed at either end of the spectrum.
     ///
     /// This value must match `MAX_MONOCHROME_SECTIONS` in ColorSliderShaders.metal.
