@@ -3,45 +3,18 @@ import SwiftUI
 /// A customizable, interactive view that allows users to select a color
 /// from a dynamically generated spectrum or gradient.
 public struct ColorSlider: View {
+    
+    // MARK: - State & Bindings
+    
     @Binding public var selection: CGColor
     
     /// The position of the selected color in the slider, normalized to a range
     /// from 0.0 to 1.0.
     @Binding public var progress: Double
     
-    private var dataSource: ColorSliderDataSource?
-    private var colorSpace: SpectrumColorSpace = .hsb
-    private var hueRange: ClosedRange<Double> = 0.0...1.0
-    private var startSections: [MonochromeSection] = []
-    private var endSections: [MonochromeSection] = []
-    private var saturationBends: [BendSection] = []
-    private var brightnessBends: [BendSection] = []
+    @State private var viewModel = ColorSliderViewModel()
 
-    public var spectrumIdentifier: AnyHashable?
-    public var onSpectrumChanged: ((CGColor) -> Double)?
-    public var label: LocalizedStringKey
-    public var axis: Axis
-
-    private var resolvedDataSource: ColorSliderDataSource {
-        if let dataSource = dataSource { return dataSource }
-        
-        let currentSaturationBends: () -> [BendSection] = { saturationBends }
-        let currentBrightnessBends: () -> [BendSection] = { brightnessBends }
-        
-        if colorSpace == .oklch {
-            return OKLCHSpectrumModel(
-                startSections: startSections, endSections: endSections,
-                startHue: hueRange.lowerBound, endHue: hueRange.upperBound,
-                lightnessBends: currentBrightnessBends, chromaBends: currentSaturationBends
-            )
-        } else {
-            return HSBSpectrumModel(
-                startSections: startSections, endSections: endSections,
-                startHue: hueRange.lowerBound, endHue: hueRange.upperBound,
-                saturationBends: currentSaturationBends, brightnessBends: currentBrightnessBends
-            )
-        }
-    }
+    // MARK: - Environment Variables
     
     @Environment(\.colorSliderTrackStroke) private var trackStroke
     
@@ -57,22 +30,36 @@ public struct ColorSlider: View {
     
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
     @Environment(\.colorSliderDimensions) private var dimensions
-    @Environment(\.colorSliderHardEdgeInnerShadowRadius) private var innerShadowRadius
-    @Environment(\.colorSliderHardEdgeInnerShadowOpacity) private var innerShadowOpacity
     @Environment(\.colorSliderAnimation) private var animation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.self) private var environment
 
+    // MARK: - Public Properties
+    
+    public var spectrumIdentifier: AnyHashable?
+    public var onSpectrumChanged: ((CGColor) -> Double)?
+    public var label: LocalizedStringKey
+    public var axis: Axis
+
+    // MARK: - Private Properties
+    
+    private var dataSource: ColorSliderDataSource?
+    private var colorSpace: SpectrumColorSpace = .hsb
+    private var hueRange: ClosedRange<Double> = 0.0...1.0
+    private var startSections: [MonochromeSection] = []
+    private var endSections: [MonochromeSection] = []
+    private var saturationBends: [BendSection] = []
+    private var brightnessBends: [BendSection] = []
+
     // MARK: - Constants
+    
     private enum Metrics {
         static let defaultPreviewOffset: CGFloat = 70.0
         static let dragScaleMultiplier: CGFloat = 1.1
         static let accessibilityStepPercentage: CGFloat = 0.05
     }
     
-    // MARK: - State
-    
-    @State private var viewModel = ColorSliderViewModel()
+    // MARK: - Initializer
 
     /// Initializes a customizable color slider.
     ///
@@ -102,8 +89,29 @@ public struct ColorSlider: View {
         self.axis = axis
     }
 
-    // MARK: - Layout Calculations
-
+    // MARK: - Computed Properties
+    
+    private var resolvedDataSource: ColorSliderDataSource {
+        if let dataSource = dataSource { return dataSource }
+        
+        let currentSaturationBends: () -> [BendSection] = { saturationBends }
+        let currentBrightnessBends: () -> [BendSection] = { brightnessBends }
+        
+        if colorSpace == .oklch {
+            return OKLCHSpectrumModel(
+                startSections: startSections, endSections: endSections,
+                startHue: hueRange.lowerBound, endHue: hueRange.upperBound,
+                lightnessBends: currentBrightnessBends, chromaBends: currentSaturationBends
+            )
+        } else {
+            return HSBSpectrumModel(
+                startSections: startSections, endSections: endSections,
+                startHue: hueRange.lowerBound, endHue: hueRange.upperBound,
+                saturationBends: currentSaturationBends, brightnessBends: currentBrightnessBends
+            )
+        }
+    }
+    
     /// The color calculated from the current `liveColorPosition` on the slider.
     private var calculatedColor: Color {
         let safeLength = dimensions.length > 0 ? dimensions.length : 0.001
@@ -136,6 +144,7 @@ public struct ColorSlider: View {
     }
     
     // MARK: - Views
+    
     public var body: some View {
         ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
             trackView
@@ -236,15 +245,8 @@ public struct ColorSlider: View {
 
     @ViewBuilder
     private func innerShadowBlock(for color: Color) -> some View {
-        if innerShadowRadius > 0 && innerShadowOpacity > 0 {
-            Rectangle()
-                .fill(
-                    color.shadow(.inner(color: .black.opacity(innerShadowOpacity), radius: innerShadowRadius, x: 0, y: 0))
-                )
-        } else {
-            Rectangle()
-                .fill(color)
-        }
+        Rectangle()
+            .fill(color)
     }
 
     @ViewBuilder
@@ -338,8 +340,9 @@ public struct ColorSlider: View {
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
         viewModel.accessibilityAdjust(direction: direction, progress: &progress)
         selection = calculatedColor.resolve(in: environment).cgColor
-        selection = calculatedColor.cgColor ?? CGColor(gray: 0, alpha: 0)
     }
+
+    // MARK: - Modifiers
 
     public func spectrum(space: SpectrumColorSpace, range: ClosedRange<Double>) -> Self {
         var copy = self
