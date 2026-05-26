@@ -2,30 +2,30 @@ import SwiftUI
 
 /// A model for generating a spectrum color for a given position, suitable for shaders.
 struct SpectrumGenerator {
-    private static func oklchToColor(l: CGFloat, c: CGFloat, h: CGFloat) -> Color {
-        let hueAngle = h * 2.0 * .pi
-        let a = c * cos(hueAngle)
-        let b = c * sin(hueAngle)
+    private static func oklchToColor(lightness: CGFloat, chroma: CGFloat, hue: CGFloat) -> Color {
+        let hueAngle = hue * 2.0 * .pi
+        let a = chroma * cos(hueAngle)
+        let b = chroma * sin(hueAngle)
         
-        let l_ = l + 0.3963377774 * a + 0.2158037573 * b
-        let m_ = l - 0.1055613458 * a - 0.0638541728 * b
-        let s_ = l - 0.0894841775 * a - 1.2914855480 * b
+        let lightnessPrime = lightness + 0.3963377774 * a + 0.2158037573 * b
+        let mediumPrime = lightness - 0.1055613458 * a - 0.0638541728 * b
+        let smallPrime = lightness - 0.0894841775 * a - 1.2914855480 * b
         
-        let l_cubed = l_ < 0 ? -pow(-l_, 3.0) : pow(l_, 3.0)
-        let m_cubed = m_ < 0 ? -pow(-m_, 3.0) : pow(m_, 3.0)
-        let s_cubed = s_ < 0 ? -pow(-s_, 3.0) : pow(s_, 3.0)
+        let lightnessCubed = lightnessPrime < 0 ? -pow(-lightnessPrime, 3.0) : pow(lightnessPrime, 3.0)
+        let mediumCubed = mediumPrime < 0 ? -pow(-mediumPrime, 3.0) : pow(mediumPrime, 3.0)
+        let smallCubed = smallPrime < 0 ? -pow(-smallPrime, 3.0) : pow(smallPrime, 3.0)
         
-        let r_lin =  2.7015367 * l_cubed - 1.6373796 * m_cubed - 0.0641571 * s_cubed
-        let g_lin = -0.3150531 * l_cubed + 1.3415174 * m_cubed - 0.0264643 * s_cubed
-        let b_lin =  0.0384799 * l_cubed - 0.0635483 * m_cubed + 1.0250684 * s_cubed
+        let redLinear =  2.7015367 * lightnessCubed - 1.6373796 * mediumCubed - 0.0641571 * smallCubed
+        let greenLinear = -0.3150531 * lightnessCubed + 1.3415174 * mediumCubed - 0.0264643 * smallCubed
+        let blueLinear =  0.0384799 * lightnessCubed - 0.0635483 * mediumCubed + 1.0250684 * smallCubed
         
-        func gamma(_ v: CGFloat) -> CGFloat {
-            return v <= 0.0031308 ? 12.92 * v : 1.055 * pow(v, 1.0 / 2.4) - 0.055
+        func applyGamma(_ value: CGFloat) -> CGFloat {
+            return value <= 0.0031308 ? 12.92 * value : 1.055 * pow(value, 1.0 / 2.4) - 0.055
         }
         
-        let red = min(max(gamma(r_lin), 0.0), 1.0)
-        let green = min(max(gamma(g_lin), 0.0), 1.0)
-        let blue = min(max(gamma(b_lin), 0.0), 1.0)
+        let red = min(max(applyGamma(redLinear), 0.0), 1.0)
+        let green = min(max(applyGamma(greenLinear), 0.0), 1.0)
+        let blue = min(max(applyGamma(blueLinear), 0.0), 1.0)
         
         return Color(.displayP3, red: red, green: green, blue: blue)
     }
@@ -83,15 +83,14 @@ struct SpectrumGenerator {
             }
         } else if clampedPosition <= hueBoundary {
             let relativeHuePos = (hueBoundary > startBoundary) ? (clampedPosition - startBoundary) / (hueBoundary - startBoundary) : 0.0
-            let currentHue = hueSection.minHue + relativeHuePos * (hueSection.maxHue - hueSection.minHue)
-
-            let primary = calculateBendValue(hue: currentHue, defaultValue: hueSection.primaryValue, bendSections: hueSection.primaryBends, hueSection: hueSection)
-            let secondary = calculateBendValue(hue: currentHue, defaultValue: hueSection.secondaryValue, bendSections: hueSection.secondaryBends, hueSection: hueSection)
-
-            return hueSection.colorSpace == .oklch
-                ? oklchToColor(l: secondary, c: primary, h: currentHue)
-                : Color(hue: currentHue, saturation: primary, brightness: secondary)
-
+            let currentHue = startHue + relativeHuePos * (endHue - startHue)
+            
+            let primary = calculateBendValue(hue: currentHue, defaultValue: primaryValue, bendSections: primaryBends, minHue: startHue)
+            let secondary = calculateBendValue(hue: currentHue, defaultValue: secondaryValue, bendSections: secondaryBends, minHue: startHue)
+            
+            return colorSpace == .oklch
+            ? oklchToColor(lightness: secondary, chroma: primary, hue: currentHue)
+            : Color(hue: currentHue, saturation: primary, brightness: secondary)
         } else {
             var cumulativeEnd = hueBoundary
             for (index, section) in endSections.enumerated() {
@@ -143,18 +142,16 @@ struct SpectrumGenerator {
 
         switch monochromeSection.color {
         case .black:
-            let targetSecondary = isStart ? startTargetSecondary : endTargetSecondary
-            let finalSecondary = interpolationFactor * targetSecondary
-            return hueSection.colorSpace == .oklch
-                ? oklchToColor(l: finalSecondary, c: hueSection.primaryValue, h: hue)
-                : Color(hue: hue, saturation: hueSection.primaryValue, brightness: finalSecondary)
+            let finalSecondary = interpolationFactor * (isStart ? startTargetSecondary : endTargetSecondary)
+            return colorSpace == .oklch
+            ? oklchToColor(lightness: finalSecondary, chroma: primaryValue, hue: hue)
+            : Color(hue: hue, saturation: primaryValue, brightness: finalSecondary)
         case .white:
-            let targetPrimary = isStart ? startTargetPrimary : endTargetPrimary
-            let finalPrimary = interpolationFactor * targetPrimary
-            let finalSecondary = hueSection.colorSpace == .oklch ? 1.0 - (interpolationFactor * (1.0 - hueSection.secondaryValue)) : hueSection.secondaryValue
-            return hueSection.colorSpace == .oklch
-                ? oklchToColor(l: finalSecondary, c: finalPrimary, h: hue)
-                : Color(hue: hue, saturation: finalPrimary, brightness: finalSecondary)
+            let finalPrimary = interpolationFactor * (isStart ? startTargetPrimary : endTargetPrimary)
+            let finalSecondary = colorSpace == .oklch ? 1.0 - (interpolationFactor * (1.0 - secondaryValue)) : secondaryValue
+            return colorSpace == .oklch
+            ? oklchToColor(lightness: finalSecondary, chroma: finalPrimary, hue: hue)
+            : Color(hue: hue, saturation: finalPrimary, brightness: finalSecondary)
         }
     }
 
@@ -164,7 +161,7 @@ struct SpectrumGenerator {
         let endBrightness: CGFloat = (toColor == .white) ? 1.0 : 0.0
 
         let brightness = startBrightness + (endBrightness - startBrightness) * relativePosition
-        return oklchToColor(l: brightness, c: 0.0, h: hue)
+        return oklchToColor(lightness: brightness, chroma: 0.0, hue: hue)
     }
 
     private static func calculateBendValue(
