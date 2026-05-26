@@ -15,7 +15,7 @@ public struct ColorSliderDimensions: Sendable, Equatable {
     public var previewSize: CGFloat = 60
     public var previewOffset: CGFloat? = nil
     public var shadowRadius: CGFloat = 5
-    public let scaleRatio: CGFloat = 0.25
+    public var scaleRatio: CGFloat = 0.25
     
     public var previewCornerRadius: CGFloat {
         previewSize * 0.225
