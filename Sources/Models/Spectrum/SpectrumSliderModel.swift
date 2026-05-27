@@ -87,7 +87,24 @@ fileprivate struct ShaderBend {
     }
 }
 
-    // MARK: - Shader Serialization
+/// A C-compatible memory layout that bridges directly to the `SpectrumShaderData` struct in Metal.
+///
+/// The property sequence, layout and alignment of this struct must exactly mirror
+/// `SpectrumShaderData` in Metal.
+///
+/// 1. Do **not** use dynamically sized arrays (e.g., `Array` or `[Float]`).
+/// 2. Do **not** use nested objects or classes.
+/// 3. Rely strictly on fixed-size tuples and primitive types (`Float`, `Int32`, `simd_float4`).
+fileprivate struct SpectrumShaderData {
+    // 32 Bytes
+    var totalWeight: Float
+    var startSectionBoundary: Float
+    var hueSectionBoundary: Float
+    var minimumHue: Float
+    var maximumHue: Float
+    var baseSaturation: Float
+    var baseBrightness: Float
+    var colorSpaceFlag: Float
     
     /// Flattens the color spectrum into a single `Float` array for Metal shaders.
     private func encodeToFloatArray() -> [Float] {
