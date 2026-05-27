@@ -43,8 +43,6 @@ private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool 
 
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
-private struct HardEdgeInnerShadowRadiusKey: EnvironmentKey { static let defaultValue: CGFloat = 0 }
-private struct HardEdgeInnerShadowOpacityKey: EnvironmentKey { static let defaultValue: Double = 0 }
 private struct AnimationKey: EnvironmentKey { static let defaultValue: Animation = .easeInOut(duration: 0.25) }
 
 extension EnvironmentValues {
@@ -94,14 +92,6 @@ extension EnvironmentValues {
     var colorSliderDimensions: ColorSliderDimensions {
         get { self[DimensionsKey.self] }
         set { self[DimensionsKey.self] = newValue }
-    }
-    var colorSliderHardEdgeInnerShadowRadius: CGFloat {
-        get { self[HardEdgeInnerShadowRadiusKey.self] }
-        set { self[HardEdgeInnerShadowRadiusKey.self] = newValue }
-    }
-    var colorSliderHardEdgeInnerShadowOpacity: Double {
-        get { self[HardEdgeInnerShadowOpacityKey.self] }
-        set { self[HardEdgeInnerShadowOpacityKey.self] = newValue }
     }
     var colorSliderAnimation: Animation {
         get { self[AnimationKey.self] }
@@ -197,15 +187,6 @@ public extension View {
             shadowRadius: shadowRadius
         )
         return environment(\.colorSliderDimensions, dim)
-    }
-
-    /// Adds an inset shadow to each discrete color block in a hard-edge slider. By default, sliders do not have an inner shadow.
-    /// - Parameters:
-    ///   - radius: The blur radius of the inner shadow. Defaults to `3`.
-    ///   - opacity: The opacity of the black shadow. Defaults to `0.3`.
-    func colorSliderHardEdgeInnerShadow(radius: CGFloat = 3, opacity: Double = 0.3) -> some View {
-        self.environment(\.colorSliderHardEdgeInnerShadowRadius, radius)
-            .environment(\.colorSliderHardEdgeInnerShadowOpacity, opacity)
     }
 
     /// Sets the animation used when the drag gesture starts and ends.
