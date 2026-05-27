@@ -65,30 +65,27 @@ internal enum spectrumConstants {
         }
 // MARK: - Metal Data Structures
 
-        let beforeHue = evaluatedComponents.prefix(upTo: hueIndex).compactMap { $0 as? MonochromeSection }
-        let afterHue = evaluatedComponents.suffix(from: hueIndex + 1).compactMap { $0 as? MonochromeSection }
-
-        let primaryBends = mainHueSection.primaryBends ?? []
-        let secondaryBends = mainHueSection.secondaryBends ?? []
-
-        // Truncate arrays at the Metal shader's hardcoded limits.
-        if primaryBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) primary bends allowed. Please remove any additional bends.") }
-        if secondaryBends.count > HueSection.maxBends { assertionFailure("No more than \(HueSection.maxBends) secondary bends allowed. Please remove any additional bends.") }
-        if beforeHue.count > SpectrumSliderModel.maxMonochromeSections { assertionFailure("No more than \(SpectrumSliderModel.maxMonochromeSections) start sections allowed. Please remove any additional sections.") }
-        if afterHue.count > SpectrumSliderModel.maxMonochromeSections { assertionFailure("No more than \(SpectrumSliderModel.maxMonochromeSections) end sections allowed. Please remove any additional sections.") }
-
-        self.hueSection = HueSection(
-            minHue: mainHueSection.minHue,
-            maxHue: mainHueSection.maxHue,
-            colorSpace: mainHueSection.colorSpace,
-            primaryValue: mainHueSection.primaryValue,
-            secondaryValue: mainHueSection.secondaryValue,
-            primaryBends: Array(primaryBends.prefix(HueSection.maxBends)),
-            secondaryBends: Array(secondaryBends.prefix(HueSection.maxBends))
+/// A strictly aligned sub-structure to represent a single bend.
+/// Uses 32 bytes (two 16-byte `simd_float4s`) to guarantee Metal alignment.
+fileprivate struct ShaderBend {
+    var data0: simd_float4 // x: type, y: startHue, z: endHue, w: targetValue
+    var data1: simd_float4 // x: hueCount, y: 0, z: 0, w: 0 (padding)
+    
+    init(bend: BendSection?) {
+        guard let b = bend else {
+            self.data0 = .zero
+            self.data1 = .zero
+            return
+        }
+        self.data0 = simd_float4(
+            b is OneWayBend ? 1.0 : 2.0,
+            Float(b.startHue),
+            Float(b.endHue),
+            Float(b.targetValue)
         )
-        self.startSections = Array(beforeHue.prefix(SpectrumSliderModel.maxMonochromeSections))
-        self.endSections = Array(afterHue.prefix(SpectrumSliderModel.maxMonochromeSections))
+        self.data1 = simd_float4(Float(b.hueCount), 0, 0, 0)
     }
+}
 
     // MARK: - Shader Serialization
     
