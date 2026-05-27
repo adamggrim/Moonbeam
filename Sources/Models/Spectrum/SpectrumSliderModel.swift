@@ -63,6 +63,7 @@ internal enum spectrumConstants {
         if let secondaryBends = mainHueSection.secondaryBends, !Self.validateBendSections(bendSections: secondaryBends) {
             assertionFailure("Secondary bend sections are overlapping.")
         }
+// MARK: - Metal Data Structures
 
         let beforeHue = evaluatedComponents.prefix(upTo: hueIndex).compactMap { $0 as? MonochromeSection }
         let afterHue = evaluatedComponents.suffix(from: hueIndex + 1).compactMap { $0 as? MonochromeSection }

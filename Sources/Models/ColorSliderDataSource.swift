@@ -32,7 +32,7 @@ public extension ColorSliderDataSource {
             
         case .function(let colorGenerator), .shader(_, let colorGenerator):
             let generatedColors = (0..<steps).map { i in
-                // Sample from the center of the block's position on the spectrum.
+                // Sample from the center of the color block's position on the spectrum.
                 let position = (Double(i) + 0.5) / Double(steps)
                 return colorGenerator(position)
             }

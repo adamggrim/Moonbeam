@@ -112,7 +112,9 @@ extension EnvironmentValues {
 // MARK: - View Modifiers
 
 public extension View {
+    
     // MARK: Track Modifiers
+    
     /// Adds a stroke to the slider track.
     func colorSliderTrackStroke<S: ShapeStyle>(_ style: S, lineWidth: CGFloat = 1) -> some View {
         let stroke = SliderStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
@@ -127,6 +129,7 @@ public extension View {
         }
 
     // MARK: Thumb Modifiers
+    
     /// The visual shape of the thumb. Defaults to `Capsule`.
     func colorSliderThumbShape<S: Shape>(_ shape: S) -> some View {
         environment(\.colorSliderThumbShape, AnyShape(shape))
@@ -144,6 +147,7 @@ public extension View {
     }
 
     // MARK: Preview Modifiers
+    
     /// The visual shape of the floating color preview. If nil, defaults to `RoundedRectangle`.
     func colorSliderPreviewShape<S: Shape>(_ shape: S) -> some View {
         environment(\.colorSliderPreviewShape, AnyShape(shape))
@@ -167,6 +171,7 @@ public extension View {
     }
 
     // MARK: Global Modifiers
+    
     /// Set to `true` to disable the liquid glass styling on the thumb. On operating systems that do not support Liquid Glass, this flag is ignored and falls back to a standard filled shape. Defaults to `false`.
     func colorSliderDisableLiquidGlass(_ disable: Bool) -> some View {
         environment(\.colorSliderDisableLiquidGlass, disable)

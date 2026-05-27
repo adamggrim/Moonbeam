@@ -63,6 +63,7 @@ public struct WhiteSection: MonochromeSection {
 }
 
 // MARK: - Bend Sections
+
 /// A bend section that fades into the start or end of a color slider.
 public struct OneWayBend: BendSection {
     public let startHue: CGFloat

@@ -53,7 +53,7 @@ struct SpectrumGenerator {
         endSections: [MonochromeSection],
         hueSection: HueSection
     ) -> Color {
-
+        
         let startWeight = startSections.reduce(0) { $0 + $1.weight }
         let hueWeight = hueSection.weight
         let endWeight = endSections.reduce(0) { $0 + $1.weight }
@@ -66,7 +66,7 @@ struct SpectrumGenerator {
         let startBoundary = startWeight / totalWeight
         let hueBoundary = (startWeight + hueWeight) / totalWeight
         let clampedPosition = max(0.0, min(1.0, position))
-
+        
         if clampedPosition < startBoundary {
             var cumulativeStart: CGFloat = 0.0
             for (index, section) in startSections.enumerated() {
@@ -109,7 +109,6 @@ struct SpectrumGenerator {
                 cumulativeEnd = sectionEnd
             }
         }
-
         return .clear
     }
 
@@ -123,6 +122,8 @@ struct SpectrumGenerator {
         var endTargetPrimary = hueSection.primaryValue, endTargetSecondary = hueSection.secondaryValue
 
         if let primaryBends = hueSection.primaryBends {
+        
+        
             for bend in primaryBends {
                 if let oneWay = bend as? OneWayBend {
                     if oneWay.startHue == hueSection.minHue { startTargetPrimary = oneWay.targetValue }
@@ -139,7 +140,7 @@ struct SpectrumGenerator {
                 }
             }
         }
-
+        
         switch monochromeSection.color {
         case .black:
             let finalSecondary = interpolationFactor * (isStart ? startTargetSecondary : endTargetSecondary)
@@ -154,8 +155,8 @@ struct SpectrumGenerator {
             : Color(hue: hue, saturation: finalPrimary, brightness: finalSecondary)
         }
     }
-
-    /// Generates a smooth gradient directly between two monochrome sections.
+    
+    /// Generates a smooth gradient between two monochrome sections.
     private static func monoToMonoColor(relativePosition: CGFloat, fromColor: MonochromeColor, toColor: MonochromeColor, hue: CGFloat) -> Color {
         let startBrightness: CGFloat = (fromColor == .white) ? 1.0 : 0.0
         let endBrightness: CGFloat = (toColor == .white) ? 1.0 : 0.0
@@ -176,7 +177,7 @@ struct SpectrumGenerator {
         let targetValue = bend.targetValue
         let valueDelta = defaultValue - targetValue
         let offset = hue - bend.startHue
-
+        
         if let oneWay = bend as? OneWayBend {
             let valueIncrement = oneWay.hueCount != 0 ? (valueDelta / oneWay.hueCount) : 0
 
@@ -192,7 +193,6 @@ struct SpectrumGenerator {
 
             return defaultValue - (valueDelta * curveProgress)
         }
-
         return defaultValue
     }
 }

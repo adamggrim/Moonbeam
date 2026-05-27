@@ -1,16 +1,23 @@
 import SwiftUI
 
+/// A view model that isolates layout mathematics, `DragGesture` processing and state
+/// normalization away from the `ColorSlider` view.
 @Observable
 internal class ColorSliderViewModel {
     
     // MARK: - Injected Configuration
+    
     var dimensions: ColorSliderDimensions = ColorSliderDimensions()
     var axis: Axis = .horizontal
     var previewPosition: PreviewPosition? = nil
     var previewSpacing: CGFloat? = nil
     var previewHidden: Bool = true
     
-    /// Updates the view model with the latest environment configuration from the view.
+    /// Updates the view model with the latest environment properties from the view.
+    ///
+    /// The `ColorSlider` view must explicitly push these properties to
+    /// `ColorSliderViewModel` via this method during `onAppear` and `onChange`
+    /// events.
     func update(
         dimensions: ColorSliderDimensions,
         axis: Axis,
@@ -26,6 +33,7 @@ internal class ColorSliderViewModel {
     }
 
     // MARK: - Constants
+    
     private enum Metrics {
         static let defaultPreviewOffset: CGFloat = 70.0
         static let dragScaleMultiplier: CGFloat = 1.1
@@ -33,6 +41,7 @@ internal class ColorSliderViewModel {
     }
     
     // MARK: - State
+    
     /// Indicates whether a drag gesture is currently active.
     var isDragging: Bool = false
     
@@ -48,6 +57,7 @@ internal class ColorSliderViewModel {
     var persistedThumbPosition: CGFloat = .zero
 
     // MARK: - Layout Calculations
+    
     var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? dimensions.thickness }
     var resolvedThumbLength: CGFloat { dimensions.thumbLength ?? dimensions.thickness * 2 }
     
@@ -148,6 +158,7 @@ internal class ColorSliderViewModel {
     }
     
     // MARK: - Drag Event Handlers
+    
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
     func accessibilityAdjust(direction: AccessibilityAdjustmentDirection, progress: inout Double) {
         let stepDelta = dimensions.length * (direction == .increment ? Metrics.accessibilityStepPercentage : -Metrics.accessibilityStepPercentage)

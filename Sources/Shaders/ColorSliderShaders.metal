@@ -8,6 +8,7 @@ constant int MAX_BENDS = 20;
 constant int MAX_MONOCHROME_SECTIONS = 2;
 
 // MARK: – HSB to RGB
+
 float3 convertHSBtoRGB(float hue, float saturation, float brightness) {
     float4 conversionConstants = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
     float3 rgbValues = abs(fract(hue + conversionConstants.xyz) * 6.0 - conversionConstants.www);
@@ -15,6 +16,7 @@ float3 convertHSBtoRGB(float hue, float saturation, float brightness) {
 }
 
 // MARK: - OKLAB and OKLCH to RGB
+
 float3 convertOKLABtoRGB(float L, float a, float b) {
     float l_ = L + 0.3963377774 * a + 0.2158037573 * b;
     float m_ = L - 0.1055613458 * a - 0.0638541728 * b;
@@ -65,7 +67,8 @@ float3 convertRGBtoOKLAB(float3 c) {
 }
 
 // MARK: – Spectrum Bends
-float calculateBend(float currentHue, float defaultValue, device const float* bendsData, int totalBends, float minimumHue) {
+
+float calculateBend(float currentHue, float defaultValue, device const ShaderBend* bendsData, int totalBends, float minimumHue) {
     // Capped at `MAX_BENDS` to prevent unroll failures.
     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
         if (bendIndex >= totalBends) break;
@@ -99,6 +102,7 @@ float calculateBend(float currentHue, float defaultValue, device const float* be
 }
 
 // MARK: - Gradient Shader
+
 [[ stitchable ]]
 half4 gradientShader(float2 position, half4 currentColor, float2 size, half4 startColor, half4 endColor, float isVertical, float colorSpaceFlag) {
     float normalizedPosition = isVertical > 0.5 ? (1.0 - (position.y / size.y)) : (position.x / size.x);
@@ -139,6 +143,7 @@ half4 gradientShader(float2 position, half4 currentColor, float2 size, half4 sta
 }
 
 // MARK: - Spectrum Shader
+
 [[ stitchable ]]
 half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isVertical, device const float* shaderData, int shaderDataLength) {
     float normalizedPosition = isVertical > 0.5 ? (1.0 - (position.y / size.y)) : (position.x / size.x);
