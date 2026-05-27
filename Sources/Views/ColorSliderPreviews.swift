@@ -27,7 +27,9 @@ private struct PreviewContainer: View {
         startSections: [BlackSection()],
         endSections: [WhiteSection()],
         startHue: 0.0,
-        endHue: 1.0
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
     )
     PreviewContainer(dataSource: spectrumModel)
 }
@@ -37,7 +39,9 @@ private struct PreviewContainer: View {
         startSections: [BlackSection()],
         endSections: [WhiteSection()],
         startHue: 0.0,
-        endHue: 1.0
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
     )
     PreviewContainer(dataSource: spectrumModel, axis: .vertical)
         .colorSliderThumbShape(Rectangle())
@@ -52,6 +56,8 @@ private struct PreviewContainer: View {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
         endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0,
         saturationBends: {
             OneWayBend(startHue: 0.0, endHue: 40.0 / 360, target: 0.5)
             TwoWayBend(startHue: 200.0 / 360, endHue: 280.0 / 360, target: 0.3)
@@ -66,7 +72,9 @@ private struct PreviewContainer: View {
         startSections: [BlackSection(), WhiteSection()],
         endSections: [BlackSection(), WhiteSection()],
         startHue: 0.0,
-        endHue: 1.0
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
     )
 
     PreviewContainer(dataSource: spectrumModel)
@@ -86,7 +94,8 @@ private struct PreviewContainer: View {
 #Preview("RGB Gradient") {
     let gradientModel = GradientSliderModel(
         startColor: .orange,
-        endColor: .blue
+        endColor: .blue,
+        colorSpace: .rgb
     )
 
     PreviewContainer(dataSource: gradientModel)
@@ -114,6 +123,8 @@ private struct PreviewContainer: View {
     let bentSpectrum = HSBSpectrumModel(
         startHue: 0.0,
         endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0,
         saturationBends: {
             TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
         },
@@ -129,6 +140,8 @@ private struct PreviewContainer: View {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
         endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0,
         saturationBends: {
             TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
         },
@@ -145,7 +158,9 @@ private struct PreviewContainer: View {
         startSections: [BlackSection()],
         endSections: [WhiteSection()],
         startHue: 0.0,
-        endHue: 1.0
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
     )
     PreviewContainer(dataSource: spectrumModel)
         .colorSliderThumbShape(Circle())
@@ -157,7 +172,9 @@ private struct PreviewContainer: View {
         startSections: [BlackSection()],
         endSections: [WhiteSection()],
         startHue: 0.0,
-        endHue: 1.0
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
     )
     PreviewContainer(dataSource: spectrumModel, axis: .vertical)
         .colorSliderThumbShape(Circle())
@@ -167,7 +184,9 @@ private struct PreviewContainer: View {
 #Preview("Glass Disabled") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
-        endHue: 1.0
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
     )
 
     PreviewContainer(dataSource: spectrumModel)
@@ -192,7 +211,9 @@ private struct PreviewContainer: View {
 #Preview("Preview Position (Horizontal Bottom)") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
-        endHue: 1.0
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
     )
     PreviewContainer(dataSource: spectrumModel)
         .colorSliderPreviewPosition(.bottom, spacing: 20)
@@ -201,7 +222,9 @@ private struct PreviewContainer: View {
 #Preview("Preview Position (Vertical Leading)") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
-        endHue: 1.0
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
     )
     PreviewContainer(dataSource: spectrumModel, axis: .vertical)
         .colorSliderPreviewPosition(.leading)
