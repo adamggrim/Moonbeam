@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A model for generating a spectrum color for a given position, suitable for shaders.
-struct SpectrumGenerator {
+internal struct SpectrumGenerator {
     private static func oklchToColor(lightness: CGFloat, chroma: CGFloat, hue: CGFloat) -> Color {
         let hueAngle = hue * 2.0 * .pi
         let a = chroma * cos(hueAngle)
@@ -38,31 +38,37 @@ struct SpectrumGenerator {
     ///
     /// - Parameters:
     ///   - position: The normalized position (0.0 to 1.0) on the slider.
-    ///   - minHue: The minimum hue of the main color spectrum.
-    ///   - maxHue: The maximum hue of the main color spectrum.
-    ///   - blackSection: An optional configuration for a black monochrome section.
-    ///   - whiteSection: An optional configuration for a white monochrome section.
-    ///   - bendSections: An optional array of sections that modify saturation/brightness.
-    ///   - priorityColor: An optional monochrome color to place first if both black and white sections exist at the same end.
-    ///   - baseSaturation: The saturation for areas with no bends.
-    ///   - baseBrightness: The brightness for areas with no bends.
-    ///   - Returns: A `SwiftUI.Color` for the specified position.
+    ///   - startSections: An array of monochrome sections appearing before the hue spectrum.
+    ///   - endSections: An array of monochrome sections appearing after the hue spectrum.
+    ///   - startHue: The hue at the beginning of the hue section.
+    ///   - endHue: The hue at the end of the hue section.
+    ///   - primaryValue: The base primary value (saturation or chroma) applied to the hue spectrum.
+    ///   - secondaryValue: The base secondary value (brightness or lightness) applied to the hue spectrum.
+    ///   - colorSpace:Whether to use HSB or OKLCH as the color space.
+    ///   - primaryBends: An optional array of `BendSection` objects to modify primary values across hue ranges.
+    ///   - secondaryBends: An optional array of `BendSection` objects to modify secondary values across hue ranges.
+    ///
+    /// - Returns: A `SwiftUI.Color` representing the computed color at the provided position.
     static func color(
         at position: CGFloat,
         startSections: [MonochromeSection],
         endSections: [MonochromeSection],
-        hueSection: HueSection
+        startHue: Double,
+        endHue: Double,
+        primaryValue: Double, // Saturation or Chroma
+        secondaryValue: Double, // Brightness or Lightness
+        colorSpace: SpectrumColorSpace,
+        primaryBends: [BendSection]?,
+        secondaryBends: [BendSection]?
     ) -> Color {
         
         let startWeight = startSections.reduce(0) { $0 + $1.weight }
-        let hueWeight = hueSection.weight
+        let hueWeight = abs(endHue - startHue)
         let endWeight = endSections.reduce(0) { $0 + $1.weight }
         let totalWeight = startWeight + hueWeight + endWeight
-
-        guard totalWeight > 0 else {
-            return .clear
-        }
-
+        
+        guard totalWeight > 0 else { return .clear }
+        
         let startBoundary = startWeight / totalWeight
         let hueBoundary = (startWeight + hueWeight) / totalWeight
         let clampedPosition = max(0.0, min(1.0, position))
@@ -73,11 +79,9 @@ struct SpectrumGenerator {
                 let sectionEnd = cumulativeStart + (section.weight / totalWeight)
                 if clampedPosition < sectionEnd {
                     let relativePos = (clampedPosition - cumulativeStart) / (sectionEnd - cumulativeStart)
-                    let isLastStartSection = (index == startSections.count - 1)
-
-                    return isLastStartSection
-                        ? monoToHueColor(relativePosition: relativePos, isStart: true, monochromeSection: section, hueSection: hueSection)
-                        : monoToMonoColor(relativePosition: relativePos, fromColor: section.color, toColor: startSections[index + 1].color, hue: hueSection.minHue)
+                    return (index == startSections.count - 1)
+                    ? monoToHueColor(relativePosition: relativePos, isStart: true, monochromeSection: section, startHue: startHue, endHue: endHue, primaryValue: primaryValue, secondaryValue: secondaryValue, colorSpace: colorSpace, primaryBends: primaryBends, secondaryBends: secondaryBends)
+                    : monoToMonoColor(relativePosition: relativePos, fromColor: section.color, toColor: startSections[index + 1].color, hue: startHue)
                 }
                 cumulativeStart = sectionEnd
             }
@@ -95,48 +99,50 @@ struct SpectrumGenerator {
             var cumulativeEnd = hueBoundary
             for (index, section) in endSections.enumerated() {
                 let sectionEnd = cumulativeEnd + (section.weight / totalWeight)
-                let isLastSection = (index == endSections.count - 1)
-
-                if clampedPosition <= sectionEnd || isLastSection {
-                    let relativePos = (clampedPosition - cumulativeEnd) / (sectionEnd - cumulativeEnd)
-                    let clampedRelativePos = min(1.0, max(0.0, relativePos))
-                    let isFirstEndSection = (index == 0)
-
-                    return isFirstEndSection
-                        ? monoToHueColor(relativePosition: clampedRelativePos, isStart: false, monochromeSection: section, hueSection: hueSection)
-                        : monoToMonoColor(relativePosition: clampedRelativePos, fromColor: endSections[index - 1].color, toColor: section.color, hue: hueSection.maxHue)
+                if clampedPosition <= sectionEnd || (index == endSections.count - 1) {
+                    let relativePos = min(1.0, max(0.0, (clampedPosition - cumulativeEnd) / (sectionEnd - cumulativeEnd)))
+                    return (index == 0)
+                    ? monoToHueColor(relativePosition: relativePos, isStart: false, monochromeSection: section, startHue: startHue, endHue: endHue, primaryValue: primaryValue, secondaryValue: secondaryValue, colorSpace: colorSpace, primaryBends: primaryBends, secondaryBends: secondaryBends)
+                    : monoToMonoColor(relativePosition: relativePos, fromColor: endSections[index - 1].color, toColor: section.color, hue: endHue)
                 }
                 cumulativeEnd = sectionEnd
             }
         }
         return .clear
     }
-
-    // MARK: - Private Helper Functions
-
-    private static func monoToHueColor(relativePosition: CGFloat, isStart: Bool, monochromeSection: MonochromeSection, hueSection: HueSection) -> Color {
-        let hue = isStart ? hueSection.minHue : hueSection.maxHue
+    
+    private static func monoToHueColor(
+        relativePosition: CGFloat,
+        isStart: Bool,
+        monochromeSection: MonochromeSection,
+        startHue: Double,
+        endHue: Double,
+        primaryValue: Double,
+        secondaryValue: Double,
+        colorSpace: SpectrumColorSpace,
+        primaryBends: [BendSection]?,
+        secondaryBends: [BendSection]?
+    ) -> Color {
+        let hue = isStart ? startHue : endHue
         let interpolationFactor = isStart ? relativePosition : (1.0 - relativePosition)
-
-        var startTargetPrimary = hueSection.primaryValue, startTargetSecondary = hueSection.secondaryValue
-        var endTargetPrimary = hueSection.primaryValue, endTargetSecondary = hueSection.secondaryValue
-
-        if let primaryBends = hueSection.primaryBends {
         
+        var startTargetPrimary = primaryValue, startTargetSecondary = secondaryValue
+        var endTargetPrimary = primaryValue, endTargetSecondary = secondaryValue
         
+        if let primaryBends = primaryBends {
             for bend in primaryBends {
                 if let oneWay = bend as? OneWayBend {
-                    if oneWay.startHue == hueSection.minHue { startTargetPrimary = oneWay.targetValue }
-                    else if oneWay.endHue == hueSection.maxHue { endTargetPrimary = oneWay.targetValue }
+                    if oneWay.startHue == startHue { startTargetPrimary = oneWay.targetValue }
+                    else if oneWay.endHue == endHue { endTargetPrimary = oneWay.targetValue }
                 }
             }
         }
         
-        if let secondaryBends = hueSection.secondaryBends {
+        if let secondaryBends = secondaryBends {
             for bend in secondaryBends {
                 if let oneWay = bend as? OneWayBend {
-                    if oneWay.startHue == hueSection.minHue { startTargetSecondary = oneWay.targetValue }
-                    else if oneWay.endHue == hueSection.maxHue { endTargetSecondary = oneWay.targetValue }
+                    if oneWay.startHue == startHue { startTargetSecondary = oneWay.targetValue }
+                    else if oneWay.endHue == endHue { endTargetSecondary = oneWay.targetValue }
                 }
             }
         }
@@ -160,38 +166,23 @@ struct SpectrumGenerator {
     private static func monoToMonoColor(relativePosition: CGFloat, fromColor: MonochromeColor, toColor: MonochromeColor, hue: CGFloat) -> Color {
         let startBrightness: CGFloat = (fromColor == .white) ? 1.0 : 0.0
         let endBrightness: CGFloat = (toColor == .white) ? 1.0 : 0.0
-
         let brightness = startBrightness + (endBrightness - startBrightness) * relativePosition
         return oklchToColor(lightness: brightness, chroma: 0.0, hue: hue)
     }
-
-    private static func calculateBendValue(
-            hue: CGFloat,
-            defaultValue: CGFloat,
-            bendSections: [BendSection]?,
-            hueSection: HueSection
-        ) -> CGFloat {
-            guard let bends = bendSections, !bends.isEmpty else { return defaultValue }
-            guard let bend = bends.first(where: { $0.startHue <= hue && hue <= $0.endHue }) else { return defaultValue }
-
-        let targetValue = bend.targetValue
-        let valueDelta = defaultValue - targetValue
+    
+    private static func calculateBendValue(hue: CGFloat, defaultValue: CGFloat, bendSections: [BendSection]?, minHue: Double) -> CGFloat {
+        guard let bends = bendSections, let bend = bends.first(where: { min($0.startHue, $0.endHue) <= hue && hue <= max($0.startHue, $0.endHue) }) else { return defaultValue }
+        
+        let valueDelta = defaultValue - bend.targetValue
         let offset = hue - bend.startHue
         
         if let oneWay = bend as? OneWayBend {
             let valueIncrement = oneWay.hueCount != 0 ? (valueDelta / oneWay.hueCount) : 0
-
-            if oneWay.startHue == hueSection.minHue {
-                return targetValue + (valueIncrement * offset)
-            } else {
-                let numIncrements = valueIncrement * offset
-                return defaultValue - numIncrements
-            }
+            if oneWay.startHue == minHue { return bend.targetValue + (valueIncrement * offset) }
+            else { return defaultValue - (valueIncrement * offset) }
         } else if let twoWay = bend as? TwoWayBend {
             let position = (hue - twoWay.startHue) / twoWay.hueCount
-            let curveProgress = sin(position * .pi)
-
-            return defaultValue - (valueDelta * curveProgress)
+            return defaultValue - (valueDelta * sin(position * .pi))
         }
         return defaultValue
     }
