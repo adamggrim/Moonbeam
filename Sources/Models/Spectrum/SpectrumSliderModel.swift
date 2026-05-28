@@ -173,8 +173,55 @@ fileprivate func encodeSpectrumData(
         let remainder = data.count % 4
         if remainder != 0 {
             data.append(contentsOf: repeatElement(0.0, count: 4 - remainder))
+/// Model for calculating perceptually uniform OKLCH spectrum colors dynamically.
+public struct OKLCHSpectrumModel: ColorSliderDataSource {
+    public let startSections: [MonochromeSection]
+    public let endSections: [MonochromeSection]
+    public let lightness: Double
+    public let chroma: Double
+    public let startHue: Double
+    public let endHue: Double
+    public let lightnessBends: [BendSection]
+    public let chromaBends: [BendSection]
+
+    /// Creates a dynamically generated spectrum based on the perceptually uniform OKLCH color space.
+    ///
+    /// - Parameters:
+    ///   - startSections: Monochrome sections that fade into the beginning of the hue spectrum. Capped at `spectrumConstants.maxMonochromeSections`.
+    ///   - endSections: Monochrome sections that fade out of the end of the hue spectrum.
+    ///   - lightness: The perceived brightness of the color (L). Standard range is 0.0 to 1.0. Defaults to 0.75.
+    ///   - chroma: The intensity/purity of the color (C). Range depends on device gamut, typically 0.0 to 0.4. Defaults to 0.15.
+    ///   - startHue: The starting hue angle (h) normalized to 0.0 - 1.0.
+    ///   - endHue: The ending hue angle (h) normalized to 0.0 - 1.0.
+    ///   - lightnessBends: Sections where the baseline lightness bends toward a target value.
+    ///   - chromaBends: Sections where the baseline chroma bends toward a target value.
+    public init(
+        startSections: [MonochromeSection] = [],
+        endSections: [MonochromeSection] = [],
+        lightness: Double = 0.75,
+        chroma: Double = 0.15,
+        startHue: Double = 0.0,
+        endHue: Double = 1.0,
+        @BendSectionBuilder lightnessBends: () -> [BendSection] = { [] },
+        @BendSectionBuilder chromaBends: () -> [BendSection] = { [] }
+    ) {
+        self.startSections = Array(startSections.prefix(spectrumConstants.maxMonochromeSections))
+        self.endSections = Array(endSections.prefix(spectrumConstants.maxMonochromeSections))
+        self.lightness = lightness
+        self.chroma = chroma
+        self.startHue = startHue
+        self.endHue = endHue
+        self.lightnessBends = validateAndTruncateBends(lightnessBends(), name: "OKLCH Lightness")
+        self.chromaBends = validateAndTruncateBends(chromaBends(), name: "OKLCH Chroma")
+    }
+
+    public var colorSource: ColorSourceProvider {
+        let fallback: (Double) -> Color = { position in
+            SpectrumGenerator.color(at: position, startSections: startSections, endSections: endSections, startHue: startHue, endHue: endHue, primaryValue: chroma, secondaryValue: lightness, colorSpace: .oklch, primaryBends: chromaBends, secondaryBends: lightnessBends)
         }
-        
-        return data
+        let shaderData = encodeSpectrumData(startSections: startSections, endSections: endSections, startHue: startHue, endHue: endHue, primaryValue: chroma, secondaryValue: lightness, colorSpace: .oklch, primaryBends: chromaBends, secondaryBends: lightnessBends)
+        return .shader(generator: { size, isVertical in
+            ShaderLibrary.bundle(.module).spectrumShader(.float2(size.width, size.height), .float(isVertical ? 1.0 : 0.0), .data(shaderData))
+        }, fallback: fallback)
     }
 }
