@@ -103,15 +103,25 @@ public struct ColorSlider: View {
         
         if colorSpace == .oklch {
             return OKLCHSpectrumModel(
-                startSections: startSections, endSections: endSections,
-                startHue: hueRange.lowerBound, endHue: hueRange.upperBound,
-                lightnessBends: currentBrightnessBends, chromaBends: currentSaturationBends
+                startSections: startSections,
+                endSections: endSections,
+                lightness: 0.75,
+                chroma: 0.15,
+                startHue: hueRange.lowerBound,
+                endHue: hueRange.upperBound,
+                lightnessBends: currentBrightnessBends,
+                chromaBends: currentSaturationBends
             )
         } else {
             return HSBSpectrumModel(
-                startSections: startSections, endSections: endSections,
-                startHue: hueRange.lowerBound, endHue: hueRange.upperBound,
-                saturationBends: currentSaturationBends, brightnessBends: currentBrightnessBends
+                startSections: startSections,
+                endSections: endSections,
+                startHue: hueRange.lowerBound,
+                endHue: hueRange.upperBound,
+                saturation: 1.0,
+                brightness: 1.0,
+                saturationBends: currentSaturationBends,
+                brightnessBends: currentBrightnessBends
             )
         }
     }
