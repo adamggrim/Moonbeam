@@ -2,6 +2,7 @@ import SwiftUI
 
 /// A view model that isolates layout mathematics, `DragGesture` processing and state
 /// normalization away from the `ColorSlider` view.
+@MainActor
 @Observable
 internal class ColorSliderViewModel {
     
