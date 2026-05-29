@@ -37,7 +37,6 @@ internal class ColorSliderViewModel {
     private enum Metrics {
         static let defaultPreviewOffset: CGFloat = 70.0
         static let dragScaleMultiplier: CGFloat = 1.1
-        static let accessibilityStepPercentage: CGFloat = 0.05
     }
     
     // MARK: - State
@@ -160,8 +159,8 @@ internal class ColorSliderViewModel {
     // MARK: - Drag Event Handlers
     
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
-    func accessibilityAdjust(direction: AccessibilityAdjustmentDirection, progress: inout Double) {
-        let stepDelta = dimensions.length * (direction == .increment ? Metrics.accessibilityStepPercentage : -Metrics.accessibilityStepPercentage)
+    func accessibilityAdjust(direction: AccessibilityAdjustmentDirection, progress: inout Double, step: Double) {
+        let stepDelta = dimensions.length * (direction == .increment ? CGFloat(step) : -CGFloat(step))
         let newDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensions.length)
         persistedThumbPosition = min(max(newDrag, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
         liveContainerDrag = .zero

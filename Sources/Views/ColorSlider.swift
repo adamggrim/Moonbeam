@@ -21,17 +21,21 @@ public struct ColorSlider: View {
     @Environment(\.colorSliderThumbShape) private var thumbShape
     @Environment(\.colorSliderThumbColor) private var thumbColor
     @Environment(\.colorSliderThumbStroke) private var thumbStroke
+    @Environment(\.colorSliderThumbShadow) private var thumbShadow
     
     @Environment(\.colorSliderPreviewShape) private var previewShape
     @Environment(\.colorSliderPreviewStroke) private var previewStroke
     @Environment(\.colorSliderPreviewPosition) private var previewPosition
     @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
     @Environment(\.colorSliderPreviewHidden) private var previewHidden
+    @Environment(\.colorSliderPreviewShadow) private var previewShadow
     
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
     @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.colorSliderAnimation) private var animation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorSliderAccessibilityStep) private var accessibilityStep
+    @Environment(\.isEnabled) private var isEnabled
     @Environment(\.self) private var environment
 
     // MARK: - Public Properties
@@ -40,6 +44,7 @@ public struct ColorSlider: View {
     public var onSpectrumChanged: ((CGColor) -> Double)?
     public var label: LocalizedStringKey
     public var axis: Axis
+    public var isContinuous: Bool
 
     // MARK: - Private Properties
     
@@ -75,6 +80,7 @@ public struct ColorSlider: View {
     ///   - onSpectrumChanged: An optional callback defining the thumb's behavior when the spectrum changes.
     ///   - label: A localized string key used for VoiceOver accessibility. Defaults to "Color Slider".
     ///   - axis: The layout orientation of the slider. Defaults to `.horizontal`.
+    ///   - isContinuous: Whether the selected color updates continuously during a drag gesture. Defaults to `true`.
     public init(
         selection: Binding<CGColor>,
         progress: Binding<Double>,
@@ -82,7 +88,8 @@ public struct ColorSlider: View {
         spectrumIdentifier: AnyHashable? = nil,
         onSpectrumChanged: ((CGColor) -> Double)? = nil,
         label: LocalizedStringKey = "Color Slider",
-        axis: Axis = .horizontal
+        axis: Axis = .horizontal,
+        isContinuous: Bool = true
     ) {
         self._selection = selection
         self._progress = progress
@@ -91,6 +98,7 @@ public struct ColorSlider: View {
         self.onSpectrumChanged = onSpectrumChanged
         self.label = label
         self.axis = axis
+        self.isContinuous = isContinuous
     }
 
     // MARK: - Computed Properties
@@ -149,6 +157,17 @@ public struct ColorSlider: View {
         return false
     }
 
+/// Calculates the discrete index of the slider (used to trigger haptics on hard-edge sliders).
+    private var discreteIndex: Int? {
+        if case .array(let colors) = resolvedDataSource.colorSource, !colors.isEmpty {
+            let safeLength = dimensions.length > 0 ? dimensions.length : 0.001
+            let clampedRatio = max(0.0, min(1.0, viewModel.liveColorPosition / safeLength))
+            let calculatedIndex = Int(CGFloat(colors.count) * clampedRatio)
+            return max(0, min(colors.count - 1, calculatedIndex))
+        }
+        return nil
+    }
+    
     private var trackShape: AnyShape {
         if let radius = dimensions.cornerRadius {
             return AnyShape(RoundedRectangle(cornerRadius: radius))
@@ -165,6 +184,9 @@ public struct ColorSlider: View {
             thumbView
             colorPreviewView
         }
+        .opacity(isEnabled ? 1.0 : 0.5)
+        .grayscale(isEnabled ? 0.0 : 0.99)
+        .sensoryFeedback(.selection, trigger: discreteIndex)
         .frame(
             width: axis == .horizontal ? dimensions.length : viewModel.resolvedThumbLength,
             height: axis == .horizontal ? viewModel.resolvedThumbLength : dimensions.length
@@ -280,7 +302,7 @@ public struct ColorSlider: View {
             height: axis == .horizontal ? viewModel.resolvedThumbLength : viewModel.resolvedThumbThickness
         )
         .scaleEffect(viewModel.isDragging && enableThumbScale ? Metrics.dragScaleMultiplier : 1.0)
-        .shadow(radius: dimensions.shadowRadius)
+        .shadow(color: thumbShadow.color, radius: thumbShadow.radius, x: thumbShadow.x, y: thumbShadow.y)
         .overlay {
             if let stroke = thumbStroke {
                 thumbShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
@@ -301,7 +323,7 @@ public struct ColorSlider: View {
         let resolvedShape = previewShape ?? AnyShape(RoundedRectangle(cornerRadius: dimensions.previewCornerRadius))
 
         return resolvedShape
-            .foregroundColor(Color(selection))
+            .foregroundColor(viewModel.isDragging ? calculatedColor : Color(selection))
             .frame(width: dimensions.previewSize, height: dimensions.previewSize)
             .scaleEffect(
                 previewHidden && !viewModel.isDragging ? dimensions.scaleRatio : 1.0,
@@ -309,7 +331,7 @@ public struct ColorSlider: View {
                 anchor: axis == .horizontal ? (viewModel.resolvedPreviewOffset > 0 ? .top : .bottom) : (viewModel.resolvedPreviewOffset > 0 ? .leading : .trailing)
             )
             .opacity(previewHidden && !viewModel.isDragging ? 0 : 1.0)
-            .shadow(radius: dimensions.shadowRadius)
+            .shadow(color: previewShadow.color, radius: previewShadow.radius, x: previewShadow.x, y: previewShadow.y)
             .overlay {
                 if let stroke = previewStroke {
                     resolvedShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
@@ -336,14 +358,19 @@ public struct ColorSlider: View {
         }
         viewModel.liveContainerDrag = axis == .horizontal ? value.translation.width : -value.translation.height
         progress = Double(dimensions.length > 0 ? viewModel.liveColorPosition / dimensions.length : 0.0)
-        selection = calculatedColor.resolve(in: environment).cgColor
+        if isContinuous {
+            selection = calculatedColor.resolve(in: environment).cgColor
+        }
     }
 
     /// Finalizes the view's state when the drag gesture ends, updating
     /// `persistedThumbPosition` with the thumb's last valid clamped position
     /// and resetting `liveContainerDrag` to zero.
     private func onDragEnded(_ value: DragGesture.Value) {
-            withAnimation(reduceMotion ? nil : animation) {
+        if !isContinuous {
+            selection = calculatedColor.resolve(in: environment).cgColor
+        }
+        withAnimation(reduceMotion ? nil : animation) {
             viewModel.isDragging = false
             viewModel.persistedThumbPosition = viewModel.liveThumbPosition
             viewModel.liveContainerDrag = .zero
@@ -352,7 +379,7 @@ public struct ColorSlider: View {
 
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
-        viewModel.accessibilityAdjust(direction: direction, progress: &progress)
+        viewModel.accessibilityAdjust(direction: direction, progress: &progress, step: accessibilityStep)
         selection = calculatedColor.resolve(in: environment).cgColor
     }
 

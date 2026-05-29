@@ -14,39 +14,55 @@ public struct ColorSliderDimensions: Sendable, Equatable {
     public var thumbLength: CGFloat? = nil
     public var previewSize: CGFloat = 60
     public var previewOffset: CGFloat? = nil
-    public var shadowRadius: CGFloat = 5
     public var scaleRatio: CGFloat = 0.25
-    
+
     public var previewCornerRadius: CGFloat {
         previewSize * 0.225
     }
 }
 
-public struct SliderStroke: Sendable {
+public struct ColorSliderShadow: Sendable, Equatable {
+    public var color: Color
+    public var radius: CGFloat
+    public var x: CGFloat
+    public var y: CGFloat
+    
+    public init(color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0) {
+        self.color = color
+        self.radius = radius
+        self.x = x
+        self.y = y
+    }
+}
+
+public struct TrackStroke: Sendable {
     public var style: AnyShapeStyle
     public var lineWidth: CGFloat
 }
 
 // MARK: - Environment Keys
 
-private struct TrackStrokeKey: EnvironmentKey { static let defaultValue: SliderStroke? = nil }
+private struct TrackStrokeKey: EnvironmentKey { static let defaultValue: TrackStroke? = nil }
 
 private struct ThumbShapeKey: EnvironmentKey { static let defaultValue = AnyShape(Capsule()) }
 private struct ThumbColorKey: EnvironmentKey { static let defaultValue: Color = .white }
-private struct ThumbStrokeKey: EnvironmentKey { static let defaultValue: SliderStroke? = nil }
+private struct ThumbStrokeKey: EnvironmentKey { static let defaultValue: TrackStroke? = nil }
+private struct ThumbShadowKey: EnvironmentKey { static let defaultValue = ColorSliderShadow() }
 
 private struct PreviewShapeKey: EnvironmentKey { static let defaultValue: AnyShape? = nil }
-private struct PreviewStrokeKey: EnvironmentKey { static let defaultValue: SliderStroke? = nil }
+private struct PreviewStrokeKey: EnvironmentKey { static let defaultValue: TrackStroke? = nil }
 private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: PreviewPosition? = nil }
 private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
 private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool = true }
+private struct PreviewShadowKey: EnvironmentKey { static let defaultValue = ColorSliderShadow() }
 
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
+private struct AccessibilityStepKey: EnvironmentKey { static let defaultValue: Double = 0.05 }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
 private struct AnimationKey: EnvironmentKey { static let defaultValue: Animation = .easeInOut(duration: 0.25) }
 
 extension EnvironmentValues {
-    var colorSliderTrackStroke: SliderStroke? {
+    var colorSliderTrackStroke: TrackStroke? {
         get { self[TrackStrokeKey.self] }
         set { self[TrackStrokeKey.self] = newValue }
     }
@@ -59,16 +75,20 @@ extension EnvironmentValues {
         get { self[ThumbColorKey.self] }
         set { self[ThumbColorKey.self] = newValue }
     }
-    var colorSliderThumbStroke: SliderStroke? {
-        get { self[ThumbStrokeKey.self] }
-        set { self[ThumbStrokeKey.self] = newValue }
+    var colorSliderThumbStroke: TrackStroke? {
+            get { self[ThumbStrokeKey.self] }
+            set { self[ThumbStrokeKey.self] = newValue }
+        }
+    var colorSliderThumbShadow: ColorSliderShadow {
+        get { self[ThumbShadowKey.self] }
+        set { self[ThumbShadowKey.self] = newValue }
     }
     
     var colorSliderPreviewShape: AnyShape? {
         get { self[PreviewShapeKey.self] }
         set { self[PreviewShapeKey.self] = newValue }
     }
-    var colorSliderPreviewStroke: SliderStroke? {
+    var colorSliderPreviewStroke: TrackStroke? {
         get { self[PreviewStrokeKey.self] }
         set { self[PreviewStrokeKey.self] = newValue }
     }
@@ -83,6 +103,15 @@ extension EnvironmentValues {
     var colorSliderPreviewHidden: Bool {
         get { self[PreviewHiddenKey.self] }
         set { self[PreviewHiddenKey.self] = newValue }
+    }
+    var colorSliderPreviewShadow: ColorSliderShadow {
+        get { self[PreviewShadowKey.self] }
+        set { self[PreviewShadowKey.self] = newValue }
+    }
+    
+    var colorSliderAccessibilityStep: Double {
+        get { self[AccessibilityStepKey.self] }
+        set { self[AccessibilityStepKey.self] = newValue }
     }
     
     var colorSliderDisableLiquidGlass: Bool {
@@ -107,7 +136,7 @@ public extension View {
     
     /// Adds a stroke to the slider track.
     func colorSliderTrackStroke<S: ShapeStyle>(_ style: S, lineWidth: CGFloat = 1) -> some View {
-        let stroke = SliderStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
+        let stroke = TrackStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
         return environment(\.colorSliderTrackStroke, stroke)
     }
     
@@ -125,17 +154,22 @@ public extension View {
         environment(\.colorSliderThumbShape, AnyShape(shape))
     }
 
-    /// The fill color of the draggable thumb. Defaults to `.white`.
+    /// The fill color of the thumb. Defaults to `.white`.
     func colorSliderThumbColor(_ color: Color) -> some View {
         environment(\.colorSliderThumbColor, color)
     }
     
-    /// Adds a stroke to the draggable thumb.
+    /// Adds a stroke to the thumb.
     func colorSliderThumbStroke<S: ShapeStyle>(_ style: S, lineWidth: CGFloat = 1) -> some View {
-        let stroke = SliderStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
+        let stroke = TrackStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
         return environment(\.colorSliderThumbStroke, stroke)
     }
 
+    /// Sets the shadow for the thumb.
+        func colorSliderThumbShadow(color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0) -> some View {
+            environment(\.colorSliderThumbShadow, ColorSliderShadow(color: color, radius: radius, x: x, y: y))
+        }
+    
     // MARK: Preview Modifiers
     
     /// The visual shape of the floating color preview. If nil, defaults to `RoundedRectangle`.
@@ -145,7 +179,7 @@ public extension View {
 
     /// Adds a stroke to the floating color preview.
     func colorSliderPreviewStroke<S: ShapeStyle>(_ style: S, lineWidth: CGFloat = 1) -> some View {
-        let stroke = SliderStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
+        let stroke = TrackStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
         return environment(\.colorSliderPreviewStroke, stroke)
     }
 
@@ -159,8 +193,18 @@ public extension View {
     func colorSliderPreviewHidden(_ hidden: Bool) -> some View {
         environment(\.colorSliderPreviewHidden, hidden)
     }
+    
+    /// Sets the shadow for the floating color preview.
+    func colorSliderPreviewShadow(color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0) -> some View {
+        environment(\.colorSliderPreviewShadow, ColorSliderShadow(color: color, radius: radius, x: x, y: y))
+    }
 
     // MARK: Global Modifiers
+    
+    /// Customizes the step percentage used when adjusting the slider via VoiceOver.
+    func colorSliderAccessibilityStep(_ step: Double) -> some View {
+        environment(\.colorSliderAccessibilityStep, step)
+    }
     
     /// Set to `true` to disable the liquid glass styling on the thumb. On operating systems that do not support Liquid Glass, this flag is ignored and falls back to a standard filled shape. Defaults to `false`.
     func colorSliderDisableLiquidGlass(_ disable: Bool) -> some View {
@@ -174,8 +218,7 @@ public extension View {
         thumbThickness: CGFloat? = nil,
         thumbLength: CGFloat? = nil,
         previewSize: CGFloat = 60,
-        previewOffset: CGFloat? = nil,
-        shadowRadius: CGFloat = 5
+        previewOffset: CGFloat? = nil
     ) -> some View {
         let dim = ColorSliderDimensions(
             length: length,
@@ -183,8 +226,7 @@ public extension View {
             thumbThickness: thumbThickness,
             thumbLength: thumbLength,
             previewSize: previewSize,
-            previewOffset: previewOffset,
-            shadowRadius: shadowRadius
+            previewOffset: previewOffset
         )
         return environment(\.colorSliderDimensions, dim)
     }
