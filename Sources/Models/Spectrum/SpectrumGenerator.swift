@@ -2,6 +2,15 @@ import SwiftUI
 
 /// A model for generating a spectrum color for a given position, suitable for shaders.
 internal struct SpectrumGenerator {
+    
+    // MARK: - RGB to OKLAB
+
+    /// Matrix to convert OKLCH to a Display P3 color.
+    ///
+    /// Taken from  "A perceptual color space for image processing" by Björn Ottosson (2020).
+    ///
+    /// - SeeAlso:
+    /// https://bottosson.github.io/posts/oklab/
     private static func oklchToColor(lightness: CGFloat, chroma: CGFloat, hue: CGFloat) -> Color {
         let hueAngle = hue * 2.0 * .pi
         let a = chroma * cos(hueAngle)

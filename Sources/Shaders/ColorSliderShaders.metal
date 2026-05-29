@@ -50,6 +50,10 @@ float3 convertHSBtoRGB(float hue, float saturation, float brightness) {
 
 // MARK: - OKLAB and OKLCH to RGB
 
+// Matrix to convert OKLAB constants to RGB.
+//
+// Taken from  "A perceptual color space for image processing" by Björn Ottosson (2020):
+// https://bottosson.github.io/posts/oklab/
 float3 convertOKLABtoRGB(float L, float a, float b) {
     float l_ = L + 0.3963377774 * a + 0.2158037573 * b;
     float m_ = L - 0.1055613458 * a - 0.0638541728 * b;
@@ -59,7 +63,7 @@ float3 convertOKLABtoRGB(float L, float a, float b) {
     float m = sign(m_) * pow(abs(m_), 3.0);
     float s = sign(s_) * pow(abs(s_), 3.0);
 
-    // Display P3 Matrix
+    // Display P3 matrix
     float3 lin = float3(
         2.7015367 * l - 1.6373796 * m - 0.0641571 * s,
         -0.3150531 * l + 1.3415174 * m - 0.0264643 * s,
@@ -74,6 +78,10 @@ float3 convertOKLABtoRGB(float L, float a, float b) {
     return clamp(sRGB, 0.0, 1.0);
 }
 
+// Matrix to convert OKLCH constants to RGB.
+//
+// Taken from  "A perceptual color space for image processing" by Björn Ottosson (2020):
+// https://bottosson.github.io/posts/oklab/
 float3 convertOKLCHtoRGB(float L, float C, float h) {
     float hueAngle = h * 2.0 * M_PI_F;
     float a = C * cos(hueAngle);
@@ -85,6 +93,12 @@ float3 resolveColor(float space, float h, float s_c, float b_l) {
     return space == 1.0 ? convertOKLCHtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
 }
 
+// MARK: - RGB to OKLAB
+
+// Matrix to convert RGB to OKLAB.
+//
+// Taken from  "A perceptual color space for image processing" by Björn Ottosson (2020):
+// https://bottosson.github.io/posts/oklab/
 float3 convertRGBtoOKLAB(float3 c) {
     float l = 0.4122214708 * c.r + 0.5363325363 * c.g + 0.0514459929 * c.b;
     float m = 0.2119034982 * c.r + 0.6806995451 * c.g + 0.1073969566 * c.b;
