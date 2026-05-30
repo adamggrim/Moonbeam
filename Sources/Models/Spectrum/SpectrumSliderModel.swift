@@ -43,18 +43,16 @@ fileprivate func validateBendSections(bendSections: [BendSection]) -> Bool {
 ///
 /// - Returns: A validated array of bend sections.
 fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) -> [BendSection] {
-    let truncated = Array(bends.prefix(spectrumConstants.maxBends))
+    if !validateBendSections(bendSections: bends) {
+        assertionFailure("Moonbeam: \(name) contains overlapping bend sections.")
+    }
     
-    #if DEBUG
     if bends.count > spectrumConstants.maxBends {
-        logger.warning("Moonbeam: \(name) exceeds maximum limit of \(spectrumConstants.maxBends). Truncated to first \(spectrumConstants.maxBends) bends.")
+        assertionFailure("Moonbeam: \(name) exceeds maximum of \(spectrumConstants.maxBends).")
+        // Fall back to a truncated array for production builds.
+        return Array(bends.prefix(spectrumConstants.maxBends))
     }
-    if !validateBendSections(bendSections: truncated) {
-        logger.warning("Moonbeam: \(name) bend sections overlap.")
-    }
-    #endif // DEBUG
-    
-    return truncated
+        return bends
 }
 
 // MARK: - Metal Data Structures
