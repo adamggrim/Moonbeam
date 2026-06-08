@@ -18,10 +18,10 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 
 ## Variations
 
-`Moonbeam` supports two color slider modes—spectrum (HSB-based) and gradient (color mixing-based).
+`Moonbeam` supports two color slider modes—spectrum (HSB- and OKLCH-based) and gradient (color mixing-based).
 
-- **For spectrum sliders:** To improve the legibility of certain colors against a light or dark background, bend the saturation or brightness in specific sections. `Moonbeam` also supports black or white fade-ins and fade-outs (e.g., starting the spectrum with white).
-- **For gradient sliders**: Create a precise gradient between any two colors.
+- **For spectrum sliders:** Create dynamic spectrums using either HSB or OKLCH color spaces. To improve the legibility of certain colors, bend saturation and brightness (HSB) or lightness and chroma (OKLCH) in specific sections. `Moonbeam` also supports black or white fade-ins and fade-outs (e.g., starting the spectrum with white).
+- **For gradient sliders**: Create a precise gradient between any two colors using RGB, OKLAB or OKLCH color spaces.
 - **For hard-edge sliders**: Create a slider with discrete color blocks.
 
 `Moonbeam` also offers layout and thumb style customization:
@@ -32,14 +32,18 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 
 ## Example (Spectrum)
 
-This example demonstrates how to create a spectrum slider using `Moonbeam`.
+This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
 
 1. **Create the slider**
     ```swift
     @State private var selectedColor: Color = .white
     ```
 
-2. **Build the spectrum model:** Use the result builder to add black or white sections and bend saturation or brightness.
+2. **Build the spectrum model:**
+
+    Use the result builder to add black or white sections and bend saturation and brightness (HSB) or lightness and chroma (OKLCH).
+
+    HSB model:
 
     ```swift
     let spectrumModel = HSBSpectrumModel(
@@ -52,20 +56,32 @@ This example demonstrates how to create a spectrum slider using `Moonbeam`.
     saturationBends: {
         OneWayBend(startHue: 0.0, endHue: 40.0 / 360, target: 0.5)
     }
-)
-    }
+    )
     ```
 
+    OKLCH model:
+
+    ```swift
+    let oklchModel = OKLCHSpectrumModel(
+        lightness: 0.75,
+        chroma: 0.15,
+        startHue: 0.0,
+        endHue: 1.0,
+        lightnessBends: {
+            OneWayBend(startHue: 0.0, endHue: 0.2, target: 0.9)
+        }
+    )
+    ```
 3. **Choose slider styles**
 
     ```swift
     ColorSlider(
         selection: $selectedColor,
         progress: $progress,
-        dataSource: spectrumModel, 
-        axis: .horizontal 
+        dataSource: spectrumModel,
+        axis: .horizontal
     )
-    .colorSliderThumbStyle(.circle)
+    .colorSliderThumbShape(Circle())
     .colorSliderThumbColor(.white)
     ```
 
@@ -84,6 +100,8 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
     let gradientModel = GradientSliderModel(startColor: .orange, endColor: .blue, colorSpace: .rgb)
     ```
 
+    `Moonbeam` gradient sliders also support OKLCH and OKLAB color spaces.
+
 3. **Choose slider styles**
 
     ```swift
@@ -92,7 +110,7 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
         dataSource: gradientModel,
         axis: .vertical
     )
-    .colorSliderThumbStyle(.capsule)
+    .colorSliderThumbShape(Capsule())
     ```
 
 ## Example (Hard-Edge)
@@ -113,8 +131,8 @@ This example demonstrates how to create a hard-edge slider with discrete color b
     @State private var selectedColor: Color = .green
 
     var body: some View {
-        ColorSliderView(
-            selectedColor: $selectedColor,
+        ColorSlider(
+            selection: $selectedColor,
             dataSource: customStops,
             axis: .horizontal
         )
@@ -137,8 +155,8 @@ This example demonstrates how to create a hard-edge slider with discrete color b
     @State private var selectedColor: Color = .cyan
 
     var body: some View {
-        ColorSliderView(
-            selectedColor: $selectedColor,
+        ColorSlider(
+            selection: $selectedColor,
             dataSource: implicitGradient,
             axis: .horizontal
         )
@@ -164,8 +182,12 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 * `.colorSliderPreviewHidden(_:)` *(Defaults to `true`.)*
 
 ### Layout & Animation
-* `.colorSliderDimensions(length:thickness:thumbThickness:thumbLength:previewSize:previewOffset:shadowRadius:)`
+* `.colorSliderDimensions(length:thickness:thumbThickness:thumbLength:previewSize:previewOffset:)`
 * `.colorSliderAnimation(_:)`
+
+### Thumb & Preview Shadows
+* `.colorSliderThumbShadow(color:radius:x:y:)`
+* `.colorSliderPreviewShadow(color:radius:x:y:)`
 
 ## Structure
 
