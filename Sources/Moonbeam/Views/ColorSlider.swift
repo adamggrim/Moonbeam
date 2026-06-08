@@ -421,3 +421,39 @@ public struct ColorSlider: View {
         return copy
     }
 }
+
+public extension ColorSlider {
+    /// Convenience initializer to accept SwiftUI's `Color` instead of `CGColor`.
+    init(
+        selection: Binding<Color>,
+        progress: Binding<Double>,
+        dataSource: ColorSliderDataSource? = nil,
+        spectrumIdentifier: AnyHashable? = nil,
+        onSpectrumChanged: ((Color) -> Double)? = nil,
+        label: LocalizedStringKey = "Color Slider",
+        axis: Axis = .horizontal,
+        isContinuous: Bool = true
+    ) {
+        // Convert the `Color` binding into a `CGColor` binding.
+        let cgSelection = Binding<CGColor>(
+            get: { selection.wrappedValue.cgColor ?? CGColor(gray: 1, alpha: 1) },
+            set: { selection.wrappedValue = Color($0) }
+        )
+        
+        let cgOnChanged: ((CGColor) -> Double)? = onSpectrumChanged.map { callback in
+            return { cgColor in callback(Color(cgColor)) }
+        }
+        
+        // Send everything to the `CGColor` initializer.
+        self.init(
+            selection: cgSelection,
+            progress: progress,
+            dataSource: dataSource,
+            spectrumIdentifier: spectrumIdentifier,
+            onSpectrumChanged: cgOnChanged,
+            label: label,
+            axis: axis,
+            isContinuous: isContinuous
+        )
+    }
+}
