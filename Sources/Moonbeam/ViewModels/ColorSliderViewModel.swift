@@ -161,10 +161,12 @@ internal class ColorSliderViewModel {
     
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
     func accessibilityAdjust(direction: AccessibilityAdjustmentDirection, progress: inout Double, step: Double) {
-        let stepDelta = dimensions.length * (direction == .increment ? CGFloat(step) : -CGFloat(step))
-        let newDrag = min(max(liveContainerThumbDrag + stepDelta, 0), dimensions.length)
-        persistedThumbPosition = min(max(newDrag, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
+        let delta = direction == .increment ? step : -step
+        let newProgress = min(max(progress + delta, 0.0), 1.0)
+        progress = newProgress
+        
+        let newTrackPosition = CGFloat(newProgress) * dimensions.length
+        persistedThumbPosition = min(max(newTrackPosition - halfThumbThickness, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
         liveContainerDrag = .zero
-        progress = Double(dimensions.length > 0 ? liveColorPosition / dimensions.length : 0.0)
     }
 }
