@@ -266,11 +266,9 @@ public struct ColorSlider: View {
             Color.clear
         } else {
             let isHorizontal = axis == .horizontal
-            // Reverse colors for the vertical axis to match original drawing order.
-            let orderedColors = isHorizontal ? colors : colors.reversed()
-            let step = 1.0 / Double(orderedColors.count)
+            let step = 1.0 / Double(colors.count)
             
-            let stops: [Gradient.Stop] = orderedColors.enumerated().flatMap { index, color in
+            let stops: [Gradient.Stop] = colors.enumerated().flatMap { index, color in
                 [
                     Gradient.Stop(color: color, location: step * Double(index)),
                     Gradient.Stop(color: color, location: step * Double(index + 1))
