@@ -262,23 +262,29 @@ public struct ColorSlider: View {
 
     @ViewBuilder
     private func hardEdgeTrackView(colors: [Color]) -> some View {
-        let isHorizontal = axis == .horizontal
-        let orderedIndices = isHorizontal ? Array(colors.indices) : Array(colors.indices.reversed())
-
-        if isHorizontal {
-            HStack(spacing: 0) {
-                ForEach(orderedIndices, id: \.self) { index in
-                    innerShadowBlock(for: colors[index])
-                }
-            }
+        if colors.isEmpty {
+            Color.clear
         } else {
-            VStack(spacing: 0) {
-                ForEach(orderedIndices, id: \.self) { index in
-                    innerShadowBlock(for: colors[index])
-                }
+            let isHorizontal = axis == .horizontal
+            // Reverse colors for the vertical axis to match original drawing order.
+            let orderedColors = isHorizontal ? colors : colors.reversed()
+            let step = 1.0 / Double(orderedColors.count)
+            
+            let stops: [Gradient.Stop] = orderedColors.enumerated().flatMap { index, color in
+                [
+                    Gradient.Stop(color: color, location: step * Double(index)),
+                    Gradient.Stop(color: color, location: step * Double(index + 1))
+                ]
             }
+            
+            LinearGradient(
+                stops: stops,
+                startPoint: isHorizontal ? .leading : .bottom,
+                endPoint: isHorizontal ? .trailing : .top
+            )
         }
     }
+    
 
     @ViewBuilder
     private func innerShadowBlock(for color: Color) -> some View {
