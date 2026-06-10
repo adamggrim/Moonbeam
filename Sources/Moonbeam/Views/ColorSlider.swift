@@ -443,7 +443,10 @@ public extension ColorSlider {
     ) {
         // Convert the `Color` binding into a `CGColor` binding.
         let cgSelection = Binding<CGColor>(
-            get: { selection.wrappedValue.cgColor ?? CGColor(gray: 1, alpha: 1) },
+            get: {
+                // Fetch the actual color to prevent `nil` returns.
+                selection.wrappedValue.resolve(in: EnvironmentValues()).cgColor
+            },
             set: { selection.wrappedValue = Color($0) }
         )
         
@@ -451,7 +454,6 @@ public extension ColorSlider {
             return { cgColor in callback(Color(cgColor)) }
         }
         
-        // Send everything to the `CGColor` initializer.
         self.init(
             selection: cgSelection,
             progress: progress,
