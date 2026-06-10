@@ -133,6 +133,7 @@ This example demonstrates how to create a hard-edge slider with discrete color b
     var body: some View {
         ColorSlider(
             selection: $selectedColor,
+            progress: $progress,
             dataSource: customStops,
             axis: .horizontal
         )
@@ -157,6 +158,7 @@ This example demonstrates how to create a hard-edge slider with discrete color b
     var body: some View {
         ColorSlider(
             selection: $selectedColor,
+            progress: $progress,
             dataSource: implicitGradient,
             axis: .horizontal
         )
