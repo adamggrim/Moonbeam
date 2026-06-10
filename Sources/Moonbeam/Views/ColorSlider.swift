@@ -2,6 +2,7 @@ import SwiftUI
 
 /// A customizable, interactive view that allows users to select a color
 /// from a dynamically generated spectrum or gradient.
+@MainActor
 public struct ColorSlider: View {
     
     // MARK: - State & Bindings
