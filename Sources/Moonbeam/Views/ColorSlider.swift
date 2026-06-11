@@ -33,6 +33,7 @@ public struct ColorSlider: View {
     
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
     @Environment(\.colorSliderDimensions) private var dimensions
+    @Environment(\.colorSliderDragMinimumDistance) private var minimumDragDistance
     @Environment(\.colorSliderAnimation) private var animation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorSliderAccessibilityStep) private var accessibilityStep
@@ -318,7 +319,7 @@ public struct ColorSlider: View {
             y: axis == .horizontal ? 0 : -viewModel.thumbOffset
         )
         .gesture(
-            DragGesture(minimumDistance: 0)
+            DragGesture(minimumDistance: minimumDragDistance)
                 .onChanged(onDragChanged)
                 .onEnded(onDragEnded)
         )

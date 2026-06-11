@@ -57,8 +57,9 @@ private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool 
 private struct PreviewShadowKey: EnvironmentKey { static let defaultValue = ColorSliderShadow() }
 
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
-private struct AccessibilityStepKey: EnvironmentKey { static let defaultValue: Double = 0.05 }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
+private struct DragMinimumDistanceKey: EnvironmentKey { static let defaultValue: CGFloat = 0 }
+private struct AccessibilityStepKey: EnvironmentKey { static let defaultValue: Double = 0.05 }
 private struct AnimationKey: EnvironmentKey { static let defaultValue: Animation = .easeInOut(duration: 0.25) }
 
 extension EnvironmentValues {
@@ -109,11 +110,6 @@ extension EnvironmentValues {
         set { self[PreviewShadowKey.self] = newValue }
     }
     
-    var colorSliderAccessibilityStep: Double {
-        get { self[AccessibilityStepKey.self] }
-        set { self[AccessibilityStepKey.self] = newValue }
-    }
-    
     var colorSliderDisableLiquidGlass: Bool {
         get { self[DisableLiquidGlassKey.self] }
         set { self[DisableLiquidGlassKey.self] = newValue }
@@ -121,6 +117,14 @@ extension EnvironmentValues {
     var colorSliderDimensions: ColorSliderDimensions {
         get { self[DimensionsKey.self] }
         set { self[DimensionsKey.self] = newValue }
+    }
+    var colorSliderDragMinimumDistance: CGFloat {
+        get { self[DragMinimumDistanceKey.self] }
+        set { self[DragMinimumDistanceKey.self] = newValue }
+    }
+    var colorSliderAccessibilityStep: Double {
+        get { self[AccessibilityStepKey.self] }
+        set { self[AccessibilityStepKey.self] = newValue }
     }
     var colorSliderAnimation: Animation {
         get { self[AnimationKey.self] }
@@ -200,12 +204,7 @@ public extension View {
     }
 
     // MARK: Global Modifiers
-    
-    /// Customizes the step percentage used when adjusting the slider via VoiceOver.
-    func colorSliderAccessibilityStep(_ step: Double) -> some View {
-        environment(\.colorSliderAccessibilityStep, step)
-    }
-    
+        
     /// Set to `true` to disable the liquid glass styling on the thumb. On operating systems that do not support Liquid Glass, this flag is ignored and falls back to a standard filled shape. Defaults to `false`.
     func colorSliderDisableLiquidGlass(_ disable: Bool) -> some View {
         environment(\.colorSliderDisableLiquidGlass, disable)
@@ -229,6 +228,16 @@ public extension View {
             previewOffset: previewOffset
         )
         return environment(\.colorSliderDimensions, dim)
+    }
+    
+    /// Customizes the minimum distance to drag the thumb before the slider recognizes the drag. Defaults to 0.
+    func colorSliderDragMinimumDistance(_ distance: CGFloat) -> some View {
+        environment(\.colorSliderDragMinimumDistance, distance)
+    }
+
+    /// Customizes the step percentage used when adjusting the slider via VoiceOver.
+    func colorSliderAccessibilityStep(_ step: Double) -> some View {
+        environment(\.colorSliderAccessibilityStep, step)
     }
 
     /// Sets the animation used when the drag gesture starts and ends.
