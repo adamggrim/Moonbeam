@@ -9,6 +9,7 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 - Swift 6.0
 - iOS 18.0
 - iPadOS 18.0
+- macOS 15.0
 
 ## Dependencies
 
@@ -221,7 +222,7 @@ Moonbeam/
 
 Follow these steps to integrate `Moonbeam` into your project:
 
-1. **Install Xcode:** Ensure you are running Xcode 16 or later to support Swift 6.0 and iOS 18.
+1. **Install Xcode:** Ensure you are running Xcode 16 or later to support Swift 6.0, iOS 18 and macOS 15.
 
 2. **Install the package:** Add `Moonbeam` to your `Package.swift` dependencies:
 

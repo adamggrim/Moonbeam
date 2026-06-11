@@ -5,7 +5,8 @@ import PackageDescription
 let package = Package(
     name: "Moonbeam",
     platforms: [
-        .iOS(.v18)
+        .iOS(.v18),
+        .macOS(.v15)
     ],
     products: [
         .library(
@@ -15,7 +16,10 @@ let package = Package(
     targets: [
         .target(
             name: "Moonbeam",
-            dependencies: []),
+            dependencies: [],
+            resources: [
+                .process("Shaders")
+            ]),
     ],
     swiftLanguageModes: [.v6]
 )

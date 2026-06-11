@@ -1,5 +1,13 @@
 import SwiftUI
 
+#if canImport(UIKit)
+import UIKit
+typealias PlatformColor = UIColor
+#elseif canImport(AppKit)
+import AppKit
+typealias PlatformColor = NSColor
+#endif
+
 /// A customizable, interactive view that allows users to select a color
 /// from a dynamically generated spectrum or gradient.
 @MainActor
@@ -155,7 +163,7 @@ public struct ColorSlider: View {
 
     /// Set to `true` to scale the thumb up during a drag gesture. Defaults to `true` if liquid glass is supported and enabled.
     private var enableThumbScale: Bool {
-        if #available(iOS 26.0, *) { return !disableLiquidGlass }
+        if #available(iOS 26.0, macOS 16.0, *) { return !disableLiquidGlass }
         return false
     }
 
@@ -294,7 +302,7 @@ public struct ColorSlider: View {
     @ViewBuilder
     private var thumbView: some View {
         Group {
-            if #available(iOS 26.0, *), !disableLiquidGlass {
+            if #available(iOS 26.0, macOS 16.0, *), !disableLiquidGlass {
                 Color.clear
                     .glassEffect(viewModel.isDragging ? .regular.interactive(true) : .identity, in: thumbShape)
                     .overlay(thumbShape.fill(thumbColor).opacity(viewModel.isDragging ? 0.0 : 1.0))
@@ -442,8 +450,7 @@ public extension ColorSlider {
     ) {
         let cgSelection = Binding<CGColor>(
             get: {
-                // Bridge through `UIColor` to support dynamic system colors.
-                UIColor(selection.wrappedValue).cgColor
+                PlatformColor(selection.wrappedValue).cgColor
             },
             set: { selection.wrappedValue = Color($0) }
         )
