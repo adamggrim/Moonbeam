@@ -440,11 +440,10 @@ public extension ColorSlider {
         axis: Axis = .horizontal,
         isContinuous: Bool = true
     ) {
-        // Convert the `Color` binding into a `CGColor` binding.
         let cgSelection = Binding<CGColor>(
             get: {
-                // Fetch the actual color to prevent `nil` returns.
-                selection.wrappedValue.resolve(in: EnvironmentValues()).cgColor
+                // Bridge through `UIColor` to support dynamic system colors.
+                UIColor(selection.wrappedValue).cgColor
             },
             set: { selection.wrappedValue = Color($0) }
         )
