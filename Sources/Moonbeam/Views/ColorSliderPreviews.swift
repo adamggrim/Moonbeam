@@ -22,7 +22,7 @@ private struct PreviewContainer: View {
     }
 }
 
-#Preview("Horizontal Slider") {
+#Preview("Horizontal HSB spectrum slider") {
     let spectrumModel = HSBSpectrumModel(
         startSections: [BlackSection()],
         endSections: [WhiteSection()],
@@ -34,7 +34,7 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: spectrumModel)
 }
 
-#Preview("Vertical Slider (AnyShape)") {
+#Preview("Vertical HSB spectrum slider (AnyShape)") {
     let spectrumModel = HSBSpectrumModel(
         startSections: [BlackSection()],
         endSections: [WhiteSection()],
@@ -52,7 +52,7 @@ private struct PreviewContainer: View {
         .colorSliderPreviewStroke(Color.white, lineWidth: 2)
 }
 
-#Preview("Spectrum with BendSections") {
+#Preview("Horizontal HSB spectrum slider with bend sections") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
         endHue: 1.0,
@@ -67,7 +67,7 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: spectrumModel)
 }
 
-#Preview("Spectrum with MonochromeSections") {
+#Preview("Horizontal HSB spectrum slider with monochrome sections") {
     let spectrumModel = HSBSpectrumModel(
         startSections: [BlackSection(), WhiteSection()],
         endSections: [BlackSection(), WhiteSection()],
@@ -80,7 +80,7 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: spectrumModel)
 }
 
-#Preview("OKLCH Spectrum") {
+#Preview("Horizontal OKLCH spectrum slider") {
     let oklchModel = OKLCHSpectrumModel(
         lightness: 0.75,
         chroma: 0.8,
@@ -91,7 +91,7 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: oklchModel)
 }
 
-#Preview("RGB Gradient") {
+#Preview("Horizontal RGB gradient slider") {
     let gradientModel = GradientSliderModel(
         startColor: .orange,
         endColor: .blue,
@@ -101,7 +101,7 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: gradientModel)
 }
 
-#Preview("OKLAB Gradient") {
+#Preview("Horizontal OKLAB gradient slider") {
     let gradientModel = GradientSliderModel(
         startColor: .blue,
         endColor: .red,
@@ -111,7 +111,7 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: gradientModel)
 }
 
-#Preview("Hard-Edge (Explicit)") {
+#Preview("Horizontal explicit hard-edge slider") {
     let customStops = HardEdgeSliderModel(colors: [
         .green, .yellow, .orange, .red, .purple, .blue
     ])
@@ -144,7 +144,7 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: bentSpectrum)
 }
 
-#Preview("Simultaneous Bends (Saturation & Brightness)") {
+#Preview("Horizontal HSB spectrum slider with simultaneous bends") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
         endHue: 1.0,
@@ -161,7 +161,7 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: spectrumModel)
 }
 
-#Preview("Circle Thumb (Horizontal)") {
+#Preview("Horizontal HSB spectrum slider with circle thumb") {
     let spectrumModel = HSBSpectrumModel(
         startSections: [BlackSection()],
         endSections: [WhiteSection()],
@@ -175,7 +175,7 @@ private struct PreviewContainer: View {
         .colorSliderDimensions(thumbLength: 25)
 }
 
-#Preview("Circle Thumb (Vertical)") {
+#Preview("Vertical HSB spectrum slider with circle thumb") {
     let spectrumModel = HSBSpectrumModel(
         startSections: [BlackSection()],
         endSections: [WhiteSection()],
@@ -189,7 +189,7 @@ private struct PreviewContainer: View {
         .colorSliderDimensions(thumbLength: 25)
 }
 
-#Preview("Glass Disabled") {
+#Preview("Horizontal HSB spectrum slider with Liquid Glass disabled") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
         endHue: 1.0,
@@ -201,7 +201,7 @@ private struct PreviewContainer: View {
         .colorSliderDisableLiquidGlass(true)
 }
 
-#Preview("Custom Dimensions") {
+#Preview("Horizontal gradient slider with custom dimensions") {
     let gradientModel = GradientSliderModel(
         startColor: .green,
         endColor: .yellow
@@ -216,7 +216,7 @@ private struct PreviewContainer: View {
         )
 }
 
-#Preview("Preview Position (Horizontal Bottom)") {
+#Preview("Horizontal HSB spectrum slider with bottom preview") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
         endHue: 1.0,
@@ -227,7 +227,7 @@ private struct PreviewContainer: View {
         .colorSliderPreviewPosition(.bottom, spacing: 20)
 }
 
-#Preview("Preview Position (Vertical Leading)") {
+#Preview("Vertical HSB spectrum slider with leading preview") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
         endHue: 1.0,
