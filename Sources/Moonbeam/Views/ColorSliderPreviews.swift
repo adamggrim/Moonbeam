@@ -119,7 +119,15 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: customStops)
 }
 
-#Preview("Hard-Edge Spectrum with BendSections") {
+#Preview("Vertical explicit hard-edge slider") {
+    let customStops = HardEdgeSliderModel(colors: [
+        .green, .yellow, .orange, .red, .purple, .blue
+    ])
+
+    PreviewContainer(dataSource: customStops, axis: .vertical)
+}
+
+#Preview("Horizontal hard-edge HSB spectrum slider with bend sections") {
     let bentSpectrum = HSBSpectrumModel(
         startHue: 0.0,
         endHue: 1.0,
