@@ -24,6 +24,15 @@ internal enum spectrumConstants {
 
 fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "SpectrumModel")
 
+/// A lightweight wrapper for telemetry and non-fatal production logging.
+internal enum MoonbeamTelemetry {
+    static func reportNonFatalIssue(_ message: String) {
+        logger.error("\(message, privacy: .public)")
+        
+        assertionFailure(message)
+    }
+}
+
 fileprivate func validateBendSections(bendSections: [BendSection]) -> Bool {
     guard bendSections.count > 1 else { return true }
     let sortedBendSections = bendSections.sorted { min($0.startHue, $0.endHue) < min($1.startHue, $1.endHue) }
@@ -56,12 +65,12 @@ fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) 
         if !hasOverlap {
             validBends.append(bend)
         } else {
-            assertionFailure("Moonbeam: \(name) contains overlapping bend sections.")
+            MoonbeamTelemetry.reportNonFatalIssue("Moonbeam: \(name) contains overlapping bend sections. Some sections will be ignored.")
         }
     }
     
     if validBends.count > spectrumConstants.maxBends {
-        assertionFailure("Moonbeam: \(name) exceeds maximum of \(spectrumConstants.maxBends).")
+        MoonbeamTelemetry.reportNonFatalIssue("Moonbeam: \(name) exceeds maximum of \(spectrumConstants.maxBends). Layout truncated.")
         // Fall back to a truncated array for production builds.
         return Array(validBends.prefix(spectrumConstants.maxBends))
     }
