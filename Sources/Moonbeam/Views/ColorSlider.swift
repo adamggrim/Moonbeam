@@ -21,7 +21,7 @@ public struct ColorSlider: View {
     /// from 0.0 to 1.0.
     @Binding public var progress: Double
     
-    @State private var viewModel = ColorSliderViewModel()
+    @State private var sliderState = ColorSliderState()
 
     // MARK: - Environment variables
     
@@ -135,7 +135,7 @@ public struct ColorSlider: View {
     /// The color calculated from the current `liveColorPosition` on the slider.
     private var calculatedColor: Color {
         let safeLength = dimensions.length > 0 ? dimensions.length : 0.001
-        let clampedRatio = max(0.0, min(1.0, viewModel.liveColorPosition / safeLength))
+        let clampedRatio = max(0.0, min(1.0, sliderState.liveColorPosition / safeLength))
         switch resolvedDataSource.colorSource {
         case .array(let colors):
             guard !colors.isEmpty else { return .clear }
@@ -167,7 +167,7 @@ public struct ColorSlider: View {
             let length: CGFloat = dimensions.length
             let safeLength: CGFloat = length > 0 ? length : 0.001
             
-            let position: CGFloat = viewModel.liveColorPosition
+            let position: CGFloat = sliderState.liveColorPosition
             let rawRatio: CGFloat = position / safeLength
             let clampedRatio: CGFloat = max(0.0, min(1.0, rawRatio))
             
@@ -193,12 +193,12 @@ public struct ColorSlider: View {
             )
             
             SliderThumbView(
-                isDragging: viewModel.isDragging,
-                thumbOffset: viewModel.thumbOffset,
+                isDragging: sliderState.isDragging,
+                thumbOffset: sliderState.thumbOffset,
                 dimensions: dimensions,
                 axis: axis,
-                resolvedThumbThickness: viewModel.resolvedThumbThickness,
-                resolvedThumbLength: viewModel.resolvedThumbLength
+                resolvedThumbThickness: sliderState.resolvedThumbThickness,
+                resolvedThumbLength: sliderState.resolvedThumbLength
             )
             .gesture(
                 DragGesture(minimumDistance: minimumDragDistance)
@@ -207,10 +207,10 @@ public struct ColorSlider: View {
             )
             
             SliderPreviewView(
-                isDragging: viewModel.isDragging,
-                currentColor: viewModel.isDragging ? calculatedColor : Color(selection),
-                previewMainAxisOffset: viewModel.previewMainAxisOffset,
-                resolvedPreviewOffset: viewModel.resolvedPreviewOffset,
+                isDragging: sliderState.isDragging,
+                currentColor: sliderState.isDragging ? calculatedColor : Color(selection),
+                previewMainAxisOffset: sliderState.previewMainAxisOffset,
+                resolvedPreviewOffset: sliderState.resolvedPreviewOffset,
                 dimensions: dimensions,
                 axis: axis
             )
@@ -219,11 +219,11 @@ public struct ColorSlider: View {
         .grayscale(isEnabled ? 0.0 : 0.99)
         .sensoryFeedback(.selection, trigger: discreteIndex)
         .frame(
-            width: axis == .horizontal ? dimensions.length : viewModel.resolvedThumbLength,
-            height: axis == .horizontal ? viewModel.resolvedThumbLength : dimensions.length
+            width: axis == .horizontal ? dimensions.length : sliderState.resolvedThumbLength,
+            height: axis == .horizontal ? sliderState.resolvedThumbLength : dimensions.length
         )
         .onAppear {
-            viewModel.update(
+            sliderState.update(
                 dimensions: dimensions,
                 axis: axis,
                 previewPosition: previewPosition,
@@ -232,27 +232,27 @@ public struct ColorSlider: View {
             )
             
             let initialTrackPosition = CGFloat(progress) * dimensions.length
-            viewModel.persistedThumbPosition = min(max(initialTrackPosition - viewModel.halfThumbThickness, viewModel.thumbInset), dimensions.length - viewModel.resolvedThumbThickness - viewModel.thumbInset)
+            sliderState.persistedThumbPosition = min(max(initialTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset), dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset)
         }
-        .onChange(of: dimensions) { _, new in viewModel.dimensions = new }
-        .onChange(of: axis) { _, new in viewModel.axis = new }
-        .onChange(of: previewPosition) { _, new in viewModel.previewPosition = new }
-        .onChange(of: previewSpacing) { _, new in viewModel.previewSpacing = new }
-        .onChange(of: previewHidden) { _, new in viewModel.previewHidden = new }
+        .onChange(of: dimensions) { _, new in sliderState.dimensions = new }
+        .onChange(of: axis) { _, new in sliderState.axis = new }
+        .onChange(of: previewPosition) { _, new in sliderState.previewPosition = new }
+        .onChange(of: previewSpacing) { _, new in sliderState.previewSpacing = new }
+        .onChange(of: previewHidden) { _, new in sliderState.previewHidden = new }
         .onChange(of: spectrumIdentifier) { _, _ in
             if let onSpectrumChanged = onSpectrumChanged {
                 progress = onSpectrumChanged(selection)
             }
             let newTrackPosition = CGFloat(progress) * dimensions.length
             withAnimation(reduceMotion ? nil : animation) {
-                viewModel.persistedThumbPosition = min(max(newTrackPosition - viewModel.halfThumbThickness, viewModel.thumbInset), dimensions.length - viewModel.resolvedThumbThickness - viewModel.thumbInset)
+                sliderState.persistedThumbPosition = min(max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset), dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset)
             }
         }
         .onChange(of: progress) { _, newValue in
-            if !viewModel.isDragging {
+            if !sliderState.isDragging {
                 let newTrackPosition = CGFloat(newValue) * dimensions.length
                 withAnimation(reduceMotion ? nil : animation) {
-                    viewModel.persistedThumbPosition = min(max(newTrackPosition - viewModel.halfThumbThickness, viewModel.thumbInset), dimensions.length - viewModel.resolvedThumbThickness - viewModel.thumbInset)
+                    sliderState.persistedThumbPosition = min(max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset), dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset)
                 }
             }
         }
@@ -272,11 +272,15 @@ public struct ColorSlider: View {
     ///
     /// - Parameter value: The current value of the `DragGesture`.
     private func onDragChanged(_ value: DragGesture.Value) {
-        if !viewModel.isDragging {
-            withAnimation(reduceMotion ? nil : animation) { viewModel.isDragging = true }
+        let translation = axis == .horizontal ? value.translation.width : -value.translation.height
+        
+        if !sliderState.isDragging {
+            withAnimation(reduceMotion ? nil : animation) { sliderState.isDragging = true }
         }
-        viewModel.liveContainerDrag = axis == .horizontal ? value.translation.width : -value.translation.height
-        progress = Double(dimensions.length > 0 ? viewModel.liveColorPosition / dimensions.length : 0.0)
+        
+        sliderState.updateDrag(translation: translation)
+        progress = Double(dimensions.length > 0 ? sliderState.liveColorPosition / dimensions.length : 0.0)
+        
         if isContinuous {
             selection = calculatedColor.resolve(in: environment).cgColor
         }
@@ -290,15 +294,13 @@ public struct ColorSlider: View {
             selection = calculatedColor.resolve(in: environment).cgColor
         }
         withAnimation(reduceMotion ? nil : animation) {
-            viewModel.isDragging = false
-            viewModel.persistedThumbPosition = viewModel.liveThumbPosition
-            viewModel.liveContainerDrag = .zero
+            sliderState.finalizeDrag()
         }
     }
 
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
-        viewModel.accessibilityAdjust(direction: direction, progress: &progress, step: accessibilityStep)
+        sliderState.accessibilityAdjust(direction: direction, progress: &progress, step: accessibilityStep)
         selection = calculatedColor.resolve(in: environment).cgColor
     }
 

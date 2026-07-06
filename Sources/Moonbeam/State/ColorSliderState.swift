@@ -1,12 +1,10 @@
 import SwiftUI
 
-/// A view model that isolates layout mathematics, `DragGesture` processing and state
+/// A state structure that isolates layout mathematics, `DragGesture` processing and state
 /// normalization away from the `ColorSlider` view.
-@MainActor
-@Observable
-internal class ColorSliderViewModel {
+internal struct ColorSliderState {
     
-    // MARK: - Injected Configuration
+    // MARK: - Injected configuration
     
     var dimensions: ColorSliderDimensions = ColorSliderDimensions()
     var axis: Axis = .horizontal
@@ -14,12 +12,12 @@ internal class ColorSliderViewModel {
     var previewSpacing: CGFloat? = nil
     var previewHidden: Bool = true
     
-    /// Updates the view model with the latest environment properties from the view.
+    /// Updates the state structure with the latest environment properties from the view.
     ///
     /// The `ColorSlider` view must explicitly push these properties to
-    /// `ColorSliderViewModel` via this method during `onAppear` and `onChange`
+    /// `ColorSliderState` via this method during `onAppear` and `onChange`
     /// events.
-    func update(
+    mutating func update(
         dimensions: ColorSliderDimensions,
         axis: Axis,
         previewPosition: PreviewPosition?,
@@ -56,13 +54,12 @@ internal class ColorSliderViewModel {
     /// Cannot extend beyond the thumb's leading edge at the end of the slider.
     var persistedThumbPosition: CGFloat = .zero
 
-    // MARK: - Layout Calculations
+    // MARK: - Layout calculations
     
     var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? dimensions.thickness }
     var resolvedThumbLength: CGFloat { dimensions.thumbLength ?? dimensions.thickness * 2 }
     
     var resolvedPreviewOffset: CGFloat {
-        // Use absolute offset to avoid overwriting position modifiers with a negative offset.
         let fallbackOffset = abs(dimensions.previewOffset ?? Metrics.defaultPreviewOffset)
         
         let spacingOffset: CGFloat
@@ -73,10 +70,8 @@ internal class ColorSliderViewModel {
         }
         
         if axis == .horizontal {
-            // Negative is top, positive is bottom.
             return previewPosition == .bottom ? spacingOffset : -spacingOffset
         } else {
-            // Negative is leading, positive is trailing.
             return previewPosition == .leading ? -spacingOffset : spacingOffset
         }
     }
@@ -141,12 +136,10 @@ internal class ColorSliderViewModel {
             }
         } else {
             if halfThumbOffset < halfPreviewSize {
-                // Clamp the color preview to the starting edge of the slider.
                 return 0
             } else if halfThumbOffset > dimensions.length - halfPreviewSize {
                 return dimensions.length - dimensions.previewSize
             } else {
-                // Clamp the color preview to the ending edge of the slider.
                 return clampedValue - halfPreviewSize + halfThumbThickness
             }
         }
@@ -157,10 +150,21 @@ internal class ColorSliderViewModel {
         min(max(liveThumbPosition, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
     }
     
-    // MARK: - Drag Event Handlers
+    // MARK: - Drag event handlers
     
+    mutating func updateDrag(translation: CGFloat) {
+        isDragging = true
+        liveContainerDrag = translation
+    }
+    
+    mutating func finalizeDrag() {
+        isDragging = false
+        persistedThumbPosition = liveThumbPosition
+        liveContainerDrag = .zero
+    }
+
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
-    func accessibilityAdjust(direction: AccessibilityAdjustmentDirection, progress: inout Double, step: Double) {
+    mutating func accessibilityAdjust(direction: AccessibilityAdjustmentDirection, progress: inout Double, step: Double) {
         let delta = direction == .increment ? step : -step
         let newProgress = min(max(progress + delta, 0.0), 1.0)
         progress = newProgress
