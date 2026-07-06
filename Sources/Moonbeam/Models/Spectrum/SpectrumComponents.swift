@@ -1,6 +1,6 @@
 import Foundation
 
-// MARK: - Core Protocols
+// MARK: - Core protocols
 
 /// Represents the lightest and darkest endpoints of a spectrum.
 public enum MonochromeColor {
@@ -37,7 +37,7 @@ public extension BendSection {
     }
 }
 
-// MARK: - Monochrome Sections
+// MARK: - Monochrome sections
 
 /// A spectrum section that resolves to pure black.
 public struct BlackSection: MonochromeSection {
@@ -62,7 +62,7 @@ public struct WhiteSection: MonochromeSection {
     }
 }
 
-// MARK: - Bend Sections
+// MARK: - Bend sections
 
 /// A bend section that fades into the start or end of a color slider.
 public struct OneWayBend: BendSection {

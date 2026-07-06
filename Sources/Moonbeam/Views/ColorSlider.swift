@@ -13,7 +13,7 @@ typealias PlatformColor = NSColor
 @MainActor
 public struct ColorSlider: View {
     
-    // MARK: - State & Bindings
+    // MARK: - State & bindings
     
     @Binding public var selection: CGColor
     
@@ -23,7 +23,7 @@ public struct ColorSlider: View {
     
     @State private var viewModel = ColorSliderViewModel()
 
-    // MARK: - Environment Variables
+    // MARK: - Environment variables
     
     @Environment(\.colorSliderPreviewPosition) private var previewPosition
     @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
@@ -36,7 +36,7 @@ public struct ColorSlider: View {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.self) private var environment
 
-    // MARK: - Public Properties
+    // MARK: - Public properties
     
     public var spectrumIdentifier: AnyHashable?
     public var onSpectrumChanged: ((CGColor) -> Double)?
@@ -44,7 +44,7 @@ public struct ColorSlider: View {
     public var axis: Axis
     public var isContinuous: Bool
 
-    // MARK: - Private Properties
+    // MARK: - Private properties
     
     private var dataSource: ColorSliderDataSource?
     private var colorSpace: SpectrumColorSpace = .hsb
@@ -99,7 +99,7 @@ public struct ColorSlider: View {
         self.isContinuous = isContinuous
     }
 
-    // MARK: - Computed Properties
+    // MARK: - Computed properties
     
     private var resolvedDataSource: ColorSliderDataSource {
         if let dataSource = dataSource { return dataSource }
@@ -262,7 +262,7 @@ public struct ColorSlider: View {
         .accessibilityLabel(label)
     }
     
-    // MARK: - Drag Event Handlers
+    // MARK: - Drag event handlers
 
     /// Updates the view's state when the position of the `DragGesture`
     /// changes.

@@ -7,7 +7,7 @@ constant int MAX_BENDS = 20;
 // This value must match `spectrumConstants.maxMonochromeSections` in `SpectrumSliderModel.swift`.
 constant int MAX_MONOCHROME_SECTIONS = 2;
 
-// MARK: - Struct Definitions
+// MARK: - Struct definitions
 
 struct ShaderBend {
     float4 data0; // x: type, y: startHue, z: endHue, w: targetValue
@@ -113,7 +113,7 @@ float3 convertRGBtoOKLAB(float3 c) {
     );
 }
 
-// MARK: – Spectrum Bends
+// MARK: – Spectrum bends
 
 float calculateBend(float currentHue, float defaultValue, device const ShaderBend* bendsData, int totalBends, float minimumHue) {
     // Capped at `MAX_BENDS` to prevent unroll failures.
@@ -147,7 +147,7 @@ float calculateBend(float currentHue, float defaultValue, device const ShaderBen
     return defaultValue;
 }
 
-// MARK: - Gradient Shader
+// MARK: - Gradient shader
 
 [[ stitchable ]]
 half4 gradientShader(float2 position, half4 currentColor, float2 size, half4 startColor, half4 endColor, float isVertical, float colorSpaceFlag) {
@@ -188,7 +188,7 @@ half4 gradientShader(float2 position, half4 currentColor, float2 size, half4 sta
     }
 }
 
-// MARK: - Spectrum Shader
+// MARK: - Spectrum shader
 
 [[ stitchable ]]
 half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isVertical, device const SpectrumShaderData* data, int dataLength) {

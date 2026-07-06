@@ -40,7 +40,7 @@ public struct TrackStroke: Sendable {
     public var lineWidth: CGFloat
 }
 
-// MARK: - Environment Keys
+// MARK: - Environment keys
 
 private struct TrackStrokeKey: EnvironmentKey { static let defaultValue: TrackStroke? = nil }
 
@@ -132,11 +132,11 @@ extension EnvironmentValues {
     }
 }
 
-// MARK: - View Modifiers
+// MARK: - View modifiers
 
 public extension View {
     
-    // MARK: Track Modifiers
+    // MARK: Track modifiers
     
     /// Adds a stroke to the slider track.
     func colorSliderTrackStroke<S: ShapeStyle>(_ style: S, lineWidth: CGFloat = 1) -> some View {
@@ -151,7 +151,7 @@ public extension View {
             return environment(\.colorSliderDimensions, newDimensions)
         }
 
-    // MARK: Thumb Modifiers
+    // MARK: Thumb modifiers
     
     /// The visual shape of the thumb. Defaults to `Capsule`.
     func colorSliderThumbShape<S: Shape>(_ shape: S) -> some View {
@@ -174,7 +174,7 @@ public extension View {
             environment(\.colorSliderThumbShadow, ColorSliderShadow(color: color, radius: radius, x: x, y: y))
         }
     
-    // MARK: Preview Modifiers
+    // MARK: Preview modifiers
     
     /// The visual shape of the floating color preview. If nil, defaults to `RoundedRectangle`.
     func colorSliderPreviewShape<S: Shape>(_ shape: S) -> some View {
@@ -203,7 +203,7 @@ public extension View {
         environment(\.colorSliderPreviewShadow, ColorSliderShadow(color: color, radius: radius, x: x, y: y))
     }
 
-    // MARK: Global Modifiers
+    // MARK: Global modifiers
         
     /// Set to `true` to disable the liquid glass styling on the thumb. On operating systems that do not support Liquid Glass, this flag is ignored and falls back to a standard filled shape. Defaults to `false`.
     func colorSliderDisableLiquidGlass(_ disable: Bool) -> some View {

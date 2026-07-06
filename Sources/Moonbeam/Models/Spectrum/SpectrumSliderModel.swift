@@ -7,7 +7,7 @@ public enum SpectrumColorSpace {
     case hsb, oklch
 }
 
-// MARK: - Constants & Validation
+// MARK: - Constants & validation
 
 /// Global bounds for shader data structures.
 internal enum spectrumConstants {
@@ -77,7 +77,7 @@ fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) 
     return validBends
 }
 
-// MARK: - Metal Data Structures
+// MARK: - Metal data structures
 
 /// A strictly aligned sub-structure to represent a single bend.
 /// Uses 32 bytes (two 16-byte `simd_float4s`) to guarantee Metal alignment.
@@ -202,7 +202,7 @@ fileprivate func encodeSpectrumData(
     return withUnsafeBytes(of: &shaderData) { Data($0) }
 }
 
-// MARK: - Public Models
+// MARK: - Public models
 
 /// Model for calculating standard HSB spectrum colors dynamically.
 public struct HSBSpectrumModel: ColorSliderDataSource {

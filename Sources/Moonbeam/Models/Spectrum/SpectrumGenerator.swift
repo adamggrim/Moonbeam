@@ -3,8 +3,6 @@ import SwiftUI
 /// A model for generating a spectrum color for a given position, suitable for shaders.
 internal struct SpectrumGenerator {
     
-    // MARK: - RGB to OKLAB
-
     /// Matrix to convert OKLCH to a Display P3 color.
     ///
     /// Taken from  "A perceptual color space for image processing" by Björn Ottosson (2020).
