@@ -63,19 +63,14 @@ float3 convertOKLABtoRGB(float L, float a, float b) {
     float m = sign(m_) * pow(abs(m_), 3.0);
     float s = sign(s_) * pow(abs(s_), 3.0);
 
-    // Display P3 matrix
+    // Linear sRGB matrix
     float3 lin = float3(
-        2.7015367 * l - 1.6373796 * m - 0.0641571 * s,
-        -0.3150531 * l + 1.3415174 * m - 0.0264643 * s,
-         0.0384799 * l - 0.0635483 * m + 1.0250684 * s
+         4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+        -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+        -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
     );
 
-    float3 sRGB = float3(
-        lin.r <= 0.0031308 ? 12.92 * lin.r : 1.055 * pow(lin.r, 1.0/2.4) - 0.055,
-        lin.g <= 0.0031308 ? 12.92 * lin.g : 1.055 * pow(lin.g, 1.0/2.4) - 0.055,
-        lin.b <= 0.0031308 ? 12.92 * lin.b : 1.055 * pow(lin.b, 1.0/2.4) - 0.055
-    );
-    return clamp(sRGB, 0.0, 1.0);
+    return clamp(lin, 0.0, 1.0);
 }
 
 // Matrix to convert OKLCH constants to RGB.
