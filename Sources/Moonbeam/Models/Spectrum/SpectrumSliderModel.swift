@@ -71,26 +71,39 @@ fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) 
     }
 
     if validBends.count > spectrumConstants.maxBends {
-        MoonbeamTelemetry.reportNonFatalIssue(
-            "Moonbeam: \(name) exceeds the maximum of \(spectrumConstants.maxBends). Bend sections array truncated."
-        )
-        // Fall back to a truncated array for production builds.
-        return Array(validBends.prefix(spectrumConstants.maxBends))
-    }
-    return validBends
+            let errorMessage = (
+                "Moonbeam: \(name) exceeds the maximum of \(spectrumConstants.maxBends). Bend sections truncated."
+            )
+
+            #if DEBUG
+            fatalError(errorMessage)
+            #else
+            MoonbeamTelemetry.reportNonFatalIssue(errorMessage)
+            // Fall back to a truncated array for production builds.
+            return Array(validBends.prefix(spectrumConstants.maxBends))
+            #endif
+        }
+        return validBends
 }
 
-/// Validates monochrome sections, truncating them if they exceed the maximum allowed, to prevent shader errors.
+/// Validates monochrome sections, truncating them if they exceed the maximum allowed, to prevent shader
+/// errors.
 fileprivate func validateAndTruncateMonochromeSections(
     _ sections: [MonochromeSection], name: String
 ) -> [MonochromeSection] {
     guard sections.count > spectrumConstants.maxMonochromeSections else { return sections }
 
-    MoonbeamTelemetry.reportNonFatalIssue(
-        "Moonbeam: \(name) monochrome sections exceed the maximum of \(spectrumConstants.maxMonochromeSections)."
-        + "Monochrome sections array truncated."
+    let errorMessage = (
+        "Moonbeam: \(name) monochrome sections exceed the maximum of \(spectrumConstants.maxMonochromeSections). "
+        + "Monochrome sections truncated."
     )
+
+    #if DEBUG
+    fatalError(errorMessage)
+    #else
+    MoonbeamTelemetry.reportNonFatalIssue(errorMessage)
     return Array(sections.prefix(spectrumConstants.maxMonochromeSections))
+    #endif
 }
 
 // MARK: - Metal data structures
