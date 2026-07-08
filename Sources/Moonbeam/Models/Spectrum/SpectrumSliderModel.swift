@@ -28,9 +28,7 @@ fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "SpectrumMo
 /// A lightweight wrapper for telemetry and non-fatal production logging.
 internal enum MoonbeamTelemetry {
     static func reportNonFatalIssue(_ message: String) {
-        logger.error("\(message, privacy: .public)")
-
-        assertionFailure(message)
+        logger.error("Moonbeam configuration error: \(message, privacy: .public)")
     }
 }
 
@@ -74,12 +72,25 @@ fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) 
 
     if validBends.count > spectrumConstants.maxBends {
         MoonbeamTelemetry.reportNonFatalIssue(
-            "Moonbeam: \(name) exceeds maximum of \(spectrumConstants.maxBends). Layout truncated."
+            "Moonbeam: \(name) exceeds the maximum of \(spectrumConstants.maxBends). Bend sections array truncated."
         )
         // Fall back to a truncated array for production builds.
         return Array(validBends.prefix(spectrumConstants.maxBends))
     }
     return validBends
+}
+
+/// Validates monochrome sections, truncating them if they exceed the maximum allowed, to prevent shader errors.
+fileprivate func validateAndTruncateMonochromeSections(
+    _ sections: [MonochromeSection], name: String
+) -> [MonochromeSection] {
+    guard sections.count > spectrumConstants.maxMonochromeSections else { return sections }
+
+    MoonbeamTelemetry.reportNonFatalIssue(
+        "Moonbeam: \(name) monochrome sections exceed the maximum of \(spectrumConstants.maxMonochromeSections)."
+        + "Monochrome sections array truncated."
+    )
+    return Array(sections.prefix(spectrumConstants.maxMonochromeSections))
 }
 
 // MARK: - Metal data structures
@@ -241,8 +252,8 @@ public struct HSBSpectrumModel: ColorSliderDataSource {
         @BendSectionBuilder saturationBends: () -> [BendSection] = { [] },
         @BendSectionBuilder brightnessBends: () -> [BendSection] = { [] }
     ) {
-        self.startSections = Array(startSections.prefix(spectrumConstants.maxMonochromeSections))
-        self.endSections = Array(endSections.prefix(spectrumConstants.maxMonochromeSections))
+        self.startSections = validateAndTruncateMonochromeSections(startSections, name: "HSB Start")
+        self.endSections = validateAndTruncateMonochromeSections(endSections, name: "HSB End")
         self.startHue = startHue
         self.endHue = endHue
         self.saturation = saturation
@@ -320,8 +331,8 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource {
         @BendSectionBuilder lightnessBends: () -> [BendSection] = { [] },
         @BendSectionBuilder chromaBends: () -> [BendSection] = { [] }
     ) {
-        self.startSections = Array(startSections.prefix(spectrumConstants.maxMonochromeSections))
-        self.endSections = Array(endSections.prefix(spectrumConstants.maxMonochromeSections))
+        self.startSections = validateAndTruncateMonochromeSections(startSections, name: "OKLCH Start")
+        self.endSections = validateAndTruncateMonochromeSections(endSections, name: "OKLCH End")
         self.lightness = lightness
         self.chroma = chroma
         self.startHue = startHue
