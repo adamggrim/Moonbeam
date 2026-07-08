@@ -3,6 +3,8 @@ import SwiftUI
 /// A model for generating a spectrum color for a given position, suitable for shaders.
 internal struct SpectrumGenerator {
 
+    // MARK: - Color conversion
+
     /// Matrix to convert OKLCH to a Display P3 color.
     ///
     /// Taken from  "A perceptual color space for image processing" by Björn Ottosson (2020).
@@ -36,6 +38,8 @@ internal struct SpectrumGenerator {
 
         return Color(.displayP3, red: red, green: green, blue: blue)
     }
+
+    // MARK: - Core generator
 
     /// Calculates the color at a specific normalized position on the spectrum.
     ///
@@ -166,6 +170,8 @@ internal struct SpectrumGenerator {
         }
         return .clear
     }
+
+    // MARK: - Private helpers
 
     private static func monoToHueColor(
         relativePosition: CGFloat,
