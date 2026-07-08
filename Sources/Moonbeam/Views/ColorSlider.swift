@@ -241,7 +241,10 @@ public struct ColorSlider: View {
             )
 
             let initialTrackPosition = CGFloat(progress) * dimensions.length
-            sliderState.persistedThumbPosition = min(max(initialTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset), dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset)
+            sliderState.persistedThumbPosition = min(
+                max(initialTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
+                dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset
+            )
         }
         .onChange(of: dimensions) { _, new in sliderState.dimensions = new }
         .onChange(of: axis) { _, new in sliderState.axis = new }
@@ -254,14 +257,19 @@ public struct ColorSlider: View {
             }
             let newTrackPosition = CGFloat(progress) * dimensions.length
             withAnimation(reduceMotion ? nil : animation) {
-                sliderState.persistedThumbPosition = min(max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset), dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset)
-            }
+                sliderState.persistedThumbPosition = min(
+                    max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
+                    dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset
+                )            }
         }
         .onChange(of: progress) { _, newValue in
             if !sliderState.isDragging {
                 let newTrackPosition = CGFloat(newValue) * dimensions.length
                 withAnimation(reduceMotion ? nil : animation) {
-                    sliderState.persistedThumbPosition = min(max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset), dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset)
+                    sliderState.persistedThumbPosition = min(
+                        max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
+                        dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset
+                    )
                 }
             }
         }

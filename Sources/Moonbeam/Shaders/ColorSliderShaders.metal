@@ -115,7 +115,13 @@ float3 convertRGBtoOKLAB(float3 c) {
 
 // MARK: – Spectrum bends
 
-float calculateBend(float currentHue, float defaultValue, device const ShaderBend* bendsData, int totalBends, float minimumHue) {
+float calculateBend(
+    float currentHue,
+    float defaultValue,
+    device const ShaderBend* bendsData,
+    int totalBends,
+    float minimumHue
+) {
     // Capped at `MAX_BENDS` to prevent unroll failures.
     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
         if (bendIndex >= totalBends) break;
@@ -150,7 +156,15 @@ float calculateBend(float currentHue, float defaultValue, device const ShaderBen
 // MARK: - Gradient shader
 
 [[ stitchable ]]
-half4 gradientShader(float2 position, half4 currentColor, float2 size, half4 startColor, half4 endColor, float isVertical, float colorSpaceFlag) {
+half4 gradientShader(
+    float2 position,
+    half4 currentColor,
+    float2 size,
+    half4 startColor,
+    half4 endColor,
+    float isVertical,
+    float colorSpaceFlag
+) {
     float normalizedPosition = isVertical > 0.5 ? (1.0 - (position.y / size.y)) : (position.x / size.x);
     normalizedPosition = clamp(normalizedPosition, 0.0, 1.0);
 
@@ -191,7 +205,14 @@ half4 gradientShader(float2 position, half4 currentColor, float2 size, half4 sta
 // MARK: - Spectrum shader
 
 [[ stitchable ]]
-half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isVertical, device const SpectrumShaderData* data, int dataLength) {
+half4 spectrumShader(
+    float2 position,
+    half4 currentColor,
+    float2 size,
+    float isVertical,
+    device const SpectrumShaderData* data,
+    int dataLength
+) {
     float normalizedPosition = isVertical > 0.5 ? (1.0 - (position.y / size.y)) : (position.x / size.x);
     normalizedPosition = clamp(normalizedPosition, 0.0, 1.0);
 
@@ -225,49 +246,101 @@ half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isV
             float sectionEndPosition = startSectionsData[sectionIndex*2 + 1];
 
             if (normalizedPosition < sectionEndPosition) {
-                float relativePositionInSection = (normalizedPosition - cumulativeStartPosition) / (sectionEndPosition - cumulativeStartPosition);
+                float distanceMoved = normalizedPosition - cumulativeStartPosition;
+                float sectionWidth = sectionEndPosition - cumulativeStartPosition;
+                float relativePositionInSection = distanceMoved / sectionWidth;
                 bool isLastSection = (sectionIndex == startSectionsCount - 1);
 
                 if (isLastSection) {
-                    float finalBrightness = isWhiteSection == 1.0 ? baseBrightness : relativePositionInSection * baseBrightness;
-                    float finalSaturation = isWhiteSection == 1.0 ? relativePositionInSection * baseSaturation : baseSaturation;
+                    float finalBrightness;
+                    if (isWhiteSection == 1.0) {
+                        finalBrightness = baseBrightness;
+                    } else {
+                        finalBrightness = relativePositionInSection * baseBrightness;
+                    }
+                    float finalSaturation;
+                    if (isWhiteSection == 1.0) {
+                        finalSaturation = relativePositionInSection * baseSaturation;
+                    } else {
+                        finalSaturation = baseSaturation;
+                    }
 
                     // Capped at `MAX_BENDS` saturation bends.
                     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
                         if (bendIndex >= saturationBendsCount) break;
-                        if (data->saturationBendsData[bendIndex].data0.y == minimumHue && data->saturationBendsData[bendIndex].data0.x == 1.0) {
-                            finalSaturation = isWhiteSection == 1.0 ? relativePositionInSection * data->saturationBendsData[bendIndex].data0.w : finalSaturation;
+                        if (data->saturationBendsData[bendIndex].data0.y == minimumHue &&
+                            data->saturationBendsData[bendIndex].data0.x == 1.0) {
+
+                            finalSaturation = isWhiteSection == 1.0
+                                ? relativePositionInSection * data->saturationBendsData[bendIndex].data0.w
+                                : finalSaturation;
                         }
                     }
 
                     // Capped at `MAX_BENDS` brightness bends.
                     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
                         if (bendIndex >= brightnessBendsCount) break;
-                        if (data->brightnessBendsData[bendIndex].data0.y == minimumHue && data->brightnessBendsData[bendIndex].data0.x == 1.0) {
-                            finalBrightness = isWhiteSection == 1.0 ? finalBrightness : relativePositionInSection * data->brightnessBendsData[bendIndex].data0.w;
+                        if (data->brightnessBendsData[bendIndex].data0.y == minimumHue &&
+                            data->brightnessBendsData[bendIndex].data0.x == 1.0) {
+
+                            finalBrightness = isWhiteSection == 1.0
+                                ? finalBrightness
+                                : relativePositionInSection * data->brightnessBendsData[bendIndex].data0.w;
                         }
                     }
 
-                    if (isWhiteSection == 1.0 && colorSpaceFlag == 1.0) finalBrightness = 1.0 - (relativePositionInSection * (1.0 - baseBrightness));
-                    return half4(half3(resolveColor(colorSpaceFlag, minimumHue, finalSaturation, finalBrightness)) * currentColor.a, currentColor.a);
+                    if (isWhiteSection == 1.0 && colorSpaceFlag == 1.0) {
+                        finalBrightness = 1.0 - (relativePositionInSection * (1.0 - baseBrightness));
+                    }
+                    return half4(
+                        half3(resolveColor(colorSpaceFlag, minimumHue, finalSaturation, finalBrightness))
+                            * currentColor.a,
+                        currentColor.a
+                    );
                 } else {
                     float nextSectionIsWhite = startSectionsData[(sectionIndex+1)*2];
                     float startingBrightness = isWhiteSection == 1.0 ? 1.0 : 0.0;
                     float endingBrightness = nextSectionIsWhite == 1.0 ? 1.0 : 0.0;
-                    float interpolatedBrightness = startingBrightness + (endingBrightness - startingBrightness) * relativePositionInSection;
-                    return half4(half3(resolveColor(colorSpaceFlag, minimumHue, 0.0, interpolatedBrightness)) * currentColor.a, currentColor.a);
+                    float brightnessDelta = endingBrightness - startingBrightness;
+                    float interpolatedBrightness = startingBrightness + brightnessDelta * relativePositionInSection;
+                    return half4(
+                        half3(resolveColor(colorSpaceFlag, minimumHue, 0.0, interpolatedBrightness))
+                            * currentColor.a,
+                        currentColor.a
+                    );
                 }
             }
             cumulativeStartPosition = sectionEndPosition;
         }
     } else if (normalizedPosition <= hueSectionBoundary) {
-        float relativeHuePosition = (hueSectionBoundary > startSectionBoundary) ? (normalizedPosition - startSectionBoundary) / (hueSectionBoundary - startSectionBoundary) : 0.0;
+        float hueSectionWidth = hueSectionBoundary - startSectionBoundary;
+        float distanceFromStart = normalizedPosition - startSectionBoundary;
+
+        float relativeHuePosition = (hueSectionBoundary > startSectionBoundary)
+            ? (distanceFromStart / hueSectionWidth)
+            : 0.0;
         float currentHue = minimumHue + relativeHuePosition * (maximumHue - minimumHue);
 
-        float calculatedSaturation = calculateBend(currentHue, baseSaturation, data->saturationBendsData, saturationBendsCount, minimumHue);
-        float calculatedBrightness = calculateBend(currentHue, baseBrightness, data->brightnessBendsData, brightnessBendsCount, minimumHue);
+        float calculatedSaturation = calculateBend(
+            currentHue,
+            baseSaturation,
+            data->saturationBendsData,
+            saturationBendsCount,
+            minimumHue
+        );
+        float calculatedBrightness = calculateBend(
+            currentHue,
+            baseBrightness,
+            data->brightnessBendsData,
+            brightnessBendsCount,
+            minimumHue
+        );
 
-        return half4(half3(resolveColor(colorSpaceFlag, currentHue, calculatedSaturation, calculatedBrightness)) * currentColor.a, currentColor.a);
+        return half4(
+            half3(resolveColor(colorSpaceFlag, currentHue, calculatedSaturation, calculatedBrightness))
+                * currentColor.a,
+            currentColor.a
+        );
     } else {
         float cumulativeEndPosition = hueSectionBoundary;
 
@@ -280,36 +353,68 @@ half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isV
             bool isLastSection = (sectionIndex == endSectionsCount - 1);
 
             if (normalizedPosition <= sectionEndPosition || isLastSection) {
-                float relativePositionInSection = clamp((normalizedPosition - cumulativeEndPosition) / (sectionEndPosition - cumulativeEndPosition), 0.0, 1.0);
+                float distanceFromEnd = normalizedPosition - cumulativeEndPosition;
+                float sectionWidth = sectionEndPosition - cumulativeEndPosition;
+
+                float relativePositionInSection = clamp(distanceFromEnd / sectionWidth, 0.0, 1.0);
                 bool isFirstEndSection = (sectionIndex == 0);
 
                 if (isFirstEndSection) {
-                    float finalBrightness = isWhiteSection == 1.0 ? baseBrightness : (1.0 - relativePositionInSection) * baseBrightness;
-                    float finalSaturation = isWhiteSection == 1.0 ? (1.0 - relativePositionInSection) * baseSaturation : baseSaturation;
+                    float finalBrightness;
+                    if (isWhiteSection == 1.0) {
+                        finalBrightness = baseBrightness;
+                    } else {
+                        finalBrightness = (1.0 - relativePositionInSection) * baseBrightness;
+                    }
+                    float finalSaturation;
+                    if (isWhiteSection == 1.0) {
+                        finalSaturation = (1.0 - relativePositionInSection) * baseSaturation;
+                    } else {
+                        finalSaturation = baseSaturation;
+                    }
 
                     // Capped at `MAX_BENDS` saturation bends.
                     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
                         if (bendIndex >= saturationBendsCount) break;
-                        if (data->saturationBendsData[bendIndex].data0.z == maximumHue && data->saturationBendsData[bendIndex].data0.x == 1.0) {
-                            finalSaturation = isWhiteSection == 1.0 ? (1.0 - relativePositionInSection) * data->saturationBendsData[bendIndex].data0.w : finalSaturation;
+                        if (data->saturationBendsData[bendIndex].data0.z == maximumHue &&
+                            data->saturationBendsData[bendIndex].data0.x == 1.0) {
+
+                            finalSaturation = isWhiteSection == 1.0
+                                ? (1.0 - relativePositionInSection) * data->saturationBendsData[bendIndex].data0.w
+                                : finalSaturation;
                         }
                     }
 
                     // Capped at `MAX_BENDS` brightness bends.
                     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
                         if (bendIndex >= brightnessBendsCount) break;
-                        if (data->brightnessBendsData[bendIndex].data0.z == maximumHue && data->brightnessBendsData[bendIndex].data0.x == 1.0) {
-                            finalBrightness = isWhiteSection == 1.0 ? finalBrightness : (1.0 - relativePositionInSection) * data->brightnessBendsData[bendIndex].data0.w;
+                        if (data->brightnessBendsData[bendIndex].data0.z == maximumHue &&
+                            data->brightnessBendsData[bendIndex].data0.x == 1.0) {
+
+                            finalBrightness = isWhiteSection == 1.0
+                                ? finalBrightness
+                                : (1.0 - relativePositionInSection) * data->brightnessBendsData[bendIndex].data0.w;
                         }
                     }
-                    if (isWhiteSection == 1.0 && colorSpaceFlag == 1.0) finalBrightness = 1.0 - ((1.0 - relativePositionInSection) * (1.0 - baseBrightness));
-                    return half4(half3(resolveColor(colorSpaceFlag, maximumHue, finalSaturation, finalBrightness)) * currentColor.a, currentColor.a);
+                    if (isWhiteSection == 1.0 && colorSpaceFlag == 1.0) {
+                        finalBrightness = 1.0 - ((1.0 - relativePositionInSection) * (1.0 - baseBrightness));
+                    }
+                    return half4(
+                        half3(resolveColor(colorSpaceFlag, maximumHue, finalSaturation, finalBrightness))
+                            * currentColor.a,
+                        currentColor.a
+                    );
                 } else {
                     float previousSectionIsWhite = endSectionsData[(sectionIndex-1)*2];
                     float startingBrightness = previousSectionIsWhite == 1.0 ? 1.0 : 0.0;
                     float endingBrightness = isWhiteSection == 1.0 ? 1.0 : 0.0;
-                    float interpolatedBrightness = startingBrightness + (endingBrightness - startingBrightness) * relativePositionInSection;
-                    return half4(half3(resolveColor(colorSpaceFlag, maximumHue, 0.0, interpolatedBrightness)) * currentColor.a, currentColor.a);
+                    float brightnessDelta = endingBrightness - startingBrightness;
+                    float interpolatedBrightness = startingBrightness + brightnessDelta * relativePositionInSection;
+                    return half4(
+                        half3(resolveColor(colorSpaceFlag, maximumHue, 0.0, interpolatedBrightness))
+                            * currentColor.a,
+                        currentColor.a
+                    );
                 }
             }
             cumulativeEndPosition = sectionEndPosition;

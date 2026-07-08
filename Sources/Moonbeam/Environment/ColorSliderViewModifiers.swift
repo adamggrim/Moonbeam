@@ -212,7 +212,9 @@ public extension View {
     }
 
     /// Sets the shadow for the thumb.
-        func colorSliderThumbShadow(color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0) -> some View {
+        func colorSliderThumbShadow(
+            color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0
+        ) -> some View {
             environment(\.colorSliderThumbShadow, ColorSliderShadow(color: color, radius: radius, x: x, y: y))
         }
 
@@ -241,7 +243,9 @@ public extension View {
     }
 
     /// Sets the shadow for the floating color preview.
-    func colorSliderPreviewShadow(color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0) -> some View {
+    func colorSliderPreviewShadow(
+        color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0
+    ) -> some View {
         environment(\.colorSliderPreviewShadow, ColorSliderShadow(color: color, radius: radius, x: x, y: y))
     }
 

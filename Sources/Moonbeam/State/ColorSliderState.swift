@@ -160,13 +160,20 @@ internal struct ColorSliderState {
     }
 
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
-    mutating func accessibilityAdjust(direction: AccessibilityAdjustmentDirection, progress: inout Double, step: Double) {
+    mutating func accessibilityAdjust(
+        direction: AccessibilityAdjustmentDirection,
+        progress: inout Double,
+        step: Double
+    ) {
         let delta = direction == .increment ? step : -step
         let newProgress = min(max(progress + delta, 0.0), 1.0)
         progress = newProgress
 
         let newTrackPosition = CGFloat(newProgress) * dimensions.length
-        persistedThumbPosition = min(max(newTrackPosition - halfThumbThickness, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
+        persistedThumbPosition = min(
+            max(newTrackPosition - halfThumbThickness, thumbInset),
+            dimensions.length - resolvedThumbThickness - thumbInset
+        )
         liveContainerDrag = .zero
     }
 }

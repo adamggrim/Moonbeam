@@ -66,12 +66,16 @@ fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) 
         if !hasOverlap {
             validBends.append(bend)
         } else {
-            MoonbeamTelemetry.reportNonFatalIssue("Moonbeam: \(name) contains overlapping bend sections. Some sections will be ignored.")
+            MoonbeamTelemetry.reportNonFatalIssue(
+                "Moonbeam: \(name) contains overlapping bend sections. Some sections will be ignored."
+            )
         }
     }
 
     if validBends.count > spectrumConstants.maxBends {
-        MoonbeamTelemetry.reportNonFatalIssue("Moonbeam: \(name) exceeds maximum of \(spectrumConstants.maxBends). Layout truncated.")
+        MoonbeamTelemetry.reportNonFatalIssue(
+            "Moonbeam: \(name) exceeds maximum of \(spectrumConstants.maxBends). Layout truncated."
+        )
         // Fall back to a truncated array for production builds.
         return Array(validBends.prefix(spectrumConstants.maxBends))
     }
@@ -249,11 +253,37 @@ public struct HSBSpectrumModel: ColorSliderDataSource {
 
     public var colorSource: ColorSourceProvider {
         let fallback: (Double) -> Color = { position in
-            SpectrumGenerator.color(at: position, startSections: startSections, endSections: endSections, startHue: startHue, endHue: endHue, primaryValue: saturation, secondaryValue: brightness, colorSpace: .hsb, primaryBends: saturationBends, secondaryBends: brightnessBends)
+            SpectrumGenerator.color(
+                at: position,
+                startSections: startSections,
+                endSections: endSections,
+                startHue: startHue,
+                endHue: endHue,
+                primaryValue: saturation,
+                secondaryValue: brightness,
+                colorSpace: .hsb,
+                primaryBends: saturationBends,
+                secondaryBends: brightnessBends
+            )
         }
-        let shaderData = encodeSpectrumData(startSections: startSections, endSections: endSections, startHue: startHue, endHue: endHue, primaryValue: saturation, secondaryValue: brightness, colorSpace: .hsb, primaryBends: saturationBends, secondaryBends: brightnessBends)
+        let shaderData = encodeSpectrumData(
+            startSections: startSections,
+            endSections: endSections,
+            startHue: startHue,
+            endHue: endHue,
+            primaryValue: saturation,
+            secondaryValue: brightness,
+            colorSpace: .hsb,
+            primaryBends: saturationBends,
+            secondaryBends: brightnessBends
+        )
         return .shader(generator: { size, isVertical in
-            ShaderLibrary.bundle(.module).spectrumShader(.float2(size.width, size.height), .float(isVertical ? 1.0 : 0.0), .data(shaderData))
+            ShaderLibrary.bundle(.module)
+                .spectrumShader(
+                    .float2(size.width, size.height),
+                    .float(isVertical ? 1.0 : 0.0),
+                    .data(shaderData)
+                )
         }, fallback: fallback)
     }
 }
@@ -302,11 +332,37 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource {
 
     public var colorSource: ColorSourceProvider {
         let fallback: (Double) -> Color = { position in
-            SpectrumGenerator.color(at: position, startSections: startSections, endSections: endSections, startHue: startHue, endHue: endHue, primaryValue: chroma, secondaryValue: lightness, colorSpace: .oklch, primaryBends: chromaBends, secondaryBends: lightnessBends)
+            SpectrumGenerator.color(
+                at: position,
+                startSections: startSections,
+                endSections: endSections,
+                startHue: startHue,
+                endHue: endHue,
+                primaryValue: chroma,
+                secondaryValue: lightness,
+                colorSpace: .oklch,
+                primaryBends: chromaBends,
+                secondaryBends: lightnessBends
+            )
         }
-        let shaderData = encodeSpectrumData(startSections: startSections, endSections: endSections, startHue: startHue, endHue: endHue, primaryValue: chroma, secondaryValue: lightness, colorSpace: .oklch, primaryBends: chromaBends, secondaryBends: lightnessBends)
+        let shaderData = encodeSpectrumData(
+            startSections: startSections,
+            endSections: endSections,
+            startHue: startHue,
+            endHue: endHue,
+            primaryValue: chroma,
+            secondaryValue: lightness,
+            colorSpace: .oklch,
+            primaryBends: chromaBends,
+            secondaryBends: lightnessBends
+        )
         return .shader(generator: { size, isVertical in
-            ShaderLibrary.bundle(.module).spectrumShader(.float2(size.width, size.height), .float(isVertical ? 1.0 : 0.0), .data(shaderData))
+            ShaderLibrary.bundle(.module)
+                .spectrumShader(
+                    .float2(size.width, size.height),
+                    .float(isVertical ? 1.0 : 0.0),
+                    .data(shaderData)
+                )
         }, fallback: fallback)
     }
 }
