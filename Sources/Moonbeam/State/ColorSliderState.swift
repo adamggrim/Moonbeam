@@ -43,13 +43,14 @@ internal struct ColorSliderState {
     /// Indicates whether a drag gesture is currently active.
     var isDragging: Bool = false
 
-    ///  The current horizontal drag within the parent container view, equivalent
-    ///  to the `value.translation.width` of the `DragGesture`.
+    ///  The current horizontal drag within the parent container view,
+    ///  equivalent to the `value.translation.width` of the `DragGesture`.
     ///
     ///  Can extend beyond the end of the slider.
     var liveContainerDrag: CGFloat = .zero
 
-    /// The persisted horizontal position of the start of the thumb on the slider.
+    /// The persisted horizontal position of the start of the thumb on the
+    /// slider.
     ///
     /// Cannot extend beyond the thumb's leading edge at the end of the slider.
     var persistedThumbPosition: CGFloat = .zero
@@ -74,7 +75,8 @@ internal struct ColorSliderState {
 
     var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
 
-    /// Inset to adjust the left and right bounds of the thumb if it is thinner than the track.
+    /// Inset to adjust the left and right bounds of the thumb if it is thinner
+    /// than the track.
     var thumbInset: CGFloat { (dimensions.thickness - resolvedThumbThickness) / 2 }
 
     /// The current `liveContainerDrag` combined with the
@@ -94,8 +96,8 @@ internal struct ColorSliderState {
         min(max(liveContainerThumbDrag + halfThumbThickness, 0), dimensions.length)
     }
 
-    /// The clamped horizontal position of the start of the thumb during an active
-    /// drag.
+    /// The clamped horizontal position of the start of the thumb during an
+    /// active drag.
     ///
     /// Cannot extend beyond the thumb's leading edge at the end of the slider.
     var liveThumbPosition: CGFloat {
@@ -104,8 +106,8 @@ internal struct ColorSliderState {
 
     /// The main axis offset for the floating color preview.
     ///
-    /// Except at the ends of the slider, the floating color preview is centered above the
-    /// thumb's center.
+    /// Except at the ends of the slider, the floating color preview is centered
+    /// above the thumb's center.
     var previewMainAxisOffset: CGFloat {
         let halfPreviewSize = dimensions.previewSize / 2
         let leftBound = halfPreviewSize - halfThumbThickness

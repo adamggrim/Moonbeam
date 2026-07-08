@@ -38,10 +38,12 @@ public struct ColorSlider: View {
 
     // MARK: - Public properties
 
-    /// An optional identifier that triggers animation and position updates when the spectrum changes.
+    /// An optional identifier that triggers animation and position updates when
+    /// the spectrum changes.
     public var spectrumIdentifier: AnyHashable?
 
-    /// A closure invoked when the spectrum changes, enabling an updated progress value for the thumb.
+    /// A closure invoked when the spectrum changes, enabling an updated
+    /// progress value for the thumb.
     public var onSpectrumChanged: ((CGColor) -> Double)?
 
     /// A localized string key used for VoiceOver accessibility.
@@ -50,7 +52,8 @@ public struct ColorSlider: View {
     /// The layout orientation of the slider (`.horizontal` or `.vertical`).
     public var axis: Axis
 
-    /// Determines whether the bound `selection` updates continuously during a drag gesture (`true`), or only when the drag ends (`false`).
+    /// Determines whether the bound `selection` updates continuously during a
+    /// drag gesture (`true`), or only when the drag ends (`false`).
     public var isContinuous: Bool
 
     // MARK: - Private properties
@@ -68,18 +71,27 @@ public struct ColorSlider: View {
     /// Initializes a customizable color slider.
     ///
     /// Created either by injecting a discrete `dataSource` (e.g., a
-    /// `GradientSliderModel` or `HardEdgeSliderModel`), or by attaching `.spectrum(...)`
-    /// modifiers directly to the view to build a spectrum implicitly.
+    /// `GradientSliderModel` or `HardEdgeSliderModel`), or by attaching
+    /// `.spectrum(...)` modifiers directly to the view to build a spectrum
+    /// implicitly.
     ///
     /// - Parameters:
     ///   - selection: A binding to the currently absolute selected color.
-    ///   - progress: A binding to the slider's normalized position (0.0 to 1.0).
-    ///   - dataSource: An optional model providing custom gradient or hard-edge data. If omitted, use the `.spectrum(...)` modifier chain to build the data source.
-    ///   - spectrumIdentifier: An optional identifier to trigger a spectrum change.
-    ///   - onSpectrumChanged: An optional callback defining the thumb's behavior when the spectrum changes.
-    ///   - label: A localized string key used for VoiceOver accessibility. Defaults to "Color Slider".
-    ///   - axis: The layout orientation of the slider. Defaults to `.horizontal`.
-    ///   - isContinuous: Whether the selected color updates continuously during a drag gesture. Defaults to `true`.
+    ///   - progress: A binding to the slider's normalized position (0.0 to
+    ///     1.0).
+    ///   - dataSource: An optional model providing custom gradient or hard-edge
+    ///     data. If omitted, use the `.spectrum(...)` modifier chain to build
+    ///     the data source.
+    ///   - spectrumIdentifier: An optional identifier to trigger a spectrum
+    ///     change.
+    ///   - onSpectrumChanged: An optional callback defining the thumb's
+    ///     behavior when the spectrum changes.
+    ///   - label: A localized string key used for VoiceOver accessibility.
+    ///     Defaults to "Color Slider".
+    ///   - axis: The layout orientation of the slider. Defaults to
+    ///     `.horizontal`.
+    ///   - isContinuous: Whether the selected color updates continuously during
+    ///     a drag gesture. Defaults to `true`.
     public init(
         selection: Binding<CGColor>,
         progress: Binding<Double>,
@@ -150,7 +162,8 @@ public struct ColorSlider: View {
         }
     }
 
-    /// The geometric shape of the slider track, falling back to `Capsule` if no corner radius is specified in the dimensions configuration.
+    /// The geometric shape of the slider track, falling back to `Capsule` if no
+    /// corner radius is specified in the dimensions configuration.
     private var trackShape: AnyShape {
         if let radius = dimensions.cornerRadius {
             return AnyShape(RoundedRectangle(cornerRadius: radius))
@@ -159,7 +172,8 @@ public struct ColorSlider: View {
         }
     }
 
-    /// Calculates the discrete index of the slider (used to trigger haptics on hard-edge sliders).
+    /// Calculates the discrete index of the slider (used to trigger haptics on
+    /// hard-edge sliders).
     private var discreteIndex: Int? {
         let source = resolvedDataSource.colorSource
 
@@ -265,7 +279,8 @@ public struct ColorSlider: View {
                 }
             }
         }
-        .accessibilityElement(children: .ignore) // Hides individual shapes from VoiceOver.
+        // Hides individual shapes from VoiceOver.
+        .accessibilityElement(children: .ignore)
         .accessibilityValue(Double(progress).formatted(.percent))
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
@@ -434,7 +449,9 @@ private struct SliderThumbView: View {
     @Environment(\.colorSliderThumbShadow) private var thumbShadow
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
 
-    /// Set to `true` to scale the thumb up during a drag gesture if the platform supports Liquid Glass effects and it has not been explicitly disabled.
+    /// Set to `true` to scale the thumb up during a drag gesture if the
+    /// platform supports Liquid Glass effects and it has not been explicitly
+    /// disabled.
     private var enableThumbScale: Bool {
         if #available(iOS 26.0, macOS 16.0, *) { return !disableLiquidGlass }
         return false
@@ -514,7 +531,8 @@ private struct SliderPreviewView: View {
 }
 
 public extension ColorSlider {
-    /// Convenience initializer to accept SwiftUI's `Color` instead of `CGColor`.
+    /// Convenience initializer to accept SwiftUI's `Color` instead of
+    /// `CGColor`.
     init(
         selection: Binding<Color>,
         progress: Binding<Double>,

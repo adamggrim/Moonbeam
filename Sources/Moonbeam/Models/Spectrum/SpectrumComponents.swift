@@ -12,17 +12,20 @@ public protocol MonochromeSection {
     /// The color of a `MonochromeSection`, either `.black` or `.white`.
     var color: MonochromeColor { get }
 
-    /// The number of monochrome steps added to the hue section (each equal in width to a single hue).
+    /// The number of monochrome steps added to the hue section (each equal in
+    /// width to a single hue).
     var weight: CGFloat { get }
 }
 
 /// Provides shared default values shared across all monochrome sections.
 public extension MonochromeSection {
-    /// The default proportionate width of a monochrome step (1/6th of a standard hue).
+    /// The default proportionate width of a monochrome step (1/6th of a
+    /// standard hue).
     static var defaultWeight: CGFloat { 1.0 / 6.0 }
 }
 
-/// A protocol for a section of the color slider with special conditions for saturation or brightness.
+/// A protocol for a section of the color slider with special conditions for
+/// saturation or brightness.
 public protocol BendSection {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     var startHue: CGFloat { get }
@@ -30,7 +33,8 @@ public protocol BendSection {
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     var endHue: CGFloat { get }
 
-    /// The saturation, brightness, lightness or chroma value where the bend peaks.
+    /// The saturation, brightness, lightness or chroma value where the bend
+    /// peaks.
     var targetValue: CGFloat { get }
 
     /// The difference between the start and end hues.
@@ -38,7 +42,8 @@ public protocol BendSection {
 }
 
 public extension BendSection {
-    /// Helper to calculate the shortest distance between two hues in a wraparound (circular) hue range.
+    /// Helper to calculate the shortest distance between two hues in a
+    /// wraparound (circular) hue range.
     static func calculateHueCount(start: CGFloat, end: CGFloat) -> CGFloat {
         let diff = abs(end - start)
         return diff > 0.5 ? 1.0 - diff : diff
@@ -53,7 +58,8 @@ public struct BlackSection: MonochromeSection {
     public let weight: CGFloat
 
     /// Initializes a black section.
-    ///   - Parameter weight: The proportionate width of the section relative to a single hue.
+    ///   - Parameter weight: The proportionate width of the section relative
+    ///     to a single hue.
     public init(weight: CGFloat = Self.defaultWeight) {
         self.weight = weight
     }
@@ -64,7 +70,8 @@ public struct WhiteSection: MonochromeSection {
     public let weight: CGFloat
 
     /// Initializes a white section.
-    /// - Parameter weight: The proportionate width of the section relative to a single hue.
+    /// - Parameter weight: The proportionate width of the section relative to
+    ///   a single hue.
     public init(weight: CGFloat = Self.defaultWeight) {
         self.weight = weight
     }
@@ -80,7 +87,8 @@ public struct OneWayBend: BendSection {
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     public let endHue: CGFloat
 
-    /// The saturation, brightness, lightness or chroma value where the bend peaks.
+    /// The saturation, brightness, lightness or chroma value where the
+    /// bend peaks.
     public let targetValue: CGFloat
 
     /// The difference between the start and end hues.
@@ -102,7 +110,8 @@ public struct TwoWayBend: BendSection {
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     public let endHue: CGFloat
 
-    /// The saturation, brightness, lightness or chroma value where the bend peaks.
+    /// The saturation, brightness, lightness or chroma value where the bend
+    /// peaks.
     public let targetValue: CGFloat
 
     /// The difference between the start and end hues.

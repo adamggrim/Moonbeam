@@ -2,14 +2,17 @@ import SwiftUI
 
 /// The position of the floating color preview relative to the slider.
 public enum PreviewPosition: Sendable, Equatable {
-    /// Positions the floating color preview above a horizontal slider, or to the left of a vertical slider.
+    /// Positions the floating color preview above a horizontal slider, or to
+    /// the left of a vertical slider.
     case topLeading
 
-    /// Positions the floating color preview below a horizontal slider, or to the right of a vertical slider.
+    /// Positions the floating color preview below a horizontal slider, or to
+    /// the right of a vertical slider.
     case bottomTrailing
 }
 
-/// Encapsulates various layout dimensions for the color slider and its components.
+/// Encapsulates various layout dimensions for the color slider and its
+/// components.
 public struct ColorSliderDimensions: Sendable, Equatable {
     /// The length of the slider track.
     public var length: CGFloat = ColorSliderDefaults.trackLength
@@ -17,13 +20,16 @@ public struct ColorSliderDimensions: Sendable, Equatable {
     /// The thickness of the slider track.
     public var thickness: CGFloat = ColorSliderDefaults.trackThickness
 
-    /// The corner radius of the slider track. If `nil`, the track resolves to a `Capsule` shape.
+    /// The corner radius of the slider track. If `nil`, the track resolves to
+    /// a `Capsule` shape.
     public var cornerRadius: CGFloat? = nil
 
-    /// The thickness of the slider thumb. If `nil`, falls back to the track's `thickness`.
+    /// The thickness of the slider thumb. If `nil`, falls back to the track's
+    /// `thickness`.
     public var thumbThickness: CGFloat? = nil
 
-    /// The length of the slider thumb. If `nil`, defaults to twice the track's `thickness`.
+    /// The length of the slider thumb. If `nil`, defaults to twice the track's
+    /// `thickness`.
     public var thumbLength: CGFloat? = nil
 
     /// The width (and height) of the floating color preview.
@@ -32,7 +38,8 @@ public struct ColorSliderDimensions: Sendable, Equatable {
     /// The distance between the floating color preview and the slider thumb.
     public var previewOffset: CGFloat? = nil
 
-    /// The scale of the floating color preview when it is hidden and not actively being dragged.
+    /// The scale of the floating color preview when it is hidden and not
+    /// sssssssssactively being dragged.
     public var scaleRatio: CGFloat = ColorSliderDefaults.scaleRatio
 
     /// The corner radius applied to the floating color preview.
@@ -57,7 +64,8 @@ public struct ColorSliderShadow: Sendable, Equatable {
     /// Initializes new shadow properties.
     ///
     /// - Parameters:
-    ///   - color: The color of the shadow. Defaults to a semi-transparent black.
+    ///   - color: The color of the shadow. Defaults to a semi-transparent
+    ///     black.
     ///   - radius: The blur radius. Defaults to 5.
     ///   - x: The horizontal offset. Defaults to 0.
     ///   - y: The vertical offset. Defaults to 0.
@@ -73,9 +81,10 @@ public struct ColorSliderShadow: Sendable, Equatable {
 public struct TrackStroke: Sendable {
     /// The styling applied to the stroke.
     ///
-    /// Because this property accepts `AnyShapeStyle`, it supports any type that conforms
-    /// to `ShapeStyle`, including colors (`Color.red`), gradients (`LinearGradient`),
-    /// hierarchical styles (`.secondary`) or background materials (`.ultraThinMaterial`).
+    /// Because this property accepts `AnyShapeStyle`, it supports any type that
+    /// conforms to `ShapeStyle`, including colors (`Color.red`), gradients
+    /// (`LinearGradient`), hierarchical styles (`.secondary`) or background
+    /// materials (`.ultraThinMaterial`).
     public var style: AnyShapeStyle
 
     /// The thickness of the stroke in points.
@@ -188,7 +197,8 @@ public extension View {
         return environment(\.colorSliderTrackStroke, stroke)
     }
 
-    /// Changes the corner radius so the slider track appears as a `RoundedRectangle` instead of a `Capsule`.
+    /// Changes the corner radius so the slider track appears as a
+    /// `RoundedRectangle` instead of a `Capsule`.
     func colorSliderCornerRadius(_ radius: CGFloat) -> some View {
             var newDimensions = ColorSliderDimensions()
             newDimensions.cornerRadius = radius
@@ -222,7 +232,8 @@ public extension View {
 
     // MARK: Preview modifiers
 
-    /// The visual shape of the floating color preview. If nil, defaults to `RoundedRectangle`.
+    /// The visual shape of the floating color preview. If nil, defaults to
+    /// `RoundedRectangle`.
     func colorSliderPreviewShape<S: Shape>(_ shape: S) -> some View {
         environment(\.colorSliderPreviewShape, AnyShape(shape))
     }
@@ -239,7 +250,8 @@ public extension View {
             .environment(\.colorSliderPreviewSpacing, spacing)
     }
 
-    /// A boolean for whether the floating color preview should appear only during active dragging. Defaults to `true`.
+    /// A boolean for whether the floating color preview should appear only
+    /// during active dragging. Defaults to `true`.
     func colorSliderPreviewHidden(_ hidden: Bool) -> some View {
         environment(\.colorSliderPreviewHidden, hidden)
     }
@@ -253,7 +265,9 @@ public extension View {
 
     // MARK: Global modifiers
 
-    /// Set to `true` to disable the liquid glass styling on the thumb. On operating systems that do not support Liquid Glass, this flag is ignored and falls back to a standard filled shape. Defaults to `false`.
+    /// Set to `true` to disable the liquid glass styling on the thumb. On
+    /// operating systems that do not support Liquid Glass, this flag is ignored
+    /// and falls back to a standard filled shape. Defaults to `false`.
     func colorSliderDisableLiquidGlass(_ disable: Bool) -> some View {
         environment(\.colorSliderDisableLiquidGlass, disable)
     }
@@ -278,12 +292,14 @@ public extension View {
         return environment(\.colorSliderDimensions, dim)
     }
 
-    /// Customizes the minimum distance to drag the thumb before the slider recognizes the drag. Defaults to 0.
+    /// Customizes the minimum distance to drag the thumb before the slider
+    /// recognizes the drag. Defaults to 0.
     func colorSliderDragMinimumDistance(_ distance: CGFloat) -> some View {
         environment(\.colorSliderDragMinimumDistance, distance)
     }
 
-    /// Customizes the step percentage used when adjusting the slider via VoiceOver.
+    /// Customizes the step percentage used when adjusting the slider via
+    /// VoiceOver.
     func colorSliderAccessibilityStep(_ step: Double) -> some View {
         environment(\.colorSliderAccessibilityStep, step)
     }

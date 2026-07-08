@@ -7,7 +7,8 @@ public enum ColorSourceProvider {
     /// Designed for hard-edge color sliders.
     case array([Color])
 
-    /// Dynamically calculates a color based on normalized position (i.e., 0.0 to 1.0).
+    /// Dynamically calculates a color based on normalized position (i.e., 0.0
+    /// to 1.0).
     ///
     /// Designed for spectrum and gradient color sliders.
     case function((_ position: Double) -> Color)
@@ -24,7 +25,8 @@ public protocol ColorSliderDataSource {
 }
 
 public extension ColorSliderDataSource {
-    /// Converts a continuous color slider into a hard-edge slider with discrete color blocks.
+    /// Converts a continuous color slider into a hard-edge slider with discrete
+    /// color blocks.
     func hardEdge(into steps: Int) -> HardEdgeSliderModel {
         guard steps > 1 else { return HardEdgeSliderModel(colors: []) }
 
@@ -34,7 +36,8 @@ public extension ColorSliderDataSource {
 
         case .function(let colorGenerator), .shader(_, let colorGenerator):
             let generatedColors = (0..<steps).map { i in
-                // Sample from the center of the color block's position on the spectrum.
+                // Sample from the center of the color block's position on the
+                // spectrum.
                 let position = (Double(i) + 0.5) / Double(steps)
                 return colorGenerator(position)
             }

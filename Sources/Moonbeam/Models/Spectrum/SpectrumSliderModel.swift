@@ -43,7 +43,8 @@ fileprivate func validateBendSections(bendSections: [BendSection]) -> Bool {
     return true
 }
 
-/// Validates bend sections, silently truncating any that exceed `spectrumConstants.maxBends` to prevent crashes in Metal.
+/// Validates bend sections, silently truncating any that exceed `spectrumConstants.maxBends` to
+/// prevent crashes in Metal.
 ///
 /// - Parameters:
 ///   - bends: The user-provided array of `BendSection` objects.
@@ -130,14 +131,16 @@ fileprivate struct ShaderBend {
     }
 }
 
-/// A C-compatible memory layout that bridges directly to the `SpectrumShaderData` struct in Metal.
+/// A C-compatible memory layout that bridges directly to the
+/// `SpectrumShaderData` struct in Metal.
 ///
-/// The property sequence, layout and alignment of this struct must exactly mirror
-/// `SpectrumShaderData` in Metal.
+/// The property sequence, layout and alignment of this struct must exactly
+/// mirror `SpectrumShaderData` in Metal.
 ///
 /// 1. Do **not** use dynamically sized arrays (e.g., `Array` or `[Float]`).
 /// 2. Do **not** use nested objects or classes.
-/// 3. Rely strictly on fixed-size tuples and primitive types (`Float`, `Int32`, `simd_float4`).
+/// 3. Rely strictly on fixed-size tuples and primitive types (`Float`, `Int32`,
+///   `simd_float4`).
 fileprivate struct SpectrumShaderData {
     // 32 Bytes
     var totalWeight: Float
@@ -199,7 +202,8 @@ fileprivate func encodeSpectrumData(
         endData[i*2 + 1] = Float(cumulativeEnd)
     }
 
-    // Type-safe tuple packing.
+    /// Packs an array of bend sections into a fixed-size tuple buffer
+    /// compatible with Metal shaders.
     func packBends(_ bends: [BendSection]) -> SpectrumShaderData.BendBuffer {
         var buffer = [ShaderBend](repeating: ShaderBend(bend: nil), count: 20)
         for i in 0..<min(bends.count, 20) {
@@ -216,7 +220,6 @@ fileprivate func encodeSpectrumData(
         maximumHue: Float(endHue),
         baseSaturation: Float(primaryValue),
         baseBrightness: Float(secondaryValue),
-        /// A numerical flag passed to the Metal shader to indicate the color space.
         colorSpaceFlag: colorSpace == .oklch ? 1.0 : 0.0,
         startSectionsCount: Int32(startSections.count),
         endSectionsCount: Int32(endSections.count),
@@ -244,17 +247,26 @@ public struct HSBSpectrumModel: ColorSliderDataSource {
     public let saturationBends: [BendSection]
     public let brightnessBends: [BendSection]
 
-    /// Creates a dynamically generated spectrum based on the HSB (Hue, Saturation, Brightness) color space.
+    /// Creates a dynamically generated spectrum based on the HSB (Hue,
+    /// Saturation, Brightness) color space.
     ///
     /// - Parameters:
-    ///   - startSections: Monochrome sections that fade into the beginning of the hue spectrum. Capped at `spectrumConstants.maxMonochromeSections`.
-    ///   - endSections: Monochrome sections that fade out of the end of the hue spectrum.
-    ///   - startHue: The starting hue value in degrees normalized to 0.0 to 1.0 (e.g., 180° = 0.5).
+    ///   - startSections: Monochrome sections that fade into the
+    ///     beginning of the hue spectrum. Capped at
+    ///     `spectrumConstants.maxMonochromeSections`.
+    ///   - endSections: Monochrome sections that fade out of the end of the hue
+    ///     spectrum.
+    ///   - startHue: The starting hue value in degrees normalized to 0.0 to 1.0
+    ///     (e.g., 180° = 0.5).
     ///   - endHue: The ending hue value in degrees normalized to 0.0 - 1.0.
-    ///   - saturation: The baseline saturation applied to the entire hue range (0.0 to 1.0).
-    ///   - brightness: The baseline brightness applied to the entire hue range (0.0 to 1.0).
-    ///   - saturationBends: A result builder providing sections where the baseline saturation increases or decreases to a `targetValue`.
-    ///   - brightnessBends: A result builder providing sections where the baseline brightness increases or decreases to a `targetValue`.
+    ///   - saturation: The baseline saturation applied to the entire hue range
+    ///     (0.0 to 1.0).
+    ///   - brightness: The baseline brightness applied to the entire hue range
+    ///     (0.0 to 1.0).
+    ///   - saturationBends: A result builder providing sections where the
+    ///     baseline saturation increases or decreases to a `targetValue`.
+    ///   - brightnessBends: A result builder providing sections where the
+    ///     baseline brightness increases or decreases to a `targetValue`.
     public init(
         startSections: [MonochromeSection] = [],
         endSections: [MonochromeSection] = [],
@@ -323,17 +335,25 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource {
     public let lightnessBends: [BendSection]
     public let chromaBends: [BendSection]
 
-    /// Creates a dynamically generated spectrum based on the perceptually uniform OKLCH color space.
+    /// Creates a dynamically generated spectrum based on the perceptually
+    /// uniform OKLCH color space.
     ///
     /// - Parameters:
-    ///   - startSections: Monochrome sections that fade into the beginning of the hue spectrum. Capped at `spectrumConstants.maxMonochromeSections`.
-    ///   - endSections: Monochrome sections that fade out of the end of the hue spectrum.
-    ///   - lightness: The perceived brightness of the color (L). Standard range is 0.0 to 1.0. Defaults to 0.75.
-    ///   - chroma: The intensity/purity of the color (C). Range depends on device gamut, typically 0.0 to 0.4. Defaults to 0.15.
-    ///   - startHue: The starting hue angle (h) normalized to 0.0 - 1.0.
-    ///   - endHue: The ending hue angle (h) normalized to 0.0 - 1.0.
-    ///   - lightnessBends: Sections where the baseline lightness bends toward a target value.
-    ///   - chromaBends: Sections where the baseline chroma bends toward a target value.
+    ///   - startSections: Monochrome sections that fade into the beginning
+    ///     of the hue spectrum. Capped at
+    ///     `spectrumConstants.maxMonochromeSections`.
+    ///   - endSections: Monochrome sections that fade out of the end of the hue
+    ///     spectrum.
+    ///   - lightness: The perceived brightness of the color. Standard range is
+    ///     0.0 to 1.0. Defaults to 0.75.
+    ///   - chroma: The intensity of the color. Range depends on the device
+    ///     gamut, typically 0.0 to 0.4. Defaults to 0.15.
+    ///   - startHue: The starting hue, normalized to 0.0 through 1.0.
+    ///   - endHue: The ending hue, normalized to 0.0 through 1.0.
+    ///   - lightnessBends: Sections where the baseline lightness bends toward
+    ///     a target value.
+    ///   - chromaBends: Sections where the baseline chroma bends toward a
+    ///     target value.
     public init(
         startSections: [MonochromeSection] = [],
         endSections: [MonochromeSection] = [],

@@ -1,13 +1,15 @@
 import SwiftUI
 
-/// A model for generating a spectrum color for a given position, suitable for shaders.
+/// A model for generating a spectrum color for a given position, suitable for
+/// shaders.
 internal struct SpectrumGenerator {
 
     // MARK: - Color conversion
 
     /// Matrix to convert OKLCH to a Display P3 color.
     ///
-    /// Taken from  "A perceptual color space for image processing" by Björn Ottosson (2020).
+    /// Taken from  "A perceptual color space for image processing" by Björn
+    /// Ottosson (2020).
     ///
     /// - SeeAlso:
     /// https://bottosson.github.io/posts/oklab/
@@ -43,23 +45,30 @@ internal struct SpectrumGenerator {
 
     /// Calculates the color at a specific normalized position on the spectrum.
     ///
-    /// This function re-implements the logic from `SpectrumSliderModel` to calculate a single
-    /// color on-demand without pre-generating an array, making it suitable for use in
-    /// a SwiftUI `Shader`.
+    /// This function re-implements the logic from `SpectrumSliderModel` to
+    /// calculate a single color on-demand without pre-generating an array,
+    /// making it suitable for use in a SwiftUI `Shader`.
     ///
     /// - Parameters:
     ///   - position: The normalized position (0.0 to 1.0) on the slider.
-    ///   - startSections: An array of monochrome sections appearing before the hue spectrum.
-    ///   - endSections: An array of monochrome sections appearing after the hue spectrum.
+    ///   - startSections: An array of monochrome sections appearing before the
+    ///     hue spectrum.
+    ///   - endSections: An array of monochrome sections appearing after the hue
+    ///     spectrum.
     ///   - startHue: The hue at the beginning of the hue section.
     ///   - endHue: The hue at the end of the hue section.
-    ///   - primaryValue: The base primary value (saturation or chroma) applied to the hue spectrum.
-    ///   - secondaryValue: The base secondary value (brightness or lightness) applied to the hue spectrum.
+    ///   - primaryValue: The base primary value (saturation or chroma) applied
+    ///     to the hue spectrum.
+    ///   - secondaryValue: The base secondary value (brightness or lightness)
+    ///     applied to the hue spectrum.
     ///   - colorSpace:Whether to use HSB or OKLCH as the color space.
-    ///   - primaryBends: An optional array of `BendSection` objects to modify primary values across hue ranges.
-    ///   - secondaryBends: An optional array of `BendSection` objects to modify secondary values across hue ranges.
+    ///   - primaryBends: An optional array of `BendSection` objects to modify
+    ///     primary values across hue ranges.
+    ///   - secondaryBends: An optional array of `BendSection` objects to modify
+    ///     secondary values across hue ranges.
     ///
-    /// - Returns: A `SwiftUI.Color` representing the computed color at the provided position.
+    /// - Returns: A `SwiftUI.Color` representing the computed color at the
+    ///   provided position.
     static func color(
         at position: CGFloat,
         startSections: [MonochromeSection],

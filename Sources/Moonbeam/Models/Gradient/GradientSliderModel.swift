@@ -14,7 +14,8 @@ public struct GradientSliderModel: ColorSliderDataSource {
     /// The ending color of the gradient.
     public let endColor: Color
 
-    /// The color space used to calculate the interpolation between the starting and ending colors.
+    /// The color space used to calculate the interpolation between the starting
+    /// and ending colors.
     public let colorSpace: GradientColorSpace
 
     public var colorSource: ColorSourceProvider {
