@@ -8,9 +8,6 @@ import SwiftUI
 /// 2. **Implicit**: Apply the `.hardEdge(into:)` modifier to convert a `SpectrumSliderModel` or `GradientSliderModel` into discrete color blocks sampled from the center of each block.
 public struct HardEdgeSliderModel: ColorSliderDataSource {
     /// The sequence of colors that make up the discrete blocks on the slider.
-    ///
-    /// This property uses a non-optional array to guarantee that the slider track always has
-    /// valid data to render.
     public let colors: [Color]
     
     /// Provides the model's color source as a discrete array, ensuring the slider track
