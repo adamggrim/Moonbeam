@@ -3,6 +3,7 @@ import SwiftUI
 import simd
 import os
 
+/// The color space used to generate the spectrum.
 public enum SpectrumColorSpace {
     case hsb, oklch
 }

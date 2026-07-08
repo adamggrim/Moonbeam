@@ -1,14 +1,20 @@
 import Foundation
 import SwiftUI
 
+/// The color space used to interpolate between starting and ending colors.
 public enum GradientColorSpace {
     case rgb, oklab, oklch
 }
 
 /// Model for calculating gradient colors on demand.
 public struct GradientSliderModel: ColorSliderDataSource {
+    /// The starting color of the gradient.
     public let startColor: Color
+    
+    /// The ending color of the gradient.
     public let endColor: Color
+    
+    /// The color space used to calculate the interpolation between the starting and ending colors.
     public let colorSpace: GradientColorSpace
 
     public var colorSource: ColorSourceProvider {

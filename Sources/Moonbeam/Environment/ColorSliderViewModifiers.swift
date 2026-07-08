@@ -7,26 +7,56 @@ public enum PreviewPosition: Sendable, Equatable {
 
 /// Encapsulates various layout dimensions for the color slider and its components.
 public struct ColorSliderDimensions: Sendable, Equatable {
+    /// The length of the slider track.
     public var length: CGFloat = 300
+    
+    /// The thickness of the slider track.
     public var thickness: CGFloat = 24
+    
+    /// The corner radius of the slider track. If `nil`, the track resolves to a `Capsule` shape.
     public var cornerRadius: CGFloat? = nil
+    
+    /// The thickness of the slider thumb. If `nil`, falls back to the track's `thickness`.
     public var thumbThickness: CGFloat? = nil
+    
+    /// The length of the slider thumb. If `nil`, defaults to twice the track's `thickness`.
     public var thumbLength: CGFloat? = nil
+    
+    /// The width (and height) of the floating color preview.
     public var previewSize: CGFloat = 60
+    
+    /// The distance between the floating color preview and the slider thumb.
     public var previewOffset: CGFloat? = nil
+    
+    /// The scale of the preview when it is hidden and not actively being dragged.
     public var scaleRatio: CGFloat = 0.25
-
+    
+    /// The corner radius applied to the floating color preview.
     public var previewCornerRadius: CGFloat {
         previewSize * 0.225
     }
 }
 
 public struct ColorSliderShadow: Sendable, Equatable {
+    /// The color of the shadow.
     public var color: Color
+    
+    /// The blur radius of the shadow.
     public var radius: CGFloat
+    
+    /// The horizontal offset of the shadow.
     public var x: CGFloat
+    
+    /// The vertical offset of the shadow.
     public var y: CGFloat
     
+    /// Initializes new shadow properties.
+    ///
+    /// - Parameters:
+    ///   - color: The color of the shadow. Defaults to a semi-transparent black.
+    ///   - radius: The blur radius. Defaults to 5.
+    ///   - x: The horizontal offset. Defaults to 0.
+    ///   - y: The vertical offset. Defaults to 0.
     public init(color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0) {
         self.color = color
         self.radius = radius
@@ -35,8 +65,16 @@ public struct ColorSliderShadow: Sendable, Equatable {
     }
 }
 
+/// Defines the stroke style and width applied to slider components.
 public struct TrackStroke: Sendable {
+    /// The styling applied to the stroke.
+    ///
+    /// Because this property accepts `AnyShapeStyle`, it supports any type that conforms
+    /// to `ShapeStyle`, including colors (`Color.red`), gradients (`LinearGradient`),
+    /// hierarchical styles (`.secondary`) or background materials (`.ultraThinMaterial`).
     public var style: AnyShapeStyle
+    
+    /// The thickness of the stroke in points.
     public var lineWidth: CGFloat
 }
 

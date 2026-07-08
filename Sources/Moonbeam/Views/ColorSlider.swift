@@ -38,10 +38,19 @@ public struct ColorSlider: View {
 
     // MARK: - Public properties
     
+    /// An optional identifier that triggers animation and position updates when the spectrum changes.
     public var spectrumIdentifier: AnyHashable?
+    
+    /// A closure invoked when the spectrum changes, enabling an updated progress value for the thumb.
     public var onSpectrumChanged: ((CGColor) -> Double)?
+    
+    /// A localized string key used for VoiceOver accessibility.
     public var label: LocalizedStringKey
+    
+    /// The layout orientation of the slider (`.horizontal` or `.vertical`).
     public var axis: Axis
+    
+    /// Determines whether the bound `selection` updates continuously during a drag gesture (`true`), or only when the drag ends (`false`).
     public var isContinuous: Bool
 
     // MARK: - Private properties

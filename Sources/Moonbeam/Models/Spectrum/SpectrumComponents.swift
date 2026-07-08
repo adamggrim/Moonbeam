@@ -9,6 +9,7 @@ public enum MonochromeColor {
 
 /// Section of the color slider that fades to or from a monochrome color.
 public protocol MonochromeSection {
+    /// The color of a `MonochromeSection`, either `.black` or `.white`.
     var color: MonochromeColor { get }
 
     /// The number of monochrome steps added to the hue section (each equal in width to a single hue).
@@ -23,9 +24,16 @@ public extension MonochromeSection {
 
 /// A protocol for a section of the color slider with special conditions for saturation or brightness.
 public protocol BendSection {
+    /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     var startHue: CGFloat { get }
+    
+    /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     var endHue: CGFloat { get }
+    
+    /// The saturation, brightness, lightness or chroma value where the bend peaks.
     var targetValue: CGFloat { get }
+    
+    /// The difference between the start and end hues.
     var hueCount: CGFloat { get }
 }
 
@@ -66,9 +74,16 @@ public struct WhiteSection: MonochromeSection {
 
 /// A bend section that fades into the start or end of a color slider.
 public struct OneWayBend: BendSection {
+    /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     public let startHue: CGFloat
+    
+    /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     public let endHue: CGFloat
+    
+    /// The saturation, brightness, lightness or chroma value where the bend peaks.
     public let targetValue: CGFloat
+    
+    /// The difference between the start and end hues.
     public let hueCount: CGFloat
 
     public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat) {
@@ -81,10 +96,19 @@ public struct OneWayBend: BendSection {
 
 /// A bend section that occurs in the middle of a color slider.
 public struct TwoWayBend: BendSection {
+    /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     public let startHue: CGFloat
+    
+    /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     public let endHue: CGFloat
+    
+    /// The saturation, brightness, lightness or chroma value where the bend peaks.
     public let targetValue: CGFloat
+    
+    /// The difference between the start and end hues.
     public let hueCount: CGFloat
+    
+    /// The hue that reaches `targetValue`.
     public let middleHue: CGFloat
 
     public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat) {

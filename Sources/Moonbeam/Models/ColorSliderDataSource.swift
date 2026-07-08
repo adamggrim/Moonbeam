@@ -16,8 +16,10 @@ public enum ColorSourceProvider {
     case shader(generator: (_ size: CGSize, _ isVertical: Bool) -> Shader, fallback: (_ position: Double) -> Color)
 }
 
-/// Protocol shared by `SpectrumSliderModel` and `GradientSliderModel`.
+/// Protocol shared by `SpectrumSliderModel`, `GradientSliderModel` and `HardEdgeSliderModel`.
 public protocol ColorSliderDataSource {
+    
+    /// Determines how the slider track is drawn on screen.
     var colorSource: ColorSourceProvider { get }
 }
 
