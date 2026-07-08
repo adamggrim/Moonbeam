@@ -63,14 +63,6 @@ public struct ColorSlider: View {
     private var saturationBends: [BendSection] = []
     private var brightnessBends: [BendSection] = []
 
-    // MARK: - Constants
-
-    private enum Metrics {
-        static let defaultPreviewOffset: CGFloat = 70.0
-        static let dragScaleMultiplier: CGFloat = 1.1
-        static let accessibilityStepPercentage: CGFloat = 0.05
-    }
-
     // MARK: - Initializer
 
     /// Initializes a customizable color slider.
@@ -455,7 +447,7 @@ private struct SliderThumbView: View {
         let xOffset: CGFloat = axis == .horizontal ? thumbOffset : 0
         let yOffset: CGFloat = axis == .horizontal ? 0 : -thumbOffset
 
-        let dynamicScale: CGFloat = (isDragging && enableThumbScale) ? 1.1 : 1.0
+        let dynamicScale: CGFloat = (isDragging && enableThumbScale) ? ColorSliderDefaults.dragScaleMultiplier : 1.0
 
         Group {
             if #available(iOS 26.0, macOS 16.0, *), !disableLiquidGlass {

@@ -60,7 +60,7 @@ internal struct ColorSliderState {
     var resolvedThumbLength: CGFloat { dimensions.thumbLength ?? dimensions.thickness * 2 }
 
     var resolvedPreviewOffset: CGFloat {
-        let fallbackOffset = abs(dimensions.previewOffset ?? Metrics.defaultPreviewOffset)
+        let fallbackOffset = abs(dimensions.previewOffset ?? ColorSliderDefaults.previewOffset)
 
         let spacingOffset: CGFloat
         if let spacing = previewSpacing {

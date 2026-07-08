@@ -12,10 +12,10 @@ public enum PreviewPosition: Sendable, Equatable {
 /// Encapsulates various layout dimensions for the color slider and its components.
 public struct ColorSliderDimensions: Sendable, Equatable {
     /// The length of the slider track.
-    public var length: CGFloat = 300
+    public var length: CGFloat = ColorSliderDefaults.trackLength
 
     /// The thickness of the slider track.
-    public var thickness: CGFloat = 24
+    public var thickness: CGFloat = ColorSliderDefaults.trackThickness
 
     /// The corner radius of the slider track. If `nil`, the track resolves to a `Capsule` shape.
     public var cornerRadius: CGFloat? = nil
@@ -27,17 +27,17 @@ public struct ColorSliderDimensions: Sendable, Equatable {
     public var thumbLength: CGFloat? = nil
 
     /// The width (and height) of the floating color preview.
-    public var previewSize: CGFloat = 60
+    public var previewSize: CGFloat = ColorSliderDefaults.previewSize
 
     /// The distance between the floating color preview and the slider thumb.
     public var previewOffset: CGFloat? = nil
 
     /// The scale of the floating color preview when it is hidden and not actively being dragged.
-    public var scaleRatio: CGFloat = 0.25
+    public var scaleRatio: CGFloat = ColorSliderDefaults.scaleRatio
 
     /// The corner radius applied to the floating color preview.
     public var previewCornerRadius: CGFloat {
-        previewSize * 0.225
+        previewSize * ColorSliderDefaults.cornerRadiusMultiplier
     }
 }
 
@@ -101,7 +101,9 @@ private struct PreviewShadowKey: EnvironmentKey { static let defaultValue = Colo
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
 private struct DragMinimumDistanceKey: EnvironmentKey { static let defaultValue: CGFloat = 0 }
-private struct AccessibilityStepKey: EnvironmentKey { static let defaultValue: Double = 0.05 }
+private struct AccessibilityStepKey: EnvironmentKey {
+    static let defaultValue: Double = ColorSliderDefaults.accessibilityStepPercentage
+}
 private struct AnimationKey: EnvironmentKey { static let defaultValue: Animation = .easeInOut(duration: 0.25) }
 
 extension EnvironmentValues {
