@@ -198,6 +198,16 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: gradientModel)
 }
 
+#Preview("Horizontal OKLCH gradient slider") {
+    let gradientModel = GradientSliderModel(
+        startColor: .purple,
+        endColor: .white,
+        colorSpace: .oklch
+    )
+
+    PreviewContainer(dataSource: gradientModel)
+}
+
 #Preview("Horizontal gradient slider with custom dimensions") {
     let gradientModel = GradientSliderModel(
         startColor: .green,
@@ -213,7 +223,7 @@ private struct PreviewContainer: View {
         )
 }
 
-// MARK: - Hard-edge previews
+// MARK: - Hard-edge sliders
 
 #Preview("Horizontal explicit hard-edge slider") {
     let customStops = HardEdgeSliderModel(colors: [
