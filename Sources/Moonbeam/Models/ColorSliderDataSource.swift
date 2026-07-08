@@ -26,7 +26,7 @@ public protocol ColorSliderDataSource {
 public extension ColorSliderDataSource {
     /// Converts a continuous color slider into a hard-edge slider with discrete color blocks.
     func hardEdge(into steps: Int) -> HardEdgeSliderModel {
-        guard steps > 1 else { return HardEdgeSliderModel(colors: [.clear]) }
+        guard steps > 1 else { return HardEdgeSliderModel(colors: []) }
         
         switch self.colorSource {
         case .array(let colors):

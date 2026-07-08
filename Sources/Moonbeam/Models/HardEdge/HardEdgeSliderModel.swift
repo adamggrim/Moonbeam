@@ -21,6 +21,6 @@ public struct HardEdgeSliderModel: ColorSliderDataSource {
     
     /// Creates a hard-edge slider model using an discrete array of colors.
     public init(colors: [Color]) {
-        self.colors = colors.isEmpty ? [.clear] : colors
+        self.colors = colors
     }
 }
