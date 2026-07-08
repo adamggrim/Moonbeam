@@ -32,7 +32,7 @@ public struct ColorSliderDimensions: Sendable, Equatable {
     /// The distance between the floating color preview and the slider thumb.
     public var previewOffset: CGFloat? = nil
     
-    /// The scale of the preview when it is hidden and not actively being dragged.
+    /// The scale of the floating color preview when it is hidden and not actively being dragged.
     public var scaleRatio: CGFloat = 0.25
     
     /// The corner radius applied to the floating color preview.
@@ -235,7 +235,7 @@ public extension View {
             .environment(\.colorSliderPreviewSpacing, spacing)
     }
     
-    /// A boolean determining if the preview should only appear during active dragging. Defaults to `true`.
+    /// A boolean for whether the floating color preview should appear only during active dragging. Defaults to `true`.
     func colorSliderPreviewHidden(_ hidden: Bool) -> some View {
         environment(\.colorSliderPreviewHidden, hidden)
     }
