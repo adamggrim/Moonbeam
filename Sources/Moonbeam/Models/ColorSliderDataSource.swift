@@ -18,7 +18,7 @@ public enum ColorSourceProvider {
 
 /// Protocol shared by `SpectrumSliderModel`, `GradientSliderModel` and `HardEdgeSliderModel`.
 public protocol ColorSliderDataSource {
-    
+
     /// Determines how the slider track is drawn on screen.
     var colorSource: ColorSourceProvider { get }
 }
@@ -27,11 +27,11 @@ public extension ColorSliderDataSource {
     /// Converts a continuous color slider into a hard-edge slider with discrete color blocks.
     func hardEdge(into steps: Int) -> HardEdgeSliderModel {
         guard steps > 1 else { return HardEdgeSliderModel(colors: []) }
-        
+
         switch self.colorSource {
         case .array(let colors):
             return HardEdgeSliderModel(colors: colors)
-            
+
         case .function(let colorGenerator), .shader(_, let colorGenerator):
             let generatedColors = (0..<steps).map { i in
                 // Sample from the center of the color block's position on the spectrum.

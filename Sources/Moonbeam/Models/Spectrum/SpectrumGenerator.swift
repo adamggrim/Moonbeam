@@ -2,7 +2,7 @@ import SwiftUI
 
 /// A model for generating a spectrum color for a given position, suitable for shaders.
 internal struct SpectrumGenerator {
-    
+
     /// Matrix to convert OKLCH to a Display P3 color.
     ///
     /// Taken from  "A perceptual color space for image processing" by Björn Ottosson (2020).
@@ -13,30 +13,30 @@ internal struct SpectrumGenerator {
         let hueAngle = hue * 2.0 * .pi
         let a = chroma * cos(hueAngle)
         let b = chroma * sin(hueAngle)
-        
+
         let lightnessPrime = lightness + 0.3963377774 * a + 0.2158037573 * b
         let mediumPrime = lightness - 0.1055613458 * a - 0.0638541728 * b
         let smallPrime = lightness - 0.0894841775 * a - 1.2914855480 * b
-        
+
         let lightnessCubed = lightnessPrime < 0 ? -pow(-lightnessPrime, 3.0) : pow(lightnessPrime, 3.0)
         let mediumCubed = mediumPrime < 0 ? -pow(-mediumPrime, 3.0) : pow(mediumPrime, 3.0)
         let smallCubed = smallPrime < 0 ? -pow(-smallPrime, 3.0) : pow(smallPrime, 3.0)
-        
+
         let redLinear =  2.7015367 * lightnessCubed - 1.6373796 * mediumCubed - 0.0641571 * smallCubed
         let greenLinear = -0.3150531 * lightnessCubed + 1.3415174 * mediumCubed - 0.0264643 * smallCubed
         let blueLinear =  0.0384799 * lightnessCubed - 0.0635483 * mediumCubed + 1.0250684 * smallCubed
-        
+
         func applyGamma(_ value: CGFloat) -> CGFloat {
             return value <= 0.0031308 ? 12.92 * value : 1.055 * pow(value, 1.0 / 2.4) - 0.055
         }
-        
+
         let red = min(max(applyGamma(redLinear), 0.0), 1.0)
         let green = min(max(applyGamma(greenLinear), 0.0), 1.0)
         let blue = min(max(applyGamma(blueLinear), 0.0), 1.0)
-        
+
         return Color(.displayP3, red: red, green: green, blue: blue)
     }
-    
+
     /// Calculates the color at a specific normalized position on the spectrum.
     ///
     /// This function re-implements the logic from `SpectrumSliderModel` to calculate a single
@@ -68,18 +68,18 @@ internal struct SpectrumGenerator {
         primaryBends: [BendSection]?,
         secondaryBends: [BendSection]?
     ) -> Color {
-        
+
         let startWeight = startSections.reduce(0) { $0 + $1.weight }
         let hueWeight = abs(endHue - startHue)
         let endWeight = endSections.reduce(0) { $0 + $1.weight }
         let totalWeight = startWeight + hueWeight + endWeight
-        
+
         guard totalWeight > 0 else { return .clear }
-        
+
         let startBoundary = startWeight / totalWeight
         let hueBoundary = (startWeight + hueWeight) / totalWeight
         let clampedPosition = max(0.0, min(1.0, position))
-        
+
         if clampedPosition < startBoundary {
             var cumulativeStart: CGFloat = 0.0
             for (index, section) in startSections.enumerated() {
@@ -95,10 +95,10 @@ internal struct SpectrumGenerator {
         } else if clampedPosition <= hueBoundary {
             let relativeHuePos = (hueBoundary > startBoundary) ? (clampedPosition - startBoundary) / (hueBoundary - startBoundary) : 0.0
             let currentHue = startHue + relativeHuePos * (endHue - startHue)
-            
+
             let primary = calculateBendValue(hue: currentHue, defaultValue: primaryValue, bendSections: primaryBends, minHue: startHue)
             let secondary = calculateBendValue(hue: currentHue, defaultValue: secondaryValue, bendSections: secondaryBends, minHue: startHue)
-            
+
             return colorSpace == .oklch
             ? oklchToColor(lightness: secondary, chroma: primary, hue: currentHue)
             : Color(hue: currentHue, saturation: primary, brightness: secondary)
@@ -117,7 +117,7 @@ internal struct SpectrumGenerator {
         }
         return .clear
     }
-    
+
     private static func monoToHueColor(
         relativePosition: CGFloat,
         isStart: Bool,
@@ -132,10 +132,10 @@ internal struct SpectrumGenerator {
     ) -> Color {
         let hue = isStart ? startHue : endHue
         let interpolationFactor = isStart ? relativePosition : (1.0 - relativePosition)
-        
+
         var startTargetPrimary = primaryValue, startTargetSecondary = secondaryValue
         var endTargetPrimary = primaryValue, endTargetSecondary = secondaryValue
-        
+
         if let primaryBends = primaryBends {
             for bend in primaryBends {
                 if let oneWay = bend as? OneWayBend {
@@ -144,7 +144,7 @@ internal struct SpectrumGenerator {
                 }
             }
         }
-        
+
         if let secondaryBends = secondaryBends {
             for bend in secondaryBends {
                 if let oneWay = bend as? OneWayBend {
@@ -153,7 +153,7 @@ internal struct SpectrumGenerator {
                 }
             }
         }
-        
+
         switch monochromeSection.color {
         case .black:
             let finalSecondary = interpolationFactor * (isStart ? startTargetSecondary : endTargetSecondary)
@@ -168,7 +168,7 @@ internal struct SpectrumGenerator {
             : Color(hue: hue, saturation: finalPrimary, brightness: finalSecondary)
         }
     }
-    
+
     /// Generates a smooth gradient between two monochrome sections.
     private static func monoToMonoColor(relativePosition: CGFloat, fromColor: MonochromeColor, toColor: MonochromeColor, hue: CGFloat) -> Color {
         let startBrightness: CGFloat = (fromColor == .white) ? 1.0 : 0.0
@@ -176,13 +176,13 @@ internal struct SpectrumGenerator {
         let brightness = startBrightness + (endBrightness - startBrightness) * relativePosition
         return oklchToColor(lightness: brightness, chroma: 0.0, hue: hue)
     }
-    
+
     private static func calculateBendValue(hue: CGFloat, defaultValue: CGFloat, bendSections: [BendSection]?, minHue: Double) -> CGFloat {
         guard let bends = bendSections, let bend = bends.first(where: { min($0.startHue, $0.endHue) <= hue && hue <= max($0.startHue, $0.endHue) }) else { return defaultValue }
-        
+
         let valueDelta = defaultValue - bend.targetValue
         let offset = hue - bend.startHue
-        
+
         if let oneWay = bend as? OneWayBend {
             let valueIncrement = oneWay.hueCount != 0 ? (valueDelta / oneWay.hueCount) : 0
             if oneWay.startHue == minHue { return bend.targetValue + (valueIncrement * offset) }

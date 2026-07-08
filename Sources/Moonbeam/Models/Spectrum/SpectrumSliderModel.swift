@@ -16,7 +16,7 @@ internal enum spectrumConstants {
     ///
     /// This value must match `MAX_MONOCHROME_SECTIONS` in `ColorSliderShaders.metal`.
     static let maxMonochromeSections = 2
- 
+
     /// The maximum number of bends sections allowed in the spectrum.
     ///
     /// This value must match `MAX_BENDS` in `ColorSliderShaders.metal`.
@@ -29,7 +29,7 @@ fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "SpectrumMo
 internal enum MoonbeamTelemetry {
     static func reportNonFatalIssue(_ message: String) {
         logger.error("\(message, privacy: .public)")
-        
+
         assertionFailure(message)
     }
 }
@@ -54,22 +54,22 @@ fileprivate func validateBendSections(bendSections: [BendSection]) -> Bool {
 /// - Returns: A validated array of bend sections.
 fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) -> [BendSection] {
     var validBends: [BendSection] = []
-    
+
     for bend in bends {
         let minBend = min(bend.startHue, bend.endHue)
         let maxBend = max(bend.startHue, bend.endHue)
-        
+
         let hasOverlap = validBends.contains { existing in
             max(existing.startHue, existing.endHue) > minBend && min(existing.startHue, existing.endHue) < maxBend
         }
-        
+
         if !hasOverlap {
             validBends.append(bend)
         } else {
             MoonbeamTelemetry.reportNonFatalIssue("Moonbeam: \(name) contains overlapping bend sections. Some sections will be ignored.")
         }
     }
-    
+
     if validBends.count > spectrumConstants.maxBends {
         MoonbeamTelemetry.reportNonFatalIssue("Moonbeam: \(name) exceeds maximum of \(spectrumConstants.maxBends). Layout truncated.")
         // Fall back to a truncated array for production builds.
@@ -85,7 +85,7 @@ fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) 
 fileprivate struct ShaderBend {
     var data0: simd_float4 // x: type, y: startHue, z: endHue, w: targetValue
     var data1: simd_float4 // x: hueCount, y: 0, z: 0, w: 0 (padding)
-    
+
     init(bend: BendSection?) {
         guard let b = bend else {
             self.data0 = .zero
@@ -120,17 +120,17 @@ fileprivate struct SpectrumShaderData {
     var baseSaturation: Float
     var baseBrightness: Float
     var colorSpaceFlag: Float
-    
+
     // 16 Bytes
     var startSectionsCount: Int32
     var endSectionsCount: Int32
     var saturationBendsCount: Int32
     var brightnessBendsCount: Int32
-    
+
     // 32 Bytes
     var startSectionsData: simd_float4
     var endSectionsData: simd_float4
-    
+
     // 20 bend elements to match `MAX_BENDS`
     typealias BendBuffer = (
         ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
@@ -138,7 +138,7 @@ fileprivate struct SpectrumShaderData {
         ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
         ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend
     )
-    
+
     var saturationBendsData: BendBuffer
     var brightnessBendsData: BendBuffer
 }
@@ -215,7 +215,7 @@ public struct HSBSpectrumModel: ColorSliderDataSource {
     public let brightness: Double
     public let saturationBends: [BendSection]
     public let brightnessBends: [BendSection]
-    
+
     /// Creates a dynamically generated spectrum based on the HSB (Hue, Saturation, Brightness) color space.
     ///
     /// - Parameters:

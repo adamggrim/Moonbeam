@@ -13,28 +13,28 @@ public enum PreviewPosition: Sendable, Equatable {
 public struct ColorSliderDimensions: Sendable, Equatable {
     /// The length of the slider track.
     public var length: CGFloat = 300
-    
+
     /// The thickness of the slider track.
     public var thickness: CGFloat = 24
-    
+
     /// The corner radius of the slider track. If `nil`, the track resolves to a `Capsule` shape.
     public var cornerRadius: CGFloat? = nil
-    
+
     /// The thickness of the slider thumb. If `nil`, falls back to the track's `thickness`.
     public var thumbThickness: CGFloat? = nil
-    
+
     /// The length of the slider thumb. If `nil`, defaults to twice the track's `thickness`.
     public var thumbLength: CGFloat? = nil
-    
+
     /// The width (and height) of the floating color preview.
     public var previewSize: CGFloat = 60
-    
+
     /// The distance between the floating color preview and the slider thumb.
     public var previewOffset: CGFloat? = nil
-    
+
     /// The scale of the floating color preview when it is hidden and not actively being dragged.
     public var scaleRatio: CGFloat = 0.25
-    
+
     /// The corner radius applied to the floating color preview.
     public var previewCornerRadius: CGFloat {
         previewSize * 0.225
@@ -44,16 +44,16 @@ public struct ColorSliderDimensions: Sendable, Equatable {
 public struct ColorSliderShadow: Sendable, Equatable {
     /// The color of the shadow.
     public var color: Color
-    
+
     /// The blur radius of the shadow.
     public var radius: CGFloat
-    
+
     /// The horizontal offset of the shadow.
     public var x: CGFloat
-    
+
     /// The vertical offset of the shadow.
     public var y: CGFloat
-    
+
     /// Initializes new shadow properties.
     ///
     /// - Parameters:
@@ -77,7 +77,7 @@ public struct TrackStroke: Sendable {
     /// to `ShapeStyle`, including colors (`Color.red`), gradients (`LinearGradient`),
     /// hierarchical styles (`.secondary`) or background materials (`.ultraThinMaterial`).
     public var style: AnyShapeStyle
-    
+
     /// The thickness of the stroke in points.
     public var lineWidth: CGFloat
 }
@@ -109,7 +109,7 @@ extension EnvironmentValues {
         get { self[TrackStrokeKey.self] }
         set { self[TrackStrokeKey.self] = newValue }
     }
-    
+
     var colorSliderThumbShape: AnyShape {
         get { self[ThumbShapeKey.self] }
         set { self[ThumbShapeKey.self] = newValue }
@@ -126,7 +126,7 @@ extension EnvironmentValues {
         get { self[ThumbShadowKey.self] }
         set { self[ThumbShadowKey.self] = newValue }
     }
-    
+
     var colorSliderPreviewShape: AnyShape? {
         get { self[PreviewShapeKey.self] }
         set { self[PreviewShapeKey.self] = newValue }
@@ -151,7 +151,7 @@ extension EnvironmentValues {
         get { self[PreviewShadowKey.self] }
         set { self[PreviewShadowKey.self] = newValue }
     }
-    
+
     var colorSliderDisableLiquidGlass: Bool {
         get { self[DisableLiquidGlassKey.self] }
         set { self[DisableLiquidGlassKey.self] = newValue }
@@ -177,15 +177,15 @@ extension EnvironmentValues {
 // MARK: - View modifiers
 
 public extension View {
-    
+
     // MARK: Track modifiers
-    
+
     /// Adds a stroke to the slider track.
     func colorSliderTrackStroke<S: ShapeStyle>(_ style: S, lineWidth: CGFloat = 1) -> some View {
         let stroke = TrackStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
         return environment(\.colorSliderTrackStroke, stroke)
     }
-    
+
     /// Changes the corner radius so the slider track appears as a `RoundedRectangle` instead of a `Capsule`.
     func colorSliderCornerRadius(_ radius: CGFloat) -> some View {
             var newDimensions = ColorSliderDimensions()
@@ -194,7 +194,7 @@ public extension View {
         }
 
     // MARK: Thumb modifiers
-    
+
     /// The visual shape of the thumb. Defaults to `Capsule`.
     func colorSliderThumbShape<S: Shape>(_ shape: S) -> some View {
         environment(\.colorSliderThumbShape, AnyShape(shape))
@@ -204,7 +204,7 @@ public extension View {
     func colorSliderThumbColor(_ color: Color) -> some View {
         environment(\.colorSliderThumbColor, color)
     }
-    
+
     /// Adds a stroke to the thumb.
     func colorSliderThumbStroke<S: ShapeStyle>(_ style: S, lineWidth: CGFloat = 1) -> some View {
         let stroke = TrackStroke(style: AnyShapeStyle(style), lineWidth: lineWidth)
@@ -215,9 +215,9 @@ public extension View {
         func colorSliderThumbShadow(color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0) -> some View {
             environment(\.colorSliderThumbShadow, ColorSliderShadow(color: color, radius: radius, x: x, y: y))
         }
-    
+
     // MARK: Preview modifiers
-    
+
     /// The visual shape of the floating color preview. If nil, defaults to `RoundedRectangle`.
     func colorSliderPreviewShape<S: Shape>(_ shape: S) -> some View {
         environment(\.colorSliderPreviewShape, AnyShape(shape))
@@ -234,24 +234,24 @@ public extension View {
         self.environment(\.colorSliderPreviewPosition, position)
             .environment(\.colorSliderPreviewSpacing, spacing)
     }
-    
+
     /// A boolean for whether the floating color preview should appear only during active dragging. Defaults to `true`.
     func colorSliderPreviewHidden(_ hidden: Bool) -> some View {
         environment(\.colorSliderPreviewHidden, hidden)
     }
-    
+
     /// Sets the shadow for the floating color preview.
     func colorSliderPreviewShadow(color: Color = .black.opacity(0.33), radius: CGFloat = 5, x: CGFloat = 0, y: CGFloat = 0) -> some View {
         environment(\.colorSliderPreviewShadow, ColorSliderShadow(color: color, radius: radius, x: x, y: y))
     }
 
     // MARK: Global modifiers
-        
+
     /// Set to `true` to disable the liquid glass styling on the thumb. On operating systems that do not support Liquid Glass, this flag is ignored and falls back to a standard filled shape. Defaults to `false`.
     func colorSliderDisableLiquidGlass(_ disable: Bool) -> some View {
         environment(\.colorSliderDisableLiquidGlass, disable)
     }
-    
+
     /// Customizes the layout dimensions of the color slider.
     func colorSliderDimensions(
         length: CGFloat = 300,
@@ -271,7 +271,7 @@ public extension View {
         )
         return environment(\.colorSliderDimensions, dim)
     }
-    
+
     /// Customizes the minimum distance to drag the thumb before the slider recognizes the drag. Defaults to 0.
     func colorSliderDragMinimumDistance(_ distance: CGFloat) -> some View {
         environment(\.colorSliderDragMinimumDistance, distance)

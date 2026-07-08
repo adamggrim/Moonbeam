@@ -12,19 +12,19 @@ typealias PlatformColor = NSColor
 /// from a dynamically generated spectrum or gradient.
 @MainActor
 public struct ColorSlider: View {
-    
+
     // MARK: - State & bindings
-    
+
     @Binding public var selection: CGColor
-    
+
     /// The position of the selected color in the slider, normalized to a range
     /// from 0.0 to 1.0.
     @Binding public var progress: Double
-    
+
     @State private var sliderState = ColorSliderState()
 
     // MARK: - Environment variables
-    
+
     @Environment(\.colorSliderPreviewPosition) private var previewPosition
     @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
     @Environment(\.colorSliderPreviewHidden) private var previewHidden
@@ -37,24 +37,24 @@ public struct ColorSlider: View {
     @Environment(\.self) private var environment
 
     // MARK: - Public properties
-    
+
     /// An optional identifier that triggers animation and position updates when the spectrum changes.
     public var spectrumIdentifier: AnyHashable?
-    
+
     /// A closure invoked when the spectrum changes, enabling an updated progress value for the thumb.
     public var onSpectrumChanged: ((CGColor) -> Double)?
-    
+
     /// A localized string key used for VoiceOver accessibility.
     public var label: LocalizedStringKey
-    
+
     /// The layout orientation of the slider (`.horizontal` or `.vertical`).
     public var axis: Axis
-    
+
     /// Determines whether the bound `selection` updates continuously during a drag gesture (`true`), or only when the drag ends (`false`).
     public var isContinuous: Bool
 
     // MARK: - Private properties
-    
+
     private var dataSource: ColorSliderDataSource?
     private var colorSpace: SpectrumColorSpace = .hsb
     private var hueRange: ClosedRange<Double> = 0.0...1.0
@@ -64,13 +64,13 @@ public struct ColorSlider: View {
     private var brightnessBends: [BendSection] = []
 
     // MARK: - Constants
-    
+
     private enum Metrics {
         static let defaultPreviewOffset: CGFloat = 70.0
         static let dragScaleMultiplier: CGFloat = 1.1
         static let accessibilityStepPercentage: CGFloat = 0.05
     }
-    
+
     // MARK: - Initializer
 
     /// Initializes a customizable color slider.
@@ -109,13 +109,13 @@ public struct ColorSlider: View {
     }
 
     // MARK: - Computed properties
-    
+
     private var resolvedDataSource: ColorSliderDataSource {
         if let dataSource = dataSource { return dataSource }
-        
+
         let currentSaturationBends: () -> [BendSection] = { saturationBends }
         let currentBrightnessBends: () -> [BendSection] = { brightnessBends }
-        
+
         if colorSpace == .oklch {
             return OKLCHSpectrumModel(
                 startSections: startSections,
@@ -140,7 +140,7 @@ public struct ColorSlider: View {
             )
         }
     }
-    
+
     /// The color calculated from the current `liveColorPosition` on the slider.
     private var calculatedColor: Color {
         let safeLength = dimensions.length > 0 ? dimensions.length : 0.001
@@ -157,7 +157,7 @@ public struct ColorSlider: View {
             return fallback(clampedRatio)
         }
     }
-    
+
     /// The geometric shape of the slider track, falling back to `Capsule` if no corner radius is specified in the dimensions configuration.
     private var trackShape: AnyShape {
         if let radius = dimensions.cornerRadius {
@@ -170,29 +170,29 @@ public struct ColorSlider: View {
     /// Calculates the discrete index of the slider (used to trigger haptics on hard-edge sliders).
     private var discreteIndex: Int? {
         let source = resolvedDataSource.colorSource
-        
+
         switch source {
         case .array(let colors) where !colors.isEmpty:
             let length: CGFloat = dimensions.length
             let safeLength: CGFloat = length > 0 ? length : 0.001
-            
+
             let position: CGFloat = sliderState.liveColorPosition
             let rawRatio: CGFloat = position / safeLength
             let clampedRatio: CGFloat = max(0.0, min(1.0, rawRatio))
-            
+
             let countFloat: CGFloat = CGFloat(colors.count)
             let calculatedIndex: Int = Int(countFloat * clampedRatio)
-            
+
             let maxIndex: Int = colors.count - 1
             return max(0, min(maxIndex, calculatedIndex))
-            
+
         default:
             return nil
         }
     }
-    
+
     // MARK: - Views
-    
+
     public var body: some View {
         ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
             SliderTrackView(
@@ -200,7 +200,7 @@ public struct ColorSlider: View {
                 dimensions: dimensions,
                 axis: axis
             )
-            
+
             SliderThumbView(
                 isDragging: sliderState.isDragging,
                 thumbOffset: sliderState.thumbOffset,
@@ -214,7 +214,7 @@ public struct ColorSlider: View {
                     .onChanged(onDragChanged)
                     .onEnded(onDragEnded)
             )
-            
+
             SliderPreviewView(
                 isDragging: sliderState.isDragging,
                 currentColor: sliderState.isDragging ? calculatedColor : Color(selection),
@@ -239,7 +239,7 @@ public struct ColorSlider: View {
                 previewSpacing: previewSpacing,
                 previewHidden: previewHidden
             )
-            
+
             let initialTrackPosition = CGFloat(progress) * dimensions.length
             sliderState.persistedThumbPosition = min(max(initialTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset), dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset)
         }
@@ -270,7 +270,7 @@ public struct ColorSlider: View {
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
     }
-    
+
     // MARK: - Drag event handlers
 
     /// Updates the view's state when the position of the `DragGesture`
@@ -282,14 +282,14 @@ public struct ColorSlider: View {
     /// - Parameter value: The current value of the `DragGesture`.
     private func onDragChanged(_ value: DragGesture.Value) {
         let translation = axis == .horizontal ? value.translation.width : -value.translation.height
-        
+
         if !sliderState.isDragging {
             withAnimation(reduceMotion ? nil : animation) { sliderState.isDragging = true }
         }
-        
+
         sliderState.updateDrag(translation: translation)
         progress = Double(dimensions.length > 0 ? sliderState.liveColorPosition / dimensions.length : 0.0)
-        
+
         if isContinuous {
             selection = calculatedColor.resolve(in: environment).cgColor
         }
@@ -343,7 +343,7 @@ public struct ColorSlider: View {
         copy.dataSource = nil
         return copy
     }
-    
+
     public func brightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
         var copy = self
         copy.brightnessBends = bends()
@@ -357,9 +357,9 @@ private struct SliderTrackView: View {
     let dataSource: ColorSliderDataSource
     let dimensions: ColorSliderDimensions
     let axis: Axis
-    
+
     @Environment(\.colorSliderTrackStroke) private var trackStroke
-    
+
     private var trackShape: AnyShape {
         if let radius = dimensions.cornerRadius {
             return AnyShape(RoundedRectangle(cornerRadius: radius))
@@ -367,7 +367,7 @@ private struct SliderTrackView: View {
             return AnyShape(Capsule())
         }
     }
-    
+
     var body: some View {
         let size = CGSize(
             width: axis == .horizontal ? dimensions.length : dimensions.thickness,
@@ -394,7 +394,7 @@ private struct SliderTrackView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private func hardEdgeTrackView(colors: [Color]) -> some View {
         if colors.isEmpty {
@@ -402,14 +402,14 @@ private struct SliderTrackView: View {
         } else {
             let isHorizontal = axis == .horizontal
             let step = 1.0 / Double(colors.count)
-            
+
             let stops: [Gradient.Stop] = colors.enumerated().flatMap { index, color in
                 [
                     Gradient.Stop(color: color, location: step * Double(index)),
                     Gradient.Stop(color: color, location: step * Double(index + 1))
                 ]
             }
-            
+
             LinearGradient(
                 stops: stops,
                 startPoint: isHorizontal ? .leading : .bottom,
@@ -427,28 +427,28 @@ private struct SliderThumbView: View {
     let axis: Axis
     let resolvedThumbThickness: CGFloat
     let resolvedThumbLength: CGFloat
-    
+
     @Environment(\.colorSliderThumbShape) private var thumbShape
     @Environment(\.colorSliderThumbColor) private var thumbColor
     @Environment(\.colorSliderThumbStroke) private var thumbStroke
     @Environment(\.colorSliderThumbShadow) private var thumbShadow
     @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
-    
+
     /// Set to `true` to scale the thumb up during a drag gesture if the platform supports Liquid Glass effects and it has not been explicitly disabled.
     private var enableThumbScale: Bool {
         if #available(iOS 26.0, macOS 16.0, *) { return !disableLiquidGlass }
         return false
     }
-    
+
     var body: some View {
         let thumbWidth: CGFloat = axis == .horizontal ? resolvedThumbThickness : resolvedThumbLength
         let thumbHeight: CGFloat = axis == .horizontal ? resolvedThumbLength : resolvedThumbThickness
-        
+
         let xOffset: CGFloat = axis == .horizontal ? thumbOffset : 0
         let yOffset: CGFloat = axis == .horizontal ? 0 : -thumbOffset
-        
+
         let dynamicScale: CGFloat = (isDragging && enableThumbScale) ? 1.1 : 1.0
-        
+
         Group {
             if #available(iOS 26.0, macOS 16.0, *), !disableLiquidGlass {
                 Color.clear
@@ -479,22 +479,22 @@ private struct SliderPreviewView: View {
     let resolvedPreviewOffset: CGFloat
     let dimensions: ColorSliderDimensions
     let axis: Axis
-    
+
     @Environment(\.colorSliderPreviewShape) private var previewShape
     @Environment(\.colorSliderPreviewStroke) private var previewStroke
     @Environment(\.colorSliderPreviewHidden) private var previewHidden
     @Environment(\.colorSliderPreviewShadow) private var previewShadow
-    
+
     var body: some View {
         let resolvedShape = previewShape ?? AnyShape(RoundedRectangle(cornerRadius: dimensions.previewCornerRadius))
 
         let dynamicAnchor: UnitPoint = axis == .horizontal
             ? (resolvedPreviewOffset > 0 ? .top : .bottom)
             : (resolvedPreviewOffset > 0 ? .leading : .trailing)
-            
+
         let dynamicScale: CGFloat = (previewHidden && !isDragging) ? dimensions.scaleRatio : 1.0
         let dynamicOpacity: Double = (previewHidden && !isDragging) ? 0.0 : 1.0
-        
+
         let xOffset: CGFloat = axis == .horizontal ? previewMainAxisOffset : resolvedPreviewOffset
         let yOffset: CGFloat = axis == .horizontal ? resolvedPreviewOffset : -previewMainAxisOffset
 
@@ -531,11 +531,11 @@ public extension ColorSlider {
             },
             set: { selection.wrappedValue = Color($0) }
         )
-        
+
         let cgOnChanged: ((CGColor) -> Double)? = onSpectrumChanged.map { callback in
             return { cgColor in callback(Color(cgColor)) }
         }
-        
+
         self.init(
             selection: cgSelection,
             progress: progress,

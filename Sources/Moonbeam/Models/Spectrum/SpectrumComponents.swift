@@ -26,13 +26,13 @@ public extension MonochromeSection {
 public protocol BendSection {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     var startHue: CGFloat { get }
-    
+
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     var endHue: CGFloat { get }
-    
+
     /// The saturation, brightness, lightness or chroma value where the bend peaks.
     var targetValue: CGFloat { get }
-    
+
     /// The difference between the start and end hues.
     var hueCount: CGFloat { get }
 }
@@ -76,13 +76,13 @@ public struct WhiteSection: MonochromeSection {
 public struct OneWayBend: BendSection {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     public let startHue: CGFloat
-    
+
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     public let endHue: CGFloat
-    
+
     /// The saturation, brightness, lightness or chroma value where the bend peaks.
     public let targetValue: CGFloat
-    
+
     /// The difference between the start and end hues.
     public let hueCount: CGFloat
 
@@ -98,16 +98,16 @@ public struct OneWayBend: BendSection {
 public struct TwoWayBend: BendSection {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     public let startHue: CGFloat
-    
+
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     public let endHue: CGFloat
-    
+
     /// The saturation, brightness, lightness or chroma value where the bend peaks.
     public let targetValue: CGFloat
-    
+
     /// The difference between the start and end hues.
     public let hueCount: CGFloat
-    
+
     /// The hue that reaches `targetValue`.
     public let middleHue: CGFloat
 

@@ -119,7 +119,7 @@ float calculateBend(float currentHue, float defaultValue, device const ShaderBen
     // Capped at `MAX_BENDS` to prevent unroll failures.
     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
         if (bendIndex >= totalBends) break;
-        
+
         float bendType = bendsData[bendIndex].data0.x;
         float startHue = bendsData[bendIndex].data0.y;
         float endHue = bendsData[bendIndex].data0.z;
@@ -216,22 +216,22 @@ half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isV
 
     if (normalizedPosition < startSectionBoundary) {
         float cumulativeStartPosition = 0.0;
-        
+
         // Capped at `MAX_MONOCHROME_SECTIONS` start sections.
         for (int sectionIndex = 0; sectionIndex < MAX_MONOCHROME_SECTIONS; sectionIndex++) {
             if (sectionIndex >= startSectionsCount) break;
-            
+
             float isWhiteSection = startSectionsData[sectionIndex*2];
             float sectionEndPosition = startSectionsData[sectionIndex*2 + 1];
-            
+
             if (normalizedPosition < sectionEndPosition) {
                 float relativePositionInSection = (normalizedPosition - cumulativeStartPosition) / (sectionEndPosition - cumulativeStartPosition);
                 bool isLastSection = (sectionIndex == startSectionsCount - 1);
-                
+
                 if (isLastSection) {
                     float finalBrightness = isWhiteSection == 1.0 ? baseBrightness : relativePositionInSection * baseBrightness;
                     float finalSaturation = isWhiteSection == 1.0 ? relativePositionInSection * baseSaturation : baseSaturation;
-                    
+
                     // Capped at `MAX_BENDS` saturation bends.
                     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
                         if (bendIndex >= saturationBendsCount) break;
@@ -239,7 +239,7 @@ half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isV
                             finalSaturation = isWhiteSection == 1.0 ? relativePositionInSection * data->saturationBendsData[bendIndex].data0.w : finalSaturation;
                         }
                     }
-                    
+
                     // Capped at `MAX_BENDS` brightness bends.
                     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
                         if (bendIndex >= brightnessBendsCount) break;
@@ -247,7 +247,7 @@ half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isV
                             finalBrightness = isWhiteSection == 1.0 ? finalBrightness : relativePositionInSection * data->brightnessBendsData[bendIndex].data0.w;
                         }
                     }
-                    
+
                     if (isWhiteSection == 1.0 && colorSpaceFlag == 1.0) finalBrightness = 1.0 - (relativePositionInSection * (1.0 - baseBrightness));
                     return half4(half3(resolveColor(colorSpaceFlag, minimumHue, finalSaturation, finalBrightness)) * currentColor.a, currentColor.a);
                 } else {
@@ -270,11 +270,11 @@ half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isV
         return half4(half3(resolveColor(colorSpaceFlag, currentHue, calculatedSaturation, calculatedBrightness)) * currentColor.a, currentColor.a);
     } else {
         float cumulativeEndPosition = hueSectionBoundary;
-        
+
         // Capped at `MAX_MONOCHROME_SECTIONS` end sections.
         for (int sectionIndex = 0; sectionIndex < MAX_MONOCHROME_SECTIONS; sectionIndex++) {
             if (sectionIndex >= endSectionsCount) break;
-            
+
             float isWhiteSection = endSectionsData[sectionIndex*2];
             float sectionEndPosition = endSectionsData[sectionIndex*2 + 1];
             bool isLastSection = (sectionIndex == endSectionsCount - 1);
@@ -286,7 +286,7 @@ half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isV
                 if (isFirstEndSection) {
                     float finalBrightness = isWhiteSection == 1.0 ? baseBrightness : (1.0 - relativePositionInSection) * baseBrightness;
                     float finalSaturation = isWhiteSection == 1.0 ? (1.0 - relativePositionInSection) * baseSaturation : baseSaturation;
-                    
+
                     // Capped at `MAX_BENDS` saturation bends.
                     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
                         if (bendIndex >= saturationBendsCount) break;
@@ -294,7 +294,7 @@ half4 spectrumShader(float2 position, half4 currentColor, float2 size, float isV
                             finalSaturation = isWhiteSection == 1.0 ? (1.0 - relativePositionInSection) * data->saturationBendsData[bendIndex].data0.w : finalSaturation;
                         }
                     }
-                    
+
                     // Capped at `MAX_BENDS` brightness bends.
                     for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
                         if (bendIndex >= brightnessBendsCount) break;

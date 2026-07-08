@@ -9,13 +9,13 @@ import SwiftUI
 public struct HardEdgeSliderModel: ColorSliderDataSource {
     /// The sequence of colors that make up the discrete blocks on the slider.
     public let colors: [Color]
-    
+
     /// Provides the model's color source as a discrete array, ensuring the slider track
     /// renders as discrete color blocks.
     public var colorSource: ColorSourceProvider {
         return .array(colors)
     }
-    
+
     /// Creates a hard-edge slider model using an discrete array of colors.
     public init(colors: [Color]) {
         self.colors = colors
