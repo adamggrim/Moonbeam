@@ -2,7 +2,11 @@ import SwiftUI
 
 /// The position of the floating color preview relative to the slider.
 public enum PreviewPosition: Sendable, Equatable {
-    case top, bottom, leading, trailing
+    /// Positions the floating color preview above a horizontal slider, or to the left of a vertical slider.
+    case topLeading
+
+    /// Positions the floating color preview below a horizontal slider, or to the right of a vertical slider.
+    case bottomTrailing
 }
 
 /// Encapsulates various layout dimensions for the color slider and its components.

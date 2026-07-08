@@ -61,21 +61,17 @@ internal struct ColorSliderState {
     
     var resolvedPreviewOffset: CGFloat {
         let fallbackOffset = abs(dimensions.previewOffset ?? Metrics.defaultPreviewOffset)
-        
+
         let spacingOffset: CGFloat
         if let spacing = previewSpacing {
             spacingOffset = (dimensions.thickness / 2) + (dimensions.previewSize / 2) + abs(spacing)
         } else {
             spacingOffset = fallbackOffset
         }
-        
-        if axis == .horizontal {
-            return previewPosition == .bottom ? spacingOffset : -spacingOffset
-        } else {
-            return previewPosition == .leading ? -spacingOffset : spacingOffset
-        }
+
+        return previewPosition == .bottomTrailing ? spacingOffset : -spacingOffset
     }
-    
+
     var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
         
     /// Inset to adjust the left and right bounds of the thumb if it is thinner than the track.

@@ -224,7 +224,7 @@ private struct PreviewContainer: View {
         brightness: 1.0
     )
     PreviewContainer(dataSource: spectrumModel)
-        .colorSliderPreviewPosition(.bottom, spacing: 20)
+        .colorSliderPreviewPosition(.bottomTrailing, spacing: 20)
 }
 
 #Preview("Vertical HSB spectrum slider with leading preview") {
@@ -235,5 +235,5 @@ private struct PreviewContainer: View {
         brightness: 1.0
     )
     PreviewContainer(dataSource: spectrumModel, axis: .vertical)
-        .colorSliderPreviewPosition(.leading)
+        .colorSliderPreviewPosition(.topLeading)
 }
