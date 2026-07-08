@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - Helper
+
 private struct PreviewContainer: View {
     let dataSource: ColorSliderDataSource
     var axis: Axis = .horizontal
@@ -21,6 +23,8 @@ private struct PreviewContainer: View {
         }
     }
 }
+
+// MARK: - HSB sliders
 
 #Preview("Horizontal HSB spectrum slider") {
     let spectrumModel = HSBSpectrumModel(
@@ -67,83 +71,6 @@ private struct PreviewContainer: View {
     PreviewContainer(dataSource: spectrumModel)
 }
 
-#Preview("Horizontal HSB spectrum slider with monochrome sections") {
-    let spectrumModel = HSBSpectrumModel(
-        startSections: [BlackSection(), WhiteSection()],
-        endSections: [BlackSection(), WhiteSection()],
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-
-    PreviewContainer(dataSource: spectrumModel)
-}
-
-#Preview("Horizontal OKLCH spectrum slider") {
-    let oklchModel = OKLCHSpectrumModel(
-        lightness: 0.75,
-        chroma: 0.8,
-        startHue: 0.0,
-        endHue: 1.0
-    )
-
-    PreviewContainer(dataSource: oklchModel)
-}
-
-#Preview("Horizontal RGB gradient slider") {
-    let gradientModel = GradientSliderModel(
-        startColor: .orange,
-        endColor: .blue,
-        colorSpace: .rgb
-    )
-
-    PreviewContainer(dataSource: gradientModel)
-}
-
-#Preview("Horizontal OKLAB gradient slider") {
-    let gradientModel = GradientSliderModel(
-        startColor: .blue,
-        endColor: .red,
-        colorSpace: .oklab
-    )
-
-    PreviewContainer(dataSource: gradientModel)
-}
-
-#Preview("Horizontal explicit hard-edge slider") {
-    let customStops = HardEdgeSliderModel(colors: [
-        .green, .yellow, .orange, .red, .purple, .blue
-    ])
-
-    PreviewContainer(dataSource: customStops)
-}
-
-#Preview("Vertical explicit hard-edge slider") {
-    let customStops = HardEdgeSliderModel(colors: [
-        .green, .yellow, .orange, .red, .purple, .blue
-    ])
-
-    PreviewContainer(dataSource: customStops, axis: .vertical)
-}
-
-#Preview("Horizontal hard-edge HSB spectrum slider with bend sections") {
-    let bentSpectrum = HSBSpectrumModel(
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0,
-        saturationBends: {
-            TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
-        },
-        brightnessBends: {
-            TwoWayBend(startHue: 200.0 / 360, endHue: 300.0 / 360, target: 0.4)
-        }
-    ).hardEdge(into: 8)
-
-    PreviewContainer(dataSource: bentSpectrum)
-}
-
 #Preview("Horizontal HSB spectrum slider with simultaneous bends") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
@@ -156,6 +83,19 @@ private struct PreviewContainer: View {
         brightnessBends: {
             TwoWayBend(startHue: 200.0 / 360, endHue: 300.0 / 360, target: 0.4)
         }
+    )
+
+    PreviewContainer(dataSource: spectrumModel)
+}
+
+#Preview("Horizontal HSB spectrum slider with monochrome sections") {
+    let spectrumModel = HSBSpectrumModel(
+        startSections: [BlackSection(), WhiteSection()],
+        endSections: [BlackSection(), WhiteSection()],
+        startHue: 0.0,
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
     )
 
     PreviewContainer(dataSource: spectrumModel)
@@ -189,33 +129,6 @@ private struct PreviewContainer: View {
         .colorSliderDimensions(thumbLength: 25)
 }
 
-#Preview("Horizontal HSB spectrum slider with Liquid Glass disabled") {
-    let spectrumModel = HSBSpectrumModel(
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-
-    PreviewContainer(dataSource: spectrumModel)
-        .colorSliderDisableLiquidGlass(true)
-}
-
-#Preview("Horizontal gradient slider with custom dimensions") {
-    let gradientModel = GradientSliderModel(
-        startColor: .green,
-        endColor: .yellow
-    )
-
-    PreviewContainer(dataSource: gradientModel)
-        .colorSliderDimensions(
-            length: 200,
-            thickness: 40,
-            previewSize: 100,
-            previewOffset: 110
-        )
-}
-
 #Preview("Horizontal HSB spectrum slider with bottom preview") {
     let spectrumModel = HSBSpectrumModel(
         startHue: 0.0,
@@ -236,4 +149,101 @@ private struct PreviewContainer: View {
     )
     PreviewContainer(dataSource: spectrumModel, axis: .vertical)
         .colorSliderPreviewPosition(.topLeading)
+}
+
+#Preview("Horizontal HSB spectrum slider with Liquid Glass disabled") {
+    let spectrumModel = HSBSpectrumModel(
+        startHue: 0.0,
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0
+    )
+
+    PreviewContainer(dataSource: spectrumModel)
+        .colorSliderDisableLiquidGlass(true)
+}
+
+// MARK: - OKLCH Previews
+
+#Preview("Horizontal OKLCH spectrum slider") {
+    let oklchModel = OKLCHSpectrumModel(
+        lightness: 0.75,
+        chroma: 0.8,
+        startHue: 0.0,
+        endHue: 1.0
+    )
+
+    PreviewContainer(dataSource: oklchModel)
+}
+
+// MARK: - Gradient previews
+
+#Preview("Horizontal RGB gradient slider") {
+    let gradientModel = GradientSliderModel(
+        startColor: .orange,
+        endColor: .blue,
+        colorSpace: .rgb
+    )
+
+    PreviewContainer(dataSource: gradientModel)
+}
+
+#Preview("Horizontal OKLAB gradient slider") {
+    let gradientModel = GradientSliderModel(
+        startColor: .blue,
+        endColor: .red,
+        colorSpace: .oklab
+    )
+
+    PreviewContainer(dataSource: gradientModel)
+}
+
+#Preview("Horizontal gradient slider with custom dimensions") {
+    let gradientModel = GradientSliderModel(
+        startColor: .green,
+        endColor: .yellow
+    )
+
+    PreviewContainer(dataSource: gradientModel)
+        .colorSliderDimensions(
+            length: 200,
+            thickness: 40,
+            previewSize: 100,
+            previewOffset: 110
+        )
+}
+
+// MARK: - Hard-edge previews
+
+#Preview("Horizontal explicit hard-edge slider") {
+    let customStops = HardEdgeSliderModel(colors: [
+        .green, .yellow, .orange, .red, .purple, .blue
+    ])
+
+    PreviewContainer(dataSource: customStops)
+}
+
+#Preview("Vertical explicit hard-edge slider") {
+    let customStops = HardEdgeSliderModel(colors: [
+        .green, .yellow, .orange, .red, .purple, .blue
+    ])
+
+    PreviewContainer(dataSource: customStops, axis: .vertical)
+}
+
+#Preview("Horizontal hard-edge HSB spectrum slider with bend sections") {
+    let bentSpectrum = HSBSpectrumModel(
+        startHue: 0.0,
+        endHue: 1.0,
+        saturation: 1.0,
+        brightness: 1.0,
+        saturationBends: {
+            TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
+        },
+        brightnessBends: {
+            TwoWayBend(startHue: 200.0 / 360, endHue: 300.0 / 360, target: 0.4)
+        }
+    ).hardEdge(into: 8)
+
+    PreviewContainer(dataSource: bentSpectrum)
 }
