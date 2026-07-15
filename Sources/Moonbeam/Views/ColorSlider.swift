@@ -65,6 +65,12 @@ public struct ColorSlider: View {
     private var endSections: [MonochromeSection] = []
     private var saturationBends: [BendSection] = []
     private var brightnessBends: [BendSection] = []
+    private var lightnessBends: [BendSection] = []
+    private var chromaBends: [BendSection] = []
+    private var baseSaturation: Double? = nil
+    private var baseBrightness: Double? = nil
+    private var baseLightness: Double? = nil
+    private var baseChroma: Double? = nil
 
     // MARK: - Initializer
 
@@ -79,9 +85,6 @@ public struct ColorSlider: View {
     ///   - selection: A binding to the currently absolute selected color.
     ///   - progress: A binding to the slider's normalized position (0.0 to
     ///     1.0).
-    ///   - dataSource: An optional model providing custom gradient or hard-edge
-    ///     data. If omitted, use the `.spectrum(...)` modifier chain to build
-    ///     the data source.
     ///   - spectrumIdentifier: An optional identifier to trigger a spectrum
     ///     change.
     ///   - onSpectrumChanged: An optional callback defining the thumb's
@@ -95,7 +98,6 @@ public struct ColorSlider: View {
     public init(
         selection: Binding<CGColor>,
         progress: Binding<Double>,
-        dataSource: ColorSliderDataSource? = nil,
         spectrumIdentifier: AnyHashable? = nil,
         onSpectrumChanged: ((CGColor) -> Double)? = nil,
         label: LocalizedStringKey = "Color Slider",
@@ -104,7 +106,7 @@ public struct ColorSlider: View {
     ) {
         self._selection = selection
         self._progress = progress
-        self.dataSource = dataSource
+        self.dataSource = nil
         self.spectrumIdentifier = spectrumIdentifier
         self.onSpectrumChanged = onSpectrumChanged
         self.label = label
@@ -117,28 +119,31 @@ public struct ColorSlider: View {
     private var resolvedDataSource: ColorSliderDataSource {
         if let dataSource = dataSource { return dataSource }
 
-        let currentSaturationBends: () -> [BendSection] = { saturationBends }
-        let currentBrightnessBends: () -> [BendSection] = { brightnessBends }
-
         if colorSpace == .oklch {
+            let currentChromaBends: () -> [BendSection] = { chromaBends }
+            let currentLightnessBends: () -> [BendSection] = { lightnessBends }
+
             return OKLCHSpectrumModel(
                 startSections: startSections,
                 endSections: endSections,
-                lightness: 0.75,
-                chroma: 0.15,
+                lightness: baseLightness ?? 0.75,
+                chroma: baseChroma ?? 0.15,
                 startHue: hueRange.lowerBound,
                 endHue: hueRange.upperBound,
-                lightnessBends: currentBrightnessBends,
-                chromaBends: currentSaturationBends
+                lightnessBends: currentLightnessBends,
+                chromaBends: currentChromaBends
             )
         } else {
+            let currentSaturationBends: () -> [BendSection] = { saturationBends }
+            let currentBrightnessBends: () -> [BendSection] = { brightnessBends }
+
             return HSBSpectrumModel(
                 startSections: startSections,
                 endSections: endSections,
                 startHue: hueRange.lowerBound,
                 endHue: hueRange.upperBound,
-                saturation: 1.0,
-                brightness: 1.0,
+                saturation: baseSaturation ?? 1.0,
+                brightness: baseBrightness ?? 1.0,
                 saturationBends: currentSaturationBends,
                 brightnessBends: currentBrightnessBends
             )
@@ -338,6 +343,34 @@ public struct ColorSlider: View {
         return copy
     }
 
+    public func baseSaturation(_ value: Double) -> Self {
+        var copy = self
+        copy.baseSaturation = value
+        copy.dataSource = nil
+        return copy
+    }
+
+    public func baseBrightness(_ value: Double) -> Self {
+        var copy = self
+        copy.baseBrightness = value
+        copy.dataSource = nil
+        return copy
+    }
+
+    public func baseLightness(_ value: Double) -> Self {
+        var copy = self
+        copy.baseLightness = value
+        copy.dataSource = nil
+        return copy
+    }
+
+    public func baseChroma(_ value: Double) -> Self {
+        var copy = self
+        copy.baseChroma = value
+        copy.dataSource = nil
+        return copy
+    }
+
     public func startingWith(_ sections: MonochromeSection...) -> Self {
         var copy = self
         copy.startSections = sections
@@ -363,6 +396,38 @@ public struct ColorSlider: View {
         var copy = self
         copy.brightnessBends = bends()
         copy.dataSource = nil
+        return copy
+    }
+
+    public func lightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
+        var copy = self
+        copy.lightnessBends = bends()
+        copy.dataSource = nil
+        return copy
+    }
+
+    public func chromaBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
+        var copy = self
+        copy.chromaBends = bends()
+        copy.dataSource = nil
+        return copy
+    }
+
+    public func gradient(from startColor: Color, to endColor: Color, space: GradientColorSpace = .rgb) -> Self {
+        var copy = self
+        copy.dataSource = GradientSliderModel(startColor: startColor, endColor: endColor, colorSpace: space)
+        return copy
+    }
+
+    public func colors(_ colors: [Color]) -> Self {
+        var copy = self
+        copy.dataSource = HardEdgeSliderModel(colors: colors)
+        return copy
+    }
+
+    public func hardEdge(into steps: Int) -> Self {
+        var copy = self
+        copy.dataSource = copy.resolvedDataSource.hardEdge(into: steps)
         return copy
     }
 }
@@ -536,7 +601,6 @@ public extension ColorSlider {
     init(
         selection: Binding<Color>,
         progress: Binding<Double>,
-        dataSource: ColorSliderDataSource? = nil,
         spectrumIdentifier: AnyHashable? = nil,
         onSpectrumChanged: ((Color) -> Double)? = nil,
         label: LocalizedStringKey = "Color Slider",
@@ -557,7 +621,6 @@ public extension ColorSlider {
         self.init(
             selection: cgSelection,
             progress: progress,
-            dataSource: dataSource,
             spectrumIdentifier: spectrumIdentifier,
             onSpectrumChanged: cgOnChanged,
             label: label,
