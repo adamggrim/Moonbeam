@@ -10,4 +10,12 @@ public enum ColorSliderDefaults {
     public static let scaleRatio: CGFloat = 0.25
     public static let dragScaleMultiplier: CGFloat = 1.1
     public static let accessibilityStepPercentage: Double = 0.05
+
+    public static let shadowRadius: CGFloat = 5.0
+    public static let shadowX: CGFloat = 0.0
+    public static let shadowY: CGFloat = 0.0
+    public static let shadowOpacity: Double = 0.33
+
+    public static let strokeLineWidth: CGFloat = 1.0
+    public static let animationDuration: Double = 0.25
 }
