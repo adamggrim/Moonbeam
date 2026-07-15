@@ -2,10 +2,9 @@ import SwiftUI
 
 // MARK: - Helper
 
-private struct PreviewContainer: View {
-    let dataSource: ColorSliderDataSource
-    var axis: Axis = .horizontal
+private struct PreviewContainer<Content: View>: View {
     var backgroundColor: Color = .black
+    @ViewBuilder let content: (Binding<CGColor>, Binding<Double>) -> Content
 
     @State private var selection: CGColor = CGColor(gray: 1, alpha: 1)
     @State private var progress: Double = 0.5
@@ -13,13 +12,7 @@ private struct PreviewContainer: View {
     var body: some View {
         ZStack {
             backgroundColor.ignoresSafeArea()
-
-            ColorSlider(
-                selection: $selection,
-                progress: $progress,
-                dataSource: dataSource,
-                axis: axis
-            )
+            content($selection, $progress)
         }
     }
 }
@@ -27,233 +20,166 @@ private struct PreviewContainer: View {
 // MARK: - HSB sliders
 
 #Preview("Horizontal HSB spectrum slider") {
-    let spectrumModel = HSBSpectrumModel(
-        startSections: [BlackSection()],
-        endSections: [WhiteSection()],
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-    PreviewContainer(dataSource: spectrumModel)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+    }
 }
 
 #Preview("Vertical HSB spectrum slider (AnyShape)") {
-    let spectrumModel = HSBSpectrumModel(
-        startSections: [BlackSection()],
-        endSections: [WhiteSection()],
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-    PreviewContainer(dataSource: spectrumModel, axis: .vertical)
-        .colorSliderThumbShape(Rectangle())
-        .colorSliderPreviewShape(Circle())
-        .colorSliderCornerRadius(0)
-        .colorSliderTrackStroke(Color.white, lineWidth: 2)
-        .colorSliderThumbStroke(Color.white, lineWidth: 2)
-        .colorSliderPreviewStroke(Color.white, lineWidth: 2)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .vertical)
+            .startingWith(BlackSection())
+            .endingWith(WhiteSection())
+            .colorSliderThumbShape(Rectangle())
+            .colorSliderPreviewShape(Circle())
+            .colorSliderCornerRadius(0)
+            .colorSliderTrackStroke(Color.white, lineWidth: 2)
+            .colorSliderThumbStroke(Color.white, lineWidth: 2)
+            .colorSliderPreviewStroke(Color.white, lineWidth: 2)
+    }
 }
 
 #Preview("Horizontal HSB spectrum slider with bend sections") {
-    let spectrumModel = HSBSpectrumModel(
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0,
-        saturationBends: {
-            OneWayBend(startHue: 0.0, endHue: 40.0 / 360, target: 0.5)
-            TwoWayBend(startHue: 200.0 / 360, endHue: 280.0 / 360, target: 0.3)
-        }
-    )
-
-    PreviewContainer(dataSource: spectrumModel)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .saturationBends {
+                OneWayBend(startHue: 0.0, endHue: 40.0 / 360, target: 0.5)
+                TwoWayBend(startHue: 200.0 / 360, endHue: 280.0 / 360, target: 0.3)
+            }
+    }
 }
 
 #Preview("Horizontal HSB spectrum slider with simultaneous bends") {
-    let spectrumModel = HSBSpectrumModel(
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0,
-        saturationBends: {
-            TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
-        },
-        brightnessBends: {
-            TwoWayBend(startHue: 200.0 / 360, endHue: 300.0 / 360, target: 0.4)
-        }
-    )
-
-    PreviewContainer(dataSource: spectrumModel)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .saturationBends {
+                TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
+            }
+            .brightnessBends {
+                TwoWayBend(startHue: 200.0 / 360, endHue: 300.0 / 360, target: 0.4)
+            }
+    }
 }
 
 #Preview("Horizontal HSB spectrum slider with monochrome sections") {
-    let spectrumModel = HSBSpectrumModel(
-        startSections: [BlackSection(), WhiteSection()],
-        endSections: [BlackSection(), WhiteSection()],
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-
-    PreviewContainer(dataSource: spectrumModel)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .startingWith(BlackSection(), WhiteSection())
+            .endingWith(BlackSection(), WhiteSection())
+    }
 }
 
 #Preview("Horizontal HSB spectrum slider with circle thumb") {
-    let spectrumModel = HSBSpectrumModel(
-        startSections: [BlackSection()],
-        endSections: [WhiteSection()],
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-    PreviewContainer(dataSource: spectrumModel)
-        .colorSliderThumbShape(Circle())
-        .colorSliderDimensions(thumbLength: 25)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .startingWith(BlackSection())
+            .endingWith(WhiteSection())
+            .colorSliderThumbShape(Circle())
+            .colorSliderDimensions(thumbLength: 25)
+    }
 }
 
 #Preview("Vertical HSB spectrum slider with circle thumb") {
-    let spectrumModel = HSBSpectrumModel(
-        startSections: [BlackSection()],
-        endSections: [WhiteSection()],
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-    PreviewContainer(dataSource: spectrumModel, axis: .vertical)
-        .colorSliderThumbShape(Circle())
-        .colorSliderDimensions(thumbLength: 25)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .vertical)
+            .startingWith(BlackSection())
+            .endingWith(WhiteSection())
+            .colorSliderThumbShape(Circle())
+            .colorSliderDimensions(thumbLength: 25)
+    }
 }
 
 #Preview("Horizontal HSB spectrum slider with bottom preview") {
-    let spectrumModel = HSBSpectrumModel(
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-    PreviewContainer(dataSource: spectrumModel)
-        .colorSliderPreviewPosition(.bottomTrailing, spacing: 20)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .colorSliderPreviewPosition(.bottomTrailing, spacing: 20)
+    }
 }
 
 #Preview("Vertical HSB spectrum slider with leading preview") {
-    let spectrumModel = HSBSpectrumModel(
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-    PreviewContainer(dataSource: spectrumModel, axis: .vertical)
-        .colorSliderPreviewPosition(.topLeading)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .vertical)
+            .colorSliderPreviewPosition(.topLeading)
+    }
 }
 
 #Preview("Horizontal HSB spectrum slider with Liquid Glass disabled") {
-    let spectrumModel = HSBSpectrumModel(
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0
-    )
-
-    PreviewContainer(dataSource: spectrumModel)
-        .colorSliderDisableLiquidGlass(true)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .colorSliderDisableLiquidGlass(true)
+    }
 }
 
 // MARK: - OKLCH Previews
 
 #Preview("Horizontal OKLCH spectrum slider") {
-    let oklchModel = OKLCHSpectrumModel(
-        lightness: 0.75,
-        chroma: 0.8,
-        startHue: 0.0,
-        endHue: 1.0
-    )
-
-    PreviewContainer(dataSource: oklchModel)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .spectrum(space: .oklch, range: 0.0...1.0)
+    }
 }
 
 // MARK: - Gradient previews
 
 #Preview("Horizontal RGB gradient slider") {
-    let gradientModel = GradientSliderModel(
-        startColor: .orange,
-        endColor: .blue,
-        colorSpace: .rgb
-    )
-
-    PreviewContainer(dataSource: gradientModel)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .gradient(from: .orange, to: .blue, space: .rgb)
+    }
 }
 
 #Preview("Horizontal OKLAB gradient slider") {
-    let gradientModel = GradientSliderModel(
-        startColor: .blue,
-        endColor: .red,
-        colorSpace: .oklab
-    )
-
-    PreviewContainer(dataSource: gradientModel)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .gradient(from: .blue, to: .red, space: .oklab)
+    }
 }
 
 #Preview("Horizontal OKLCH gradient slider") {
-    let gradientModel = GradientSliderModel(
-        startColor: .purple,
-        endColor: .white,
-        colorSpace: .oklch
-    )
-
-    PreviewContainer(dataSource: gradientModel)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .gradient(from: .purple, to: .white, space: .oklch)
+    }
 }
 
 #Preview("Horizontal gradient slider with custom dimensions") {
-    let gradientModel = GradientSliderModel(
-        startColor: .green,
-        endColor: .yellow
-    )
-
-    PreviewContainer(dataSource: gradientModel)
-        .colorSliderDimensions(
-            length: 200,
-            thickness: 40,
-            previewSize: 100,
-            previewOffset: 110
-        )
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .gradient(from: .green, to: .yellow)
+            .colorSliderDimensions(
+                length: 200,
+                thickness: 40,
+                previewSize: 100,
+                previewOffset: 110
+            )
+    }
 }
 
 // MARK: - Hard-edge sliders
 
 #Preview("Horizontal explicit hard-edge slider") {
-    let customStops = HardEdgeSliderModel(colors: [
-        .green, .yellow, .orange, .red, .purple, .blue
-    ])
-
-    PreviewContainer(dataSource: customStops)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .colors([.green, .yellow, .orange, .red, .purple, .blue])
+    }
 }
 
 #Preview("Vertical explicit hard-edge slider") {
-    let customStops = HardEdgeSliderModel(colors: [
-        .green, .yellow, .orange, .red, .purple, .blue
-    ])
-
-    PreviewContainer(dataSource: customStops, axis: .vertical)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .vertical)
+            .colors([.green, .yellow, .orange, .red, .purple, .blue])
+    }
 }
 
 #Preview("Horizontal hard-edge HSB spectrum slider with bend sections") {
-    let bentSpectrum = HSBSpectrumModel(
-        startHue: 0.0,
-        endHue: 1.0,
-        saturation: 1.0,
-        brightness: 1.0,
-        saturationBends: {
-            TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
-        },
-        brightnessBends: {
-            TwoWayBend(startHue: 200.0 / 360, endHue: 300.0 / 360, target: 0.4)
-        }
-    ).hardEdge(into: 8)
-
-    PreviewContainer(dataSource: bentSpectrum)
+    PreviewContainer { selection, progress in
+        ColorSlider(selection: selection, progress: progress, axis: .horizontal)
+            .saturationBends {
+                TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
+            }
+            .brightnessBends {
+                TwoWayBend(startHue: 200.0 / 360, endHue: 300.0 / 360, target: 0.4)
+            }
+            .hardEdge(into: 8)
+    }
 }
