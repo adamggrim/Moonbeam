@@ -1,44 +1,12 @@
 #include <metal_stdlib>
 #include <SwiftUI/SwiftUI_Metal.h>
+#include "../../MoonbeamShared/include/MoonbeamShared.h"
 using namespace metal;
 
 // This value must match `spectrumConstants.maxBends` in `SpectrumSliderModel.swift`.
 constant int MAX_BENDS = 20;
 // This value must match `spectrumConstants.maxMonochromeSections` in `SpectrumSliderModel.swift`.
 constant int MAX_MONOCHROME_SECTIONS = 2;
-
-// MARK: - Struct definitions
-
-struct ShaderBend {
-    float4 data0; // x: type, y: startHue, z: endHue, w: targetValue
-    float4 data1; // x: hueCount, y: 0, z: 0, w: 0
-};
-
-/// Represents the structured data passed to the Metal shader for rendering the spectrum.
-///
-///  The property sequence, layout and alignment of this struct must exactly mirror the `SpectrumShaderData`
-///   struct in `SpectrumSliderModel.swift`.
-struct SpectrumShaderData {
-    float totalWeight;
-    float startSectionBoundary;
-    float hueSectionBoundary;
-    float minimumHue;
-    float maximumHue;
-    float baseSaturation;
-    float baseBrightness;
-    float colorSpaceFlag;
-
-    int startSectionsCount;
-    int endSectionsCount;
-    int saturationBendsCount;
-    int brightnessBendsCount;
-
-    float4 startSectionsData;
-    float4 endSectionsData;
-
-    ShaderBend saturationBendsData[20];
-    ShaderBend brightnessBendsData[20];
-};
 
 // MARK: – HSB to RGB
 

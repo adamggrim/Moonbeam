@@ -3,6 +3,8 @@ import SwiftUI
 import simd
 import os
 
+import MoonbeamShared
+
 /// The color space used to generate the spectrum.
 public enum SpectrumColorSpace {
     case hsb, oklch
@@ -109,13 +111,10 @@ fileprivate func validateAndTruncateMonochromeSections(
 
 // MARK: - Metal data structures
 
-/// A strictly aligned sub-structure to represent a single bend.
-/// Uses 32 bytes (two 16-byte `simd_float4s`) to guarantee Metal alignment.
-fileprivate struct ShaderBend {
-    var data0: simd_float4 // x: type, y: startHue, z: endHue, w: targetValue
-    var data1: simd_float4 // x: hueCount, y: 0, z: 0, w: 0 (padding)
-
+/// Adds an initializer to the C-bridged `ShaderBend` struct to map Swift `BendSection` properties.
+extension ShaderBend {
     init(bend: BendSection?) {
+        self.init() // Initialize the C struct zeroed out
         guard let b = bend else {
             self.data0 = .zero
             self.data1 = .zero
@@ -129,49 +128,6 @@ fileprivate struct ShaderBend {
         )
         self.data1 = simd_float4(Float(b.hueCount), 0, 0, 0)
     }
-}
-
-/// A C-compatible memory layout that bridges directly to the
-/// `SpectrumShaderData` struct in Metal.
-///
-/// The property sequence, layout and alignment of this struct must exactly
-/// mirror `SpectrumShaderData` in Metal.
-///
-/// 1. Do **not** use dynamically sized arrays (e.g., `Array` or `[Float]`).
-/// 2. Do **not** use nested objects or classes.
-/// 3. Rely strictly on fixed-size tuples and primitive types (`Float`, `Int32`,
-///   `simd_float4`).
-fileprivate struct SpectrumShaderData {
-    // 32 Bytes
-    var totalWeight: Float
-    var startSectionBoundary: Float
-    var hueSectionBoundary: Float
-    var minimumHue: Float
-    var maximumHue: Float
-    var baseSaturation: Float
-    var baseBrightness: Float
-    var colorSpaceFlag: Float
-
-    // 16 Bytes
-    var startSectionsCount: Int32
-    var endSectionsCount: Int32
-    var saturationBendsCount: Int32
-    var brightnessBendsCount: Int32
-
-    // 32 Bytes
-    var startSectionsData: simd_float4
-    var endSectionsData: simd_float4
-
-    // 20 bend elements to match `MAX_BENDS`
-    typealias BendBuffer = (
-        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
-        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
-        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
-        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend
-    )
-
-    var saturationBendsData: BendBuffer
-    var brightnessBendsData: BendBuffer
 }
 
 fileprivate func encodeSpectrumData(
@@ -203,13 +159,20 @@ fileprivate func encodeSpectrumData(
     }
 
     /// Packs an array of bend sections into a fixed-size tuple buffer
-    /// compatible with Metal shaders.
-    func packBends(_ bends: [BendSection]) -> SpectrumShaderData.BendBuffer {
+    /// compatible with Metal shaders and the C-bridged struct.
+    typealias BendBuffer = (
+        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
+        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
+        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
+        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend
+    )
+
+    func packBends(_ bends: [BendSection]) -> BendBuffer {
         var buffer = [ShaderBend](repeating: ShaderBend(bend: nil), count: 20)
         for i in 0..<min(bends.count, 20) {
             buffer[i] = ShaderBend(bend: bends[i])
         }
-        return buffer.withUnsafeBytes { $0.load(as: SpectrumShaderData.BendBuffer.self) }
+        return buffer.withUnsafeBytes { $0.load(as: BendBuffer.self) }
     }
 
     var shaderData = SpectrumShaderData(
@@ -234,18 +197,18 @@ fileprivate func encodeSpectrumData(
     return withUnsafeBytes(of: &shaderData) { Data($0) }
 }
 
-// MARK: - Public models
+// MARK: - Internal models
 
 /// Model for calculating standard HSB spectrum colors dynamically.
-public struct HSBSpectrumModel: ColorSliderDataSource {
-    public let startSections: [MonochromeSection]
-    public let endSections: [MonochromeSection]
-    public let startHue: Double
-    public let endHue: Double
-    public let saturation: Double
-    public let brightness: Double
-    public let saturationBends: [BendSection]
-    public let brightnessBends: [BendSection]
+internal struct HSBSpectrumModel: ColorSliderDataSource {
+    let startSections: [MonochromeSection]
+    let endSections: [MonochromeSection]
+    let startHue: Double
+    let endHue: Double
+    let saturation: Double
+    let brightness: Double
+    let saturationBends: [BendSection]
+    let brightnessBends: [BendSection]
 
     /// Creates a dynamically generated spectrum based on the HSB (Hue,
     /// Saturation, Brightness) color space.
@@ -267,7 +230,7 @@ public struct HSBSpectrumModel: ColorSliderDataSource {
     ///     baseline saturation increases or decreases to a `targetValue`.
     ///   - brightnessBends: A result builder providing sections where the
     ///     baseline brightness increases or decreases to a `targetValue`.
-    public init(
+    init(
         startSections: [MonochromeSection] = [],
         endSections: [MonochromeSection] = [],
         startHue: Double = 0.0,
@@ -287,7 +250,7 @@ public struct HSBSpectrumModel: ColorSliderDataSource {
         self.brightnessBends = validateAndTruncateBends(brightnessBends(), name: "HSB Brightness")
     }
 
-    public var colorSource: ColorSourceProvider {
+    var colorSource: ColorSourceProvider {
         let fallback: (Double) -> Color = { position in
             SpectrumGenerator.color(
                 at: position,
@@ -374,7 +337,7 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource {
         self.chromaBends = validateAndTruncateBends(chromaBends(), name: "OKLCH Chroma")
     }
 
-    public var colorSource: ColorSourceProvider {
+    var colorSource: ColorSourceProvider {
         let fallback: (Double) -> Color = { position in
             SpectrumGenerator.color(
                 at: position,

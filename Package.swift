@@ -15,8 +15,12 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "Moonbeam",
+            name: "MoonbeamShared",
             dependencies: [],
+            publicHeadersPath: "."),
+        .target(
+            name: "Moonbeam",
+            dependencies: ["MoonbeamShared"],
             resources: [
                 .process("Shaders")
             ]),
