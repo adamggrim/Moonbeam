@@ -7,18 +7,18 @@ public enum GradientColorSpace {
 }
 
 /// Model for calculating gradient colors on demand.
-public struct GradientSliderModel: ColorSliderDataSource {
+internal struct GradientSliderModel: ColorSliderDataSource {
     /// The starting color of the gradient.
-    public let startColor: Color
+    let startColor: Color
 
     /// The ending color of the gradient.
-    public let endColor: Color
+    let endColor: Color
 
     /// The color space used to calculate the interpolation between the starting
     /// and ending colors.
-    public let colorSpace: GradientColorSpace
+    let colorSpace: GradientColorSpace
 
-    public var colorSource: ColorSourceProvider {
+    var colorSource: ColorSourceProvider {
         let fallback: (Double) -> Color = { position in
             switch colorSpace {
             case .rgb: return startColor.mix(with: endColor, by: position)
@@ -38,7 +38,7 @@ public struct GradientSliderModel: ColorSliderDataSource {
         }, fallback: fallback)
     }
 
-    public init(startColor: Color, endColor: Color, colorSpace: GradientColorSpace = .rgb) {
+    init(startColor: Color, endColor: Color, colorSpace: GradientColorSpace = .rgb) {
         self.startColor = startColor
         self.endColor = endColor
         self.colorSpace = colorSpace

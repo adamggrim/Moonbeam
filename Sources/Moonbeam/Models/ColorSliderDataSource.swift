@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Represents whether the colors are defined by an array or function.
-public enum ColorSourceProvider {
+internal enum ColorSourceProvider {
     /// Provides colors as a precomputed array.
     ///
     /// Designed for hard-edge color sliders.
@@ -18,13 +18,13 @@ public enum ColorSourceProvider {
 }
 
 /// Protocol shared by `SpectrumSliderModel`, `GradientSliderModel` and `HardEdgeSliderModel`.
-public protocol ColorSliderDataSource {
+internal protocol ColorSliderDataSource {
 
     /// Determines how the slider track is drawn on screen.
     var colorSource: ColorSourceProvider { get }
 }
 
-public extension ColorSliderDataSource {
+internal extension ColorSliderDataSource {
     /// Converts a continuous color slider into a hard-edge slider with discrete
     /// color blocks.
     func hardEdge(into steps: Int) -> HardEdgeSliderModel {
