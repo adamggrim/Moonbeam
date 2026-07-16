@@ -1,6 +1,8 @@
 #ifndef MoonbeamShared_h
 #define MoonbeamShared_h
 
+#define MAX_MONOCHROME_SECTIONS 2
+
 #ifdef __METAL_VERSION__
 #include <metal_stdlib>
 using namespace metal;

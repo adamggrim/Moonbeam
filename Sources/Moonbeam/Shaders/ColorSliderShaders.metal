@@ -3,9 +3,6 @@
 #include "../../MoonbeamShared/include/MoonbeamShared.h"
 using namespace metal;
 
-// This value must match `spectrumConstants.maxMonochromeSections` in `SpectrumSliderModel.swift`.
-constant int MAX_MONOCHROME_SECTIONS = 2;
-
 // MARK: – HSB to RGB
 
 float3 convertHSBtoRGB(float hue, float saturation, float brightness) {

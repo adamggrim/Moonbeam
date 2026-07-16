@@ -12,14 +12,6 @@ public enum SpectrumColorSpace {
 
 // MARK: - Constants and validation
 
-/// Global bounds for shader data structures.
-internal enum spectrumConstants {
-    /// The maximum number of monochrome sections allowed at either end of the spectrum.
-    ///
-    /// This value must match `MAX_MONOCHROME_SECTIONS` in `ColorSliderShaders.metal`.
-    static let maxMonochromeSections = 2
-}
-
 fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "SpectrumModel")
 
 /// A lightweight wrapper for telemetry and non-fatal production logging.
@@ -69,15 +61,16 @@ fileprivate func validateBends(_ bends: [BendSection], name: String) -> [BendSec
     return validBends
 }
 
-/// Validates monochrome sections, truncating them if they exceed the maximum allowed, to prevent shader
-/// errors.
+/// Validates monochrome sections, truncating them if they exceed the maximum
+/// allowed, to prevent shader errors.
 fileprivate func validateAndTruncateMonochromeSections(
     _ sections: [MonochromeSection], name: String
 ) -> [MonochromeSection] {
-    guard sections.count > spectrumConstants.maxMonochromeSections else { return sections }
+    let maxSections = Int(MAX_MONOCHROME_SECTIONS)
+    guard sections.count > maxSections else { return sections }
 
     let errorMessage = (
-        "Moonbeam: \(name) monochrome sections exceed the maximum of \(spectrumConstants.maxMonochromeSections). "
+        "Moonbeam: \(name) monochrome sections exceed the maximum of \(maxSections). "
         + "Monochrome sections truncated."
     )
 
@@ -85,7 +78,7 @@ fileprivate func validateAndTruncateMonochromeSections(
     fatalError(errorMessage)
     #else
     MoonbeamTelemetry.reportNonFatalIssue(errorMessage)
-    return Array(sections.prefix(spectrumConstants.maxMonochromeSections))
+    return Array(sections.prefix(maxSections))
     #endif
 }
 
@@ -117,10 +110,12 @@ fileprivate func encodeSpectrumData(
     let endWeight = endSections.reduce(0) { $0 + $1.weight }
     let totalWeight = startWeight + hueWeight + endWeight
 
+    let maxSections = Int(MAX_MONOCHROME_SECTIONS)
+
     var startData = simd_float4(0, 0, 0, 0)
     var cumulativeStart = 0.0
     for (i, sec) in startSections.enumerated() {
-        if i >= spectrumConstants.maxMonochromeSections { break }
+        if i >= maxSections { break }
         cumulativeStart += sec.weight / totalWeight
         startData[i*2] = sec.color == .white ? 1.0 : 0.0
         startData[i*2 + 1] = Float(cumulativeStart)
@@ -129,7 +124,7 @@ fileprivate func encodeSpectrumData(
     var endData = simd_float4(0, 0, 0, 0)
     var cumulativeEnd = (startWeight + hueWeight) / totalWeight
     for (i, sec) in endSections.enumerated() {
-        if i >= spectrumConstants.maxMonochromeSections { break }
+        if i >= maxSections { break }
         cumulativeEnd += sec.weight / totalWeight
         endData[i*2] = sec.color == .white ? 1.0 : 0.0
         endData[i*2 + 1] = Float(cumulativeEnd)
@@ -173,8 +168,7 @@ internal struct HSBSpectrumModel: ColorSliderDataSource {
     ///
     /// - Parameters:
     ///   - startSections: Monochrome sections that fade into the
-    ///     beginning of the hue spectrum. Capped at
-    ///     `spectrumConstants.maxMonochromeSections`.
+    ///     beginning of the hue spectrum. Capped at `MAX_MONOCHROME_SECTIONS`.
     ///   - endSections: Monochrome sections that fade out of the end of the hue
     ///     spectrum.
     ///   - startHue: The starting hue value in degrees normalized to 0.0 to 1.0
@@ -271,9 +265,9 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource {
     /// uniform OKLCH color space.
     ///
     /// - Parameters:
-    ///   - startSections: Monochrome sections that fade into the beginning
-    ///     of the hue spectrum. Capped at
-    ///     `spectrumConstants.maxMonochromeSections`.
+    ///   - startSections: Monochrome sections that fade into the beginning of
+    ///     the hue spectrum. Capped at
+    ///     `MAX_MONOCHROME_SECTIONS`.
     ///   - endSections: Monochrome sections that fade out of the end of the hue
     ///     spectrum.
     ///   - lightness: The perceived brightness of the color. Standard range is
