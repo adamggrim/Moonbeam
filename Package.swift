@@ -16,8 +16,7 @@ let package = Package(
     targets: [
         .target(
             name: "MoonbeamShared",
-            dependencies: [],
-            publicHeadersPath: "."),
+            dependencies: []),
         .target(
             name: "Moonbeam",
             dependencies: ["MoonbeamShared"],
