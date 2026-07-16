@@ -1,0 +1,4 @@
+module MoonbeamShared {
+    header "MoonbeamShared.h"
+    export *
+}
