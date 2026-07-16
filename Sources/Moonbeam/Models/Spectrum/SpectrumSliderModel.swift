@@ -10,7 +10,7 @@ public enum SpectrumColorSpace {
     case hsb, oklch
 }
 
-// MARK: - Constants & validation
+// MARK: - Constants and validation
 
 /// Global bounds for shader data structures.
 internal enum spectrumConstants {

@@ -13,7 +13,7 @@ typealias PlatformColor = NSColor
 @MainActor
 public struct ColorSlider: View {
 
-    // MARK: - State & bindings
+    // MARK: - State and bindings
 
     @Binding public var selection: CGColor
 
