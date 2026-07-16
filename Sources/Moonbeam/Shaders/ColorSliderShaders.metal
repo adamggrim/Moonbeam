@@ -3,8 +3,6 @@
 #include "../../MoonbeamShared/include/MoonbeamShared.h"
 using namespace metal;
 
-// This value must match `spectrumConstants.maxBends` in `SpectrumSliderModel.swift`.
-constant int MAX_BENDS = 20;
 // This value must match `spectrumConstants.maxMonochromeSections` in `SpectrumSliderModel.swift`.
 constant int MAX_MONOCHROME_SECTIONS = 2;
 
@@ -88,10 +86,7 @@ float calculateBend(
     int totalBends,
     float minimumHue
 ) {
-    // Capped at `MAX_BENDS` to prevent unroll failures.
-    for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
-        if (bendIndex >= totalBends) break;
-
+    for (int bendIndex = 0; bendIndex < totalBends; bendIndex++) {
         float bendType = bendsData[bendIndex].data0.x;
         float startHue = bendsData[bendIndex].data0.y;
         float endHue = bendsData[bendIndex].data0.z;
@@ -177,7 +172,11 @@ half4 spectrumShader(
     float2 size,
     float isVertical,
     device const SpectrumShaderData* data,
-    int dataLength
+    int dataLength,
+    device const ShaderBend* saturationBendsData,
+    int saturationBendsDataLength,
+    device const ShaderBend* brightnessBendsData,
+    int brightnessBendsDataLength
 ) {
     float normalizedPosition = isVertical > 0.5 ? (1.0 - (position.y / size.y)) : (position.x / size.x);
     normalizedPosition = clamp(normalizedPosition, 0.0, 1.0);
@@ -231,27 +230,23 @@ half4 spectrumShader(
                         finalSaturation = baseSaturation;
                     }
 
-                    // Capped at `MAX_BENDS` saturation bends.
-                    for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
-                        if (bendIndex >= saturationBendsCount) break;
-                        if (data->saturationBendsData[bendIndex].data0.y == minimumHue &&
-                            data->saturationBendsData[bendIndex].data0.x == 1.0) {
+                    for (int bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
+                        if (saturationBendsData[bendIndex].data0.y == minimumHue &&
+                            saturationBendsData[bendIndex].data0.x == 1.0) {
 
                             finalSaturation = isWhiteSection == 1.0
-                                ? relativePositionInSection * data->saturationBendsData[bendIndex].data0.w
+                                ? relativePositionInSection * saturationBendsData[bendIndex].data0.w
                                 : finalSaturation;
                         }
                     }
 
-                    // Capped at `MAX_BENDS` brightness bends.
-                    for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
-                        if (bendIndex >= brightnessBendsCount) break;
-                        if (data->brightnessBendsData[bendIndex].data0.y == minimumHue &&
-                            data->brightnessBendsData[bendIndex].data0.x == 1.0) {
+                    for (int bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
+                        if (brightnessBendsData[bendIndex].data0.y == minimumHue &&
+                            brightnessBendsData[bendIndex].data0.x == 1.0) {
 
                             finalBrightness = isWhiteSection == 1.0
                                 ? finalBrightness
-                                : relativePositionInSection * data->brightnessBendsData[bendIndex].data0.w;
+                                : relativePositionInSection * brightnessBendsData[bendIndex].data0.w;
                         }
                     }
 
@@ -290,14 +285,14 @@ half4 spectrumShader(
         float calculatedSaturation = calculateBend(
             currentHue,
             baseSaturation,
-            data->saturationBendsData,
+            saturationBendsData,
             saturationBendsCount,
             minimumHue
         );
         float calculatedBrightness = calculateBend(
             currentHue,
             baseBrightness,
-            data->brightnessBendsData,
+            brightnessBendsData,
             brightnessBendsCount,
             minimumHue
         );
@@ -339,27 +334,23 @@ half4 spectrumShader(
                         finalSaturation = baseSaturation;
                     }
 
-                    // Capped at `MAX_BENDS` saturation bends.
-                    for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
-                        if (bendIndex >= saturationBendsCount) break;
-                        if (data->saturationBendsData[bendIndex].data0.z == maximumHue &&
-                            data->saturationBendsData[bendIndex].data0.x == 1.0) {
+                    for (int bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
+                        if (saturationBendsData[bendIndex].data0.z == maximumHue &&
+                            saturationBendsData[bendIndex].data0.x == 1.0) {
 
                             finalSaturation = isWhiteSection == 1.0
-                                ? (1.0 - relativePositionInSection) * data->saturationBendsData[bendIndex].data0.w
+                                ? (1.0 - relativePositionInSection) * saturationBendsData[bendIndex].data0.w
                                 : finalSaturation;
                         }
                     }
 
-                    // Capped at `MAX_BENDS` brightness bends.
-                    for (int bendIndex = 0; bendIndex < MAX_BENDS; bendIndex++) {
-                        if (bendIndex >= brightnessBendsCount) break;
-                        if (data->brightnessBendsData[bendIndex].data0.z == maximumHue &&
-                            data->brightnessBendsData[bendIndex].data0.x == 1.0) {
+                    for (int bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
+                        if (brightnessBendsData[bendIndex].data0.z == maximumHue &&
+                            brightnessBendsData[bendIndex].data0.x == 1.0) {
 
                             finalBrightness = isWhiteSection == 1.0
                                 ? finalBrightness
-                                : (1.0 - relativePositionInSection) * data->brightnessBendsData[bendIndex].data0.w;
+                                : (1.0 - relativePositionInSection) * brightnessBendsData[bendIndex].data0.w;
                         }
                     }
                     if (isWhiteSection == 1.0 && colorSpaceFlag == 1.0) {

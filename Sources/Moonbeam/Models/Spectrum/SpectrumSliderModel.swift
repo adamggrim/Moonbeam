@@ -18,11 +18,6 @@ internal enum spectrumConstants {
     ///
     /// This value must match `MAX_MONOCHROME_SECTIONS` in `ColorSliderShaders.metal`.
     static let maxMonochromeSections = 2
-
-    /// The maximum number of bends sections allowed in the spectrum.
-    ///
-    /// This value must match `MAX_BENDS` in `ColorSliderShaders.metal`.
-    static let maxBends = 20
 }
 
 fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "SpectrumModel")
@@ -45,15 +40,14 @@ fileprivate func validateBendSections(bendSections: [BendSection]) -> Bool {
     return true
 }
 
-/// Validates bend sections, silently truncating any that exceed `spectrumConstants.maxBends` to
-/// prevent crashes in Metal.
+/// Validates bend sections.
 ///
 /// - Parameters:
 ///   - bends: The user-provided array of `BendSection` objects.
 ///   - name: A descriptive identifier for the `BendSection` objects.
 ///
 /// - Returns: A validated array of bend sections.
-fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) -> [BendSection] {
+fileprivate func validateBends(_ bends: [BendSection], name: String) -> [BendSection] {
     var validBends: [BendSection] = []
 
     for bend in bends {
@@ -72,21 +66,7 @@ fileprivate func validateAndTruncateBends(_ bends: [BendSection], name: String) 
             )
         }
     }
-
-    if validBends.count > spectrumConstants.maxBends {
-            let errorMessage = (
-                "Moonbeam: \(name) exceeds the maximum of \(spectrumConstants.maxBends). Bend sections truncated."
-            )
-
-            #if DEBUG
-            fatalError(errorMessage)
-            #else
-            MoonbeamTelemetry.reportNonFatalIssue(errorMessage)
-            // Fall back to a truncated array for production builds.
-            return Array(validBends.prefix(spectrumConstants.maxBends))
-            #endif
-        }
-        return validBends
+    return validBends
 }
 
 /// Validates monochrome sections, truncating them if they exceed the maximum allowed, to prevent shader
@@ -113,27 +93,24 @@ fileprivate func validateAndTruncateMonochromeSections(
 
 /// Adds an initializer to the C-bridged `ShaderBend` struct to map Swift `BendSection` properties.
 extension ShaderBend {
-    init(bend: BendSection?) {
+    init(bend: BendSection) {
         self.init() // Initialize the C struct zeroed out
-        guard let b = bend else {
-            self.data0 = .zero
-            self.data1 = .zero
-            return
-        }
         self.data0 = simd_float4(
-            b is OneWayBend ? 1.0 : 2.0,
-            Float(b.startHue),
-            Float(b.endHue),
-            Float(b.targetValue)
+            bend is OneWayBend ? 1.0 : 2.0,
+            Float(bend.startHue),
+            Float(bend.endHue),
+            Float(bend.targetValue)
         )
-        self.data1 = simd_float4(Float(b.hueCount), 0, 0, 0)
+        self.data1 = simd_float4(Float(bend.hueCount), 0, 0, 0)
     }
+
+    static let empty = ShaderBend(data0: .zero, data1: .zero)
 }
 
 fileprivate func encodeSpectrumData(
     startSections: [MonochromeSection], endSections: [MonochromeSection],
     startHue: Double, endHue: Double, primaryValue: Double, secondaryValue: Double,
-    colorSpace: SpectrumColorSpace, primaryBends: [BendSection], secondaryBends: [BendSection]
+    colorSpace: SpectrumColorSpace, primaryBendsCount: Int, secondaryBendsCount: Int
 ) -> Data {
     let hueWeight = abs(endHue - startHue)
     let startWeight = startSections.reduce(0) { $0 + $1.weight }
@@ -158,23 +135,6 @@ fileprivate func encodeSpectrumData(
         endData[i*2 + 1] = Float(cumulativeEnd)
     }
 
-    /// Packs an array of bend sections into a fixed-size tuple buffer
-    /// compatible with Metal shaders and the C-bridged struct.
-    typealias BendBuffer = (
-        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
-        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
-        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend,
-        ShaderBend, ShaderBend, ShaderBend, ShaderBend, ShaderBend
-    )
-
-    func packBends(_ bends: [BendSection]) -> BendBuffer {
-        var buffer = [ShaderBend](repeating: ShaderBend(bend: nil), count: 20)
-        for i in 0..<min(bends.count, 20) {
-            buffer[i] = ShaderBend(bend: bends[i])
-        }
-        return buffer.withUnsafeBytes { $0.load(as: BendBuffer.self) }
-    }
-
     var shaderData = SpectrumShaderData(
         totalWeight: Float(totalWeight),
         startSectionBoundary: Float(startWeight / totalWeight),
@@ -186,12 +146,10 @@ fileprivate func encodeSpectrumData(
         colorSpaceFlag: colorSpace == .oklch ? 1.0 : 0.0,
         startSectionsCount: Int32(startSections.count),
         endSectionsCount: Int32(endSections.count),
-        saturationBendsCount: Int32(primaryBends.count),
-        brightnessBendsCount: Int32(secondaryBends.count),
+        saturationBendsCount: Int32(primaryBendsCount),
+        brightnessBendsCount: Int32(secondaryBendsCount),
         startSectionsData: startData,
-        endSectionsData: endData,
-        saturationBendsData: packBends(primaryBends),
-        brightnessBendsData: packBends(secondaryBends)
+        endSectionsData: endData
     )
 
     return withUnsafeBytes(of: &shaderData) { Data($0) }
@@ -246,8 +204,8 @@ internal struct HSBSpectrumModel: ColorSliderDataSource {
         self.endHue = endHue
         self.saturation = saturation
         self.brightness = brightness
-        self.saturationBends = validateAndTruncateBends(saturationBends(), name: "HSB Saturation")
-        self.brightnessBends = validateAndTruncateBends(brightnessBends(), name: "HSB Brightness")
+        self.saturationBends = validateBends(saturationBends(), name: "HSB Saturation")
+        self.brightnessBends = validateBends(brightnessBends(), name: "HSB Brightness")
     }
 
     var colorSource: ColorSourceProvider {
@@ -273,15 +231,26 @@ internal struct HSBSpectrumModel: ColorSliderDataSource {
             primaryValue: saturation,
             secondaryValue: brightness,
             colorSpace: .hsb,
-            primaryBends: saturationBends,
-            secondaryBends: brightnessBends
+            primaryBendsCount: saturationBends.count,
+            secondaryBendsCount: brightnessBends.count
         )
+
+        let satBendsMapped = saturationBends.map { ShaderBend(bend: $0) }
+        let safeSatBends = satBendsMapped.isEmpty ? [ShaderBend.empty] : satBendsMapped
+        let satBendsData = safeSatBends.withUnsafeBufferPointer { Data(buffer: $0) }
+
+        let brightBendsMapped = brightnessBends.map { ShaderBend(bend: $0) }
+        let safeBrightBends = brightBendsMapped.isEmpty ? [ShaderBend.empty] : brightBendsMapped
+        let brightBendsData = safeBrightBends.withUnsafeBufferPointer { Data(buffer: $0) }
+
         return .shader(generator: { size, isVertical in
             ShaderLibrary.bundle(.module)
                 .spectrumShader(
                     .float2(size.width, size.height),
                     .float(isVertical ? 1.0 : 0.0),
-                    .data(shaderData)
+                    .data(shaderData),
+                    .data(satBendsData),
+                    .data(brightBendsData)
                 )
         }, fallback: fallback)
     }
@@ -333,8 +302,8 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource {
         self.chroma = chroma
         self.startHue = startHue
         self.endHue = endHue
-        self.lightnessBends = validateAndTruncateBends(lightnessBends(), name: "OKLCH Lightness")
-        self.chromaBends = validateAndTruncateBends(chromaBends(), name: "OKLCH Chroma")
+        self.lightnessBends = validateBends(lightnessBends(), name: "OKLCH Lightness")
+        self.chromaBends = validateBends(chromaBends(), name: "OKLCH Chroma")
     }
 
     var colorSource: ColorSourceProvider {
@@ -360,15 +329,26 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource {
             primaryValue: chroma,
             secondaryValue: lightness,
             colorSpace: .oklch,
-            primaryBends: chromaBends,
-            secondaryBends: lightnessBends
+            primaryBendsCount: chromaBends.count,
+            secondaryBendsCount: lightnessBends.count
         )
+
+        let chromaBendsMapped = chromaBends.map { ShaderBend(bend: $0) }
+        let safeChromaBends = chromaBendsMapped.isEmpty ? [ShaderBend.empty] : chromaBendsMapped
+        let chromaBendsData = safeChromaBends.withUnsafeBufferPointer { Data(buffer: $0) }
+
+        let lightnessBendsMapped = lightnessBends.map { ShaderBend(bend: $0) }
+        let safeLightnessBends = lightnessBendsMapped.isEmpty ? [ShaderBend.empty] : lightnessBendsMapped
+        let lightnessBendsData = safeLightnessBends.withUnsafeBufferPointer { Data(buffer: $0) }
+
         return .shader(generator: { size, isVertical in
             ShaderLibrary.bundle(.module)
                 .spectrumShader(
                     .float2(size.width, size.height),
                     .float(isVertical ? 1.0 : 0.0),
-                    .data(shaderData)
+                    .data(shaderData),
+                    .data(chromaBendsData),
+                    .data(lightnessBendsData)
                 )
         }, fallback: fallback)
     }

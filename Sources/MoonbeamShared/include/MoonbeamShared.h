@@ -32,9 +32,6 @@ typedef struct {
 
     mb_float4 startSectionsData;
     mb_float4 endSectionsData;
-
-    ShaderBend saturationBendsData[20];
-    ShaderBend brightnessBendsData[20];
 } SpectrumShaderData;
 
 #endif /* MoonbeamShared_h */
