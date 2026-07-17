@@ -24,6 +24,11 @@ typedef enum {
     MoonbeamColorSpaceOKLCH = 3
 } MoonbeamColorSpaceFlag;
 
+typedef enum {
+    MoonbeamBendTypeOneWay = 1,
+    MoonbeamBendTypeTwoWay = 2
+} MoonbeamBendType;
+
 typedef struct {
     float totalWeight;
     float startSectionBoundary;

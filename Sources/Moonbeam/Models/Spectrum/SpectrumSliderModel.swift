@@ -87,9 +87,9 @@ fileprivate func validateAndTruncateMonochromeSections(
 /// Adds an initializer to the C-bridged `ShaderBend` struct to map Swift `BendSection` properties.
 extension ShaderBend {
     init(bend: BendSection) {
-        self.init() // Initialize the C struct zeroed out
+        self.init()
         self.data0 = simd_float4(
-            bend is OneWayBend ? 1.0 : 2.0,
+            bend is OneWayBend ? Float(MoonbeamBendTypeOneWay.rawValue) : Float(MoonbeamBendTypeTwoWay.rawValue),
             Float(bend.startHue),
             Float(bend.endHue),
             Float(bend.targetValue)

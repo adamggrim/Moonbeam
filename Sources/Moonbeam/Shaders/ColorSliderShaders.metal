@@ -94,7 +94,7 @@ float calculateBend(
             float valueDifference = defaultValue - targetValue;
             float hueOffset = currentHue - startHue;
 
-            if (bendType == 1.0) { // One-way bend
+            if (bendType == float(MoonbeamBendTypeOneWay)) { // One-way bend
                 float valueIncrement = (hueCount != 0.0) ? (valueDifference / hueCount) : 0.0;
                 if (startHue == minimumHue) {
                     return targetValue + (valueIncrement * hueOffset);
