@@ -309,10 +309,15 @@ public struct ColorSlider: View {
         }
 
         sliderState.updateDrag(translation: translation)
-        progress = Double(dimensions.length > 0 ? sliderState.liveColorPosition / dimensions.length : 0.0)
 
-        if isContinuous {
-            selection = calculatedColor.resolve(in: environment).cgColor
+        let newProgress = Double(dimensions.length > 0 ? sliderState.liveColorPosition / dimensions.length : 0.0)
+        let newSelection = isContinuous ? calculatedColor.resolve(in: environment).cgColor : nil
+
+        Task { @MainActor in
+            self.progress = newProgress
+            if let newSelection {
+                self.selection = newSelection
+            }
         }
     }
 
