@@ -5,8 +5,7 @@
 
 #ifdef __METAL_VERSION__
 #include <metal_stdlib>
-using namespace metal;
-typedef float4 mb_float4;
+typedef metal::float4 mb_float4;
 #else
 #include <simd/simd.h>
 typedef simd_float4 mb_float4;
