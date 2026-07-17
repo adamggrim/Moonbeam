@@ -139,10 +139,10 @@ fileprivate func encodeSpectrumData(
         baseSaturation: Float(primaryValue),
         baseBrightness: Float(secondaryValue),
         colorSpaceFlag: colorSpace == .oklch ? MoonbeamColorSpaceOKLCH.rawValue : MoonbeamColorSpaceHSB.rawValue,
-        startSectionsCount: Int32(startSections.count),
-        endSectionsCount: Int32(endSections.count),
-        saturationBendsCount: Int32(primaryBendsCount),
-        brightnessBendsCount: Int32(secondaryBendsCount),
+        startSectionsCount: UInt32(startSections.count),
+        endSectionsCount: UInt32(endSections.count),
+        saturationBendsCount: UInt32(primaryBendsCount),
+        brightnessBendsCount: UInt32(secondaryBendsCount),
         startSectionsData: startData,
         endSectionsData: endData
     )

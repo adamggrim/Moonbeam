@@ -38,10 +38,10 @@ typedef struct {
     float baseBrightness;
     uint32_t colorSpaceFlag;
 
-    int startSectionsCount;
-    int endSectionsCount;
-    int saturationBendsCount;
-    int brightnessBendsCount;
+    uint32_t startSectionsCount;
+    uint32_t endSectionsCount;
+    uint32_t saturationBendsCount;
+    uint32_t brightnessBendsCount;
 
     mb_float4 startSectionsData;
     mb_float4 endSectionsData;

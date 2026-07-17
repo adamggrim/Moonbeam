@@ -95,10 +95,10 @@ float calculateBend(
     float currentHue,
     float defaultValue,
     device const ShaderBend* bendsData,
-    int totalBends,
+    uint totalBends,
     float minimumHue
 ) {
-    for (int bendIndex = 0; bendIndex < totalBends; bendIndex++) {
+    for (uint bendIndex = 0; bendIndex < totalBends; bendIndex++) {
         float bendType = bendsData[bendIndex].data0.x;
         float startHue = bendsData[bendIndex].data0.y;
         float endHue = bendsData[bendIndex].data0.z;
@@ -206,10 +206,10 @@ half4 spectrumShader(
     float baseBrightness = data->baseBrightness;
     uint colorSpaceFlag = data->colorSpaceFlag;
 
-    int startSectionsCount = data->startSectionsCount;
-    int endSectionsCount = data->endSectionsCount;
-    int saturationBendsCount = data->saturationBendsCount;
-    int brightnessBendsCount = data->brightnessBendsCount;
+    uint startSectionsCount = data->startSectionsCount;
+    uint endSectionsCount = data->endSectionsCount;
+    uint saturationBendsCount = data->saturationBendsCount;
+    uint brightnessBendsCount = data->brightnessBendsCount;
 
     float4 startSectionsData = data->startSectionsData;
     float4 endSectionsData = data->endSectionsData;
@@ -218,7 +218,7 @@ half4 spectrumShader(
         float cumulativeStartPosition = 0.0;
 
         // Capped at `MAX_MONOCHROME_SECTIONS` start sections.
-        for (int sectionIndex = 0; sectionIndex < MAX_MONOCHROME_SECTIONS; sectionIndex++) {
+        for (uint sectionIndex = 0; sectionIndex < MAX_MONOCHROME_SECTIONS; sectionIndex++) {
             if (sectionIndex >= startSectionsCount) break;
 
             float isWhiteSection = startSectionsData[sectionIndex*2];
@@ -244,7 +244,7 @@ half4 spectrumShader(
                         finalSaturation = baseSaturation;
                     }
 
-                    for (int bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
+                    for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
                         if (saturationBendsData[bendIndex].data0.y == minimumHue &&
                             saturationBendsData[bendIndex].data0.x == 1.0) {
 
@@ -254,7 +254,7 @@ half4 spectrumShader(
                         }
                     }
 
-                    for (int bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
+                    for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
                         if (brightnessBendsData[bendIndex].data0.y == minimumHue &&
                             brightnessBendsData[bendIndex].data0.x == 1.0) {
 
@@ -320,7 +320,7 @@ half4 spectrumShader(
         float cumulativeEndPosition = hueSectionBoundary;
 
         // Capped at `MAX_MONOCHROME_SECTIONS` end sections.
-        for (int sectionIndex = 0; sectionIndex < MAX_MONOCHROME_SECTIONS; sectionIndex++) {
+        for (uint sectionIndex = 0; sectionIndex < MAX_MONOCHROME_SECTIONS; sectionIndex++) {
             if (sectionIndex >= endSectionsCount) break;
 
             float isWhiteSection = endSectionsData[sectionIndex*2];
@@ -348,7 +348,7 @@ half4 spectrumShader(
                         finalSaturation = baseSaturation;
                     }
 
-                    for (int bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
+                    for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
                         if (saturationBendsData[bendIndex].data0.z == maximumHue &&
                             saturationBendsData[bendIndex].data0.x == 1.0) {
 
@@ -358,7 +358,7 @@ half4 spectrumShader(
                         }
                     }
 
-                    for (int bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
+                    for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
                         if (brightnessBendsData[bendIndex].data0.z == maximumHue &&
                             brightnessBendsData[bendIndex].data0.x == 1.0) {
 
