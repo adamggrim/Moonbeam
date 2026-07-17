@@ -11,6 +11,20 @@ float3 convertHSBtoRGB(float hue, float saturation, float brightness) {
     return brightness * mix(conversionConstants.xxx, clamp(rgbValues - conversionConstants.xxx, 0.0, 1.0), saturation);
 }
 
+// MARK: - Gamma Transfer Functions
+
+float3 linearToSRGB(float3 c) {
+    float3 linear_low = 12.92 * c;
+    float3 linear_high = 1.055 * pow(c, 1.0 / 2.4) - 0.055;
+    return select(linear_high, linear_low, c <= 0.0031308);
+}
+
+float3 sRGBToLinear(float3 c) {
+    float3 srgb_low = c / 12.92;
+    float3 srgb_high = pow((c + 0.055) / 1.055, 2.4);
+    return select(srgb_high, srgb_low, c <= 0.04045);
+}
+
 // MARK: - OKLAB and OKLCH to RGB
 
 // Matrix to convert OKLAB constants to RGB.
@@ -34,7 +48,7 @@ float3 convertOKLABtoRGB(float L, float a, float b) {
         -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
     );
 
-    return clamp(lin, 0.0, 1.0);
+    return linearToSRGB(clamp(lin, 0.0, 1.0));
 }
 
 // Matrix to convert OKLCH constants to RGB.
@@ -61,9 +75,10 @@ float3 resolveColor(uint space, float h, float s_c, float b_l) {
 // (2020):
 // https://bottosson.github.io/posts/oklab/
 float3 convertRGBtoOKLAB(float3 c) {
-    float l = 0.4122214708 * c.r + 0.5363325363 * c.g + 0.0514459929 * c.b;
-    float m = 0.2119034982 * c.r + 0.6806995451 * c.g + 0.1073969566 * c.b;
-    float s = 0.0883024619 * c.r + 0.2817188376 * c.g + 0.6299787005 * c.b;
+    float3 lin = sRGBToLinear(c);
+    float l = 0.4122214708 * lin.r + 0.5363325363 * lin.g + 0.0514459929 * lin.b;
+    float m = 0.2119034982 * lin.r + 0.6806995451 * lin.g + 0.1073969566 * lin.b;
+    float s = 0.0883024619 * lin.r + 0.2817188376 * lin.g + 0.6299787005 * lin.b;
     l = sign(l) * pow(abs(l), 1.0/3.0);
     m = sign(m) * pow(abs(m), 1.0/3.0);
     s = sign(s) * pow(abs(s), 1.0/3.0);

@@ -6,7 +6,7 @@ internal struct SpectrumGenerator {
 
     // MARK: - Color conversion
 
-    /// Matrix to convert OKLCH to a Display P3 color.
+    /// Matrix to convert OKLCH to a linear RGB color.
     ///
     /// Taken from  "A perceptual color space for image processing" by Björn
     /// Ottosson (2020).
@@ -26,9 +26,9 @@ internal struct SpectrumGenerator {
         let mediumCubed = mediumPrime < 0 ? -pow(-mediumPrime, 3.0) : pow(mediumPrime, 3.0)
         let smallCubed = smallPrime < 0 ? -pow(-smallPrime, 3.0) : pow(smallPrime, 3.0)
 
-        let redLinear =  2.7015367 * lightnessCubed - 1.6373796 * mediumCubed - 0.0641571 * smallCubed
-        let greenLinear = -0.3150531 * lightnessCubed + 1.3415174 * mediumCubed - 0.0264643 * smallCubed
-        let blueLinear =  0.0384799 * lightnessCubed - 0.0635483 * mediumCubed + 1.0250684 * smallCubed
+        let redLinear =   4.0767416621 * lightnessCubed - 3.3077115913 * mediumCubed + 0.2309699292 * smallCubed
+        let greenLinear = -1.2684380046 * lightnessCubed + 2.6097574011 * mediumCubed - 0.3413193965 * smallCubed
+        let blueLinear = -0.0041960863 * lightnessCubed - 0.7034186147 * mediumCubed + 1.7076147010 * smallCubed
 
         func applyGamma(_ value: CGFloat) -> CGFloat {
             return value <= 0.0031308 ? 12.92 * value : 1.055 * pow(value, 1.0 / 2.4) - 0.055
@@ -38,7 +38,7 @@ internal struct SpectrumGenerator {
         let green = min(max(applyGamma(greenLinear), 0.0), 1.0)
         let blue = min(max(applyGamma(blueLinear), 0.0), 1.0)
 
-        return Color(.displayP3, red: red, green: green, blue: blue)
+        return Color(red: red, green: green, blue: blue)
     }
 
     // MARK: - Core generator
