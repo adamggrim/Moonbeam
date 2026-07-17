@@ -586,14 +586,14 @@ private struct SliderPreviewView: View {
         resolvedShape
             .foregroundColor(currentColor)
             .frame(width: dimensions.previewSize, height: dimensions.previewSize)
-            .scaleEffect(dynamicScale, anchor: previewScaleAnchor)
-            .opacity(dynamicOpacity)
-            .shadow(color: previewShadow.color, radius: previewShadow.radius, x: previewShadow.x, y: previewShadow.y)
             .overlay {
                 if let stroke = previewStroke {
                     resolvedShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
                 }
             }
+            .scaleEffect(dynamicScale, anchor: previewScaleAnchor)
+            .opacity(dynamicOpacity)
+            .shadow(color: previewShadow.color, radius: previewShadow.radius, x: previewShadow.x, y: previewShadow.y)
             .offset(x: xOffset, y: yOffset)
     }
 }
