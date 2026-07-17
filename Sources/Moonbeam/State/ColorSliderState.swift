@@ -114,32 +114,22 @@ internal struct ColorSliderState {
         let rightBound = dimensions.length - halfPreviewSize - halfThumbThickness
         let clampedValue = min(max(liveThumbPosition, leftBound), rightBound)
 
-        /// The offset that centers the floating color preview above the thumb.
+        return clampedValue - halfPreviewSize + halfThumbThickness
+    }
+
+    /// Calculates the exact relative position of the thumb inside the preview.
+    ///
+    /// The preview always animates out of and back into the slider thumb.
+    var previewScaleAnchor: UnitPoint {
         let halfThumbOffset = thumbOffset + halfThumbThickness
+        let relativeMainAxis = (halfThumbOffset - previewMainAxisOffset) / dimensions.previewSize
 
-        if previewHidden {
-            let startEdgeLimit: CGFloat
-            let endEdgeLimit: CGFloat
-            let offsetAdjustment: CGFloat = halfThumbThickness
+        let crossAxisLimit = resolvedPreviewOffset > 0 ? 0.0 : 1.0
 
-            startEdgeLimit = -halfPreviewSize + halfThumbOffset
-            endEdgeLimit = -halfPreviewSize + halfThumbOffset
-
-            if !isDragging && halfThumbOffset < halfPreviewSize {
-                return startEdgeLimit
-            } else if (!isDragging && halfThumbOffset > dimensions.length - halfPreviewSize) {
-                return endEdgeLimit
-            } else {
-                return clampedValue - halfPreviewSize + offsetAdjustment
-            }
+        if axis == .horizontal {
+            return UnitPoint(x: relativeMainAxis, y: crossAxisLimit)
         } else {
-            if halfThumbOffset < halfPreviewSize {
-                return 0
-            } else if halfThumbOffset > dimensions.length - halfPreviewSize {
-                return dimensions.length - dimensions.previewSize
-            } else {
-                return clampedValue - halfPreviewSize + halfThumbThickness
-            }
+            return UnitPoint(x: crossAxisLimit, y: 1.0 - relativeMainAxis)
         }
     }
 

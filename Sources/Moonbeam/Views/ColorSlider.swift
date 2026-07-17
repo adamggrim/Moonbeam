@@ -231,6 +231,7 @@ public struct ColorSlider: View {
                 currentColor: sliderState.isDragging ? calculatedColor : Color(selection),
                 previewMainAxisOffset: sliderState.previewMainAxisOffset,
                 resolvedPreviewOffset: sliderState.resolvedPreviewOffset,
+                previewScaleAnchor: sliderState.previewScaleAnchor,
                 dimensions: dimensions,
                 axis: axis
             )
@@ -559,6 +560,7 @@ private struct SliderPreviewView: View {
     let currentColor: Color
     let previewMainAxisOffset: CGFloat
     let resolvedPreviewOffset: CGFloat
+    let previewScaleAnchor: UnitPoint
     let dimensions: ColorSliderDimensions
     let axis: Axis
 
@@ -570,10 +572,6 @@ private struct SliderPreviewView: View {
     var body: some View {
         let resolvedShape = previewShape ?? AnyShape(RoundedRectangle(cornerRadius: dimensions.previewCornerRadius))
 
-        let dynamicAnchor: UnitPoint = axis == .horizontal
-            ? (resolvedPreviewOffset > 0 ? .top : .bottom)
-            : (resolvedPreviewOffset > 0 ? .leading : .trailing)
-
         let dynamicScale: CGFloat = (previewHidden && !isDragging) ? dimensions.scaleRatio : 1.0
         let dynamicOpacity: Double = (previewHidden && !isDragging) ? 0.0 : 1.0
 
@@ -583,7 +581,7 @@ private struct SliderPreviewView: View {
         resolvedShape
             .foregroundColor(currentColor)
             .frame(width: dimensions.previewSize, height: dimensions.previewSize)
-            .scaleEffect(dynamicScale, anchor: dynamicAnchor)
+            .scaleEffect(dynamicScale, anchor: previewScaleAnchor)
             .opacity(dynamicOpacity)
             .shadow(color: previewShadow.color, radius: previewShadow.radius, x: previewShadow.x, y: previewShadow.y)
             .overlay {
