@@ -1,6 +1,8 @@
 import Foundation
 import SwiftUI
 
+import MoonbeamShared
+
 /// The color space used to interpolate between starting and ending colors.
 public enum GradientColorSpace {
     case rgb, oklab, oklch
@@ -27,7 +29,12 @@ internal struct GradientSliderModel: ColorSliderDataSource {
         }
 
         return .shader(generator: { size, isVertical in
-            let spaceFlag: Float = colorSpace == .oklch ? 2.0 : (colorSpace == .oklab ? 1.0 : 0.0)
+            let spaceFlag: Float
+            switch colorSpace {
+            case .oklch: spaceFlag = Float(MoonbeamColorSpaceOKLCH.rawValue)
+            case .oklab: spaceFlag = Float(MoonbeamColorSpaceOKLAB.rawValue)
+            default:     spaceFlag = Float(MoonbeamColorSpaceRGB.rawValue)
+            }
             return ShaderLibrary.bundle(.module).gradientShader(
                 .float2(size.width, size.height),
                 .color(startColor),

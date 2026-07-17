@@ -49,8 +49,8 @@ float3 convertOKLCHtoRGB(float L, float C, float h) {
     return convertOKLABtoRGB(L, a, b);
 }
 
-float3 resolveColor(float space, float h, float s_c, float b_l) {
-    return space == 1.0 ? convertOKLCHtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
+float3 resolveColor(uint space, float h, float s_c, float b_l) {
+    return space == MoonbeamColorSpaceOKLCH ? convertOKLCHtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
 }
 
 // MARK: - RGB to OKLAB
@@ -126,7 +126,9 @@ half4 gradientShader(
     float normalizedPosition = isVertical > 0.5 ? (1.0 - (position.y / size.y)) : (position.x / size.x);
     normalizedPosition = clamp(normalizedPosition, 0.0, 1.0);
 
-    if (colorSpaceFlag == 0.0) {
+    uint space = uint(colorSpaceFlag);
+
+    if (space == MoonbeamColorSpaceRGB) {
         half4 blendedColor = mix(startColor, endColor, normalizedPosition);
         return half4(blendedColor.rgb * currentColor.a, blendedColor.a * currentColor.a);
     }
@@ -134,7 +136,7 @@ half4 gradientShader(
     float3 labStart = convertRGBtoOKLAB(float3(startColor.rgb));
     float3 labEnd = convertRGBtoOKLAB(float3(endColor.rgb));
 
-    if (colorSpaceFlag == 1.0) {
+    if (space == MoonbeamColorSpaceOKLAB) {
         float3 mixedLab = mix(labStart, labEnd, normalizedPosition);
         float3 rgbOut = convertOKLABtoRGB(mixedLab.x, mixedLab.y, mixedLab.z);
         return half4(half3(rgbOut) * currentColor.a, currentColor.a);
@@ -187,7 +189,7 @@ half4 spectrumShader(
     float maximumHue = data->maximumHue;
     float baseSaturation = data->baseSaturation;
     float baseBrightness = data->baseBrightness;
-    float colorSpaceFlag = data->colorSpaceFlag;
+    uint colorSpaceFlag = data->colorSpaceFlag;
 
     int startSectionsCount = data->startSectionsCount;
     int endSectionsCount = data->endSectionsCount;
@@ -247,7 +249,7 @@ half4 spectrumShader(
                         }
                     }
 
-                    if (isWhiteSection == 1.0 && colorSpaceFlag == 1.0) {
+                    if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
                         finalBrightness = 1.0 - (relativePositionInSection * (1.0 - baseBrightness));
                     }
                     return half4(
@@ -350,7 +352,7 @@ half4 spectrumShader(
                                 : (1.0 - relativePositionInSection) * brightnessBendsData[bendIndex].data0.w;
                         }
                     }
-                    if (isWhiteSection == 1.0 && colorSpaceFlag == 1.0) {
+                    if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
                         finalBrightness = 1.0 - ((1.0 - relativePositionInSection) * (1.0 - baseBrightness));
                     }
                     return half4(

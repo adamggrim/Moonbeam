@@ -17,6 +17,13 @@ typedef struct {
     mb_float4 data1;
 } ShaderBend;
 
+typedef enum {
+    MoonbeamColorSpaceRGB = 0,
+    MoonbeamColorSpaceHSB = 1,
+    MoonbeamColorSpaceOKLAB = 2,
+    MoonbeamColorSpaceOKLCH = 3
+} MoonbeamColorSpaceFlag;
+
 typedef struct {
     float totalWeight;
     float startSectionBoundary;
@@ -25,7 +32,7 @@ typedef struct {
     float maximumHue;
     float baseSaturation;
     float baseBrightness;
-    float colorSpaceFlag;
+    uint32_t colorSpaceFlag;
 
     int startSectionsCount;
     int endSectionsCount;
