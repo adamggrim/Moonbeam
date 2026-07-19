@@ -56,23 +56,7 @@ public struct ColorSlider: View {
     /// drag gesture (`true`), or only when the drag ends (`false`).
     public var isContinuous: Bool
 
-    // MARK: - Private properties
-
-    private var dataSource: ColorSliderDataSource?
-    private var colorSpace: SpectrumColorSpace = .hsb
-    private var hueRange: ClosedRange<Double> = 0.0...1.0
-    private var startSections: [MonochromeSection] = []
-    private var endSections: [MonochromeSection] = []
-    private var saturationBends: [BendSection] = []
-    private var brightnessBends: [BendSection] = []
-    private var lightnessBends: [BendSection] = []
-    private var chromaBends: [BendSection] = []
-    private var baseSaturation: Double? = nil
-    private var baseBrightness: Double? = nil
-    private var baseLightness: Double? = nil
-    private var baseChroma: Double? = nil
-
-    // MARK: - Initializer
+    var configuration = ColorSliderConfiguration()
 
     /// Initializes a customizable color slider.
     ///
@@ -106,7 +90,6 @@ public struct ColorSlider: View {
     ) {
         self._selection = selection
         self._progress = progress
-        self.dataSource = nil
         self.spectrumIdentifier = spectrumIdentifier
         self.onSpectrumChanged = onSpectrumChanged
         self.label = label
@@ -114,36 +97,36 @@ public struct ColorSlider: View {
         self.isContinuous = isContinuous
     }
 
-    // MARK: - Computed properties
-
     private var resolvedDataSource: ColorSliderDataSource {
-        if let dataSource = dataSource { return dataSource }
+        if let explicitDataSource = configuration.dataSource {
+            return explicitDataSource
+        }
 
-        if colorSpace == .oklch {
-            let currentChromaBends: () -> [BendSection] = { chromaBends }
-            let currentLightnessBends: () -> [BendSection] = { lightnessBends }
+        if configuration.colorSpace == .oklch {
+            let currentChromaBends: () -> [BendSection] = { configuration.chromaBends }
+            let currentLightnessBends: () -> [BendSection] = { configuration.lightnessBends }
 
             return OKLCHSpectrumModel(
-                startSections: startSections,
-                endSections: endSections,
-                lightness: baseLightness ?? 0.75,
-                chroma: baseChroma ?? 0.15,
-                startHue: hueRange.lowerBound,
-                endHue: hueRange.upperBound,
+                startSections: configuration.startSections,
+                endSections: configuration.endSections,
+                lightness: configuration.baseLightness ?? 0.75,
+                chroma: configuration.baseChroma ?? 0.15,
+                startHue: configuration.hueRange.lowerBound,
+                endHue: configuration.hueRange.upperBound,
                 lightnessBends: currentLightnessBends,
                 chromaBends: currentChromaBends
             )
         } else {
-            let currentSaturationBends: () -> [BendSection] = { saturationBends }
-            let currentBrightnessBends: () -> [BendSection] = { brightnessBends }
+            let currentSaturationBends: () -> [BendSection] = { configuration.saturationBends }
+            let currentBrightnessBends: () -> [BendSection] = { configuration.brightnessBends }
 
             return HSBSpectrumModel(
-                startSections: startSections,
-                endSections: endSections,
-                startHue: hueRange.lowerBound,
-                endHue: hueRange.upperBound,
-                saturation: baseSaturation ?? 1.0,
-                brightness: baseBrightness ?? 1.0,
+                startSections: configuration.startSections,
+                endSections: configuration.endSections,
+                startHue: configuration.hueRange.lowerBound,
+                endHue: configuration.hueRange.upperBound,
+                saturation: configuration.baseSaturation ?? 1.0,
+                brightness: configuration.baseBrightness ?? 1.0,
                 saturationBends: currentSaturationBends,
                 brightnessBends: currentBrightnessBends
             )
@@ -272,7 +255,8 @@ public struct ColorSlider: View {
                 sliderState.persistedThumbPosition = min(
                     max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
                     dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset
-                )            }
+                )
+            }
         }
         .onChange(of: progress) { _, newValue in
             if !sliderState.isDragging {
@@ -308,7 +292,7 @@ public struct ColorSlider: View {
             withAnimation(reduceMotion ? nil : animation) { sliderState.isDragging = true }
         }
 
-        sliderState.updateDrag(translation: translation)
+        ColorSliderCoordinator.updateDrag(state: &sliderState, translation: translation)
 
         let newProgress = Double(dimensions.length > 0 ? sliderState.liveColorPosition / dimensions.length : 0.0)
         let newSelection = isContinuous ? calculatedColor.resolve(in: environment).cgColor : nil
@@ -329,111 +313,109 @@ public struct ColorSlider: View {
             selection = calculatedColor.resolve(in: environment).cgColor
         }
         withAnimation(reduceMotion ? nil : animation) {
-            sliderState.finalizeDrag()
+            ColorSliderCoordinator.finalizeDrag(state: &sliderState)
         }
     }
 
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
-        sliderState.accessibilityAdjust(direction: direction, progress: &progress, step: accessibilityStep)
+        ColorSliderCoordinator.accessibilityAdjust(
+            state: &sliderState,
+            direction: direction,
+            progress: &progress,
+            step: accessibilityStep
+        )
         selection = calculatedColor.resolve(in: environment).cgColor
     }
+}
 
-    // MARK: - Modifiers
+// MARK: - Modifiers
 
-    public func spectrum(space: SpectrumColorSpace, range: ClosedRange<Double>) -> Self {
+public extension ColorSlider {
+    func spectrum(space: SpectrumColorSpace, range: ClosedRange<Double>) -> Self {
         var copy = self
-        copy.colorSpace = space
-        copy.hueRange = range
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingSpectrum(space: space, range: range)
         return copy
     }
 
-    public func baseSaturation(_ value: Double) -> Self {
+    func baseSaturation(_ value: Double) -> Self {
         var copy = self
-        copy.baseSaturation = value
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingBaseSaturation(value)
         return copy
     }
 
-    public func baseBrightness(_ value: Double) -> Self {
+    func baseBrightness(_ value: Double) -> Self {
         var copy = self
-        copy.baseBrightness = value
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingBaseBrightness(value)
         return copy
     }
 
-    public func baseLightness(_ value: Double) -> Self {
+    func baseLightness(_ value: Double) -> Self {
         var copy = self
-        copy.baseLightness = value
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingBaseLightness(value)
         return copy
     }
 
-    public func baseChroma(_ value: Double) -> Self {
+    func baseChroma(_ value: Double) -> Self {
         var copy = self
-        copy.baseChroma = value
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingBaseChroma(value)
         return copy
     }
 
-    public func startingWith(_ sections: MonochromeSection...) -> Self {
+    func startingWith(_ sections: MonochromeSection...) -> Self {
         var copy = self
-        copy.startSections = sections
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingStartSections(sections)
         return copy
     }
 
-    public func endingWith(_ sections: MonochromeSection...) -> Self {
+    func endingWith(_ sections: MonochromeSection...) -> Self {
         var copy = self
-        copy.endSections = sections
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingEndSections(sections)
         return copy
     }
 
-    public func saturationBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
+    func saturationBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
         var copy = self
-        copy.saturationBends = bends()
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingSaturationBends(bends())
         return copy
     }
 
-    public func brightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
+    func brightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
         var copy = self
-        copy.brightnessBends = bends()
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingBrightnessBends(bends())
         return copy
     }
 
-    public func lightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
+    func lightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
         var copy = self
-        copy.lightnessBends = bends()
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingLightnessBends(bends())
         return copy
     }
 
-    public func chromaBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
+    func chromaBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
         var copy = self
-        copy.chromaBends = bends()
-        copy.dataSource = nil
+        copy.configuration = copy.configuration.applyingChromaBends(bends())
         return copy
     }
 
-    public func gradient(from startColor: Color, to endColor: Color, space: GradientColorSpace = .rgb) -> Self {
+    func gradient(from startColor: Color, to endColor: Color, space: GradientColorSpace = .rgb) -> Self {
         var copy = self
-        copy.dataSource = GradientSliderModel(startColor: startColor, endColor: endColor, colorSpace: space)
+        copy.configuration = copy.configuration.applyingGradient(from: startColor, to: endColor, space: space)
         return copy
     }
 
-    public func colors(_ colors: [Color]) -> Self {
+    func colors(_ colors: [Color]) -> Self {
         var copy = self
-        copy.dataSource = HardEdgeSliderModel(colors: colors)
+        copy.configuration = copy.configuration.applyingColors(colors)
         return copy
     }
 
-    public func hardEdge(into steps: Int) -> Self {
+    func hardEdge(into steps: Int) -> Self {
         var copy = self
-        copy.dataSource = copy.resolvedDataSource.hardEdge(into: steps)
+        // Re-use the existing resolution flow but package the resulting generated colors
+        // back into the configuration as a static hard edge array.
+        let colors = copy.resolvedDataSource.hardEdge(into: steps).colors
+        copy.configuration = copy.configuration.applyingColors(colors)
         return copy
     }
 }

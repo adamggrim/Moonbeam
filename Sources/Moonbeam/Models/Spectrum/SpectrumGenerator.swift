@@ -4,43 +4,6 @@ import SwiftUI
 /// shaders.
 internal struct SpectrumGenerator {
 
-    // MARK: - Color conversion
-
-    /// Matrix to convert OKLCH to a linear RGB color.
-    ///
-    /// Taken from  "A perceptual color space for image processing" by Björn
-    /// Ottosson (2020).
-    ///
-    /// - SeeAlso:
-    /// https://bottosson.github.io/posts/oklab/
-    private static func oklchToColor(lightness: CGFloat, chroma: CGFloat, hue: CGFloat) -> Color {
-        let hueAngle = hue * 2.0 * .pi
-        let a = chroma * cos(hueAngle)
-        let b = chroma * sin(hueAngle)
-
-        let lightnessPrime = lightness + 0.3963377774 * a + 0.2158037573 * b
-        let mediumPrime = lightness - 0.1055613458 * a - 0.0638541728 * b
-        let smallPrime = lightness - 0.0894841775 * a - 1.2914855480 * b
-
-        let lightnessCubed = lightnessPrime < 0 ? -pow(-lightnessPrime, 3.0) : pow(lightnessPrime, 3.0)
-        let mediumCubed = mediumPrime < 0 ? -pow(-mediumPrime, 3.0) : pow(mediumPrime, 3.0)
-        let smallCubed = smallPrime < 0 ? -pow(-smallPrime, 3.0) : pow(smallPrime, 3.0)
-
-        let redLinear =   4.0767416621 * lightnessCubed - 3.3077115913 * mediumCubed + 0.2309699292 * smallCubed
-        let greenLinear = -1.2684380046 * lightnessCubed + 2.6097574011 * mediumCubed - 0.3413193965 * smallCubed
-        let blueLinear = -0.0041960863 * lightnessCubed - 0.7034186147 * mediumCubed + 1.7076147010 * smallCubed
-
-        func applyGamma(_ value: CGFloat) -> CGFloat {
-            return value <= 0.0031308 ? 12.92 * value : 1.055 * pow(value, 1.0 / 2.4) - 0.055
-        }
-
-        let red = min(max(applyGamma(redLinear), 0.0), 1.0)
-        let green = min(max(applyGamma(greenLinear), 0.0), 1.0)
-        let blue = min(max(applyGamma(blueLinear), 0.0), 1.0)
-
-        return Color(red: red, green: green, blue: blue)
-    }
-
     // MARK: - Core generator
 
     /// Calculates the color at a specific normalized position on the spectrum.
@@ -143,7 +106,7 @@ internal struct SpectrumGenerator {
             )
 
             return colorSpace == .oklch
-            ? oklchToColor(lightness: secondary, chroma: primary, hue: currentHue)
+            ? ColorSpaceConverter.oklchToColor(lightness: secondary, chroma: primary, hue: currentHue)
             : Color(hue: currentHue, saturation: primary, brightness: secondary)
         } else {
             var cumulativeEnd = hueBoundary
@@ -222,7 +185,7 @@ internal struct SpectrumGenerator {
         case .black:
             let finalSecondaryValue = interpolationFactor * (isStart ? startTargetSecondary : endTargetSecondary)
             return colorSpace == .oklch
-            ? oklchToColor(lightness: finalSecondaryValue, chroma: primaryValue, hue: hue)
+            ? ColorSpaceConverter.oklchToColor(lightness: finalSecondaryValue, chroma: primaryValue, hue: hue)
             : Color(hue: hue, saturation: primaryValue, brightness: finalSecondaryValue)
         case .white:
             let finalPrimaryValue = interpolationFactor * (isStart ? startTargetPrimary : endTargetPrimary)
@@ -230,7 +193,7 @@ internal struct SpectrumGenerator {
                 ? 1.0 - (interpolationFactor * (1.0 - secondaryValue))
                 : secondaryValue
             return colorSpace == .oklch
-            ? oklchToColor(lightness: finalSecondaryValue, chroma: finalPrimaryValue, hue: hue)
+            ? ColorSpaceConverter.oklchToColor(lightness: finalSecondaryValue, chroma: finalPrimaryValue, hue: hue)
             : Color(hue: hue, saturation: finalPrimaryValue, brightness: finalSecondaryValue)
         }
     }
@@ -245,7 +208,7 @@ internal struct SpectrumGenerator {
         let startBrightness: CGFloat = (fromColor == .white) ? 1.0 : 0.0
         let endBrightness: CGFloat = (toColor == .white) ? 1.0 : 0.0
         let brightness = startBrightness + (endBrightness - startBrightness) * relativePosition
-        return oklchToColor(lightness: brightness, chroma: 0.0, hue: hue)
+        return ColorSpaceConverter.oklchToColor(lightness: brightness, chroma: 0.0, hue: hue)
     }
 
     private static func calculateBendValue(
