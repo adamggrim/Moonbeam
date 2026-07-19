@@ -43,7 +43,7 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
 
 2. **Create the slider and add modifiers:**
 
-    Use the `.spectrum()` modifier to define the color space and hue range. Add `.startingWith()`, `.endingWith()` . Bend saturation, brightness, lightness or chroma with the `.saturationBends()`, `.brightnessBends()`, `.lightnessBends()` and `.chromaBends()` modifiers. 
+    Use the `.spectrum()` modifier to define the color space and hue range. Add `.startingWith()`, `.endingWith()` . Bend saturation, brightness, lightness or chroma with the `.saturationBends()`, `.brightnessBends()`, `.lightnessBends()` and `.chromaBends()` modifiers.
 
     HSB spectrum:
 
@@ -67,8 +67,8 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
 
     ```swift
     ColorSlider(
-        selection: $selectedColor, 
-        progress: $progress, 
+        selection: $selectedColor,
+        progress: $progress,
         axis: .horizontal
     )
     .spectrum(space: .oklch, range: 0.0...1.0)
@@ -121,7 +121,7 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 2. **Create the slider**
 
     Pass an array of colors to the `.colors()` modifier.
-    
+
     ```swift
     @State private var selectedColor: Color = .green
 
@@ -197,6 +197,9 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 
 ## Structure
 
+<details>
+<summary>(Click to expand)</summary>
+
 ```
 Moonbeam/
 └── Sources/
@@ -220,6 +223,7 @@ Moonbeam/
         ├── ColorSliderView.swift: The interactive SwiftUI color slider
         └── ColorSliderViewPreviews.swift: SwiftUI previews and test containers
 ```
+</details>
 
 ## Usage
 
