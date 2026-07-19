@@ -206,13 +206,13 @@ public struct ColorSlider: View {
 
     public var body: some View {
         ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
-            SliderTrackView(
+            TrackView(
                 dataSource: resolvedDataSource,
                 dimensions: dimensions,
                 axis: axis
             )
 
-            SliderThumbView(
+            ThumbView(
                 isDragging: sliderState.isDragging,
                 thumbOffset: sliderState.thumbOffset,
                 dimensions: dimensions,
@@ -226,7 +226,7 @@ public struct ColorSlider: View {
                     .onEnded(onDragEnded)
             )
 
-            SliderPreviewView(
+            ColorPreviewView(
                 isDragging: sliderState.isDragging,
                 currentColor: sliderState.isDragging ? calculatedColor : Color(selection),
                 previewMainAxisOffset: sliderState.previewMainAxisOffset,
@@ -435,166 +435,6 @@ public struct ColorSlider: View {
         var copy = self
         copy.dataSource = copy.resolvedDataSource.hardEdge(into: steps)
         return copy
-    }
-}
-
-/// An isolated view for rendering the slider background track.
-private struct SliderTrackView: View {
-    let dataSource: ColorSliderDataSource
-    let dimensions: ColorSliderDimensions
-    let axis: Axis
-
-    @Environment(\.colorSliderTrackStroke) private var trackStroke
-
-    private var trackShape: AnyShape {
-        if let radius = dimensions.cornerRadius {
-            return AnyShape(RoundedRectangle(cornerRadius: radius))
-        } else {
-            return AnyShape(Capsule())
-        }
-    }
-
-    var body: some View {
-        let size = CGSize(
-            width: axis == .horizontal ? dimensions.length : dimensions.thickness,
-            height: axis == .horizontal ? dimensions.thickness : dimensions.length
-        )
-
-        Group {
-            switch dataSource.colorSource {
-            case .array(let colors):
-                hardEdgeTrackView(colors: colors)
-                    .clipShape(trackShape)
-            case .function(let colorGenerator):
-                trackShape.fill(colorGenerator(0.5))
-            case .shader(let shaderGenerator, _):
-                trackShape
-                    .fill(Color.white) // Pixels for Metal to paint on.
-                    .colorEffect(shaderGenerator(size, axis == .vertical))
-            }
-        }
-        .frame(width: size.width, height: size.height)
-        .overlay {
-            if let stroke = trackStroke {
-                trackShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func hardEdgeTrackView(colors: [Color]) -> some View {
-        if colors.isEmpty {
-            Color.clear
-        } else {
-            let isHorizontal = axis == .horizontal
-            let step = 1.0 / Double(colors.count)
-
-            let stops: [Gradient.Stop] = colors.enumerated().flatMap { index, color in
-                [
-                    Gradient.Stop(color: color, location: step * Double(index)),
-                    Gradient.Stop(color: color, location: step * Double(index + 1))
-                ]
-            }
-
-            LinearGradient(
-                stops: stops,
-                startPoint: isHorizontal ? .leading : .bottom,
-                endPoint: isHorizontal ? .trailing : .top
-            )
-        }
-    }
-}
-
-/// An isolated view responsible for rendering the draggable slider thumb.
-private struct SliderThumbView: View {
-    let isDragging: Bool
-    let thumbOffset: CGFloat
-    let dimensions: ColorSliderDimensions
-    let axis: Axis
-    let resolvedThumbThickness: CGFloat
-    let resolvedThumbLength: CGFloat
-
-    @Environment(\.colorSliderThumbShape) private var thumbShape
-    @Environment(\.colorSliderThumbColor) private var thumbColor
-    @Environment(\.colorSliderThumbStroke) private var thumbStroke
-    @Environment(\.colorSliderThumbShadow) private var thumbShadow
-    @Environment(\.colorSliderDisableLiquidGlass) private var disableLiquidGlass
-
-    /// Set to `true` to scale the thumb up during a drag gesture if the
-    /// platform supports Liquid Glass effects and it has not been explicitly
-    /// disabled.
-    private var enableThumbScale: Bool {
-        if #available(iOS 26.0, macOS 16.0, *) { return !disableLiquidGlass }
-        return false
-    }
-
-    var body: some View {
-        let thumbWidth: CGFloat = axis == .horizontal ? resolvedThumbThickness : resolvedThumbLength
-        let thumbHeight: CGFloat = axis == .horizontal ? resolvedThumbLength : resolvedThumbThickness
-
-        let xOffset: CGFloat = axis == .horizontal ? thumbOffset : 0
-        let yOffset: CGFloat = axis == .horizontal ? 0 : -thumbOffset
-
-        let dynamicScale: CGFloat = (isDragging && enableThumbScale) ? ColorSliderDefaults.dragScaleMultiplier : 1.0
-
-        Group {
-            if #available(iOS 26.0, macOS 16.0, *), !disableLiquidGlass {
-                Color.clear
-                    .glassEffect(isDragging ? .regular.interactive(true) : .identity, in: thumbShape)
-                    .overlay(thumbShape.fill(thumbColor).opacity(isDragging ? 0.0 : 1.0))
-            } else {
-                thumbShape.fill(thumbColor)
-            }
-        }
-        .foregroundColor(thumbColor)
-        .frame(width: thumbWidth, height: thumbHeight)
-        .scaleEffect(dynamicScale)
-        .shadow(color: thumbShadow.color, radius: thumbShadow.radius, x: thumbShadow.x, y: thumbShadow.y)
-        .overlay {
-            if let stroke = thumbStroke {
-                thumbShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
-            }
-        }
-        .offset(x: xOffset, y: yOffset)
-    }
-}
-
-/// An isolated view responsible for rendering the floating color preview.
-private struct SliderPreviewView: View {
-    let isDragging: Bool
-    let currentColor: Color
-    let previewMainAxisOffset: CGFloat
-    let resolvedPreviewOffset: CGFloat
-    let previewScaleAnchor: UnitPoint
-    let dimensions: ColorSliderDimensions
-    let axis: Axis
-
-    @Environment(\.colorSliderPreviewShape) private var previewShape
-    @Environment(\.colorSliderPreviewStroke) private var previewStroke
-    @Environment(\.colorSliderPreviewHidden) private var previewHidden
-    @Environment(\.colorSliderPreviewShadow) private var previewShadow
-
-    var body: some View {
-        let resolvedShape = previewShape ?? AnyShape(RoundedRectangle(cornerRadius: dimensions.previewCornerRadius))
-
-        let dynamicScale: CGFloat = (previewHidden && !isDragging) ? dimensions.scaleRatio : 1.0
-        let dynamicOpacity: Double = (previewHidden && !isDragging) ? 0.0 : 1.0
-
-        let xOffset: CGFloat = axis == .horizontal ? previewMainAxisOffset : resolvedPreviewOffset
-        let yOffset: CGFloat = axis == .horizontal ? resolvedPreviewOffset : -previewMainAxisOffset
-
-        resolvedShape
-            .foregroundColor(currentColor)
-            .frame(width: dimensions.previewSize, height: dimensions.previewSize)
-            .overlay {
-                if let stroke = previewStroke {
-                    resolvedShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
-                }
-            }
-            .scaleEffect(dynamicScale, anchor: previewScaleAnchor)
-            .opacity(dynamicOpacity)
-            .shadow(color: previewShadow.color, radius: previewShadow.radius, x: previewShadow.x, y: previewShadow.y)
-            .offset(x: xOffset, y: yOffset)
     }
 }
 
