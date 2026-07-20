@@ -18,8 +18,20 @@ public struct ColorSlider: View {
     @Binding public var selection: CGColor
 
     /// The position of the selected color in the slider, normalized to a range
-    /// from 0.0 to 1.0.
-    @Binding public var progress: Double
+    /// from 0.0 to 1.0. The single source of truth when there is no
+    /// provided `externalProgress`.
+    @State private var internalProgress: Double
+
+    /// The position of the selected color in the slider, normalized to a range
+    /// from 0.0 to 1.0. If provided, the slider synchronizes its layout
+    /// progress with this external value.
+    private var externalProgress: Binding<Double>?
+
+    /// The current position of the selected color in the slider, prioritizing
+    /// `externalProgress` if provided.
+    private var currentProgress: Double {
+        externalProgress?.wrappedValue ?? internalProgress
+    }
 
     @State private var sliderState = ColorSliderState()
 
@@ -81,7 +93,8 @@ public struct ColorSlider: View {
     ///     a drag gesture. Defaults to `true`.
     public init(
         selection: Binding<CGColor>,
-        progress: Binding<Double>,
+        progress: Binding<Double>? = nil,
+        initialProgress: Double = 0.5,
         spectrumIdentifier: AnyHashable? = nil,
         onSpectrumChanged: ((CGColor) -> Double)? = nil,
         label: LocalizedStringKey = "Color Slider",
@@ -89,7 +102,8 @@ public struct ColorSlider: View {
         isContinuous: Bool = true
     ) {
         self._selection = selection
-        self._progress = progress
+        self.externalProgress = progress
+        self._internalProgress = State(initialValue: progress?.wrappedValue ?? initialProgress)
         self.spectrumIdentifier = spectrumIdentifier
         self.onSpectrumChanged = onSpectrumChanged
         self.label = label
@@ -235,7 +249,7 @@ public struct ColorSlider: View {
                 previewHidden: previewHidden
             )
 
-            let initialTrackPosition = CGFloat(progress) * dimensions.length
+            let initialTrackPosition = CGFloat(currentProgress) * dimensions.length
             sliderState.persistedThumbPosition = min(
                 max(initialTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
                 dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset
@@ -248,9 +262,11 @@ public struct ColorSlider: View {
         .onChange(of: previewHidden) { _, new in sliderState.previewHidden = new }
         .onChange(of: spectrumIdentifier) { _, _ in
             if let onSpectrumChanged = onSpectrumChanged {
-                progress = onSpectrumChanged(selection)
+                let updatedProgress = onSpectrumChanged(selection)
+                internalProgress = updatedProgress
+                externalProgress?.wrappedValue = updatedProgress
             }
-            let newTrackPosition = CGFloat(progress) * dimensions.length
+            let newTrackPosition = CGFloat(currentProgress) * dimensions.length
             withAnimation(reduceMotion ? nil : animation) {
                 sliderState.persistedThumbPosition = min(
                     max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
@@ -258,7 +274,7 @@ public struct ColorSlider: View {
                 )
             }
         }
-        .onChange(of: progress) { _, newValue in
+        .onChange(of: currentProgress) { _, newValue in
             if !sliderState.isDragging {
                 let newTrackPosition = CGFloat(newValue) * dimensions.length
                 withAnimation(reduceMotion ? nil : animation) {
@@ -271,7 +287,7 @@ public struct ColorSlider: View {
         }
         // Hides individual shapes from VoiceOver.
         .accessibilityElement(children: .ignore)
-        .accessibilityValue(Double(progress).formatted(.percent))
+        .accessibilityValue(Double(currentProgress).formatted(.percent))
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
     }
@@ -298,7 +314,9 @@ public struct ColorSlider: View {
         let newSelection = isContinuous ? calculatedColor.resolve(in: environment).cgColor : nil
 
         Task { @MainActor in
-            self.progress = newProgress
+            self.internalProgress = newProgress
+            self.externalProgress?.wrappedValue = newProgress
+
             if let newSelection {
                 self.selection = newSelection
             }
@@ -319,12 +337,15 @@ public struct ColorSlider: View {
 
     /// Adjusts the slider by a specific percentage step (for VoiceOver).
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
+        var mutableProgress = currentProgress
         ColorSliderCoordinator.accessibilityAdjust(
             state: &sliderState,
             direction: direction,
-            progress: &progress,
+            progress: &mutableProgress,
             step: accessibilityStep
         )
+        self.internalProgress = mutableProgress
+        self.externalProgress?.wrappedValue = mutableProgress
         selection = calculatedColor.resolve(in: environment).cgColor
     }
 }
@@ -426,7 +447,8 @@ public extension ColorSlider {
     /// `CGColor`.
     init(
         selection: Binding<Color>,
-        progress: Binding<Double>,
+        progress: Binding<Double>? = nil,
+        initialProgress: Double = 0.5,
         spectrumIdentifier: AnyHashable? = nil,
         onSpectrumChanged: ((Color) -> Double)? = nil,
         label: LocalizedStringKey = "Color Slider",
@@ -447,6 +469,7 @@ public extension ColorSlider {
         self.init(
             selection: cgSelection,
             progress: progress,
+            initialProgress: initialProgress,
             spectrumIdentifier: spectrumIdentifier,
             onSpectrumChanged: cgOnChanged,
             label: label,
