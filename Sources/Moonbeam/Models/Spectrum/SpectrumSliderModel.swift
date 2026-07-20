@@ -155,6 +155,7 @@ internal struct HSBSpectrumModel: ColorSliderDataSource, Sendable {
     let brightness: Double
     let saturationBends: [BendSection]
     let brightnessBends: [BendSection]
+    let colorSource: ColorSourceProvider
 
     /// Creates a dynamically generated spectrum based on the HSB (Hue,
     /// Saturation, Brightness) color space.
@@ -185,59 +186,62 @@ internal struct HSBSpectrumModel: ColorSliderDataSource, Sendable {
         @BendSectionBuilder saturationBends: () -> [BendSection] = { [] },
         @BendSectionBuilder brightnessBends: () -> [BendSection] = { [] }
     ) {
-        self.startSections = validateAndTruncateMonochromeSections(startSections, name: "HSB Start")
-        self.endSections = validateAndTruncateMonochromeSections(endSections, name: "HSB End")
+        let validStart = validateMonochromeSections(startSections, name: "HSB Start")
+        let validEnd = validateMonochromeSections(endSections, name: "HSB End")
+        let validSaturationBends = validateBends(saturationBends(), name: "HSB Saturation")
+        let validBrightnessBends = validateBends(brightnessBends(), name: "HSB Brightness")
+
+        self.startSections = validStart
+        self.endSections = validEnd
         self.startHue = startHue
         self.endHue = endHue
         self.saturation = saturation
         self.brightness = brightness
-        self.saturationBends = validateBends(saturationBends(), name: "HSB Saturation")
-        self.brightnessBends = validateBends(brightnessBends(), name: "HSB Brightness")
-    }
+        self.saturationBends = validSaturationBends
+        self.brightnessBends = validBrightnessBends
 
-    var colorSource: ColorSourceProvider {
         let fallback: @Sendable (Double) -> Color = { position in
             SpectrumGenerator.color(
                 at: position,
-                startSections: startSections,
-                endSections: endSections,
+                startSections: validStart,
+                endSections: validEnd,
                 startHue: startHue,
                 endHue: endHue,
                 primaryValue: saturation,
                 secondaryValue: brightness,
                 colorSpace: .hsb,
-                primaryBends: saturationBends,
-                secondaryBends: brightnessBends
+                primaryBends: validSaturationBends,
+                secondaryBends: validBrightnessBends
             )
         }
         let shaderData = encodeSpectrumData(
-            startSections: startSections,
-            endSections: endSections,
+            startSections: validStart,
+            endSections: validEnd,
             startHue: startHue,
             endHue: endHue,
             primaryValue: saturation,
             secondaryValue: brightness,
             colorSpace: .hsb,
-            primaryBendsCount: saturationBends.count,
-            secondaryBendsCount: brightnessBends.count
+            primaryBendsCount: validSaturationBends.count,
+            secondaryBendsCount: validBrightnessBends.count
         )
 
-        let satBendsMapped = saturationBends.map { ShaderBend(bend: $0) }
-        let safeSatBends = satBendsMapped.isEmpty ? [ShaderBend.empty] : satBendsMapped
-        let satBendsData = safeSatBends.withUnsafeBufferPointer { Data(buffer: $0) }
+        let saturationBendsMapped = validSaturationBends.map { ShaderBend(bend: $0) }
+        let safeSaturationBends = saturationBendsMapped.isEmpty ? [ShaderBend.empty] : saturationBendsMapped
+        let saturationBendsData = safeSaturationBends.withUnsafeBufferPointer { Data(buffer: $0) }
 
-        let brightBendsMapped = brightnessBends.map { ShaderBend(bend: $0) }
-        let safeBrightBends = brightBendsMapped.isEmpty ? [ShaderBend.empty] : brightBendsMapped
-        let brightBendsData = safeBrightBends.withUnsafeBufferPointer { Data(buffer: $0) }
+        let brightnessBendsMapped = validBrightnessBends.map { ShaderBend(bend: $0) }
+        let safeBrightnessBends = brightnessBendsMapped.isEmpty ? [ShaderBend.empty] : brightnessBendsMapped
+        let brightnessBendsData = safeBrightnessBends.withUnsafeBufferPointer { Data(buffer: $0) }
 
-        return .shader(generator: { size, isVertical in
+        self.colorSource = .shader(generator: { size, isVertical in
             ShaderLibrary.bundle(.module)
                 .spectrumShader(
                     .float2(size.width, size.height),
                     .float(isVertical ? 1.0 : 0.0),
                     .data(shaderData),
-                    .data(satBendsData),
-                    .data(brightBendsData)
+                    .data(saturationBendsData),
+                    .data(brightnessBendsData)
                 )
         }, fallback: fallback)
     }
@@ -253,6 +257,7 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource, Sendable {
     public let endHue: Double
     public let lightnessBends: [BendSection]
     public let chromaBends: [BendSection]
+    let colorSource: ColorSourceProvider
 
     /// Creates a dynamically generated spectrum based on the perceptually
     /// uniform OKLCH color space.
@@ -283,52 +288,55 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource, Sendable {
         @BendSectionBuilder lightnessBends: () -> [BendSection] = { [] },
         @BendSectionBuilder chromaBends: () -> [BendSection] = { [] }
     ) {
-        self.startSections = validateAndTruncateMonochromeSections(startSections, name: "OKLCH Start")
-        self.endSections = validateAndTruncateMonochromeSections(endSections, name: "OKLCH End")
+        let validStart = validateMonochromeSections(startSections, name: "OKLCH Start")
+        let validEnd = validateMonochromeSections(endSections, name: "OKLCH End")
+        let validLightnessBends = validateBends(lightnessBends(), name: "OKLCH Lightness")
+        let validChromaBends = validateBends(chromaBends(), name: "OKLCH Chroma")
+
+        self.startSections = validStart
+        self.endSections = validEnd
         self.lightness = lightness
         self.chroma = chroma
         self.startHue = startHue
         self.endHue = endHue
-        self.lightnessBends = validateBends(lightnessBends(), name: "OKLCH Lightness")
-        self.chromaBends = validateBends(chromaBends(), name: "OKLCH Chroma")
-    }
+        self.lightnessBends = validLightnessBends
+        self.chromaBends = validChromaBends
 
-    var colorSource: ColorSourceProvider {
         let fallback: @Sendable (Double) -> Color = { position in
             SpectrumGenerator.color(
                 at: position,
-                startSections: startSections,
-                endSections: endSections,
+                startSections: validStart,
+                endSections: validEnd,
                 startHue: startHue,
                 endHue: endHue,
                 primaryValue: chroma,
                 secondaryValue: lightness,
                 colorSpace: .oklch,
-                primaryBends: chromaBends,
-                secondaryBends: lightnessBends
+                primaryBends: validChromaBends,
+                secondaryBends: validLightnessBends
             )
         }
         let shaderData = encodeSpectrumData(
-            startSections: startSections,
-            endSections: endSections,
+            startSections: validStart,
+            endSections: validEnd,
             startHue: startHue,
             endHue: endHue,
             primaryValue: chroma,
             secondaryValue: lightness,
             colorSpace: .oklch,
-            primaryBendsCount: chromaBends.count,
-            secondaryBendsCount: lightnessBends.count
+            primaryBendsCount: validChromaBends.count,
+            secondaryBendsCount: validLightnessBends.count
         )
 
-        let chromaBendsMapped = chromaBends.map { ShaderBend(bend: $0) }
+        let chromaBendsMapped = validChromaBends.map { ShaderBend(bend: $0) }
         let safeChromaBends = chromaBendsMapped.isEmpty ? [ShaderBend.empty] : chromaBendsMapped
         let chromaBendsData = safeChromaBends.withUnsafeBufferPointer { Data(buffer: $0) }
 
-        let lightnessBendsMapped = lightnessBends.map { ShaderBend(bend: $0) }
+        let lightnessBendsMapped = validLightnessBends.map { ShaderBend(bend: $0) }
         let safeLightnessBends = lightnessBendsMapped.isEmpty ? [ShaderBend.empty] : lightnessBendsMapped
         let lightnessBendsData = safeLightnessBends.withUnsafeBufferPointer { Data(buffer: $0) }
 
-        return .shader(generator: { size, isVertical in
+        self.colorSource = .shader(generator: { size, isVertical in
             ShaderLibrary.bundle(.module)
                 .spectrumShader(
                     .float2(size.width, size.height),
