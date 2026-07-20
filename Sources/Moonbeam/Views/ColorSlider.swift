@@ -111,40 +111,8 @@ public struct ColorSlider: View {
         self.isContinuous = isContinuous
     }
 
-        if let explicitDataSource = configuration.dataSource {
-            return explicitDataSource
-        }
-
-        if configuration.colorSpace == .oklch {
-            let currentChromaBends: () -> [BendSection] = { configuration.chromaBends }
-            let currentLightnessBends: () -> [BendSection] = { configuration.lightnessBends }
-
-            return OKLCHSpectrumModel(
-                startSections: configuration.startSections,
-                endSections: configuration.endSections,
-                lightness: configuration.baseLightness ?? 0.75,
-                chroma: configuration.baseChroma ?? 0.15,
-                startHue: configuration.hueRange.lowerBound,
-                endHue: configuration.hueRange.upperBound,
-                lightnessBends: currentLightnessBends,
-                chromaBends: currentChromaBends
-            )
-        } else {
-            let currentSaturationBends: () -> [BendSection] = { configuration.saturationBends }
-            let currentBrightnessBends: () -> [BendSection] = { configuration.brightnessBends }
-
-            return HSBSpectrumModel(
-                startSections: configuration.startSections,
-                endSections: configuration.endSections,
-                startHue: configuration.hueRange.lowerBound,
-                endHue: configuration.hueRange.upperBound,
-                saturation: configuration.baseSaturation ?? 1.0,
-                brightness: configuration.baseBrightness ?? 1.0,
-                saturationBends: currentSaturationBends,
-                brightnessBends: currentBrightnessBends
-            )
-        }
     private var resolvedDataSource: any ColorSliderDataSource & Sendable {
+        DataSourceFactory.resolve(from: configuration)
     }
 
     /// The color calculated from the current `liveColorPosition` on the slider.
