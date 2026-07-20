@@ -21,7 +21,7 @@ internal enum ColorSourceProvider: Sendable {
 }
 
 /// Protocol shared by `SpectrumSliderModel`, `GradientSliderModel` and `HardEdgeSliderModel`.
-internal protocol ColorSliderDataSource {
+internal protocol ColorSliderDataSource: Sendable {
 
     /// Determines how the slider track is drawn on screen.
     var colorSource: ColorSourceProvider { get }

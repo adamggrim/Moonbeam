@@ -110,7 +110,7 @@ public struct ColorSlider: View {
         self.isContinuous = isContinuous
     }
 
-    private var resolvedDataSource: any ColorSliderDataSource & Sendable {
+    private var resolvedDataSource: any ColorSliderDataSource {
         DataSourceFactory.resolve(from: configuration)
     }
 

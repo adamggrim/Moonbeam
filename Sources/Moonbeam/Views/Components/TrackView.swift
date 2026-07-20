@@ -3,7 +3,7 @@ import SwiftUI
 
 /// An isolated view for rendering the slider background track.
 internal struct TrackView: View {
-    let dataSource: any ColorSliderDataSource & Sendable
+    let dataSource: any ColorSliderDataSource
     let dimensions: ColorSliderDimensions
     let axis: Axis
 
