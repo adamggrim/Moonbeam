@@ -6,7 +6,7 @@ import os
 import MoonbeamShared
 
 /// The color space used to generate the spectrum.
-public enum SpectrumColorSpace {
+public enum SpectrumColorSpace: Sendable {
     case hsb, oklch
 }
 
@@ -153,7 +153,7 @@ fileprivate func encodeSpectrumData(
 // MARK: - Internal models
 
 /// Model for calculating standard HSB spectrum colors dynamically.
-internal struct HSBSpectrumModel: ColorSliderDataSource {
+internal struct HSBSpectrumModel: ColorSliderDataSource, Sendable {
     let startSections: [MonochromeSection]
     let endSections: [MonochromeSection]
     let startHue: Double
@@ -203,7 +203,7 @@ internal struct HSBSpectrumModel: ColorSliderDataSource {
     }
 
     var colorSource: ColorSourceProvider {
-        let fallback: (Double) -> Color = { position in
+        let fallback: @Sendable (Double) -> Color = { position in
             SpectrumGenerator.color(
                 at: position,
                 startSections: startSections,
@@ -251,7 +251,7 @@ internal struct HSBSpectrumModel: ColorSliderDataSource {
 }
 
 /// Model for calculating perceptually uniform OKLCH spectrum colors dynamically.
-public struct OKLCHSpectrumModel: ColorSliderDataSource {
+public struct OKLCHSpectrumModel: ColorSliderDataSource, Sendable {
     public let startSections: [MonochromeSection]
     public let endSections: [MonochromeSection]
     public let lightness: Double
@@ -301,7 +301,7 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource {
     }
 
     var colorSource: ColorSourceProvider {
-        let fallback: (Double) -> Color = { position in
+        let fallback: @Sendable (Double) -> Color = { position in
             SpectrumGenerator.color(
                 at: position,
                 startSections: startSections,

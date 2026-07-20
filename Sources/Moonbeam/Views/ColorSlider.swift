@@ -97,7 +97,6 @@ public struct ColorSlider: View {
         self.isContinuous = isContinuous
     }
 
-    private var resolvedDataSource: ColorSliderDataSource {
         if let explicitDataSource = configuration.dataSource {
             return explicitDataSource
         }
@@ -131,6 +130,7 @@ public struct ColorSlider: View {
                 brightnessBends: currentBrightnessBends
             )
         }
+    private var resolvedDataSource: any ColorSliderDataSource & Sendable {
     }
 
     /// The color calculated from the current `liveColorPosition` on the slider.

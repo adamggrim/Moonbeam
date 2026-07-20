@@ -3,12 +3,12 @@ import Foundation
 // MARK: - Core protocols
 
 /// Represents the lightest and darkest endpoints of a spectrum.
-public enum MonochromeColor {
+public enum MonochromeColor: Sendable {
     case black, white
 }
 
 /// Section of the color slider that fades to or from a monochrome color.
-public protocol MonochromeSection {
+public protocol MonochromeSection: Sendable {
     /// The color of a `MonochromeSection`, either `.black` or `.white`.
     var color: MonochromeColor { get }
 
@@ -26,7 +26,7 @@ public extension MonochromeSection {
 
 /// A protocol for a section of the color slider with special conditions for
 /// saturation or brightness.
-public protocol BendSection {
+public protocol BendSection: Sendable {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     var startHue: CGFloat { get }
 

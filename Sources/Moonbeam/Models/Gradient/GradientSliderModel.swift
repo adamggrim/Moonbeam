@@ -4,7 +4,7 @@ import SwiftUI
 import MoonbeamShared
 
 /// The color space used to interpolate between starting and ending colors.
-public enum GradientColorSpace {
+public enum GradientColorSpace: Sendable {
     case rgb, oklab, oklch
 }
 
@@ -21,7 +21,7 @@ internal struct GradientSliderModel: ColorSliderDataSource {
     let colorSpace: GradientColorSpace
 
     var colorSource: ColorSourceProvider {
-        let fallback: (Double) -> Color = { position in
+        let fallback: @Sendable (Double) -> Color = { position in
             switch colorSpace {
             case .rgb: return startColor.mix(with: endColor, by: position)
             case .oklab, .oklch: return startColor.mix(with: endColor, by: position, in: .perceptual)

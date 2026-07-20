@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Represents whether the colors are defined by an array or function.
-internal enum ColorSourceProvider {
+internal enum ColorSourceProvider: Sendable {
     /// Provides colors as a precomputed array.
     ///
     /// Designed for hard-edge color sliders.
@@ -11,7 +11,7 @@ internal enum ColorSourceProvider {
     /// to 1.0).
     ///
     /// Designed for spectrum and gradient color sliders.
-    case function((_ position: Double) -> Color)
+    case function(@Sendable (_ position: Double) -> Color)
 
     /// Renders the background using a Metal shader.
     case shader(generator: (_ size: CGSize, _ isVertical: Bool) -> Shader, fallback: (_ position: Double) -> Color)

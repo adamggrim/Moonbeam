@@ -2,10 +2,10 @@ import SwiftUI
 
 /// A configuration object for the data and rules required to generate a color
 /// slider.
-public struct ColorSliderConfiguration {
+public struct ColorSliderConfiguration: Sendable {
     /// An explicitly provided data source, such as a gradient or hard-edge model.
     /// If nil, the slider will generate an implicit spectrum based on the properties below.
-    internal var dataSource: ColorSliderDataSource? = nil
+    internal var dataSource: (any ColorSliderDataSource & Sendable)? = nil
 
     /// The color space used to generate the spectrum. Defaults to HSB.
     public var colorSpace: SpectrumColorSpace = .hsb

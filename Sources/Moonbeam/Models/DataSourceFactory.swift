@@ -10,10 +10,8 @@ internal enum DataSourceFactory {
     /// - Parameter configuration: The data configuration built by the view
     ///   modifiers.
     /// - Returns: An object conforming to `ColorSliderDataSource`.
-    static func resolve(from configuration: ColorSliderConfiguration) -> ColorSliderDataSource {
-        if let explicitDataSource = configuration.dataSource {
-            return explicitDataSource
-        }
+    static func resolve(from configuration: ColorSliderConfiguration) -> any ColorSliderDataSource & Sendable {
+        let baseSource: any ColorSliderDataSource & Sendable
 
         if configuration.colorSpace == .oklch {
             let currentChromaBends: () -> [BendSection] = { configuration.chromaBends }
