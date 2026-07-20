@@ -15,12 +15,11 @@ internal struct HardEdgeSliderModel: ColorSliderDataSource {
 
     /// Provides the model's color source as a discrete array, ensuring the
     /// slider track renders as discrete color blocks.
-    var colorSource: ColorSourceProvider {
-        return .array(colors)
-    }
+    let colorSource: ColorSourceProvider
 
     /// Creates a hard-edge slider model using an discrete array of colors.
     init(colors: [Color]) {
         self.colors = colors
+        self.colorSource = .array(colors)
     }
 }
