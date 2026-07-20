@@ -13,19 +13,19 @@ public enum PreviewPosition: Sendable, Equatable {
 
 // MARK: - Environment keys
 
-private struct TrackStrokeKey: EnvironmentKey { static let defaultValue: TrackStroke? = nil }
+private struct ShapeStrokeKey: EnvironmentKey { static let defaultValue: ShapeStroke? = nil }
 
 private struct ThumbShapeKey: EnvironmentKey { static let defaultValue = AnyShape(Capsule()) }
 private struct ThumbColorKey: EnvironmentKey { static let defaultValue: Color = .white }
-private struct ThumbStrokeKey: EnvironmentKey { static let defaultValue: TrackStroke? = nil }
-private struct ThumbShadowKey: EnvironmentKey { static let defaultValue = ColorSliderShadow() }
+private struct ThumbStrokeKey: EnvironmentKey { static let defaultValue: ShapeStroke? = nil }
+private struct ThumbShadowKey: EnvironmentKey { static let defaultValue = ShapeShadow() }
 
 private struct PreviewShapeKey: EnvironmentKey { static let defaultValue: AnyShape? = nil }
-private struct PreviewStrokeKey: EnvironmentKey { static let defaultValue: TrackStroke? = nil }
+private struct PreviewStrokeKey: EnvironmentKey { static let defaultValue: ShapeStroke? = nil }
 private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: PreviewPosition? = nil }
 private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
 private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool = true }
-private struct PreviewShadowKey: EnvironmentKey { static let defaultValue = ColorSliderShadow() }
+private struct PreviewShadowKey: EnvironmentKey { static let defaultValue = ShapeShadow() }
 
 private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
@@ -42,9 +42,9 @@ private struct ColorSliderConfigurationKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    var colorSliderTrackStroke: TrackStroke? {
-        get { self[TrackStrokeKey.self] }
-        set { self[TrackStrokeKey.self] = newValue }
+    var colorSliderTrackStroke: ShapeStroke? {
+        get { self[ShapeStrokeKey.self] }
+        set { self[ShapeStrokeKey.self] = newValue }
     }
 
     var colorSliderThumbShape: AnyShape {
@@ -55,11 +55,11 @@ extension EnvironmentValues {
         get { self[ThumbColorKey.self] }
         set { self[ThumbColorKey.self] = newValue }
     }
-    var colorSliderThumbStroke: TrackStroke? {
+    var colorSliderThumbStroke: ShapeStroke? {
             get { self[ThumbStrokeKey.self] }
             set { self[ThumbStrokeKey.self] = newValue }
         }
-    var colorSliderThumbShadow: ColorSliderShadow {
+    var colorSliderThumbShadow: ShapeShadow {
         get { self[ThumbShadowKey.self] }
         set { self[ThumbShadowKey.self] = newValue }
     }
@@ -68,7 +68,7 @@ extension EnvironmentValues {
         get { self[PreviewShapeKey.self] }
         set { self[PreviewShapeKey.self] = newValue }
     }
-    var colorSliderPreviewStroke: TrackStroke? {
+    var colorSliderPreviewStroke: ShapeStroke? {
         get { self[PreviewStrokeKey.self] }
         set { self[PreviewStrokeKey.self] = newValue }
     }
@@ -84,7 +84,7 @@ extension EnvironmentValues {
         get { self[PreviewHiddenKey.self] }
         set { self[PreviewHiddenKey.self] = newValue }
     }
-    var colorSliderPreviewShadow: ColorSliderShadow {
+    var colorSliderPreviewShadow: ShapeShadow {
         get { self[PreviewShadowKey.self] }
         set { self[PreviewShadowKey.self] = newValue }
     }
