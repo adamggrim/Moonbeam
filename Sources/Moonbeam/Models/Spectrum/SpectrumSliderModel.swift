@@ -21,7 +21,7 @@ internal enum MoonbeamTelemetry {
     }
 }
 
-fileprivate func validateBendSections(bendSections: [BendSection]) -> Bool {
+internal func validateBendSections(bendSections: [BendSection]) -> Bool {
     guard bendSections.count > 1 else { return true }
     let sortedBendSections = bendSections.sorted { min($0.startHue, $0.endHue) < min($1.startHue, $1.endHue) }
     for (currentSection, nextSection) in zip(sortedBendSections, sortedBendSections.dropFirst()) {
@@ -39,7 +39,7 @@ fileprivate func validateBendSections(bendSections: [BendSection]) -> Bool {
 ///   - name: A descriptive identifier for the `BendSection` objects.
 ///
 /// - Returns: A validated array of bend sections.
-fileprivate func validateBends(_ bends: [BendSection], name: String) -> [BendSection] {
+internal func validateBends(_ bends: [BendSection], name: String) -> [BendSection] {
     var validBends: [BendSection] = []
 
     for bend in bends {
@@ -62,7 +62,7 @@ fileprivate func validateBends(_ bends: [BendSection], name: String) -> [BendSec
 }
 
 /// Validates monochrome sections  to prevent shader errors.
-fileprivate func validateMonochromeSections(
+internal func validateMonochromeSections(
     _ sections: [MonochromeSection], name: String
 ) -> [MonochromeSection] {
     let maxSections = Int(MAX_MONOCHROME_SECTIONS)
@@ -93,7 +93,7 @@ extension ShaderBend {
     static let empty = ShaderBend(data0: .zero, data1: .zero)
 }
 
-fileprivate func encodeSpectrumData(
+internal func encodeSpectrumData(
     startSections: [MonochromeSection], endSections: [MonochromeSection],
     startHue: Double, endHue: Double, primaryValue: Double, secondaryValue: Double,
     colorSpace: SpectrumColorSpace, primaryBendsCount: Int, secondaryBendsCount: Int
