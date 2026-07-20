@@ -26,6 +26,8 @@ public struct ColorSliderConfiguration: Sendable {
     public var baseLightness: Double? = nil
     public var baseChroma: Double? = nil
 
+    public var hardEdgeSteps: Int? = nil
+
     public init() {}
 
     internal func applyingSpectrum(space: SpectrumColorSpace, range: ClosedRange<Double>) -> Self {
@@ -115,6 +117,12 @@ public struct ColorSliderConfiguration: Sendable {
     internal func applyingColors(_ colors: [Color]) -> Self {
         var copy = self
         copy.dataSource = HardEdgeSliderModel(colors: colors)
+        return copy
+    }
+
+    internal func applyingHardEdge(into steps: Int) -> Self {
+        var copy = self
+        copy.hardEdgeSteps = steps
         return copy
     }
 }
