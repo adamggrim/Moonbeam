@@ -31,13 +31,6 @@ internal struct ColorSliderState {
         self.previewHidden = previewHidden
     }
 
-    // MARK: - Constants
-
-    private enum Metrics {
-        static let defaultPreviewOffset: CGFloat = 70.0
-        static let dragScaleMultiplier: CGFloat = 1.1
-    }
-
     // MARK: - State
 
     /// Indicates whether a drag gesture is currently active.
