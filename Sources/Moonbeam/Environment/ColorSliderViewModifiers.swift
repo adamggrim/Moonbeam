@@ -122,6 +122,10 @@ private struct AnimationKey: EnvironmentKey {
     static let defaultValue: Animation = .easeInOut(duration: ColorSliderDefaults.animationDuration)
 }
 
+private struct ColorSliderConfigurationKey: EnvironmentKey {
+    static let defaultValue = ColorSliderConfiguration()
+}
+
 extension EnvironmentValues {
     var colorSliderTrackStroke: TrackStroke? {
         get { self[TrackStrokeKey.self] }
@@ -189,6 +193,11 @@ extension EnvironmentValues {
     var colorSliderAnimation: Animation {
         get { self[AnimationKey.self] }
         set { self[AnimationKey.self] = newValue }
+    }
+
+    var colorSliderConfiguration: ColorSliderConfiguration {
+        get { self[ColorSliderConfigurationKey.self] }
+        set { self[ColorSliderConfigurationKey.self] = newValue }
     }
 }
 
