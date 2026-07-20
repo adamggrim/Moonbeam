@@ -20,7 +20,7 @@ internal struct ThumbView: View {
     /// platform supports Liquid Glass effects and it has not been explicitly
     /// disabled.
     private var enableThumbScale: Bool {
-        if #available(iOS 26.0, macOS 16.0, *) { return !disableLiquidGlass }
+        if #available(iOS 26.0, macOS 26.0, *) { return !disableLiquidGlass }
         return false
     }
 
@@ -34,7 +34,7 @@ internal struct ThumbView: View {
         let dynamicScale: CGFloat = (isDragging && enableThumbScale) ? ColorSliderDefaults.dragScaleMultiplier : 1.0
 
         Group {
-            if #available(iOS 26.0, macOS 16.0, *), !disableLiquidGlass {
+            if #available(iOS 26.0, macOS 26.0, *), !disableLiquidGlass {
                 Color.clear
                     .glassEffect(isDragging ? .regular.interactive(true) : .identity, in: thumbShape)
                     .overlay(thumbShape.fill(thumbColor).opacity(isDragging ? 0.0 : 1.0))
