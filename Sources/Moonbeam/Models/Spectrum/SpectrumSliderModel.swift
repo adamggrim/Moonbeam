@@ -61,25 +61,18 @@ fileprivate func validateBends(_ bends: [BendSection], name: String) -> [BendSec
     return validBends
 }
 
-/// Validates monochrome sections, truncating them if they exceed the maximum
-/// allowed, to prevent shader errors.
-fileprivate func validateAndTruncateMonochromeSections(
+/// Validates monochrome sections  to prevent shader errors.
+fileprivate func validateMonochromeSections(
     _ sections: [MonochromeSection], name: String
 ) -> [MonochromeSection] {
     let maxSections = Int(MAX_MONOCHROME_SECTIONS)
-    guard sections.count > maxSections else { return sections }
 
-    let errorMessage = (
-        "Moonbeam: \(name) monochrome sections exceed the maximum of \(maxSections). "
-        + "Monochrome sections truncated."
+    precondition(
+        sections.count <= maxSections,
+        "Moonbeam: \(name) monochrome sections exceed the maximum of \(maxSections). You provided \(sections.count)."
     )
 
-    #if DEBUG
-    fatalError(errorMessage)
-    #else
-    MoonbeamTelemetry.reportNonFatalIssue(errorMessage)
-    return Array(sections.prefix(maxSections))
-    #endif
+    return sections
 }
 
 // MARK: - Metal data structures
