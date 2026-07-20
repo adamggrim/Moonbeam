@@ -14,7 +14,9 @@ internal enum ColorSourceProvider: Sendable {
     case function(@Sendable (_ position: Double) -> Color)
 
     /// Renders the background using a Metal shader.
-    case shader(generator: (_ size: CGSize, _ isVertical: Bool) -> Shader, fallback: (_ position: Double) -> Color)
+    case shader(generator: @Sendable (
+        _ size: CGSize, _ isVertical: Bool
+    ) -> Shader, fallback: @Sendable (_ position: Double) -> Color)
 }
 
 /// Protocol shared by `SpectrumSliderModel`, `GradientSliderModel` and `HardEdgeSliderModel`.
