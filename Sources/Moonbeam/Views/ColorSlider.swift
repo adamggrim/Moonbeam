@@ -56,7 +56,7 @@ public struct ColorSlider: View {
     /// drag gesture (`true`), or only when the drag ends (`false`).
     public var isContinuous: Bool
 
-    var configuration = ColorSliderConfiguration()
+    @Environment(\.colorSliderConfiguration) private var configuration
 
     /// Initializes a customizable color slider.
     ///
@@ -331,92 +331,93 @@ public struct ColorSlider: View {
 
 // MARK: - Modifiers
 
-public extension ColorSlider {
-    func spectrum(space: SpectrumColorSpace, range: ClosedRange<Double>) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingSpectrum(space: space, range: range)
-        return copy
+public extension View {
+    func spectrum(space: SpectrumColorSpace, range: ClosedRange<Double>) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingSpectrum(space: space, range: range)
+        }
     }
 
-    func baseSaturation(_ value: Double) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingBaseSaturation(value)
-        return copy
+    func baseSaturation(_ value: Double) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingBaseSaturation(value)
+        }
     }
 
-    func baseBrightness(_ value: Double) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingBaseBrightness(value)
-        return copy
+    func baseBrightness(_ value: Double) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingBaseBrightness(value)
+        }
     }
 
-    func baseLightness(_ value: Double) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingBaseLightness(value)
-        return copy
+    func baseLightness(_ value: Double) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingBaseLightness(value)
+        }
     }
 
-    func baseChroma(_ value: Double) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingBaseChroma(value)
-        return copy
+    func baseChroma(_ value: Double) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingBaseChroma(value)
+        }
     }
 
-    func startingWith(_ sections: MonochromeSection...) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingStartSections(sections)
-        return copy
+    func startingWith(_ sections: MonochromeSection...) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingStartSections(sections)
+        }
     }
 
-    func endingWith(_ sections: MonochromeSection...) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingEndSections(sections)
-        return copy
+    func endingWith(_ sections: MonochromeSection...) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingEndSections(sections)
+        }
     }
 
-    func saturationBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingSaturationBends(bends())
-        return copy
+    func saturationBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> some View {
+        let resolvedBends = bends()
+        return transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingSaturationBends(resolvedBends)
+        }
     }
 
-    func brightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingBrightnessBends(bends())
-        return copy
+    func brightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> some View {
+        let resolvedBends = bends()
+        return transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingBrightnessBends(resolvedBends)
+        }
     }
 
-    func lightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingLightnessBends(bends())
-        return copy
+    func lightnessBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> some View {
+        let resolvedBends = bends()
+        return transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingLightnessBends(resolvedBends)
+        }
     }
 
-    func chromaBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingChromaBends(bends())
-        return copy
+    func chromaBends(@BendSectionBuilder _ bends: () -> [BendSection]) -> some View {
+        let resolvedBends = bends()
+        return transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingChromaBends(resolvedBends)
+        }
     }
 
-    func gradient(from startColor: Color, to endColor: Color, space: GradientColorSpace = .rgb) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingGradient(from: startColor, to: endColor, space: space)
-        return copy
+    func gradient(from startColor: Color, to endColor: Color, space: GradientColorSpace = .rgb) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingGradient(from: startColor, to: endColor, space: space)
+        }
     }
 
-    func colors(_ colors: [Color]) -> Self {
-        var copy = self
-        copy.configuration = copy.configuration.applyingColors(colors)
-        return copy
+    func colors(_ colors: [Color]) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingColors(colors)
+        }
     }
 
-    func hardEdge(into steps: Int) -> Self {
-        var copy = self
-        // Re-use the existing resolution flow but package the resulting generated colors
-        // back into the configuration as a static hard edge array.
-        let colors = copy.resolvedDataSource.hardEdge(into: steps).colors
-        copy.configuration = copy.configuration.applyingColors(colors)
-        return copy
+    func hardEdge(into steps: Int) -> some View {
+        transformEnvironment(\.colorSliderConfiguration) { config in
+            config = config.applyingHardEdge(into: steps)
+        }
     }
 }
 
