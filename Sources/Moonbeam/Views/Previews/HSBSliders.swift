@@ -3,7 +3,6 @@ import SwiftUI
 #Preview("Horizontal HSB spectrum slider") {
     PreviewContainer { selection, progress in
         ColorSlider(selection: selection, progress: progress, axis: .horizontal)
-            .colorSliderPreviewStroke(Color.white, lineWidth: 2)
     }
 }
 
