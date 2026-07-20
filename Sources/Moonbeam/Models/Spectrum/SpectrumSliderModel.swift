@@ -107,19 +107,19 @@ fileprivate func encodeSpectrumData(
 
     var startData = simd_float4(0, 0, 0, 0)
     var cumulativeStart = 0.0
-    for (i, sec) in startSections.enumerated() {
+    for (i, section) in startSections.enumerated() {
         if i >= maxSections { break }
-        cumulativeStart += sec.weight / totalWeight
-        startData[i*2] = sec.color == .white ? 1.0 : 0.0
+        cumulativeStart += section.weight / totalWeight
+        startData[i*2] = section.color == .white ? 1.0 : 0.0
         startData[i*2 + 1] = Float(cumulativeStart)
     }
 
     var endData = simd_float4(0, 0, 0, 0)
     var cumulativeEnd = (startWeight + hueWeight) / totalWeight
-    for (i, sec) in endSections.enumerated() {
+    for (i, section) in endSections.enumerated() {
         if i >= maxSections { break }
-        cumulativeEnd += sec.weight / totalWeight
-        endData[i*2] = sec.color == .white ? 1.0 : 0.0
+        cumulativeEnd += section.weight / totalWeight
+        endData[i*2] = section.color == .white ? 1.0 : 0.0
         endData[i*2 + 1] = Float(cumulativeEnd)
     }
 
@@ -227,12 +227,12 @@ internal struct HSBSpectrumModel: ColorSliderDataSource, Sendable {
         )
 
         let saturationBendsMapped = validSaturationBends.map { ShaderBend(bend: $0) }
-        let safeSaturationBends = saturationBendsMapped.isEmpty ? [ShaderBend.empty] : saturationBendsMapped
-        let saturationBendsData = safeSaturationBends.withUnsafeBufferPointer { Data(buffer: $0) }
+        let nonEmptySaturationBends = saturationBendsMapped.isEmpty ? [ShaderBend.empty] : saturationBendsMapped
+        let saturationBendsData = nonEmptySaturationBends.withUnsafeBufferPointer { Data(buffer: $0) }
 
         let brightnessBendsMapped = validBrightnessBends.map { ShaderBend(bend: $0) }
-        let safeBrightnessBends = brightnessBendsMapped.isEmpty ? [ShaderBend.empty] : brightnessBendsMapped
-        let brightnessBendsData = safeBrightnessBends.withUnsafeBufferPointer { Data(buffer: $0) }
+        let nonEmptyBrightnessBends = brightnessBendsMapped.isEmpty ? [ShaderBend.empty] : brightnessBendsMapped
+        let brightnessBendsData = nonEmptyBrightnessBends.withUnsafeBufferPointer { Data(buffer: $0) }
 
         self.colorSource = .shader(generator: { size, isVertical in
             ShaderLibrary.bundle(.module)
@@ -329,12 +329,12 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource, Sendable {
         )
 
         let chromaBendsMapped = validChromaBends.map { ShaderBend(bend: $0) }
-        let safeChromaBends = chromaBendsMapped.isEmpty ? [ShaderBend.empty] : chromaBendsMapped
-        let chromaBendsData = safeChromaBends.withUnsafeBufferPointer { Data(buffer: $0) }
+        let nonEmptyChromaBends = chromaBendsMapped.isEmpty ? [ShaderBend.empty] : chromaBendsMapped
+        let chromaBendsData = nonEmptyChromaBends.withUnsafeBufferPointer { Data(buffer: $0) }
 
         let lightnessBendsMapped = validLightnessBends.map { ShaderBend(bend: $0) }
-        let safeLightnessBends = lightnessBendsMapped.isEmpty ? [ShaderBend.empty] : lightnessBendsMapped
-        let lightnessBendsData = safeLightnessBends.withUnsafeBufferPointer { Data(buffer: $0) }
+        let nonEmptyLightnessBends = lightnessBendsMapped.isEmpty ? [ShaderBend.empty] : lightnessBendsMapped
+        let lightnessBendsData = nonEmptyLightnessBends.withUnsafeBufferPointer { Data(buffer: $0) }
 
         self.colorSource = .shader(generator: { size, isVertical in
             ShaderLibrary.bundle(.module)

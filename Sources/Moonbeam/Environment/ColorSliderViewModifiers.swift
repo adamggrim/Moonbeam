@@ -223,7 +223,7 @@ public extension View {
         previewSize: CGFloat = 60,
         previewOffset: CGFloat? = nil
     ) -> some View {
-        let dim = ColorSliderDimensions(
+        let dimensions = ColorSliderDimensions(
             length: length,
             thickness: thickness,
             thumbThickness: thumbThickness,
@@ -231,7 +231,7 @@ public extension View {
             previewSize: previewSize,
             previewOffset: previewOffset
         )
-        return environment(\.colorSliderDimensions, dim)
+        return environment(\.colorSliderDimensions, dimensions)
     }
 
     /// Customizes the minimum distance to drag the thumb before the slider

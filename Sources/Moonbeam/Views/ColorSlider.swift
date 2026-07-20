@@ -117,8 +117,8 @@ public struct ColorSlider: View {
 
     /// The color calculated from the current `liveColorPosition` on the slider.
     private var calculatedColor: Color {
-        let safeLength = dimensions.length > 0 ? dimensions.length : 0.001
-        let clampedRatio = max(0.0, min(1.0, sliderState.liveColorPosition / safeLength))
+        let nonZeroLength = dimensions.length > 0 ? dimensions.length : 0.001
+        let clampedRatio = max(0.0, min(1.0, sliderState.liveColorPosition / nonZeroLength))
         switch resolvedDataSource.colorSource {
         case .array(let colors):
             guard !colors.isEmpty else { return .clear }
@@ -150,14 +150,14 @@ public struct ColorSlider: View {
         switch source {
         case .array(let colors) where !colors.isEmpty:
             let length: CGFloat = dimensions.length
-            let safeLength: CGFloat = length > 0 ? length : 0.001
+            let nonZeroLength: CGFloat = length > 0 ? length : 0.001
 
             let position: CGFloat = sliderState.liveColorPosition
-            let rawRatio: CGFloat = position / safeLength
+            let rawRatio: CGFloat = position / nonZeroLength
             let clampedRatio: CGFloat = max(0.0, min(1.0, rawRatio))
 
-            let countFloat: CGFloat = CGFloat(colors.count)
-            let calculatedIndex: Int = Int(countFloat * clampedRatio)
+            let colorCount: CGFloat = CGFloat(colors.count)
+            let calculatedIndex: Int = Int(colorCount * clampedRatio)
 
             let maxIndex: Int = colors.count - 1
             return max(0, min(maxIndex, calculatedIndex))
