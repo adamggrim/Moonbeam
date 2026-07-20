@@ -20,7 +20,13 @@ internal struct GradientSliderModel: ColorSliderDataSource {
     /// and ending colors.
     let colorSpace: GradientColorSpace
 
-    var colorSource: ColorSourceProvider {
+    let colorSource: ColorSourceProvider
+
+    init(startColor: Color, endColor: Color, colorSpace: GradientColorSpace = .rgb) {
+        self.startColor = startColor
+        self.endColor = endColor
+        self.colorSpace = colorSpace
+
         let fallback: @Sendable (Double) -> Color = { position in
             switch colorSpace {
             case .rgb: return startColor.mix(with: endColor, by: position)
@@ -28,7 +34,7 @@ internal struct GradientSliderModel: ColorSliderDataSource {
             }
         }
 
-        return .shader(generator: { size, isVertical in
+        self.colorSource = .shader(generator: { size, isVertical in
             let spaceFlag: Float
             switch colorSpace {
             case .oklch: spaceFlag = Float(MoonbeamColorSpaceOKLCH.rawValue)
@@ -43,11 +49,5 @@ internal struct GradientSliderModel: ColorSliderDataSource {
                 .float(spaceFlag)
             )
         }, fallback: fallback)
-    }
-
-    init(startColor: Color, endColor: Color, colorSpace: GradientColorSpace = .rgb) {
-        self.startColor = startColor
-        self.endColor = endColor
-        self.colorSpace = colorSpace
     }
 }
