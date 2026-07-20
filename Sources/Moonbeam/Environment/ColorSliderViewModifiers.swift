@@ -39,7 +39,7 @@ public struct ColorSliderDimensions: Sendable, Equatable {
     public var previewOffset: CGFloat? = nil
 
     /// The scale of the floating color preview when it is hidden and not
-    /// sssssssssactively being dragged.
+    /// actively being dragged.
     public var scaleRatio: CGFloat = ColorSliderDefaults.scaleRatio
 
     /// The corner radius applied to the floating color preview.
