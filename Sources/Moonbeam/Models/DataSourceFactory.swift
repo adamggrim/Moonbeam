@@ -42,5 +42,11 @@ internal enum DataSourceFactory {
                 brightnessBends: currentBrightnessBends
             )
         }
+
+        if let steps = configuration.hardEdgeSteps {
+            return baseSource.hardEdge(into: steps)
+        }
+
+        return baseSource
     }
 }
