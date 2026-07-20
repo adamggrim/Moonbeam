@@ -54,7 +54,7 @@ fileprivate func validateBends(_ bends: [BendSection], name: String) -> [BendSec
             validBends.append(bend)
         } else {
             MoonbeamTelemetry.reportNonFatalIssue(
-                "Moonbeam: \(name) contains overlapping bend sections. Some sections will be ignored."
+                "Moonbeam: \(name) contains overlapping bend sections. Bend sections after the first will not appear."
             )
         }
     }
