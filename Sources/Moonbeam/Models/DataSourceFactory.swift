@@ -13,11 +13,13 @@ internal enum DataSourceFactory {
     static func resolve(from configuration: ColorSliderConfiguration) -> any ColorSliderDataSource & Sendable {
         let baseSource: any ColorSliderDataSource & Sendable
 
-        if configuration.colorSpace == .oklch {
+        if let explicitDataSource = configuration.dataSource {
+            baseSource = explicitDataSource
+        } else if configuration.colorSpace == .oklch {
             let currentChromaBends: () -> [BendSection] = { configuration.chromaBends }
             let currentLightnessBends: () -> [BendSection] = { configuration.lightnessBends }
 
-            return OKLCHSpectrumModel(
+            baseSource = OKLCHSpectrumModel(
                 startSections: configuration.startSections,
                 endSections: configuration.endSections,
                 lightness: configuration.baseLightness ?? 0.75,
@@ -31,7 +33,7 @@ internal enum DataSourceFactory {
             let currentSaturationBends: () -> [BendSection] = { configuration.saturationBends }
             let currentBrightnessBends: () -> [BendSection] = { configuration.brightnessBends }
 
-            return HSBSpectrumModel(
+            baseSource = HSBSpectrumModel(
                 startSections: configuration.startSections,
                 endSections: configuration.endSections,
                 startHue: configuration.hueRange.lowerBound,
