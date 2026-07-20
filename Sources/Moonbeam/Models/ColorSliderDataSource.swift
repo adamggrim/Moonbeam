@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Represents whether the colors are defined by an array or function.
+/// Represents whether the colors are defined by an array, a function or a Metal
+/// shader.
 internal enum ColorSourceProvider: Sendable {
     /// Provides colors as a precomputed array.
     ///

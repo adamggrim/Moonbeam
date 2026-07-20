@@ -25,7 +25,7 @@ public extension MonochromeSection {
 }
 
 /// A protocol for a section of the color slider with special conditions for
-/// saturation or brightness.
+/// saturation, brightness, lightness or chroma.
 public protocol BendSection: Sendable {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     var startHue: CGFloat { get }

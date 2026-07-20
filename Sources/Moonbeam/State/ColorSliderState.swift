@@ -36,13 +36,13 @@ internal struct ColorSliderState {
     /// Indicates whether a drag gesture is currently active.
     var isDragging: Bool = false
 
-    ///  The current horizontal drag within the parent container view,
-    ///  equivalent to the `value.translation.width` of the `DragGesture`.
+    ///  The current main-axis drag within the parent container view, equivalent
+    ///  to the `value.translation.width` of the `DragGesture`.
     ///
     ///  Can extend beyond the end of the slider.
     var liveContainerDrag: CGFloat = .zero
 
-    /// The persisted horizontal position of the start of the thumb on the
+    /// The persisted main-axis position of the start of the thumb on the
     /// slider.
     ///
     /// Cannot extend beyond the thumb's leading edge at the end of the slider.
@@ -73,13 +73,13 @@ internal struct ColorSliderState {
     var thumbInset: CGFloat { (dimensions.thickness - resolvedThumbThickness) / 2 }
 
     /// The current `liveContainerDrag` combined with the
-    /// `persistedThumbPosition`. Equivalent to the horizontal position of the
+    /// `persistedThumbPosition`. Equivalent to the main-axis position of the
     /// thumb's leading edge during a `DragGesture`.
     ///
     /// Like `liveContainerDrag`, can extend beyond the end of the slider.
     var liveContainerThumbDrag: CGFloat { persistedThumbPosition + liveContainerDrag }
 
-    /// The clamped horizontal position of the current selected color on the
+    /// The clamped main-axis position of the current selected color on the
     /// slider.
     ///
     /// For most of the slider, corresponds with the horizontal position of the
@@ -89,7 +89,7 @@ internal struct ColorSliderState {
         min(max(liveContainerThumbDrag + halfThumbThickness, 0), dimensions.length)
     }
 
-    /// The clamped horizontal position of the start of the thumb during an
+    /// The clamped main-axis position of the start of the thumb during an
     /// active drag.
     ///
     /// Cannot extend beyond the thumb's leading edge at the end of the slider.

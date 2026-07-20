@@ -72,10 +72,9 @@ public struct ColorSlider: View {
 
     /// Initializes a customizable color slider.
     ///
-    /// Created either by injecting a discrete `dataSource` (e.g., a
-    /// `GradientSliderModel` or `HardEdgeSliderModel`), or by attaching
-    /// `.spectrum(...)` modifiers directly to the view to build a spectrum
-    /// implicitly.
+    /// Created by attaching view modifiers like `.spectrum(...)`,
+    /// `.gradient(...)` or `.colors(...)` directly to the view to configure
+    /// the data source.
     ///
     /// - Parameters:
     ///   - selection: A binding to the currently absolute selected color.

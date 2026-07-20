@@ -8,9 +8,10 @@ internal struct SpectrumGenerator {
 
     /// Calculates the color at a specific normalized position on the spectrum.
     ///
-    /// This function re-implements the logic from `SpectrumSliderModel` to
-    /// calculate a single color on-demand without pre-generating an array,
-    /// making it suitable for use in a SwiftUI `Shader`.
+    /// This function re-implements the logic from `HSBSpectrumModel` and
+    /// `OKLCHSpectrumModel` to calculate a single color on-demand without
+    /// pre-generating an array, providing a pure-Swift fallback for floating
+    /// color previews or wherever Metal shaders are unavailable.
     ///
     /// - Parameters:
     ///   - position: The normalized position (0.0 to 1.0) on the slider.
