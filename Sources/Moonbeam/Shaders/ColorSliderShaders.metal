@@ -126,6 +126,13 @@ float calculateBend(
     return defaultValue;
 }
 
+// MARK: - Coordinate helper
+
+inline float calculateNormalizedPosition(float2 position, float2 size, float isVertical) {
+    float normalized = isVertical > 0.5 ? (1.0 - (position.y / size.y)) : (position.x / size.x);
+    return clamp(normalized, 0.0, 1.0);
+}
+
 // MARK: - Gradient shader
 
 [[ stitchable ]]
@@ -138,13 +145,12 @@ half4 gradientShader(
     float isVertical,
     float colorSpaceFlag
 ) {
-    float normalizedPosition = isVertical > 0.5 ? (1.0 - (position.y / size.y)) : (position.x / size.x);
-    normalizedPosition = clamp(normalizedPosition, 0.0, 1.0);
+    float normalizedPosition = calculateNormalizedPosition(position, size, isVertical);
 
     uint space = uint(colorSpaceFlag);
 
     if (space == MoonbeamColorSpaceRGB) {
-        half4 blendedColor = mix(startColor, endColor, normalizedPosition);
+        half4 blendedColor = mix(startColor, endColor, half(normalizedPosition));
         return half4(blendedColor.rgb * currentColor.a, blendedColor.a * currentColor.a);
     }
 
@@ -192,8 +198,7 @@ half4 spectrumShader(
     device const ShaderBend* brightnessBendsData,
     int brightnessBendsDataLength
 ) {
-    float normalizedPosition = isVertical > 0.5 ? (1.0 - (position.y / size.y)) : (position.x / size.x);
-    normalizedPosition = clamp(normalizedPosition, 0.0, 1.0);
+    float normalizedPosition = calculateNormalizedPosition(position, size, isVertical);
 
     float totalWeight = data->totalWeight;
     if (totalWeight <= 0.0) return half4(0.0);
