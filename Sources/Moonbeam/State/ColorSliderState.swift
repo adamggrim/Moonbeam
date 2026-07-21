@@ -130,4 +130,35 @@ internal struct ColorSliderState {
     var thumbOffset: CGFloat {
         min(max(liveThumbPosition, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
     }
+
+    // MARK: - Mutating actions
+
+    mutating func updateDrag(translation: CGFloat) {
+        isDragging = true
+        liveContainerDrag = translation
+    }
+
+    mutating func finalizeDrag() {
+        isDragging = false
+        persistedThumbPosition = liveThumbPosition
+        liveContainerDrag = .zero
+    }
+
+    /// Adjusts the slider by a specific percentage step (for VoiceOver).
+    mutating func accessibilityAdjust(
+        direction: AccessibilityAdjustmentDirection,
+        progress: inout Double,
+        step: Double
+    ) {
+        let delta = direction == .increment ? step : -step
+        let newProgress = min(max(progress + delta, 0.0), 1.0)
+        progress = newProgress
+
+        let newTrackPosition = CGFloat(newProgress) * dimensions.length
+        persistedThumbPosition = min(
+            max(newTrackPosition - halfThumbThickness, thumbInset),
+            dimensions.length - resolvedThumbThickness - thumbInset
+        )
+        liveContainerDrag = .zero
+    }
 }
