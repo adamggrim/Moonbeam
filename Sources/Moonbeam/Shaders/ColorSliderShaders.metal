@@ -223,17 +223,16 @@ half4 spectrumShader(
         float cumulativeStartPosition = 0.0;
 
         // Capped at `MAX_MONOCHROME_SECTIONS` start sections.
-        for (uint sectionIndex = 0; sectionIndex < MAX_MONOCHROME_SECTIONS; sectionIndex++) {
-            if (sectionIndex >= startSectionsCount) break;
-
-            float isWhiteSection = startSectionsData[sectionIndex*2];
-            float sectionEndPosition = startSectionsData[sectionIndex*2 + 1];
+        uint sectionIndex = 0;
+        if (sectionIndex < startSectionsCount) {
+            float isWhiteSection = startSectionsData[0];
+            float sectionEndPosition = startSectionsData[1];
 
             if (normalizedPosition < sectionEndPosition) {
                 float distanceMoved = normalizedPosition - cumulativeStartPosition;
                 float sectionWidth = sectionEndPosition - cumulativeStartPosition;
                 float relativePositionInSection = distanceMoved / sectionWidth;
-                bool isLastSection = (sectionIndex == startSectionsCount - 1);
+                bool isLastSection = (0 == startSectionsCount - 1);
 
                 if (isLastSection) {
                     float finalBrightness;
@@ -278,9 +277,9 @@ half4 spectrumShader(
                         currentColor.a
                     );
                 } else {
-                    float nextSectionIsWhite = startSectionsData[(sectionIndex+1)*2];
-                    float startingBrightness = isWhiteSection == 1.0 ? 1.0 : 0.0;
-                    float endingBrightness = nextSectionIsWhite == 1.0 ? 1.0 : 0.0;
+                    float nextSectionIsWhite = startSectionsData[2];
+                    half startingBrightness = select(0.0h, 1.0h, isWhiteSection == 1.0f);
+                    half endingBrightness = select(0.0h, 1.0h, nextSectionIsWhite == 1.0f);
                     float brightnessDelta = endingBrightness - startingBrightness;
                     float interpolatedBrightness = startingBrightness + brightnessDelta * relativePositionInSection;
                     return half4(
@@ -289,6 +288,61 @@ half4 spectrumShader(
                         currentColor.a
                     );
                 }
+            }
+            cumulativeStartPosition = sectionEndPosition;
+        }
+
+        sectionIndex = 1;
+        if (sectionIndex < startSectionsCount) {
+            float isWhiteSection = startSectionsData[2];
+            float sectionEndPosition = startSectionsData[3];
+
+            if (normalizedPosition < sectionEndPosition) {
+                float distanceMoved = normalizedPosition - cumulativeStartPosition;
+                float sectionWidth = sectionEndPosition - cumulativeStartPosition;
+                float relativePositionInSection = distanceMoved / sectionWidth;
+
+                float finalBrightness;
+                if (isWhiteSection == 1.0) {
+                    finalBrightness = baseBrightness;
+                } else {
+                    finalBrightness = relativePositionInSection * baseBrightness;
+                }
+                float finalSaturation;
+                if (isWhiteSection == 1.0) {
+                    finalSaturation = relativePositionInSection * baseSaturation;
+                } else {
+                    finalSaturation = baseSaturation;
+                }
+
+                for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
+                    if (saturationBendsData[bendIndex].data0.y == minimumHue &&
+                        saturationBendsData[bendIndex].data0.x == 1.0) {
+
+                        finalSaturation = isWhiteSection == 1.0
+                            ? relativePositionInSection * saturationBendsData[bendIndex].data0.w
+                            : finalSaturation;
+                    }
+                }
+
+                for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
+                    if (brightnessBendsData[bendIndex].data0.y == minimumHue &&
+                        brightnessBendsData[bendIndex].data0.x == 1.0) {
+
+                        finalBrightness = isWhiteSection == 1.0
+                            ? finalBrightness
+                            : relativePositionInSection * brightnessBendsData[bendIndex].data0.w;
+                    }
+                }
+
+                if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
+                    finalBrightness = 1.0 - (relativePositionInSection * (1.0 - baseBrightness));
+                }
+                return half4(
+                    half3(resolveColor(colorSpaceFlag, minimumHue, finalSaturation, finalBrightness))
+                        * currentColor.a,
+                    currentColor.a
+                );
             }
             cumulativeStartPosition = sectionEndPosition;
         }
@@ -325,73 +379,84 @@ half4 spectrumShader(
         float cumulativeEndPosition = hueSectionBoundary;
 
         // Capped at `MAX_MONOCHROME_SECTIONS` end sections.
-        for (uint sectionIndex = 0; sectionIndex < MAX_MONOCHROME_SECTIONS; sectionIndex++) {
-            if (sectionIndex >= endSectionsCount) break;
-
-            float isWhiteSection = endSectionsData[sectionIndex*2];
-            float sectionEndPosition = endSectionsData[sectionIndex*2 + 1];
-            bool isLastSection = (sectionIndex == endSectionsCount - 1);
+        uint sectionIndex = 0;
+        if (sectionIndex < endSectionsCount) {
+            float isWhiteSection = endSectionsData[0];
+            float sectionEndPosition = endSectionsData[1];
+            bool isLastSection = (0 == endSectionsCount - 1);
 
             if (normalizedPosition <= sectionEndPosition || isLastSection) {
                 float distanceFromEnd = normalizedPosition - cumulativeEndPosition;
                 float sectionWidth = sectionEndPosition - cumulativeEndPosition;
 
                 float relativePositionInSection = clamp(distanceFromEnd / sectionWidth, 0.0, 1.0);
-                bool isFirstEndSection = (sectionIndex == 0);
 
-                if (isFirstEndSection) {
-                    float finalBrightness;
-                    if (isWhiteSection == 1.0) {
-                        finalBrightness = baseBrightness;
-                    } else {
-                        finalBrightness = (1.0 - relativePositionInSection) * baseBrightness;
-                    }
-                    float finalSaturation;
-                    if (isWhiteSection == 1.0) {
-                        finalSaturation = (1.0 - relativePositionInSection) * baseSaturation;
-                    } else {
-                        finalSaturation = baseSaturation;
-                    }
-
-                    for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
-                        if (saturationBendsData[bendIndex].data0.z == maximumHue &&
-                            saturationBendsData[bendIndex].data0.x == 1.0) {
-
-                            finalSaturation = isWhiteSection == 1.0
-                                ? (1.0 - relativePositionInSection) * saturationBendsData[bendIndex].data0.w
-                                : finalSaturation;
-                        }
-                    }
-
-                    for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
-                        if (brightnessBendsData[bendIndex].data0.z == maximumHue &&
-                            brightnessBendsData[bendIndex].data0.x == 1.0) {
-
-                            finalBrightness = isWhiteSection == 1.0
-                                ? finalBrightness
-                                : (1.0 - relativePositionInSection) * brightnessBendsData[bendIndex].data0.w;
-                        }
-                    }
-                    if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
-                        finalBrightness = 1.0 - ((1.0 - relativePositionInSection) * (1.0 - baseBrightness));
-                    }
-                    return half4(
-                        half3(resolveColor(colorSpaceFlag, maximumHue, finalSaturation, finalBrightness))
-                            * currentColor.a,
-                        currentColor.a
-                    );
+                float finalBrightness;
+                if (isWhiteSection == 1.0) {
+                    finalBrightness = baseBrightness;
                 } else {
-                    float previousSectionIsWhite = endSectionsData[(sectionIndex-1)*2];
-                    float startingBrightness = previousSectionIsWhite == 1.0 ? 1.0 : 0.0;
-                    float endingBrightness = isWhiteSection == 1.0 ? 1.0 : 0.0;
-                    float brightnessDelta = endingBrightness - startingBrightness;
-                    float interpolatedBrightness = startingBrightness + brightnessDelta * relativePositionInSection;
-                    return half4(
-                        half3(resolveColor(colorSpaceFlag, maximumHue, 0.0, interpolatedBrightness))
-                            * currentColor.a,
-                        currentColor.a
-                    );
+                    finalBrightness = (1.0 - relativePositionInSection) * baseBrightness;
                 }
+                float finalSaturation;
+                if (isWhiteSection == 1.0) {
+                    finalSaturation = (1.0 - relativePositionInSection) * baseSaturation;
+                } else {
+                    finalSaturation = baseSaturation;
+                }
+
+                for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
+                    if (saturationBendsData[bendIndex].data0.z == maximumHue &&
+                        saturationBendsData[bendIndex].data0.x == 1.0) {
+
+                        finalSaturation = isWhiteSection == 1.0
+                            ? (1.0 - relativePositionInSection) * saturationBendsData[bendIndex].data0.w
+                            : finalSaturation;
+                    }
+                }
+
+                for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
+                    if (brightnessBendsData[bendIndex].data0.z == maximumHue &&
+                        brightnessBendsData[bendIndex].data0.x == 1.0) {
+
+                        finalBrightness = isWhiteSection == 1.0
+                            ? finalBrightness
+                            : (1.0 - relativePositionInSection) * brightnessBendsData[bendIndex].data0.w;
+                    }
+                }
+                if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
+                    finalBrightness = 1.0 - ((1.0 - relativePositionInSection) * (1.0 - baseBrightness));
+                }
+                return half4(
+                    half3(resolveColor(colorSpaceFlag, maximumHue, finalSaturation, finalBrightness))
+                        * currentColor.a,
+                    currentColor.a
+                );
+            }
+            cumulativeEndPosition = sectionEndPosition;
+        }
+
+        sectionIndex = 1;
+        if (sectionIndex < endSectionsCount) {
+            float isWhiteSection = endSectionsData[2];
+            float sectionEndPosition = endSectionsData[3];
+            bool isLastSection = true;
+
+            if (normalizedPosition <= sectionEndPosition || isLastSection) {
+                float distanceFromEnd = normalizedPosition - cumulativeEndPosition;
+                float sectionWidth = sectionEndPosition - cumulativeEndPosition;
+
+                float relativePositionInSection = clamp(distanceFromEnd / sectionWidth, 0.0, 1.0);
+
+                float previousSectionIsWhite = endSectionsData[0];
+                half startingBrightness = select(0.0h, 1.0h, previousSectionIsWhite == 1.0f);
+                half endingBrightness = select(0.0h, 1.0h, isWhiteSection == 1.0f);
+                float brightnessDelta = endingBrightness - startingBrightness;
+                float interpolatedBrightness = startingBrightness + brightnessDelta * relativePositionInSection;
+                return half4(
+                    half3(resolveColor(colorSpaceFlag, maximumHue, 0.0, interpolatedBrightness))
+                        * currentColor.a,
+                    currentColor.a
+                );
             }
             cumulativeEndPosition = sectionEndPosition;
         }
