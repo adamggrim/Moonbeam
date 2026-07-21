@@ -11,7 +11,7 @@ float3 convertHSBtoRGB(float hue, float saturation, float brightness) {
     return brightness * mix(conversionConstants.xxx, clamp(rgbValues - conversionConstants.xxx, 0.0, 1.0), saturation);
 }
 
-// MARK: - Gamma Transfer Functions
+// MARK: - Gamma transfer functions
 
 float3 linearToSRGB(float3 c) {
     float3 linear_low = 12.92 * c;
