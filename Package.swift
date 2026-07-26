@@ -23,6 +23,11 @@ let package = Package(
             resources: [
                 .process("Shaders")
             ]),
+        .testTarget(
+            name: "MoonbeamTests",
+            dependencies: ["Moonbeam"],
+            path: "Tests/Moonbeam"
+        )
     ],
     swiftLanguageModes: [.v6]
 )
