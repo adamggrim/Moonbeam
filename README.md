@@ -154,6 +154,7 @@ This example demonstrates how to create a hard-edge slider with discrete color b
         progress: $progress,
         axis: .horizontal
     )
+    .colors([.green, .yellow, .orange, .red, .purple, .blue])
     .gradient(from: .red, to: .blue, space: .rgb)
     .hardEdge(into: 6)
     ```
@@ -203,25 +204,48 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 ```
 Moonbeam/
 └── Sources/
-  └── Moonbeam/
-    ├── Environment/
-    │ └── ColorSliderViewModifiers.swift: SwiftUI environment keys and view modifiers for customization
-    ├── Models/
-    │ ├── Gradient/
-    │ │ └── GradientSliderModel.swift: Model for calculating linear gradient colors
-    │ ├── HardEdge/
-    │ │ └── HardEdgeSliderModel.swift: Model for a slider with discrete color blocks
-    │ ├── Spectrum/
-    │ │ ├── SpectrumBuilders.swift: Result builders for building spectrum components
-    │ │ ├── SpectrumComponents.swift: Definitions for hue, monochrome and bend sections
-    │ │ ├── SpectrumGenerator.swift: Core logic for generating spectrums
-    │ │ └── SpectrumSliderModel.swift: Model for calculating spectrums
-    │ └── ColorSliderDataSource.swift: Protocols and enumerations defining color data sources
-    ├── Shaders/
-    │   └── ColorSliderShaders.metal: Metal shaders for gradient and spectrum rendering
-    └── Views/
-        ├── ColorSliderView.swift: The interactive SwiftUI color slider
-        └── ColorSliderViewPreviews.swift: SwiftUI previews and test containers
+  ├── Moonbeam/
+  │ ├── Environment/
+  │ │ ├── ColorSliderDefaults.swift: Global default metrics and constant values
+  │ │ ├── ColorSliderDimensions.swift: Layout dimensions and geometry definitions for sliders
+  │ │ ├── ColorSliderViewModifiers.swift: SwiftUI environment keys and global view modifiers
+  │ │ └── ShapeModifiers.swift: Shared types and modifiers for styling component shapes
+  │ ├── Models/
+  │ │ ├── Gradient/
+  │ │ │ └── GradientSliderModel.swift: Data source model for linear color gradient calculations
+  │ │ ├── HardEdge/
+  │ │ │ └── HardEdgeSliderModel.swift: Data source model for sliders with discrete color blocks
+  │ │ ├── Spectrum/
+  │ │ │ ├── HSBSpectrumModel.swift: Dynamic generator for HSB-based spectrum colors
+  │ │ │ ├── OKLCHSpectrumModel.swift: Dynamic generator for perceptually uniform OKLCH spectrums
+  │ │ │ ├── SpectrumComponents.swift: Definitions for monochrome colors and custom bend sections
+  │ │ │ ├── SpectrumGenerator.swift: Core pure-Swift fallback logic for spectrum generation
+  │ │ │ └── SpectrumSliderModel.swift: Utilities, validations, and Metal data encoders for spectrums
+  │ │ ├── ColorSliderDataSource.swift: Protocols and enums defining data sources and rendering methods
+  │ │ ├── ColorSpaceConverter.swift: Mathematical conversions between OKLCH, OKLAB, and RGB
+  │ │ └── DataSourceFactory.swift: Factory for resolving the correct data source from configurations
+  │ ├── Shaders/
+  │ │ └── ColorSliderShaders.metal: Metal shaders for hardware-accelerated gradient and spectrum rendering
+  │ ├── State/
+  │ │ └── ColorSliderState.swift: State manager handling layout math, gestures, and value clamping
+  │ └── Views/
+  │   ├── Components/
+  │   │ ├── ColorPreviewView.swift: Floating visual preview of the currently selected color
+  │   │ ├── ThumbView.swift: Draggable thumb handle for the slider interface
+  │   │ └── TrackView.swift: Background track rendering discrete, continuous, or shaded colors
+  │   ├── Previews/
+  │   │ ├── GradientSliders.swift: SwiftUI previews for gradient slider configurations
+  │   │ ├── HardEdgeSliders.swift: SwiftUI previews demonstrating hard-edge block sliders
+  │   │ ├── HSBSliders.swift: Extensive SwiftUI previews for HSB spectrum implementations
+  │   │ ├── OKLCHSliders.swift: SwiftUI previews showcasing OKLCH spectrum outputs
+  │   │ └── PreviewContainer.swift: Helper container view for standardized interactive preview testing
+  │   ├── ColorSlider.swift: Main interactive SwiftUI color slider view component
+  │   ├── ColorSliderConfiguration.swift: Configuration object storing user-defined rules and properties
+  │   └── ColorSliderConfigurationModifiers.swift: Convenience modifiers for applying configurations to views
+  └── MoonbeamShared/
+    └── include/
+      ├── MoonbeamShared.h: Shared C/Metal headers and data structures
+      └── module.modulemap: Clang module map for bridging MoonbeamShared
 ```
 </details>
 
