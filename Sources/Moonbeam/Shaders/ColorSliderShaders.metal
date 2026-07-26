@@ -5,10 +5,12 @@ using namespace metal;
 
 // MARK: – HSB to RGB
 
+constant float4 hsbConversionConstants = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+
 float3 convertHSBtoRGB(float hue, float saturation, float brightness) {
-    float4 conversionConstants = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    float3 rgbValues = abs(fract(hue + conversionConstants.xyz) * 6.0 - conversionConstants.www);
-    return brightness * mix(conversionConstants.xxx, clamp(rgbValues - conversionConstants.xxx, 0.0, 1.0), saturation);
+    float3 rgbValues = abs(fract(hue + hsbConversionConstants.xyz) * 6.0 - hsbConversionConstants.www);
+    return brightness * mix(hsbConversionConstants.xxx,
+        clamp(rgbValues - hsbConversionConstants.xxx, 0.0, 1.0), saturation);
 }
 
 // MARK: - Gamma transfer functions
@@ -25,6 +27,18 @@ float3 sRGBToLinear(float3 c) {
     return select(srgb_high, srgb_low, c <= 0.04045);
 }
 
+constant float3x3 oklabLMSMatrix = float3x3(
+    float3(1.0, 1.0, 1.0),
+    float3(0.3963377774, -0.1055613458, -0.0894841775),
+    float3(0.2158037573, -0.0638541728, -1.2914855480)
+);
+
+constant float3x3 oklabRGBMatrix = float3x3(
+    float3(4.0767416621, -1.2684380046, -0.0041960863),
+    float3(-3.3077115913, 2.6097574011, -0.7034186147),
+    float3(0.2309699292, -0.3413193965, 1.7076147010)
+);
+
 // MARK: - OKLAB and OKLCH to RGB
 
 // Matrix to convert OKLAB constants to RGB.
@@ -33,20 +47,13 @@ float3 sRGBToLinear(float3 c) {
 // (2020):
 // https://bottosson.github.io/posts/oklab/
 float3 convertOKLABtoRGB(float L, float a, float b) {
-    float l_ = L + 0.3963377774 * a + 0.2158037573 * b;
-    float m_ = L - 0.1055613458 * a - 0.0638541728 * b;
-    float s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+    float3 lms_ = oklabLMSMatrix * float3(L, a, b);
 
-    float l = sign(l_) * pow(abs(l_), 3.0);
-    float m = sign(m_) * pow(abs(m_), 3.0);
-    float s = sign(s_) * pow(abs(s_), 3.0);
+    float l = sign(lms_.x) * pow(abs(lms_.x), 3.0);
+    float m = sign(lms_.y) * pow(abs(lms_.y), 3.0);
+    float s = sign(lms_.z) * pow(abs(lms_.z), 3.0);
 
-    // Linear sRGB matrix
-    float3 lin = float3(
-         4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-        -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-        -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
-    );
+    float3 lin = oklabRGBMatrix * float3(l, m, s);
 
     return linearToSRGB(clamp(lin, 0.0, 1.0));
 }
@@ -67,6 +74,18 @@ float3 resolveColor(uint space, float h, float s_c, float b_l) {
     return space == MoonbeamColorSpaceOKLCH ? convertOKLCHtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
 }
 
+constant float3x3 rgbToLMSMatrix = float3x3(
+    float3(0.4122214708, 0.2119034982, 0.0883024619),
+    float3(0.5363325363, 0.6806995451, 0.2817188376),
+    float3(0.0514459929, 0.1073969566, 0.6299787005)
+);
+
+constant float3x3 lmsToOKLABMatrix = float3x3(
+    float3(0.2104542553, 1.9779984951, 0.0259040371),
+    float3(0.7936177850, -2.4285922050, 0.7827717662),
+    float3(-0.0040720468, 0.4505937099, -0.8086757660)
+);
+
 // MARK: - RGB to OKLAB
 
 // Matrix to convert RGB to OKLAB.
@@ -76,17 +95,11 @@ float3 resolveColor(uint space, float h, float s_c, float b_l) {
 // https://bottosson.github.io/posts/oklab/
 float3 convertRGBtoOKLAB(float3 c) {
     float3 lin = sRGBToLinear(c);
-    float l = 0.4122214708 * lin.r + 0.5363325363 * lin.g + 0.0514459929 * lin.b;
-    float m = 0.2119034982 * lin.r + 0.6806995451 * lin.g + 0.1073969566 * lin.b;
-    float s = 0.0883024619 * lin.r + 0.2817188376 * lin.g + 0.6299787005 * lin.b;
-    l = sign(l) * pow(abs(l), 1.0/3.0);
-    m = sign(m) * pow(abs(m), 1.0/3.0);
-    s = sign(s) * pow(abs(s), 1.0/3.0);
-    return float3(
-        0.2104542553*l + 0.7936177850*m - 0.0040720468*s,
-        1.9779984951*l - 2.4285922050*m + 0.4505937099*s,
-        0.0259040371*l + 0.7827717662*m - 0.8086757660*s
-    );
+
+    float3 lms = rgbToLMSMatrix * lin;
+    lms = sign(lms) * pow(abs(lms), 1.0/3.0);
+
+    return lmsToOKLABMatrix * lms;
 }
 
 // MARK: – Spectrum bends
