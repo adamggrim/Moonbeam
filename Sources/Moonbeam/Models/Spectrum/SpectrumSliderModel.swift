@@ -15,8 +15,17 @@ public enum SpectrumColorSpace: Sendable {
 fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "SpectrumModel")
 
 /// A lightweight wrapper for telemetry and non-fatal production logging.
-internal enum MoonbeamTelemetry {
-    static func reportNonFatalIssue(_ message: String) {
+public enum MoonbeamTelemetry {
+    private static let loggerStorage = OSAllocatedUnfairLock(
+        initialState: Logger(subsystem: "com.moonbeam", category: "SpectrumModel")
+    )
+
+    public static var logger: Logger {
+        get { loggerStorage.withLock { $0 } }
+        set { loggerStorage.withLock { $0 = newValue } }
+    }
+
+    internal static func reportNonFatalIssue(_ message: String) {
         logger.error("Moonbeam configuration error: \(message, privacy: .public)")
     }
 }
