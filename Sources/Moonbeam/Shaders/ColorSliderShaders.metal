@@ -27,6 +27,11 @@ float3 sRGBToLinear(float3 c) {
     return select(srgb_high, srgb_low, c <= 0.04045);
 }
 
+// Matrices to convert LMS constants to/from OKLAB and RGB.
+//
+// Taken from "A perceptual color space for image processing" by Björn Ottosson
+// (2020):
+// https://bottosson.github.io/posts/oklab/
 constant float3x3 oklabLMSMatrix = float3x3(
     float3(1.0, 1.0, 1.0),
     float3(0.3963377774, -0.1055613458, -0.0894841775),
@@ -74,6 +79,11 @@ float3 resolveColor(uint space, float h, float s_c, float b_l) {
     return space == MoonbeamColorSpaceOKLCH ? convertOKLCHtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
 }
 
+// Matrices to convert RGB to LMS and OKLAB constants.
+//
+// Taken from "A perceptual color space for image processing" by Björn Ottosson
+// (2020):
+// https://bottosson.github.io/posts/oklab/
 constant float3x3 rgbToLMSMatrix = float3x3(
     float3(0.4122214708, 0.2119034982, 0.0883024619),
     float3(0.5363325363, 0.6806995451, 0.2817188376),
