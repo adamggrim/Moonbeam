@@ -93,7 +93,7 @@ public struct ColorSlider: View {
     public init(
         selection: Binding<CGColor>,
         progress: Binding<Double>? = nil,
-        initialProgress: Double = 0.5,
+        initialProgress: Double = 0.0,
         spectrumIdentifier: AnyHashable? = nil,
         onSpectrumChanged: ((CGColor) -> Double)? = nil,
         label: LocalizedStringKey = "Color Slider",
@@ -322,7 +322,7 @@ public extension ColorSlider {
     init(
         selection: Binding<Color>,
         progress: Binding<Double>? = nil,
-        initialProgress: Double = 0.5,
+        initialProgress: Double = 0.0,
         spectrumIdentifier: AnyHashable? = nil,
         onSpectrumChanged: ((Color) -> Double)? = nil,
         label: LocalizedStringKey = "Color Slider",
