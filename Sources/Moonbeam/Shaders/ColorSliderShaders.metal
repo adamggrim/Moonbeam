@@ -277,7 +277,7 @@ half4 spectrumShader(
 
                             finalSaturation = isWhiteSection == 1.0
                                 ? relativePositionInSection * saturationBendsData[bendIndex].data0.w
-                                : finalSaturation;
+                                : saturationBendsData[bendIndex].data0.w;
                         }
                     }
 
@@ -286,13 +286,13 @@ half4 spectrumShader(
                             brightnessBendsData[bendIndex].data0.x == 1.0) {
 
                             finalBrightness = isWhiteSection == 1.0
-                                ? finalBrightness
+                                ? brightnessBendsData[bendIndex].data0.w
                                 : relativePositionInSection * brightnessBendsData[bendIndex].data0.w;
                         }
                     }
 
                     if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
-                        finalBrightness = 1.0 - (relativePositionInSection * (1.0 - baseBrightness));
+                        finalBrightness = 1.0 - (relativePositionInSection * (1.0 - finalBrightness));
                     }
                     return half4(
                         half3(resolveColor(colorSpaceFlag, minimumHue, finalSaturation, finalBrightness))
@@ -344,7 +344,7 @@ half4 spectrumShader(
 
                         finalSaturation = isWhiteSection == 1.0
                             ? relativePositionInSection * saturationBendsData[bendIndex].data0.w
-                            : finalSaturation;
+                            : saturationBendsData[bendIndex].data0.w;
                     }
                 }
 
@@ -353,13 +353,13 @@ half4 spectrumShader(
                         brightnessBendsData[bendIndex].data0.x == 1.0) {
 
                         finalBrightness = isWhiteSection == 1.0
-                            ? finalBrightness
+                            ? brightnessBendsData[bendIndex].data0.w
                             : relativePositionInSection * brightnessBendsData[bendIndex].data0.w;
                     }
                 }
 
                 if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
-                    finalBrightness = 1.0 - (relativePositionInSection * (1.0 - baseBrightness));
+                    finalBrightness = 1.0 - (relativePositionInSection * (1.0 - finalBrightness));
                 }
                 return half4(
                     half3(resolveColor(colorSpaceFlag, minimumHue, finalSaturation, finalBrightness))
@@ -433,7 +433,7 @@ half4 spectrumShader(
 
                         finalSaturation = isWhiteSection == 1.0
                             ? (1.0 - relativePositionInSection) * saturationBendsData[bendIndex].data0.w
-                            : finalSaturation;
+                            : saturationBendsData[bendIndex].data0.w;
                     }
                 }
 
@@ -442,12 +442,12 @@ half4 spectrumShader(
                         brightnessBendsData[bendIndex].data0.x == 1.0) {
 
                         finalBrightness = isWhiteSection == 1.0
-                            ? finalBrightness
+                            ? brightnessBendsData[bendIndex].data0.w
                             : (1.0 - relativePositionInSection) * brightnessBendsData[bendIndex].data0.w;
                     }
                 }
                 if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
-                    finalBrightness = 1.0 - ((1.0 - relativePositionInSection) * (1.0 - baseBrightness));
+                    finalBrightness = 1.0 - ((1.0 - relativePositionInSection) * (1.0 - finalBrightness));
                 }
                 return half4(
                     half3(resolveColor(colorSpaceFlag, maximumHue, finalSaturation, finalBrightness))

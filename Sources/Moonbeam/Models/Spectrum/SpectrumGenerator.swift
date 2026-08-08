@@ -185,14 +185,16 @@ internal struct SpectrumGenerator {
         switch monochromeSection.color {
         case .black:
             let finalSecondaryValue = interpolationFactor * (isStart ? startTargetSecondary : endTargetSecondary)
+            let finalPrimaryValue = isStart ? startTargetPrimary : endTargetPrimary
             return colorSpace == .oklch
-            ? ColorSpaceConverter.oklchToColor(lightness: finalSecondaryValue, chroma: primaryValue, hue: hue)
-            : Color(hue: hue, saturation: primaryValue, brightness: finalSecondaryValue)
+            ? ColorSpaceConverter.oklchToColor(lightness: finalSecondaryValue, chroma: finalPrimaryValue, hue: hue)
+            : Color(hue: hue, saturation: finalPrimaryValue, brightness: finalSecondaryValue)
         case .white:
             let finalPrimaryValue = interpolationFactor * (isStart ? startTargetPrimary : endTargetPrimary)
+            let finalTargetSecondary = isStart ? startTargetSecondary : endTargetSecondary
             let finalSecondaryValue = colorSpace == .oklch
-                ? 1.0 - (interpolationFactor * (1.0 - secondaryValue))
-                : secondaryValue
+                ? 1.0 - (interpolationFactor * (1.0 - finalTargetSecondary))
+                : finalTargetSecondary
             return colorSpace == .oklch
             ? ColorSpaceConverter.oklchToColor(lightness: finalSecondaryValue, chroma: finalPrimaryValue, hue: hue)
             : Color(hue: hue, saturation: finalPrimaryValue, brightness: finalSecondaryValue)
