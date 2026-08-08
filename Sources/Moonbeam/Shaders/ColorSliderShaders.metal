@@ -149,6 +149,49 @@ float calculateBend(
     return defaultValue;
 }
 
+// MARK: – Monochrome fade helper
+
+inline float2 calculateMonochromeFade(
+    float isWhiteSection,
+    float fadeFactor,
+    float baseSaturation,
+    float baseBrightness,
+    uint colorSpaceFlag,
+    float targetHue,
+    device const ShaderBend* saturationBendsData,
+    uint saturationBendsCount,
+    device const ShaderBend* brightnessBendsData,
+    uint brightnessBendsCount,
+    bool isStartBend
+) {
+    float finalSaturation = isWhiteSection == 1.0 ? fadeFactor * baseSaturation : baseSaturation;
+    float finalBrightness = isWhiteSection == 1.0 ? baseBrightness : fadeFactor * baseBrightness;
+
+    for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
+        float bendHue = isStartBend ? saturationBendsData[bendIndex].data0.y : saturationBendsData[bendIndex].data0.z;
+        if (bendHue == targetHue && saturationBendsData[bendIndex].data0.x == 1.0) {
+            finalSaturation = isWhiteSection == 1.0
+                ? fadeFactor * saturationBendsData[bendIndex].data0.w
+                : saturationBendsData[bendIndex].data0.w;
+        }
+    }
+
+    for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
+        float bendHue = isStartBend ? brightnessBendsData[bendIndex].data0.y : brightnessBendsData[bendIndex].data0.z;
+        if (bendHue == targetHue && brightnessBendsData[bendIndex].data0.x == 1.0) {
+            finalBrightness = isWhiteSection == 1.0
+                ? brightnessBendsData[bendIndex].data0.w
+                : fadeFactor * brightnessBendsData[bendIndex].data0.w;
+        }
+    }
+
+    if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
+        finalBrightness = 1.0 - (fadeFactor * (1.0 - finalBrightness));
+    }
+
+    return float2(finalSaturation, finalBrightness);
+}
+
 // MARK: - Coordinate helper
 
 inline float calculateNormalizedPosition(float2 position, float2 size, float isVertical) {
@@ -258,44 +301,13 @@ half4 spectrumShader(
                 bool isLastSection = (0 == startSectionsCount - 1);
 
                 if (isLastSection) {
-                    float finalBrightness;
-                    if (isWhiteSection == 1.0) {
-                        finalBrightness = baseBrightness;
-                    } else {
-                        finalBrightness = relativePositionInSection * baseBrightness;
-                    }
-                    float finalSaturation;
-                    if (isWhiteSection == 1.0) {
-                        finalSaturation = relativePositionInSection * baseSaturation;
-                    } else {
-                        finalSaturation = baseSaturation;
-                    }
-
-                    for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
-                        if (saturationBendsData[bendIndex].data0.y == minimumHue &&
-                            saturationBendsData[bendIndex].data0.x == 1.0) {
-
-                            finalSaturation = isWhiteSection == 1.0
-                                ? relativePositionInSection * saturationBendsData[bendIndex].data0.w
-                                : saturationBendsData[bendIndex].data0.w;
-                        }
-                    }
-
-                    for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
-                        if (brightnessBendsData[bendIndex].data0.y == minimumHue &&
-                            brightnessBendsData[bendIndex].data0.x == 1.0) {
-
-                            finalBrightness = isWhiteSection == 1.0
-                                ? brightnessBendsData[bendIndex].data0.w
-                                : relativePositionInSection * brightnessBendsData[bendIndex].data0.w;
-                        }
-                    }
-
-                    if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
-                        finalBrightness = 1.0 - (relativePositionInSection * (1.0 - finalBrightness));
-                    }
+                    float2 fade = calculateMonochromeFade(
+                        isWhiteSection, relativePositionInSection, baseSaturation, baseBrightness,
+                        colorSpaceFlag, minimumHue, saturationBendsData, saturationBendsCount,
+                        brightnessBendsData, brightnessBendsCount, true
+                    );
                     return half4(
-                        half3(resolveColor(colorSpaceFlag, minimumHue, finalSaturation, finalBrightness))
+                        half3(resolveColor(colorSpaceFlag, minimumHue, fade.x, fade.y))
                             * currentColor.a,
                         currentColor.a
                     );
@@ -325,44 +337,13 @@ half4 spectrumShader(
                 float sectionWidth = sectionEndPosition - cumulativeStartPosition;
                 float relativePositionInSection = distanceMoved / sectionWidth;
 
-                float finalBrightness;
-                if (isWhiteSection == 1.0) {
-                    finalBrightness = baseBrightness;
-                } else {
-                    finalBrightness = relativePositionInSection * baseBrightness;
-                }
-                float finalSaturation;
-                if (isWhiteSection == 1.0) {
-                    finalSaturation = relativePositionInSection * baseSaturation;
-                } else {
-                    finalSaturation = baseSaturation;
-                }
-
-                for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
-                    if (saturationBendsData[bendIndex].data0.y == minimumHue &&
-                        saturationBendsData[bendIndex].data0.x == 1.0) {
-
-                        finalSaturation = isWhiteSection == 1.0
-                            ? relativePositionInSection * saturationBendsData[bendIndex].data0.w
-                            : saturationBendsData[bendIndex].data0.w;
-                    }
-                }
-
-                for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
-                    if (brightnessBendsData[bendIndex].data0.y == minimumHue &&
-                        brightnessBendsData[bendIndex].data0.x == 1.0) {
-
-                        finalBrightness = isWhiteSection == 1.0
-                            ? brightnessBendsData[bendIndex].data0.w
-                            : relativePositionInSection * brightnessBendsData[bendIndex].data0.w;
-                    }
-                }
-
-                if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
-                    finalBrightness = 1.0 - (relativePositionInSection * (1.0 - finalBrightness));
-                }
+                float2 fade = calculateMonochromeFade(
+                    isWhiteSection, relativePositionInSection, baseSaturation, baseBrightness,
+                    colorSpaceFlag, minimumHue, saturationBendsData, saturationBendsCount,
+                    brightnessBendsData, brightnessBendsCount, true
+                );
                 return half4(
-                    half3(resolveColor(colorSpaceFlag, minimumHue, finalSaturation, finalBrightness))
+                    half3(resolveColor(colorSpaceFlag, minimumHue, fade.x, fade.y))
                         * currentColor.a,
                     currentColor.a
                 );
@@ -411,46 +392,16 @@ half4 spectrumShader(
             if (normalizedPosition <= sectionEndPosition || isLastSection) {
                 float distanceFromEnd = normalizedPosition - cumulativeEndPosition;
                 float sectionWidth = sectionEndPosition - cumulativeEndPosition;
-
                 float relativePositionInSection = clamp(distanceFromEnd / sectionWidth, 0.0, 1.0);
 
-                float finalBrightness;
-                if (isWhiteSection == 1.0) {
-                    finalBrightness = baseBrightness;
-                } else {
-                    finalBrightness = (1.0 - relativePositionInSection) * baseBrightness;
-                }
-                float finalSaturation;
-                if (isWhiteSection == 1.0) {
-                    finalSaturation = (1.0 - relativePositionInSection) * baseSaturation;
-                } else {
-                    finalSaturation = baseSaturation;
-                }
-
-                for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
-                    if (saturationBendsData[bendIndex].data0.z == maximumHue &&
-                        saturationBendsData[bendIndex].data0.x == 1.0) {
-
-                        finalSaturation = isWhiteSection == 1.0
-                            ? (1.0 - relativePositionInSection) * saturationBendsData[bendIndex].data0.w
-                            : saturationBendsData[bendIndex].data0.w;
-                    }
-                }
-
-                for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
-                    if (brightnessBendsData[bendIndex].data0.z == maximumHue &&
-                        brightnessBendsData[bendIndex].data0.x == 1.0) {
-
-                        finalBrightness = isWhiteSection == 1.0
-                            ? brightnessBendsData[bendIndex].data0.w
-                            : (1.0 - relativePositionInSection) * brightnessBendsData[bendIndex].data0.w;
-                    }
-                }
-                if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
-                    finalBrightness = 1.0 - ((1.0 - relativePositionInSection) * (1.0 - finalBrightness));
-                }
+                float fadeFactor = 1.0 - relativePositionInSection;
+                float2 fade = calculateMonochromeFade(
+                    isWhiteSection, fadeFactor, baseSaturation, baseBrightness,
+                    colorSpaceFlag, maximumHue, saturationBendsData, saturationBendsCount,
+                    brightnessBendsData, brightnessBendsCount, false
+                );
                 return half4(
-                    half3(resolveColor(colorSpaceFlag, maximumHue, finalSaturation, finalBrightness))
+                    half3(resolveColor(colorSpaceFlag, maximumHue, fade.x, fade.y))
                         * currentColor.a,
                     currentColor.a
                 );
