@@ -87,7 +87,7 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
 
     ```swift
     @State private var selectedColor: Color = .cyan
-    @State private var progress: Double = 0.5
+    @State private var progress: Double = 0.0
     ```
 
 2. **Create the slider and add modifiers **
@@ -141,7 +141,7 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 
     ```swift
     @State private var selectedColor: Color = .cyan
-    @State private var progress: Double = 0.5
+    @State private var progress: Double = 0.0
     ```
 
 2. **Create the slider and add modifiers**
