@@ -293,7 +293,7 @@ public struct ColorSlider: View {
     /// Finalizes the view's state when the drag gesture ends, updating
     /// `persistedThumbPosition` with the thumb's last valid clamped position
     /// and resetting `liveContainerDrag` to zero.
-    private func onDragEnded(_ value: DragGesture.Value) {
+    private func onDragEnded(_: DragGesture.Value) {
         if !isContinuous {
             selection = calculatedColor.resolve(in: environment).cgColor
         }

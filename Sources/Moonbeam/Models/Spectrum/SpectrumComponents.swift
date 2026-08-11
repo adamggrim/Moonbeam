@@ -126,14 +126,10 @@ public struct TwoWayBend: BendSection {
     /// The difference between the start and end hues.
     public let hueCount: CGFloat
 
-    /// The hue that reaches `targetValue`.
-    public let middleHue: CGFloat
-
     public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat) {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target
         self.hueCount = Self.calculateHueCount(start: startHue, end: endHue)
-        self.middleHue = (self.startHue + self.endHue) / 2
     }
 }
