@@ -135,9 +135,9 @@ public struct ColorSlider: View {
     /// corner radius is specified in the dimensions configuration.
     private var trackShape: AnyShape {
         if let radius = dimensions.cornerRadius {
-            return AnyShape(RoundedRectangle(cornerRadius: radius))
+            return AnyShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         } else {
-            return AnyShape(Capsule())
+            return AnyShape(Capsule(style: .continuous))
         }
     }
 

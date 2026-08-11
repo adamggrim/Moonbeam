@@ -11,9 +11,9 @@ internal struct TrackView: View {
 
     private var trackShape: AnyShape {
         if let radius = dimensions.cornerRadius {
-            return AnyShape(RoundedRectangle(cornerRadius: radius))
+            return AnyShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         } else {
-            return AnyShape(Capsule())
+            return AnyShape(Capsule(style: .continuous))
         }
     }
 

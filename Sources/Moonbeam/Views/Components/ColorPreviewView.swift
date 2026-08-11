@@ -17,7 +17,9 @@ internal struct ColorPreviewView: View {
     @Environment(\.colorSliderPreviewShadow) private var previewShadow
 
     var body: some View {
-        let resolvedShape = previewShape ?? AnyShape(RoundedRectangle(cornerRadius: dimensions.previewCornerRadius))
+        let resolvedShape = previewShape ?? AnyShape(
+            RoundedRectangle(cornerRadius: dimensions.previewCornerRadius, style: .continuous)
+        )
 
         let dynamicScale: CGFloat = (previewHidden && !isDragging) ? dimensions.scaleRatio : 1.0
         let dynamicOpacity: Double = (previewHidden && !isDragging) ? 0.0 : 1.0

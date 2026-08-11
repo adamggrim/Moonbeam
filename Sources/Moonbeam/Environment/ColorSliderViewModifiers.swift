@@ -15,7 +15,7 @@ public enum PreviewPosition: Sendable, Equatable {
 
 private struct ShapeStrokeKey: EnvironmentKey { static let defaultValue: ShapeStroke? = nil }
 
-private struct ThumbShapeKey: EnvironmentKey { static let defaultValue = AnyShape(Capsule()) }
+private struct ThumbShapeKey: EnvironmentKey { static let defaultValue = AnyShape(Capsule(style: .continuous)) }
 private struct ThumbColorKey: EnvironmentKey { static let defaultValue: Color = .white }
 private struct ThumbStrokeKey: EnvironmentKey { static let defaultValue: ShapeStroke? = nil }
 private struct ThumbShadowKey: EnvironmentKey { static let defaultValue = ShapeShadow() }
