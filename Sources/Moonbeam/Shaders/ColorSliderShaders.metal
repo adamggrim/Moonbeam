@@ -133,15 +133,17 @@ float calculateBend(
             float hueOffset = currentHue - startHue;
 
             if (bendType == float(MoonbeamBendTypeOneWay)) { // One-way bend
-                float valueIncrement = (hueCount != 0.0) ? (valueDifference / hueCount) : 0.0;
+                float normalizedPosition = (hueCount != 0.0) ? (hueOffset / hueCount) : 0.0;
+                float curveProgress = (1.0 - cos(normalizedPosition * M_PI_F)) / 2.0;
+
                 if (startHue == minimumHue) {
-                    return targetValue + (valueIncrement * hueOffset);
+                    return targetValue + (valueDifference * curveProgress);
                 } else {
-                    return defaultValue - (valueIncrement * hueOffset);
+                    return defaultValue - (valueDifference * curveProgress);
                 }
             } else { // Two-way bend
                 float normalizedPosition = (hueCount != 0.0) ? (hueOffset / hueCount) : 0.0;
-                float curveProgress = sin(normalizedPosition * M_PI_F);
+                float curveProgress = (1.0 - cos(normalizedPosition * 2.0 * M_PI_F)) / 2.0;
                 return defaultValue - (valueDifference * curveProgress);
             }
         }
@@ -153,7 +155,7 @@ float calculateBend(
 
 inline float2 calculateMonochromeFade(
     float isWhiteSection,
-    float fadeFactor,
+    float linearFadeFactor,
     float baseSaturation,
     float baseBrightness,
     uint colorSpaceFlag,
@@ -164,6 +166,7 @@ inline float2 calculateMonochromeFade(
     uint brightnessBendsCount,
     bool isStartBend
 ) {
+    float fadeFactor = (1.0 - cos(linearFadeFactor * M_PI_F)) / 2.0;
     float finalSaturation = isWhiteSection == 1.0 ? fadeFactor * baseSaturation : baseSaturation;
     float finalBrightness = isWhiteSection == 1.0 ? baseBrightness : fadeFactor * baseBrightness;
 
@@ -316,7 +319,8 @@ half4 spectrumShader(
                     half startingBrightness = select(0.0h, 1.0h, isWhiteSection == 1.0f);
                     half endingBrightness = select(0.0h, 1.0h, nextSectionIsWhite == 1.0f);
                     float brightnessDelta = endingBrightness - startingBrightness;
-                    float interpolatedBrightness = startingBrightness + brightnessDelta * relativePositionInSection;
+                    float smoothProgress = (1.0 - cos(relativePositionInSection * M_PI_F)) / 2.0;
+                    float interpolatedBrightness = startingBrightness + brightnessDelta * smoothProgress;
                     return half4(
                         half3(resolveColor(colorSpaceFlag, minimumHue, 0.0, interpolatedBrightness))
                             * currentColor.a,

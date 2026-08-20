@@ -159,7 +159,8 @@ internal struct SpectrumGenerator {
         secondaryBends: [BendSection]?
     ) -> Color {
         let hue = isStart ? startHue : endHue
-        let interpolationFactor = isStart ? relativePosition : (1.0 - relativePosition)
+        let linearFactor = isStart ? relativePosition : (1.0 - relativePosition)
+        let interpolationFactor = (1.0 - cos(linearFactor * .pi)) / 2.0
 
         var startTargetPrimary = primaryValue, startTargetSecondary = secondaryValue
         var endTargetPrimary = primaryValue, endTargetSecondary = secondaryValue
@@ -210,7 +211,8 @@ internal struct SpectrumGenerator {
     ) -> Color {
         let startBrightness: CGFloat = (fromColor == .white) ? 1.0 : 0.0
         let endBrightness: CGFloat = (toColor == .white) ? 1.0 : 0.0
-        let brightness = startBrightness + (endBrightness - startBrightness) * relativePosition
+        let curveProgress = (1.0 - cos(relativePosition * .pi)) / 2.0
+        let brightness = startBrightness + (endBrightness - startBrightness) * curveProgress
         return ColorSpaceConverter.oklchToColor(lightness: brightness, chroma: 0.0, hue: hue)
     }
 
@@ -232,12 +234,17 @@ internal struct SpectrumGenerator {
         let offset = hue - bend.startHue
 
         if let oneWay = bend as? OneWayBend {
-            let valueIncrement = oneWay.hueCount != 0 ? (valueDelta / oneWay.hueCount) : 0
-            if oneWay.startHue == minHue { return bend.targetValue + (valueIncrement * offset) }
-            else { return defaultValue - (valueIncrement * offset) }
+            let position = oneWay.hueCount != 0 ? (offset / oneWay.hueCount) : 0
+            let curveProgress = (1.0 - cos(position * .pi)) / 2.0
+
+            if oneWay.startHue == minHue {
+                return bend.targetValue + (valueDelta * curveProgress)
+            } else {
+                return defaultValue - (valueDelta * curveProgress)
+            }
         } else if let twoWay = bend as? TwoWayBend {
             let position = (hue - twoWay.startHue) / twoWay.hueCount
-            return defaultValue - (valueDelta * sin(position * .pi))
+            return defaultValue - (valueDelta * (1.0 - cos(position * 2.0 * .pi)) / 2.0)
         }
         return defaultValue
     }
