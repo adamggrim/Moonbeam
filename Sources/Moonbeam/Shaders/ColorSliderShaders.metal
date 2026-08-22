@@ -127,6 +127,7 @@ float calculateBend(
         float endHue = bendsData[bendIndex].data0.z;
         float targetValue = bendsData[bendIndex].data0.w;
         float hueCount = bendsData[bendIndex].data1.x;
+        float isCubic = bendsData[bendIndex].data1.y;
 
         if (currentHue >= startHue && currentHue <= endHue) {
             float valueDifference = defaultValue - targetValue;
@@ -134,7 +135,7 @@ float calculateBend(
 
             if (bendType == float(MoonbeamBendTypeOneWay)) { // One-way bend
                 float normalizedPosition = (hueCount != 0.0) ? (hueOffset / hueCount) : 0.0;
-                float curveProgress = (1.0 - cos(normalizedPosition * M_PI_F)) / 2.0;
+                float curveProgress = isCubic > 0.5 ? smoothstep(0.0, 1.0, normalizedPosition) : normalizedPosition;
 
                 if (startHue == minimumHue) {
                     return targetValue + (valueDifference * curveProgress);
@@ -143,7 +144,8 @@ float calculateBend(
                 }
             } else { // Two-way bend
                 float normalizedPosition = (hueCount != 0.0) ? (hueOffset / hueCount) : 0.0;
-                float curveProgress = (1.0 - cos(normalizedPosition * 2.0 * M_PI_F)) / 2.0;
+                float linearProgress = 1.0 - abs(normalizedPosition * 2.0 - 1.0);
+                float curveProgress = isCubic > 0.5 ? smoothstep(0.0, 1.0, linearProgress) : linearProgress;
                 return defaultValue - (valueDifference * curveProgress);
             }
         }
@@ -155,6 +157,7 @@ float calculateBend(
 
 inline float2 calculateMonochromeFade(
     float isWhiteSection,
+    float isCubic,
     float linearFadeFactor,
     float baseSaturation,
     float baseBrightness,
@@ -166,7 +169,7 @@ inline float2 calculateMonochromeFade(
     uint brightnessBendsCount,
     bool isStartBend
 ) {
-    float fadeFactor = (1.0 - cos(linearFadeFactor * M_PI_F)) / 2.0;
+    float fadeFactor = isCubic > 0.5 ? smoothstep(0.0, 1.0, linearFadeFactor) : linearFadeFactor;
     float finalSaturation = isWhiteSection == 1.0 ? fadeFactor * baseSaturation : baseSaturation;
     float finalBrightness = isWhiteSection == 1.0 ? baseBrightness : fadeFactor * baseBrightness;
 
@@ -294,7 +297,9 @@ half4 spectrumShader(
         // Capped at `MAX_MONOCHROME_SECTIONS` start sections.
         uint sectionIndex = 0;
         if (sectionIndex < startSectionsCount) {
-            float isWhiteSection = startSectionsData[0];
+            float rawSectionData0 = startSectionsData[0];
+            float isWhiteSection = fmod(rawSectionData0, 2.0);
+            float isCubic = rawSectionData0 >= 2.0 ? 1.0 : 0.0;
             float sectionEndPosition = startSectionsData[1];
 
             if (normalizedPosition < sectionEndPosition) {
@@ -305,7 +310,7 @@ half4 spectrumShader(
 
                 if (isLastSection) {
                     float2 fade = calculateMonochromeFade(
-                        isWhiteSection, relativePositionInSection, baseSaturation, baseBrightness,
+                        isWhiteSection, isCubic, relativePositionInSection, baseSaturation, baseBrightness,
                         colorSpaceFlag, minimumHue, saturationBendsData, saturationBendsCount,
                         brightnessBendsData, brightnessBendsCount, true
                     );
@@ -315,11 +320,13 @@ half4 spectrumShader(
                         currentColor.a
                     );
                 } else {
-                    float nextSectionIsWhite = startSectionsData[2];
+                    float rawSectionData2 = startSectionsData[2];
+                    float nextSectionIsWhite = fmod(rawSectionData2, 2.0);
+                    float nextSectionIsCubic = rawSectionData2 >= 2.0 ? 1.0 : 0.0;
                     half startingBrightness = select(0.0h, 1.0h, isWhiteSection == 1.0f);
                     half endingBrightness = select(0.0h, 1.0h, nextSectionIsWhite == 1.0f);
                     float brightnessDelta = endingBrightness - startingBrightness;
-                    float smoothProgress = (1.0 - cos(relativePositionInSection * M_PI_F)) / 2.0;
+                    float smoothProgress = nextSectionIsCubic > 0.5 ? smoothstep(0.0, 1.0, relativePositionInSection) : relativePositionInSection;
                     float interpolatedBrightness = startingBrightness + brightnessDelta * smoothProgress;
                     return half4(
                         half3(resolveColor(colorSpaceFlag, minimumHue, 0.0, interpolatedBrightness))
@@ -333,7 +340,9 @@ half4 spectrumShader(
 
         sectionIndex = 1;
         if (sectionIndex < startSectionsCount) {
-            float isWhiteSection = startSectionsData[2];
+            float rawSectionData2 = startSectionsData[2];
+            float isWhiteSection = fmod(rawSectionData2, 2.0);
+            float isCubic = rawSectionData2 >= 2.0 ? 1.0 : 0.0;
             float sectionEndPosition = startSectionsData[3];
 
             if (normalizedPosition < sectionEndPosition) {
@@ -342,7 +351,7 @@ half4 spectrumShader(
                 float relativePositionInSection = distanceMoved / sectionWidth;
 
                 float2 fade = calculateMonochromeFade(
-                    isWhiteSection, relativePositionInSection, baseSaturation, baseBrightness,
+                    isWhiteSection, isCubic, relativePositionInSection, baseSaturation, baseBrightness,
                     colorSpaceFlag, minimumHue, saturationBendsData, saturationBendsCount,
                     brightnessBendsData, brightnessBendsCount, true
                 );
@@ -389,7 +398,9 @@ half4 spectrumShader(
         // Capped at `MAX_MONOCHROME_SECTIONS` end sections.
         uint sectionIndex = 0;
         if (sectionIndex < endSectionsCount) {
-            float isWhiteSection = endSectionsData[0];
+            float rawSectionData0 = endSectionsData[0];
+            float isWhiteSection = fmod(rawSectionData0, 2.0);
+            float isCubic = rawSectionData0 >= 2.0 ? 1.0 : 0.0;
             float sectionEndPosition = endSectionsData[1];
             bool isLastSection = (0 == endSectionsCount - 1);
 
@@ -400,7 +411,7 @@ half4 spectrumShader(
 
                 float fadeFactor = 1.0 - relativePositionInSection;
                 float2 fade = calculateMonochromeFade(
-                    isWhiteSection, fadeFactor, baseSaturation, baseBrightness,
+                    isWhiteSection, isCubic, fadeFactor, baseSaturation, baseBrightness,
                     colorSpaceFlag, maximumHue, saturationBendsData, saturationBendsCount,
                     brightnessBendsData, brightnessBendsCount, false
                 );
@@ -415,7 +426,9 @@ half4 spectrumShader(
 
         sectionIndex = 1;
         if (sectionIndex < endSectionsCount) {
-            float isWhiteSection = endSectionsData[2];
+            float rawSectionData2 = endSectionsData[2];
+            float isWhiteSection = fmod(rawSectionData2, 2.0);
+            float isCubic = rawSectionData2 >= 2.0 ? 1.0 : 0.0;
             float sectionEndPosition = endSectionsData[3];
             bool isLastSection = true;
 
@@ -425,11 +438,13 @@ half4 spectrumShader(
 
                 float relativePositionInSection = clamp(distanceFromEnd / sectionWidth, 0.0, 1.0);
 
-                float previousSectionIsWhite = endSectionsData[0];
+                float rawSectionData0 = endSectionsData[0];
+                float previousSectionIsWhite = fmod(rawSectionData0, 2.0);
                 half startingBrightness = select(0.0h, 1.0h, previousSectionIsWhite == 1.0f);
                 half endingBrightness = select(0.0h, 1.0h, isWhiteSection == 1.0f);
                 float brightnessDelta = endingBrightness - startingBrightness;
-                float interpolatedBrightness = startingBrightness + brightnessDelta * relativePositionInSection;
+                float smoothProgress = isCubic > 0.5 ? smoothstep(0.0, 1.0, relativePositionInSection) : relativePositionInSection;
+                float interpolatedBrightness = startingBrightness + brightnessDelta * smoothProgress;
                 return half4(
                     half3(resolveColor(colorSpaceFlag, maximumHue, 0.0, interpolatedBrightness))
                         * currentColor.a,

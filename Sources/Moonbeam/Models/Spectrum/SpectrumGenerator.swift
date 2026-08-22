@@ -79,8 +79,8 @@ internal struct SpectrumGenerator {
                     } else {
                         return monoToMonoColor(
                             relativePosition: relativePosition,
-                            fromColor: section.color,
-                            toColor: startSections[index + 1].color,
+                            fromSection: section,
+                            toSection: startSections[index + 1],
                             hue: startHue
                         )
                     }
@@ -132,8 +132,8 @@ internal struct SpectrumGenerator {
                     } else {
                         return monoToMonoColor(
                             relativePosition: relativePosition,
-                            fromColor: endSections[index - 1].color,
-                            toColor: section.color,
+                            fromSection: endSections[index - 1],
+                            toSection: section,
                             hue: endHue
                         )
                     }
@@ -160,7 +160,14 @@ internal struct SpectrumGenerator {
     ) -> Color {
         let hue = isStart ? startHue : endHue
         let linearFactor = isStart ? relativePosition : (1.0 - relativePosition)
-        let interpolationFactor = (1.0 - cos(linearFactor * .pi)) / 2.0
+
+        let interpolationFactor: CGFloat
+        switch monochromeSection.easing {
+        case .linear:
+            interpolationFactor = linearFactor
+        case .cubic:
+            interpolationFactor = linearFactor * linearFactor * (3.0 - 2.0 * linearFactor)
+        }
 
         var startTargetPrimary = primaryValue, startTargetSecondary = secondaryValue
         var endTargetPrimary = primaryValue, endTargetSecondary = secondaryValue
@@ -205,13 +212,21 @@ internal struct SpectrumGenerator {
     /// Generates a smooth gradient between two monochrome sections.
     private static func monoToMonoColor(
         relativePosition: CGFloat,
-        fromColor: MonochromeColor,
-        toColor: MonochromeColor,
+        fromSection: MonochromeSection,
+        toSection: MonochromeSection,
         hue: CGFloat
     ) -> Color {
-        let startBrightness: CGFloat = (fromColor == .white) ? 1.0 : 0.0
-        let endBrightness: CGFloat = (toColor == .white) ? 1.0 : 0.0
-        let curveProgress = (1.0 - cos(relativePosition * .pi)) / 2.0
+        let startBrightness: CGFloat = (fromSection.color == .white) ? 1.0 : 0.0
+        let endBrightness: CGFloat = (toSection.color == .white) ? 1.0 : 0.0
+
+        let curveProgress: CGFloat
+        switch toSection.easing {
+        case .linear:
+            curveProgress = relativePosition
+        case .cubic:
+            curveProgress = relativePosition * relativePosition * (3.0 - 2.0 * relativePosition)
+        }
+
         let brightness = startBrightness + (endBrightness - startBrightness) * curveProgress
         return ColorSpaceConverter.oklchToColor(lightness: brightness, chroma: 0.0, hue: hue)
     }
@@ -235,7 +250,13 @@ internal struct SpectrumGenerator {
 
         if let oneWay = bend as? OneWayBend {
             let position = oneWay.hueCount != 0 ? (offset / oneWay.hueCount) : 0
-            let curveProgress = (1.0 - cos(position * .pi)) / 2.0
+            let curveProgress: CGFloat
+            switch oneWay.easing {
+            case .linear:
+                curveProgress = position
+            case .cubic:
+                curveProgress = position * position * (3.0 - 2.0 * position)
+            }
 
             if oneWay.startHue == minHue {
                 return bend.targetValue + (valueDelta * curveProgress)
@@ -244,7 +265,15 @@ internal struct SpectrumGenerator {
             }
         } else if let twoWay = bend as? TwoWayBend {
             let position = (hue - twoWay.startHue) / twoWay.hueCount
-            return defaultValue - (valueDelta * (1.0 - cos(position * 2.0 * .pi)) / 2.0)
+            let linearProgress = 1.0 - abs(position * 2.0 - 1.0)
+            let smoothProgress: CGFloat
+            switch twoWay.easing {
+            case .linear:
+                smoothProgress = linearProgress
+            case .cubic:
+                smoothProgress = linearProgress * linearProgress * (3.0 - 2.0 * linearProgress)
+            }
+            return defaultValue - (valueDelta * smoothProgress)
         }
         return defaultValue
     }

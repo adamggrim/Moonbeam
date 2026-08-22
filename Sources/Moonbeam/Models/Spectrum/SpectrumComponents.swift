@@ -2,6 +2,12 @@ import Foundation
 
 // MARK: - Core protocols
 
+/// Defines the mathematical curve used to interpolate values across a bend or
+/// monochrome section.
+public enum Easing: Sendable {
+    case linear, cubic
+}
+
 /// Represents the lightest and darkest endpoints of a spectrum.
 public enum MonochromeColor: Sendable {
     case black, white
@@ -15,6 +21,9 @@ public protocol MonochromeSection: Sendable {
     /// The number of monochrome steps added to the hue section (each equal in
     /// width to a single hue).
     var weight: CGFloat { get }
+
+    /// The mathematical easing curve applied to the monochrome section.
+    var easing: Easing { get }
 }
 
 /// Provides shared default values shared across all monochrome sections.
@@ -39,6 +48,9 @@ public protocol BendSection: Sendable {
 
     /// The difference between the start and end hues.
     var hueCount: CGFloat { get }
+
+    /// The mathematical easing curve applied to the bend section.
+    var easing: Easing { get }
 }
 
 public extension BendSection {
@@ -65,24 +77,28 @@ public struct BendSectionBuilder {
 public struct BlackSection: MonochromeSection {
     public let color: MonochromeColor = .black
     public let weight: CGFloat
+    public let easing: Easing
 
     /// Initializes a black section.
     ///   - Parameter weight: The proportionate width of the section relative
     ///     to a single hue.
-    public init(weight: CGFloat = Self.defaultWeight) {
+    public init(weight: CGFloat = Self.defaultWeight, easing: Easing = .cubic) {
         self.weight = weight
+        self.easing = easing
     }
 }
 
 public struct WhiteSection: MonochromeSection {
     public let color: MonochromeColor = .white
     public let weight: CGFloat
+    public let easing: Easing
 
     /// Initializes a white section.
     /// - Parameter weight: The proportionate width of the section relative to
     ///   a single hue.
-    public init(weight: CGFloat = Self.defaultWeight) {
+    public init(weight: CGFloat = Self.defaultWeight, easing: Easing = .cubic) {
         self.weight = weight
+        self.easing = easing
     }
 }
 
@@ -103,10 +119,14 @@ public struct OneWayBend: BendSection {
     /// The difference between the start and end hues.
     public let hueCount: CGFloat
 
-    public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat) {
+    /// The mathematical easing curve applied to the bend section.
+    public let easing: Easing
+
+    public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat, easing: Easing = .cubic) {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target
+        self.easing = easing
         self.hueCount = Self.calculateHueCount(start: startHue, end: endHue)
     }
 }
@@ -126,10 +146,14 @@ public struct TwoWayBend: BendSection {
     /// The difference between the start and end hues.
     public let hueCount: CGFloat
 
-    public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat) {
+    /// The mathematical easing curve applied to the bend section.
+    public let easing: Easing
+
+    public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat, easing: Easing = .cubic) {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target
+        self.easing = easing
         self.hueCount = Self.calculateHueCount(start: startHue, end: endHue)
     }
 }

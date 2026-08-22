@@ -96,7 +96,7 @@ extension ShaderBend {
             Float(bend.endHue),
             Float(bend.targetValue)
         )
-        self.data1 = simd_float4(Float(bend.hueCount), 0, 0, 0)
+        self.data1 = simd_float4(Float(bend.hueCount), bend.easing == .cubic ? 1.0 : 0.0, 0, 0)
     }
 
     static let empty = ShaderBend(data0: .zero, data1: .zero)
@@ -119,7 +119,9 @@ internal func encodeSpectrumData(
     for (i, section) in startSections.enumerated() {
         if i >= maxSections { break }
         cumulativeStart += section.weight / totalWeight
-        startData[i*2] = section.color == .white ? 1.0 : 0.0
+        let colorVal: Float = section.color == .white ? 1.0 : 0.0
+        let easingVal: Float = section.easing == .cubic ? 2.0 : 0.0
+        startData[i*2] = colorVal + easingVal
         startData[i*2 + 1] = Float(cumulativeStart)
     }
 
@@ -128,7 +130,9 @@ internal func encodeSpectrumData(
     for (i, section) in endSections.enumerated() {
         if i >= maxSections { break }
         cumulativeEnd += section.weight / totalWeight
-        endData[i*2] = section.color == .white ? 1.0 : 0.0
+        let colorVal: Float = section.color == .white ? 1.0 : 0.0
+        let easingVal: Float = section.easing == .cubic ? 2.0 : 0.0
+        endData[i*2] = colorVal + easingVal
         endData[i*2 + 1] = Float(cumulativeEnd)
     }
 
