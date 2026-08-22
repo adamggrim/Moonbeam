@@ -34,6 +34,7 @@ internal struct ThumbView: View {
         let dynamicScale: CGFloat = (isDragging && enableThumbScale) ? ColorSliderDefaults.dragScaleMultiplier : 1.0
 
         Group {
+#if compiler(>=6.2)
             if #available(iOS 26.0, macOS 26.0, *), !disableLiquidGlass {
                 Color.clear
                     .glassEffect(isDragging ? .regular.interactive(true) : .identity, in: thumbShape)
@@ -41,6 +42,9 @@ internal struct ThumbView: View {
             } else {
                 thumbShape.fill(thumbColor)
             }
+#else
+            thumbShape.fill(thumbColor)
+#endif
         }
         .foregroundColor(thumbColor)
         .frame(width: thumbWidth, height: thumbHeight)
@@ -54,4 +58,3 @@ internal struct ThumbView: View {
         .offset(x: xOffset, y: yOffset)
     }
 }
-
