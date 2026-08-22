@@ -64,7 +64,7 @@ internal struct SpectrumGenerator {
                 if clampedPosition < sectionEnd {
                     let relativePosition = (clampedPosition - cumulativeStart) / (sectionEnd - cumulativeStart)
                     if index == startSections.count - 1 {
-                        return monoToHueColor(
+                        return monochromeToHueColor(
                             relativePosition: relativePosition,
                             isStart: true,
                             monochromeSection: section,
@@ -77,7 +77,7 @@ internal struct SpectrumGenerator {
                             secondaryBends: secondaryBends
                         )
                     } else {
-                        return monoToMonoColor(
+                        return monochromeToMonochromeColor(
                             relativePosition: relativePosition,
                             fromSection: section,
                             toSection: startSections[index + 1],
@@ -117,7 +117,7 @@ internal struct SpectrumGenerator {
                     let sectionProgress = (clampedPosition - cumulativeEnd) / (sectionEnd - cumulativeEnd)
                     let relativePosition = min(1.0, max(0.0, sectionProgress))
                     if index == 0 {
-                        return monoToHueColor(
+                        return monochromeToHueColor(
                             relativePosition: relativePosition,
                             isStart: false,
                             monochromeSection: section,
@@ -130,7 +130,7 @@ internal struct SpectrumGenerator {
                             secondaryBends: secondaryBends
                         )
                     } else {
-                        return monoToMonoColor(
+                        return monochromeToMonochromeColor(
                             relativePosition: relativePosition,
                             fromSection: endSections[index - 1],
                             toSection: section,
@@ -146,7 +146,7 @@ internal struct SpectrumGenerator {
 
     // MARK: - Private helpers
 
-    private static func monoToHueColor(
+    private static func monochromeToHueColor(
         relativePosition: CGFloat,
         isStart: Bool,
         monochromeSection: MonochromeSection,
@@ -210,7 +210,7 @@ internal struct SpectrumGenerator {
     }
 
     /// Generates a smooth gradient between two monochrome sections.
-    private static func monoToMonoColor(
+    private static func monochromeToMonochromeColor(
         relativePosition: CGFloat,
         fromSection: MonochromeSection,
         toSection: MonochromeSection,
