@@ -11,6 +11,7 @@ struct PreviewContainer<Content: View>: View {
         ZStack {
             backgroundColor.ignoresSafeArea()
             content($selection, $progress)
+                .padding()
         }
     }
 }

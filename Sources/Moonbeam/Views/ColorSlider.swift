@@ -116,7 +116,7 @@ public struct ColorSlider: View {
 
     /// The color calculated from the current `liveColorPosition` on the slider.
     private var calculatedColor: Color {
-        let nonZeroLength = dimensions.length > 0 ? dimensions.length : 0.001
+        let nonZeroLength = sliderState.resolvedLength > 0 ? sliderState.resolvedLength : 0.001
         let clampedRatio = max(0.0, min(1.0, sliderState.liveColorPosition / nonZeroLength))
         switch resolvedDataSource.colorSource {
         case .array(let colors):
@@ -148,7 +148,7 @@ public struct ColorSlider: View {
 
         switch source {
         case .array(let colors) where !colors.isEmpty:
-            let length: CGFloat = dimensions.length
+            let length: CGFloat = sliderState.resolvedLength
             let nonZeroLength: CGFloat = length > 0 ? length : 0.001
 
             let position: CGFloat = sliderState.liveColorPosition
@@ -169,86 +169,115 @@ public struct ColorSlider: View {
     // MARK: - Views
 
     public var body: some View {
-        ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
-            TrackView(
-                dataSource: resolvedDataSource,
-                dimensions: dimensions,
-                axis: axis
-            )
+        GeometryReader { proxy in
+            let dynamicLength = axis == .horizontal ? proxy.size.width : proxy.size.height
+            let resolvedDimensions: ColorSliderDimensions = {
+                var d = dimensions
+                d.length = d.length ?? dynamicLength
+                return d
+            }()
 
-            ThumbView(
-                isDragging: sliderState.isDragging,
-                thumbOffset: sliderState.thumbOffset,
-                dimensions: dimensions,
-                axis: axis,
-                resolvedThumbThickness: sliderState.resolvedThumbThickness,
-                resolvedThumbLength: sliderState.resolvedThumbLength
-            )
-            .gesture(
-                DragGesture(minimumDistance: minimumDragDistance)
-                    .onChanged(onDragChanged)
-                    .onEnded(onDragEnded)
-            )
+            ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
+                TrackView(
+                    dataSource: resolvedDataSource,
+                    dimensions: resolvedDimensions,
+                    axis: axis
+                )
 
-            ColorPreviewView(
-                isDragging: sliderState.isDragging,
-                currentColor: sliderState.isDragging ? calculatedColor : Color(selection),
-                previewMainAxisOffset: sliderState.previewMainAxisOffset,
-                resolvedPreviewOffset: sliderState.resolvedPreviewOffset,
-                previewScaleAnchor: sliderState.previewScaleAnchor,
-                dimensions: dimensions,
-                axis: axis
-            )
-        }
-        .opacity(isEnabled ? 1.0 : 0.5)
-        .grayscale(isEnabled ? 0.0 : 0.99)
-        .sensoryFeedback(.selection, trigger: discreteIndex)
-        .frame(
-            width: axis == .horizontal ? dimensions.length : sliderState.resolvedThumbLength,
-            height: axis == .horizontal ? sliderState.resolvedThumbLength : dimensions.length
-        )
-        .onAppear {
-            sliderState.update(
-                dimensions: dimensions,
-                axis: axis,
-                previewPosition: previewPosition,
-                previewSpacing: previewSpacing,
-                previewHidden: previewHidden
-            )
+                ThumbView(
+                    isDragging: sliderState.isDragging,
+                    thumbOffset: sliderState.thumbOffset,
+                    dimensions: resolvedDimensions,
+                    axis: axis,
+                    resolvedThumbThickness: sliderState.resolvedThumbThickness,
+                    resolvedThumbLength: sliderState.resolvedThumbLength
+                )
+                .gesture(
+                    DragGesture(minimumDistance: minimumDragDistance)
+                        .onChanged(onDragChanged)
+                        .onEnded(onDragEnded)
+                )
 
-            let initialTrackPosition = CGFloat(currentProgress) * dimensions.length
-            sliderState.persistedThumbPosition = min(
-                max(initialTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
-                dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset
-            )
-        }
-        .onChange(of: dimensions) { _, new in sliderState.dimensions = new }
-        .onChange(of: axis) { _, new in sliderState.axis = new }
-        .onChange(of: previewPosition) { _, new in sliderState.previewPosition = new }
-        .onChange(of: previewSpacing) { _, new in sliderState.previewSpacing = new }
-        .onChange(of: previewHidden) { _, new in sliderState.previewHidden = new }
-        .onChange(of: spectrumIdentifier) { _, _ in
-            if let onSpectrumChanged = onSpectrumChanged {
-                let updatedProgress = onSpectrumChanged(selection)
-                internalProgress = updatedProgress
-                externalProgress?.wrappedValue = updatedProgress
-            }
-            let newTrackPosition = CGFloat(currentProgress) * dimensions.length
-            withAnimation(reduceMotion ? nil : animation) {
-                sliderState.persistedThumbPosition = min(
-                    max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
-                    dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset
+                ColorPreviewView(
+                    isDragging: sliderState.isDragging,
+                    currentColor: sliderState.isDragging ? calculatedColor : Color(selection),
+                    previewMainAxisOffset: sliderState.previewMainAxisOffset,
+                    resolvedPreviewOffset: sliderState.resolvedPreviewOffset,
+                    previewScaleAnchor: sliderState.previewScaleAnchor,
+                    dimensions: resolvedDimensions,
+                    axis: axis
                 )
             }
-        }
-        .onChange(of: currentProgress) { _, newValue in
-            if !sliderState.isDragging {
-                let newTrackPosition = CGFloat(newValue) * dimensions.length
+            .opacity(isEnabled ? 1.0 : 0.5)
+            .grayscale(isEnabled ? 0.0 : 0.99)
+            .sensoryFeedback(.selection, trigger: discreteIndex)
+            .onAppear {
+                sliderState.update(
+                    dimensions: resolvedDimensions,
+                    axis: axis,
+                    previewPosition: previewPosition,
+                    previewSpacing: previewSpacing,
+                    previewHidden: previewHidden
+                )
+
+                let initialTrackPosition = CGFloat(currentProgress) * sliderState.resolvedLength
+                sliderState.persistedThumbPosition = min(
+                    max(initialTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
+                    sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
+                )
+            }
+            .onChange(of: dimensions) { _, newDimensions in
+                var updated = newDimensions
+                updated.length = updated.length ?? dynamicLength
+                sliderState.dimensions = updated
+                if !sliderState.isDragging {
+                    let newTrackPosition = CGFloat(currentProgress) * sliderState.resolvedLength
+                    sliderState.persistedThumbPosition = min(
+                        max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
+                        sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
+                    )
+                }
+            }
+            .onChange(of: proxy.size) { _, newSize in
+                let newLength = axis == .horizontal ? newSize.width : newSize.height
+                var updated = dimensions
+                updated.length = dimensions.length ?? newLength
+                sliderState.dimensions = updated
+                if !sliderState.isDragging {
+                    let newTrackPosition = CGFloat(currentProgress) * sliderState.resolvedLength
+                    sliderState.persistedThumbPosition = min(
+                        max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
+                        sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
+                    )
+                }
+            }
+            .onChange(of: axis) { _, new in sliderState.axis = new }
+            .onChange(of: previewPosition) { _, new in sliderState.previewPosition = new }
+            .onChange(of: previewSpacing) { _, new in sliderState.previewSpacing = new }
+            .onChange(of: previewHidden) { _, new in sliderState.previewHidden = new }
+            .onChange(of: spectrumIdentifier) { _, _ in
+                if let onSpectrumChanged = onSpectrumChanged {
+                    let updatedProgress = onSpectrumChanged(selection)
+                    internalProgress = updatedProgress
+                    externalProgress?.wrappedValue = updatedProgress
+                }
+                let newTrackPosition = CGFloat(currentProgress) * sliderState.resolvedLength
                 withAnimation(reduceMotion ? nil : animation) {
                     sliderState.persistedThumbPosition = min(
                         max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
-                        dimensions.length - sliderState.resolvedThumbThickness - sliderState.thumbInset
+                        sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
                     )
+                }
+            }
+            .onChange(of: currentProgress) { _, newValue in
+                if !sliderState.isDragging {
+                    let newTrackPosition = CGFloat(newValue) * sliderState.resolvedLength
+                    withAnimation(reduceMotion ? nil : animation) {
+                        sliderState.persistedThumbPosition = min(
+                            max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
+                            sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
+                        )
+                    }
                 }
             }
         }
@@ -257,9 +286,13 @@ public struct ColorSlider: View {
         .accessibilityValue(Double(currentProgress).formatted(.percent))
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
+        .frame(
+            width: axis == .horizontal ? dimensions.length : sliderState.resolvedThumbLength,
+            height: axis == .horizontal ? sliderState.resolvedThumbLength : dimensions.length
+        )
     }
 
-    // MARK: - Drag event handlers
+        // MARK: - Drag event handlers
 
     /// Updates the view's state when the position of the `DragGesture`
     /// changes.
@@ -277,7 +310,11 @@ public struct ColorSlider: View {
 
         sliderState.updateDrag(translation: translation)
 
-        let newProgress = Double(dimensions.length > 0 ? sliderState.liveColorPosition / dimensions.length : 0.0)
+        let newProgress = Double(
+            sliderState.resolvedLength > 0
+                ? sliderState.liveColorPosition / sliderState.resolvedLength
+                : 0.0
+        )
         let newSelection = isContinuous ? calculatedColor.resolve(in: environment).cgColor : nil
 
         self.internalProgress = newProgress

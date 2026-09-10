@@ -50,6 +50,8 @@ internal struct ColorSliderState {
 
     // MARK: - Layout calculations
 
+    var resolvedLength: CGFloat { dimensions.length ?? 0 }
+
     var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? dimensions.thickness }
     var resolvedThumbLength: CGFloat { dimensions.thumbLength ?? dimensions.thickness * 2 }
 
@@ -86,7 +88,7 @@ internal struct ColorSliderState {
     /// thumb's center. At the start or end of the slider, can extend beyond the
     /// thumb's center to the start or end of the thumb.
     var liveColorPosition: CGFloat {
-        min(max(liveContainerThumbDrag + halfThumbThickness, 0), dimensions.length)
+        min(max(liveContainerThumbDrag + halfThumbThickness, 0), resolvedLength)
     }
 
     /// The clamped main-axis position of the start of the thumb during an
@@ -94,7 +96,7 @@ internal struct ColorSliderState {
     ///
     /// Cannot extend beyond the thumb's leading edge at the end of the slider.
     var liveThumbPosition: CGFloat {
-        min(max(liveContainerThumbDrag, 0 + thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
+        min(max(liveContainerThumbDrag, 0 + thumbInset), resolvedLength - resolvedThumbThickness - thumbInset)
     }
 
     /// The main axis offset for the floating color preview.
@@ -104,7 +106,7 @@ internal struct ColorSliderState {
     var previewMainAxisOffset: CGFloat {
         let halfPreviewSize = dimensions.previewSize / 2
         let leftBound = halfPreviewSize - halfThumbThickness
-        let rightBound = dimensions.length - halfPreviewSize - halfThumbThickness
+        let rightBound = resolvedLength - halfPreviewSize - halfThumbThickness
         let clampedValue = min(max(liveThumbPosition, leftBound), rightBound)
 
         return clampedValue - halfPreviewSize + halfThumbThickness
@@ -128,7 +130,7 @@ internal struct ColorSliderState {
 
     /// The offset of the thumb's leading edge.
     var thumbOffset: CGFloat {
-        min(max(liveThumbPosition, thumbInset), dimensions.length - resolvedThumbThickness - thumbInset)
+        min(max(liveThumbPosition, thumbInset), resolvedLength - resolvedThumbThickness - thumbInset)
     }
 
     // MARK: - Mutating actions
@@ -154,10 +156,10 @@ internal struct ColorSliderState {
         let newProgress = min(max(progress + delta, 0.0), 1.0)
         progress = newProgress
 
-        let newTrackPosition = CGFloat(newProgress) * dimensions.length
+        let newTrackPosition = CGFloat(newProgress) * resolvedLength
         persistedThumbPosition = min(
             max(newTrackPosition - halfThumbThickness, thumbInset),
-            dimensions.length - resolvedThumbThickness - thumbInset
+            resolvedLength - resolvedThumbThickness - thumbInset
         )
         liveContainerDrag = .zero
     }

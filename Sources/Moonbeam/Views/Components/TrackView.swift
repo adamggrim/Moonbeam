@@ -19,8 +19,8 @@ internal struct TrackView: View {
 
     var body: some View {
         let size = CGSize(
-            width: axis == .horizontal ? dimensions.length : dimensions.thickness,
-            height: axis == .horizontal ? dimensions.thickness : dimensions.length
+            width: axis == .horizontal ? (dimensions.length ?? 0) : dimensions.thickness,
+            height: axis == .horizontal ? dimensions.thickness : (dimensions.length ?? 0)
         )
 
         Group {

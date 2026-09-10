@@ -3,8 +3,8 @@ import SwiftUI
 /// Encapsulates various layout dimensions for the color slider and its
 /// components.
 public struct ColorSliderDimensions: Sendable, Equatable {
-    /// The length of the slider track.
-    public var length: CGFloat = ColorSliderDefaults.trackLength
+    /// The length of the slider track. If `nil`, the slider takes up available space.
+    public var length: CGFloat? = nil
 
     /// The thickness of the slider track.
     public var thickness: CGFloat = ColorSliderDefaults.trackThickness

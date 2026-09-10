@@ -131,7 +131,7 @@ public extension View {
 
     /// Customizes the layout dimensions of the color slider.
     func colorSliderDimensions(
-        length: CGFloat = 300,
+        length: CGFloat? = nil,
         thickness: CGFloat = 24,
         thumbThickness: CGFloat? = nil,
         thumbLength: CGFloat? = nil,
