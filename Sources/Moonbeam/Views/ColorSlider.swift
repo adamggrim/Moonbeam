@@ -280,13 +280,11 @@ public struct ColorSlider: View {
         let newProgress = Double(dimensions.length > 0 ? sliderState.liveColorPosition / dimensions.length : 0.0)
         let newSelection = isContinuous ? calculatedColor.resolve(in: environment).cgColor : nil
 
-        Task { @MainActor in
-            self.internalProgress = newProgress
-            self.externalProgress?.wrappedValue = newProgress
+        self.internalProgress = newProgress
+        self.externalProgress?.wrappedValue = newProgress
 
-            if let newSelection {
-                self.selection = newSelection
-            }
+        if let newSelection {
+            self.selection = newSelection
         }
     }
 
