@@ -281,14 +281,17 @@ public struct ColorSlider: View {
                 }
             }
         }
-        // Hides individual shapes from VoiceOver.
         .accessibilityElement(children: .ignore)
         .accessibilityValue(Double(currentProgress).formatted(.percent))
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
         .frame(
-            width: axis == .horizontal ? dimensions.length : sliderState.resolvedThumbLength,
+            width: axis == .vertical ? sliderState.resolvedThumbLength : dimensions.length,
             height: axis == .horizontal ? sliderState.resolvedThumbLength : dimensions.length
+        )
+        .frame(
+            maxWidth: axis == .horizontal && dimensions.length == nil ? .infinity : nil,
+            maxHeight: axis == .vertical && dimensions.length == nil ? .infinity : nil
         )
     }
 
