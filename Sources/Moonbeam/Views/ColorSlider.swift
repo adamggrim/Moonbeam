@@ -280,6 +280,16 @@ public struct ColorSlider: View {
                     }
                 }
             }
+            .onChange(of: selection) { _, newSelection in
+                if !sliderState.isDragging {
+                    let currentColor = calculatedColor.resolve(in: environment).cgColor
+                    if newSelection != currentColor, let onSpectrumChanged = onSpectrumChanged {
+                        let updatedProgress = onSpectrumChanged(newSelection)
+                        internalProgress = updatedProgress
+                        externalProgress?.wrappedValue = updatedProgress
+                    }
+                }
+            }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityValue(Double(currentProgress).formatted(.percent))
