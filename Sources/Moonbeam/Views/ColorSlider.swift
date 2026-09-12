@@ -15,23 +15,12 @@ public struct ColorSlider: View {
 
     // MARK: - State and bindings
 
-    @Binding public var selection: CGColor
+    /// The position of the slider, normalized to a range from 0.0 to 1.0.
+    /// This is the slider's single source of truth.
+    @Binding public var value: Double
 
-    /// The position of the selected color in the slider, normalized to a range
-    /// from 0.0 to 1.0. The single source of truth when there is no
-    /// provided `externalProgress`.
-    @State private var internalProgress: Double
-
-    /// The position of the selected color in the slider, normalized to a range
-    /// from 0.0 to 1.0. If provided, the slider synchronizes its layout
-    /// progress with this external value.
-    private var externalProgress: Binding<Double>?
-
-    /// The current position of the selected color in the slider, prioritizing
-    /// `externalProgress` if provided.
-    private var currentProgress: Double {
-        externalProgress?.wrappedValue ?? internalProgress
-    }
+    /// An optional closure that emits the computed color.
+    public var onColorChange: ((Color) -> Void)?
 
     @State private var sliderState = ColorSliderState()
 
@@ -50,21 +39,13 @@ public struct ColorSlider: View {
 
     // MARK: - Public properties
 
-    /// An optional identifier that triggers animation and position updates when
-    /// the spectrum changes.
-    public var spectrumIdentifier: AnyHashable?
-
-    /// A closure invoked when the spectrum changes, enabling an updated
-    /// progress value for the thumb.
-    public var onSpectrumChanged: ((CGColor) -> Double)?
-
     /// A localized string key used for VoiceOver accessibility.
     public var label: LocalizedStringKey
 
     /// The layout orientation of the slider (`.horizontal` or `.vertical`).
     public var axis: Axis
 
-    /// Determines whether the bound `selection` updates continuously during a
+    /// Determines whether the bound `color` output updates continuously during a
     /// drag gesture (`true`), or only when the drag ends (`false`).
     public var isContinuous: Bool
 
@@ -77,34 +58,23 @@ public struct ColorSlider: View {
     /// the data source.
     ///
     /// - Parameters:
-    ///   - selection: A binding to the currently absolute selected color.
-    ///   - progress: A binding to the slider's normalized position (0.0 to
-    ///     1.0).
-    ///   - spectrumIdentifier: An optional identifier to trigger a spectrum
-    ///     change.
-    ///   - onSpectrumChanged: An optional callback defining the thumb's
-    ///     behavior when the spectrum changes.
+    ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
+    ///   - color: An optional output binding to receive the generated color.
     ///   - label: A localized string key used for VoiceOver accessibility.
     ///     Defaults to "Color Slider".
     ///   - axis: The layout orientation of the slider. Defaults to
     ///     `.horizontal`.
-    ///   - isContinuous: Whether the selected color updates continuously during
+    ///   - isContinuous: Whether the output color updates continuously during
     ///     a drag gesture. Defaults to `true`.
     public init(
-        selection: Binding<CGColor>,
-        progress: Binding<Double>? = nil,
-        initialProgress: Double = 0.0,
-        spectrumIdentifier: AnyHashable? = nil,
-        onSpectrumChanged: ((CGColor) -> Double)? = nil,
+        value: Binding<Double>,
+        onColorChange: ((Color) -> Void)? = nil,
         label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal,
         isContinuous: Bool = true
     ) {
-        self._selection = selection
-        self.externalProgress = progress
-        self._internalProgress = State(initialValue: progress?.wrappedValue ?? initialProgress)
-        self.spectrumIdentifier = spectrumIdentifier
-        self.onSpectrumChanged = onSpectrumChanged
+        self._value = value
+        self.onColorChange = onColorChange
         self.label = label
         self.axis = axis
         self.isContinuous = isContinuous
@@ -200,7 +170,7 @@ public struct ColorSlider: View {
 
                 ColorPreviewView(
                     isDragging: sliderState.isDragging,
-                    currentColor: sliderState.isDragging ? calculatedColor : Color(selection),
+                    currentColor: calculatedColor,
                     previewMainAxisOffset: sliderState.previewMainAxisOffset,
                     resolvedPreviewOffset: sliderState.resolvedPreviewOffset,
                     previewScaleAnchor: sliderState.previewScaleAnchor,
@@ -220,18 +190,22 @@ public struct ColorSlider: View {
                     previewHidden: previewHidden
                 )
 
-                let initialTrackPosition = CGFloat(currentProgress) * sliderState.resolvedLength
+                let initialTrackPosition = CGFloat(value) * sliderState.resolvedLength
                 sliderState.persistedThumbPosition = min(
                     max(initialTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
                     sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
                 )
+
+                if let onColorChange {
+                    onColorChange(calculatedColor)
+                }
             }
             .onChange(of: dimensions) { _, newDimensions in
                 var updated = newDimensions
                 updated.length = updated.length ?? dynamicLength
                 sliderState.dimensions = updated
                 if !sliderState.isDragging {
-                    let newTrackPosition = CGFloat(currentProgress) * sliderState.resolvedLength
+                    let newTrackPosition = CGFloat(value) * sliderState.resolvedLength
                     sliderState.persistedThumbPosition = min(
                         max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
                         sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
@@ -244,7 +218,7 @@ public struct ColorSlider: View {
                 updated.length = dimensions.length ?? newLength
                 sliderState.dimensions = updated
                 if !sliderState.isDragging {
-                    let newTrackPosition = CGFloat(currentProgress) * sliderState.resolvedLength
+                    let newTrackPosition = CGFloat(value) * sliderState.resolvedLength
                     sliderState.persistedThumbPosition = min(
                         max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
                         sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
@@ -255,21 +229,7 @@ public struct ColorSlider: View {
             .onChange(of: previewPosition) { _, new in sliderState.previewPosition = new }
             .onChange(of: previewSpacing) { _, new in sliderState.previewSpacing = new }
             .onChange(of: previewHidden) { _, new in sliderState.previewHidden = new }
-            .onChange(of: spectrumIdentifier) { _, _ in
-                if let onSpectrumChanged = onSpectrumChanged {
-                    let updatedProgress = onSpectrumChanged(selection)
-                    internalProgress = updatedProgress
-                    externalProgress?.wrappedValue = updatedProgress
-                }
-                let newTrackPosition = CGFloat(currentProgress) * sliderState.resolvedLength
-                withAnimation(reduceMotion ? nil : animation) {
-                    sliderState.persistedThumbPosition = min(
-                        max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
-                        sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
-                    )
-                }
-            }
-            .onChange(of: currentProgress) { _, newValue in
+            .onChange(of: value) { _, newValue in
                 if !sliderState.isDragging {
                     let newTrackPosition = CGFloat(newValue) * sliderState.resolvedLength
                     withAnimation(reduceMotion ? nil : animation) {
@@ -278,21 +238,12 @@ public struct ColorSlider: View {
                             sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
                         )
                     }
-                }
-            }
-            .onChange(of: selection) { _, newSelection in
-                if !sliderState.isDragging {
-                    let currentColor = calculatedColor.resolve(in: environment).cgColor
-                    if newSelection != currentColor, let onSpectrumChanged = onSpectrumChanged {
-                        let updatedProgress = onSpectrumChanged(newSelection)
-                        internalProgress = updatedProgress
-                        externalProgress?.wrappedValue = updatedProgress
-                    }
+                    onColorChange?(calculatedColor)
                 }
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityValue(Double(currentProgress).formatted(.percent))
+        .accessibilityValue(value.formatted(.percent))
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
         .frame(
@@ -305,7 +256,7 @@ public struct ColorSlider: View {
         )
     }
 
-        // MARK: - Drag event handlers
+    // MARK: - Drag event handlers
 
     /// Updates the view's state when the position of the `DragGesture`
     /// changes.
@@ -313,9 +264,9 @@ public struct ColorSlider: View {
     /// Called continuously while the user is dragging the thumb. Calculates
     /// `liveContainerThumbDrag`, `liveColorPosition` and`liveThumbPosition`.
     ///
-    /// - Parameter value: The current value of the `DragGesture`.
-    private func onDragChanged(_ value: DragGesture.Value) {
-        let translation = axis == .horizontal ? value.translation.width : -value.translation.height
+    /// - Parameter dragValue: The current value of the `DragGesture`.
+    private func onDragChanged(_ dragValue: DragGesture.Value) {
+        let translation = axis == .horizontal ? dragValue.translation.width : -dragValue.translation.height
 
         if !sliderState.isDragging {
             withAnimation(reduceMotion ? nil : animation) { sliderState.isDragging = true }
@@ -325,78 +276,34 @@ public struct ColorSlider: View {
 
         let newProgress = Double(
             sliderState.resolvedLength > 0
-                ? sliderState.liveColorPosition / sliderState.resolvedLength
-                : 0.0
+            ? sliderState.liveColorPosition / sliderState.resolvedLength
+            : 0.0
         )
-        let newSelection = isContinuous ? calculatedColor.resolve(in: environment).cgColor : nil
 
-        self.internalProgress = newProgress
-        self.externalProgress?.wrappedValue = newProgress
+        self.value = newProgress
 
-        if let newSelection {
-            self.selection = newSelection
+        if isContinuous {
+            onColorChange?(calculatedColor)
         }
     }
 
-    /// Finalizes the view's state when the drag gesture ends, updating
-    /// `persistedThumbPosition` with the thumb's last valid clamped position
-    /// and resetting `liveContainerDrag` to zero.
     private func onDragEnded(_: DragGesture.Value) {
         if !isContinuous {
-            selection = calculatedColor.resolve(in: environment).cgColor
+            onColorChange?(calculatedColor)
         }
         withAnimation(reduceMotion ? nil : animation) {
             sliderState.finalizeDrag()
         }
     }
 
-    /// Adjusts the slider by a specific percentage step (for VoiceOver).
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
-        var mutableProgress = currentProgress
+        var mutableProgress = value
         sliderState.accessibilityAdjust(
             direction: direction,
             progress: &mutableProgress,
             step: accessibilityStep
         )
-        self.internalProgress = mutableProgress
-        self.externalProgress?.wrappedValue = mutableProgress
-        selection = calculatedColor.resolve(in: environment).cgColor
-    }
-}
-
-public extension ColorSlider {
-    /// Convenience initializer to accept SwiftUI's `Color` instead of
-    /// `CGColor`.
-    init(
-        selection: Binding<Color>,
-        progress: Binding<Double>? = nil,
-        initialProgress: Double = 0.0,
-        spectrumIdentifier: AnyHashable? = nil,
-        onSpectrumChanged: ((Color) -> Double)? = nil,
-        label: LocalizedStringKey = "Color Slider",
-        axis: Axis = .horizontal,
-        isContinuous: Bool = true
-    ) {
-        let cgSelection = Binding<CGColor>(
-            get: {
-                PlatformColor(selection.wrappedValue).cgColor
-            },
-            set: { selection.wrappedValue = Color($0) }
-        )
-
-        let cgOnChanged: ((CGColor) -> Double)? = onSpectrumChanged.map { callback in
-            return { cgColor in callback(Color(cgColor)) }
-        }
-
-        self.init(
-            selection: cgSelection,
-            progress: progress,
-            initialProgress: initialProgress,
-            spectrumIdentifier: spectrumIdentifier,
-            onSpectrumChanged: cgOnChanged,
-            label: label,
-            axis: axis,
-            isContinuous: isContinuous
-        )
+        self.value = mutableProgress
+        onColorChange?(calculatedColor)
     }
 }

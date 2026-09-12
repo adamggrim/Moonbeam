@@ -37,8 +37,8 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
 
 1. **Initialize the state variables**
     ```swift
-    @State private var selectedColor: Color = .white
     @State private var progress: Double = 0.5
+    @State private var selectedColor: Color = .white
     ```
 
 2. **Create the slider and add modifiers:**
@@ -49,8 +49,8 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
 
     ```swift
     ColorSlider(
-        selection: $selectedColor,
-        progress: $progress,
+        value: $progress,
+        onColorChange: { selectedColor = $0 },
         axis: .horizontal
     )
     .spectrum(space: .hsb, range: 0.0...1.0)
@@ -67,8 +67,8 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
 
     ```swift
     ColorSlider(
-        selection: $selectedColor,
-        progress: $progress,
+        value: $progress,
+        onColorChange: { selectedColor = $0 },
         axis: .horizontal
     )
     .spectrum(space: .oklch, range: 0.0...1.0)
@@ -86,8 +86,8 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
 1. **Initialize the state variables**
 
     ```swift
-    @State private var selectedColor: Color = .cyan
     @State private var progress: Double = 0.0
+    @State private var selectedColor: Color = .cyan
     ```
 
 2. **Create the slider and add modifiers **
@@ -96,8 +96,8 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
 
     ```swift
     ColorSlider(
-        selection: $selectedColor,
-        progress: $progress,
+        value: $progress,
+        onColorChange: { selectedColor = $0 },
         axis: .vertical
     )
     .gradient(from: .orange, to: .blue, space: .rgb)
@@ -123,12 +123,13 @@ This example demonstrates how to create a hard-edge slider with discrete color b
     Pass an array of colors to the `.colors()` modifier.
 
     ```swift
+    @State private var progress: Double = 0.0
     @State private var selectedColor: Color = .green
 
     var body: some View {
         ColorSlider(
-            selection: $selectedColor,
-            progress: $progress,
+            value: $progress,
+            onColorChange: { selectedColor = $0 },
             dataSource: customStops,
             axis: .horizontal
         )
@@ -140,8 +141,8 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 1. **Initialize the state variables**
 
     ```swift
-    @State private var selectedColor: Color = .cyan
     @State private var progress: Double = 0.0
+    @State private var selectedColor: Color = .cyan
     ```
 
 2. **Create the slider and add modifiers**
@@ -150,8 +151,8 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 
     ```swift
     ColorSlider(
-        selection: $selectedColor,
-        progress: $progress,
+        value: $progress,
+        onColorChange: { selectedColor = $0 },
         axis: .horizontal
     )
     .colors([.green, .yellow, .orange, .red, .purple, .blue])
