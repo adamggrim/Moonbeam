@@ -50,15 +50,18 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
     ```swift
     ColorSlider(
         value: $progress,
+        dataSource: HSBSpectrumModel(
+            startSections: [BlackSection()], // Fade from black
+            endSections: [WhiteSection()],   // Fade to white
+            startHue: 0.0,
+            endHue: 1.0,
+            saturationBends: {
+                OneWayBend(startHue: 0.0, endHue: 40.0 / 360, target: 0.5)
+            }
+        ),
         onColorChange: { selectedColor = $0 },
         axis: .horizontal
     )
-    .spectrum(space: .hsb, range: 0.0...1.0)
-    .startingWith(BlackSection()) // Fade from black
-    .endingWith(WhiteSection())   // Fade to white
-    .saturationBends {
-        OneWayBend(startHue: 0.0, endHue: 40.0 / 360, target: 0.5)
-    }
     .colorSliderThumbShape(Circle())
     .colorSliderThumbColor(.white)
     ```
@@ -68,15 +71,18 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
     ```swift
     ColorSlider(
         value: $progress,
+        dataSource: OKLCHSpectrumModel(
+            lightness: 0.75,
+            chroma: 0.15,
+            startHue: 0.0,
+            endHue: 1.0,
+            lightnessBends: {
+                OneWayBend(startHue: 0.0, endHue: 0.2, target: 0.9)
+            }
+        ),
         onColorChange: { selectedColor = $0 },
         axis: .horizontal
     )
-    .spectrum(space: .oklch, range: 0.0...1.0)
-    .baseLightness(0.75)
-    .baseChroma(0.15)
-    .lightnessBends {
-        OneWayBend(startHue: 0.0, endHue: 0.2, target: 0.9)
-    }
     ```
 
 ## Example (gradient)
@@ -97,10 +103,10 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
     ```swift
     ColorSlider(
         value: $progress,
+        dataSource: GradientSliderModel(startColor: .orange, endColor: .blue, colorSpace: .rgb),
         onColorChange: { selectedColor = $0 },
         axis: .vertical
     )
-    .gradient(from: .orange, to: .blue, space: .rgb)
     .colorSliderThumbShape(Circle())
     ```
 
@@ -152,28 +158,16 @@ This example demonstrates how to create a hard-edge slider with discrete color b
     ```swift
     ColorSlider(
         value: $progress,
+        dataSource: GradientSliderModel(startColor: .red, endColor: .blue, colorSpace: .rgb)
+            .hardEdge(into: 6),
         onColorChange: { selectedColor = $0 },
         axis: .horizontal
     )
-    .colors([.green, .yellow, .orange, .red, .purple, .blue])
-    .gradient(from: .red, to: .blue, space: .rgb)
-    .hardEdge(into: 6)
     ```
 
 ## Customization
 
 `Moonbeam` uses SwiftUI environment values for slider styling. Apply these to a single `ColorSlider` or parent view.
-
-### Data modifiers
-* `.spectrum(space:range:)`
-* `.baseSaturation(_:) / .baseBrightness(_:)`
-* `.baseLightness(_:) / .baseChroma(_:)`
-* `.gradient(from:to:space:)`
-* `.colors(_:)`
-* `.hardEdge(into:)`
-* `.startingWith(_:) / .endingWith(_:)`
-* `.saturationBends { ... } / .brightnessBends { ... }`
-* `.lightnessBends { ... } / .chromaBends { ... }`
 
 ### Slider
 * `.colorSliderTrackStroke(_:lineWidth:)`

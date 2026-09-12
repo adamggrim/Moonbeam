@@ -11,13 +11,16 @@ typealias PlatformColor = NSColor
 /// A customizable, interactive view that allows users to select a color
 /// from a dynamically generated spectrum or gradient.
 @MainActor
-public struct ColorSlider: View {
+public struct ColorSlider<Source: ColorSliderDataSource>: View {
 
     // MARK: - State and bindings
 
     /// The position of the slider, normalized to a range from 0.0 to 1.0.
     /// This is the slider's single source of truth.
     @Binding public var value: Double
+
+    /// The data source driving the slider's colors.
+    public var dataSource: Source
 
     /// An optional closure that emits the computed color.
     public var onColorChange: ((Color) -> Void)?
@@ -49,17 +52,15 @@ public struct ColorSlider: View {
     /// drag gesture (`true`), or only when the drag ends (`false`).
     public var isContinuous: Bool
 
-    @Environment(\.colorSliderConfiguration) private var configuration
-
     /// Initializes a customizable color slider.
     ///
-    /// Created by attaching view modifiers like `.spectrum(...)`,
-    /// `.gradient(...)` or `.colors(...)` directly to the view to configure
-    /// the data source.
+    /// Created by providing a data source such as `HSBSpectrumModel`,
+    /// `OKLCHSpectrumModel`, `GradientSliderModel`, or `HardEdgeSliderModel`.
     ///
     /// - Parameters:
     ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
-    ///   - color: An optional output binding to receive the generated color.
+    ///   - dataSource: The source defining the color calculations and rendering.
+    ///   - onColorChange: An optional closure to receive the generated color.
     ///   - label: A localized string key used for VoiceOver accessibility.
     ///     Defaults to "Color Slider".
     ///   - axis: The layout orientation of the slider. Defaults to
@@ -68,27 +69,25 @@ public struct ColorSlider: View {
     ///     a drag gesture. Defaults to `true`.
     public init(
         value: Binding<Double>,
+        dataSource: Source,
         onColorChange: ((Color) -> Void)? = nil,
         label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal,
         isContinuous: Bool = true
     ) {
         self._value = value
+        self.dataSource = dataSource
         self.onColorChange = onColorChange
         self.label = label
         self.axis = axis
         self.isContinuous = isContinuous
     }
 
-    private var resolvedDataSource: any ColorSliderDataSource {
-        DataSourceFactory.resolve(from: configuration)
-    }
-
     /// The color calculated from the current `liveColorPosition` on the slider.
     private var calculatedColor: Color {
         let nonZeroLength = sliderState.resolvedLength > 0 ? sliderState.resolvedLength : 0.001
         let clampedRatio = max(0.0, min(1.0, sliderState.liveColorPosition / nonZeroLength))
-        switch resolvedDataSource.colorSource {
+        switch dataSource.colorSource {
         case .array(let colors):
             guard !colors.isEmpty else { return .clear }
             let calculatedIndex = Int(CGFloat(colors.count) * clampedRatio)
@@ -114,7 +113,7 @@ public struct ColorSlider: View {
     /// Calculates the discrete index of the slider (used to trigger haptics on
     /// hard-edge sliders).
     private var discreteIndex: Int? {
-        let source = resolvedDataSource.colorSource
+        let source = dataSource.colorSource
 
         switch source {
         case .array(let colors) where !colors.isEmpty:
@@ -149,7 +148,7 @@ public struct ColorSlider: View {
 
             ZStack(alignment: axis == .horizontal ? .leading : .bottom) {
                 TrackView(
-                    dataSource: resolvedDataSource,
+                    dataSource: dataSource,
                     dimensions: resolvedDimensions,
                     axis: axis
                 )
@@ -305,5 +304,35 @@ public struct ColorSlider: View {
         )
         self.value = mutableProgress
         onColorChange?(calculatedColor)
+    }
+}
+
+public extension ColorSlider where Source == HSBSpectrumModel {
+    /// Initializes a customizable color slider with a default HSB spectrum.
+    ///
+    /// - Parameters:
+    ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
+    ///   - onColorChange: An optional closure to receive the generated color.
+    ///   - label: A localized string key used for VoiceOver accessibility.
+    ///     Defaults to "Color Slider".
+    ///   - axis: The layout orientation of the slider. Defaults to
+    ///     `.horizontal`.
+    ///   - isContinuous: Whether the output color updates continuously during
+    ///     a drag gesture. Defaults to `true`.
+    init(
+        value: Binding<Double>,
+        onColorChange: ((Color) -> Void)? = nil,
+        label: LocalizedStringKey = "Color Slider",
+        axis: Axis = .horizontal,
+        isContinuous: Bool = true
+    ) {
+        self.init(
+            value: value,
+            dataSource: HSBSpectrumModel(),
+            onColorChange: onColorChange,
+            label: label,
+            axis: axis,
+            isContinuous: isContinuous
+        )
     }
 }

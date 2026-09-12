@@ -2,7 +2,11 @@ import SwiftUI
 
 #Preview("Horizontal OKLCH spectrum slider") {
     PreviewContainer { selection, progress in
-        ColorSlider(value: progress, onColorChange: { selection.wrappedValue = $0 }, axis: .horizontal)
-            .spectrum(space: .oklch, range: 0.0...1.0)
+        ColorSlider(
+            value: progress,
+            dataSource: OKLCHSpectrumModel(startHue: 0.0, endHue: 1.0),
+            onColorChange: { selection.wrappedValue = $0 },
+            axis: .horizontal
+        )
     }
 }

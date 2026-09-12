@@ -3,7 +3,7 @@ import SwiftUI
 import MoonbeamShared
 
 /// Model for calculating perceptually uniform OKLCH spectrum colors dynamically.
-internal struct OKLCHSpectrumModel: ColorSliderDataSource {
+public struct OKLCHSpectrumModel: ColorSliderDataSource {
     let startSections: [MonochromeSection]
     let endSections: [MonochromeSection]
     let lightness: Double
@@ -12,7 +12,7 @@ internal struct OKLCHSpectrumModel: ColorSliderDataSource {
     let endHue: Double
     let lightnessBends: [BendSection]
     let chromaBends: [BendSection]
-    let colorSource: ColorSourceProvider
+    public let colorSource: ColorSourceProvider
 
     /// Creates a dynamically generated spectrum based on the perceptually
     /// uniform OKLCH color space.

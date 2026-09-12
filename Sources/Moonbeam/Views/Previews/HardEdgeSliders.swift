@@ -2,27 +2,42 @@ import SwiftUI
 
 #Preview("Horizontal explicit hard-edge slider") {
     PreviewContainer { selection, progress in
-        ColorSlider(value: progress, onColorChange: { selection.wrappedValue = $0 }, axis: .horizontal)
-            .colors([.green, .yellow, .orange, .red, .purple, .blue])
+        ColorSlider(
+            value: progress,
+            dataSource: HardEdgeSliderModel(colors: [.green, .yellow, .orange, .red, .purple, .blue]),
+            onColorChange: { selection.wrappedValue = $0 },
+            axis: .horizontal
+        )
     }
 }
 
 #Preview("Vertical explicit hard-edge slider") {
     PreviewContainer { selection, progress in
-        ColorSlider(value: progress, onColorChange: { selection.wrappedValue = $0 }, axis: .vertical)
-            .colors([.green, .yellow, .orange, .red, .purple, .blue])
+        ColorSlider(
+            value: progress,
+            dataSource: HardEdgeSliderModel(colors: [.green, .yellow, .orange, .red, .purple, .blue]),
+            onColorChange: { selection.wrappedValue = $0 },
+            axis: .vertical
+        )
     }
 }
 
 #Preview("Horizontal hard-edge HSB spectrum slider with bend sections") {
     PreviewContainer { selection, progress in
-        ColorSlider(value: progress, onColorChange: { selection.wrappedValue = $0 }, axis: .horizontal)
-            .saturationBends {
+        let dataSource = HSBSpectrumModel(
+            saturationBends: {
                 TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
-            }
-            .brightnessBends {
+            },
+            brightnessBends: {
                 TwoWayBend(startHue: 200.0 / 360, endHue: 300.0 / 360, target: 0.4)
             }
-            .hardEdge(into: 8)
+        ).hardEdge(into: 8)
+
+        ColorSlider(
+            value: progress,
+            dataSource: dataSource,
+            onColorChange: { selection.wrappedValue = $0 },
+            axis: .horizontal
+        )
     }
 }

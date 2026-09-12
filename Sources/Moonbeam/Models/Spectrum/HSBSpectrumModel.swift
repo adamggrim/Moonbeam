@@ -3,7 +3,7 @@ import SwiftUI
 import MoonbeamShared
 
 /// Model for calculating standard HSB spectrum colors dynamically.
-internal struct HSBSpectrumModel: ColorSliderDataSource {
+public struct HSBSpectrumModel: ColorSliderDataSource {
     let startSections: [MonochromeSection]
     let endSections: [MonochromeSection]
     let startHue: Double
@@ -12,7 +12,7 @@ internal struct HSBSpectrumModel: ColorSliderDataSource {
     let brightness: Double
     let saturationBends: [BendSection]
     let brightnessBends: [BendSection]
-    let colorSource: ColorSourceProvider
+    public let colorSource: ColorSourceProvider
 
     /// Creates a dynamically generated spectrum based on the HSB (Hue,
     /// Saturation, Brightness) color space.
@@ -33,7 +33,7 @@ internal struct HSBSpectrumModel: ColorSliderDataSource {
     ///     baseline saturation increases or decreases to a `targetValue`.
     ///   - brightnessBends: A result builder providing sections where the
     ///     baseline brightness increases or decreases to a `targetValue`.
-    init(
+    public init(
         startSections: [MonochromeSection] = [],
         endSections: [MonochromeSection] = [],
         startHue: Double = 0.0,
