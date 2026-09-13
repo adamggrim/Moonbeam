@@ -22,12 +22,14 @@ import SwiftUI
             onColorChange: { selection.wrappedValue = $0 },
             axis: .vertical
         )
-        .colorSliderThumbShape(Rectangle())
-        .colorSliderPreviewShape(Circle())
-        .colorSliderCornerRadius(0)
-        .colorSliderTrackStroke(Color.white, lineWidth: 2)
-        .colorSliderThumbStroke(Color.white, lineWidth: 2)
-        .colorSliderPreviewStroke(Color.white, lineWidth: 2)
+        .colorSliderStyle(DefaultColorSliderStyle(
+            trackShape: AnyShape(Rectangle()),
+            trackStroke: ShapeStroke(style: AnyShapeStyle(.white), lineWidth: 2),
+            thumbShape: AnyShape(Rectangle()),
+            thumbStroke: ShapeStroke(style: AnyShapeStyle(.white), lineWidth: 2),
+            previewShape: AnyShape(Circle()),
+            previewStroke: ShapeStroke(style: AnyShapeStyle(.white), lineWidth: 2)
+        ))
     }
 }
 
@@ -90,7 +92,9 @@ import SwiftUI
             onColorChange: { selection.wrappedValue = $0 },
             axis: .horizontal
         )
-        .colorSliderThumbShape(Circle())
+        .colorSliderStyle(DefaultColorSliderStyle(
+            thumbShape: AnyShape(Circle())
+        ))
         .colorSliderDimensions(thumbLength: 25)
     }
 }
@@ -106,32 +110,10 @@ import SwiftUI
             onColorChange: { selection.wrappedValue = $0 },
             axis: .vertical
         )
-        .colorSliderThumbShape(Circle())
+        .colorSliderStyle(DefaultColorSliderStyle(
+            thumbShape: AnyShape(Circle())
+        ))
         .colorSliderDimensions(thumbLength: 25)
-    }
-}
-
-#Preview("Horizontal HSB spectrum slider with bottom preview") {
-    PreviewContainer { selection, progress in
-        ColorSlider(
-            value: progress,
-            dataSource: HSBSpectrumModel(),
-            onColorChange: { selection.wrappedValue = $0 },
-            axis: .horizontal
-        )
-        .colorSliderPreviewPosition(.bottomTrailing, spacing: 20)
-    }
-}
-
-#Preview("Vertical HSB spectrum slider with leading preview") {
-    PreviewContainer { selection, progress in
-        ColorSlider(
-            value: progress,
-            dataSource: HSBSpectrumModel(),
-            onColorChange: { selection.wrappedValue = $0 },
-            axis: .vertical
-        )
-        .colorSliderPreviewPosition(.topLeading)
     }
 }
 
@@ -143,6 +125,8 @@ import SwiftUI
             onColorChange: { selection.wrappedValue = $0 },
             axis: .horizontal
         )
-        .colorSliderDisableLiquidGlass(true)
+        .colorSliderStyle(DefaultColorSliderStyle(
+            disableLiquidGlass: true
+        ))
     }
 }

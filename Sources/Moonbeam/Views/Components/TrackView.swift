@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 /// An isolated view for rendering the slider background track.
@@ -6,16 +5,6 @@ internal struct TrackView: View {
     let dataSource: any ColorSliderDataSource
     let dimensions: ColorSliderDimensions
     let axis: Axis
-
-    @Environment(\.colorSliderTrackStroke) private var trackStroke
-
-    private var trackShape: AnyShape {
-        if let radius = dimensions.cornerRadius {
-            return AnyShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-        } else {
-            return AnyShape(Capsule(style: .continuous))
-        }
-    }
 
     var body: some View {
         let size = CGSize(
@@ -27,21 +16,16 @@ internal struct TrackView: View {
             switch dataSource.colorSource {
             case .array(let colors):
                 hardEdgeTrackView(colors: colors)
-                    .clipShape(trackShape)
             case .function(let colorGenerator):
-                trackShape.fill(colorGenerator(0.5))
+                Rectangle()
+                    .fill(colorGenerator(0.5))
             case .shader(let shaderGenerator, _):
-                trackShape
+                Rectangle()
                     .fill(Color.white) // Pixels for Metal to paint on.
                     .colorEffect(shaderGenerator(size, axis == .vertical))
             }
         }
         .frame(width: size.width, height: size.height)
-        .overlay {
-            if let stroke = trackStroke {
-                trackShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
-            }
-        }
     }
 
     @ViewBuilder

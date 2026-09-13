@@ -13,21 +13,6 @@ public enum PreviewPosition: Sendable, Equatable {
 
 // MARK: - Environment keys
 
-private struct ShapeStrokeKey: EnvironmentKey { static let defaultValue: ShapeStroke? = nil }
-
-private struct ThumbShapeKey: EnvironmentKey { static let defaultValue = AnyShape(Capsule(style: .continuous)) }
-private struct ThumbColorKey: EnvironmentKey { static let defaultValue: Color = .white }
-private struct ThumbStrokeKey: EnvironmentKey { static let defaultValue: ShapeStroke? = nil }
-private struct ThumbShadowKey: EnvironmentKey { static let defaultValue = ShapeShadow() }
-
-private struct PreviewShapeKey: EnvironmentKey { static let defaultValue: AnyShape? = nil }
-private struct PreviewStrokeKey: EnvironmentKey { static let defaultValue: ShapeStroke? = nil }
-private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: PreviewPosition? = nil }
-private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
-private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool = true }
-private struct PreviewShadowKey: EnvironmentKey { static let defaultValue = ShapeShadow() }
-
-private struct DisableLiquidGlassKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
 private struct DragMinimumDistanceKey: EnvironmentKey { static let defaultValue: CGFloat = 0 }
 private struct AccessibilityStepKey: EnvironmentKey {
@@ -38,69 +23,21 @@ private struct AnimationKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    var colorSliderTrackStroke: ShapeStroke? {
-        get { self[ShapeStrokeKey.self] }
-        set { self[ShapeStrokeKey.self] = newValue }
-    }
-
-    var colorSliderThumbShape: AnyShape {
-        get { self[ThumbShapeKey.self] }
-        set { self[ThumbShapeKey.self] = newValue }
-    }
-    var colorSliderThumbColor: Color {
-        get { self[ThumbColorKey.self] }
-        set { self[ThumbColorKey.self] = newValue }
-    }
-    var colorSliderThumbStroke: ShapeStroke? {
-            get { self[ThumbStrokeKey.self] }
-            set { self[ThumbStrokeKey.self] = newValue }
-        }
-    var colorSliderThumbShadow: ShapeShadow {
-        get { self[ThumbShadowKey.self] }
-        set { self[ThumbShadowKey.self] = newValue }
-    }
-
-    var colorSliderPreviewShape: AnyShape? {
-        get { self[PreviewShapeKey.self] }
-        set { self[PreviewShapeKey.self] = newValue }
-    }
-    var colorSliderPreviewStroke: ShapeStroke? {
-        get { self[PreviewStrokeKey.self] }
-        set { self[PreviewStrokeKey.self] = newValue }
-    }
-    var colorSliderPreviewPosition: PreviewPosition? {
-        get { self[PreviewPositionKey.self] }
-        set { self[PreviewPositionKey.self] = newValue }
-    }
-    var colorSliderPreviewSpacing: CGFloat? {
-        get { self[PreviewSpacingKey.self] }
-        set { self[PreviewSpacingKey.self] = newValue }
-    }
-    var colorSliderPreviewHidden: Bool {
-        get { self[PreviewHiddenKey.self] }
-        set { self[PreviewHiddenKey.self] = newValue }
-    }
-    var colorSliderPreviewShadow: ShapeShadow {
-        get { self[PreviewShadowKey.self] }
-        set { self[PreviewShadowKey.self] = newValue }
-    }
-
-    var colorSliderDisableLiquidGlass: Bool {
-        get { self[DisableLiquidGlassKey.self] }
-        set { self[DisableLiquidGlassKey.self] = newValue }
-    }
     var colorSliderDimensions: ColorSliderDimensions {
         get { self[DimensionsKey.self] }
         set { self[DimensionsKey.self] = newValue }
     }
+
     var colorSliderDragMinimumDistance: CGFloat {
         get { self[DragMinimumDistanceKey.self] }
         set { self[DragMinimumDistanceKey.self] = newValue }
     }
+
     var colorSliderAccessibilityStep: Double {
         get { self[AccessibilityStepKey.self] }
         set { self[AccessibilityStepKey.self] = newValue }
     }
+
     var colorSliderAnimation: Animation {
         get { self[AnimationKey.self] }
         set { self[AnimationKey.self] = newValue }
@@ -112,13 +49,6 @@ extension EnvironmentValues {
 public extension View {
 
     // MARK: Global modifiers
-
-    /// Set to `true` to disable the liquid glass styling on the thumb. On
-    /// operating systems that do not support Liquid Glass, this flag is ignored
-    /// and falls back to a standard filled shape. Defaults to `false`.
-    func colorSliderDisableLiquidGlass(_ disable: Bool) -> some View {
-        environment(\.colorSliderDisableLiquidGlass, disable)
-    }
 
     /// Customizes the layout dimensions of the color slider.
     func colorSliderDimensions(
