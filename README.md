@@ -62,8 +62,12 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
         onColorChange: { selectedColor = $0 },
         axis: .horizontal
     )
-    .colorSliderThumbShape(Circle())
-    .colorSliderThumbColor(.white)
+    .colorSliderStyle(
+        DefaultColorSliderStyle(
+            thumbShape: AnyShape(Circle()),
+            thumbColor: .white
+        )
+    )
     ```
 
     OKLCH spectrum:
@@ -107,7 +111,9 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
         onColorChange: { selectedColor = $0 },
         axis: .vertical
     )
-    .colorSliderThumbShape(Circle())
+    .colorSliderStyle(DefaultColorSliderStyle(
+        thumbShape: AnyShape(Circle())
+    ))
     ```
 
 ## Example (hard-edge)
@@ -167,6 +173,32 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 
 ## Customization
 
+`Moonbeam` uses an idiomatic SwiftUI styling architecture via the `ColorSliderStyle` protocol.
+
+### Styling
+Customize the appearance of any color slider by applying the `.colorSliderStyle()` modifier to a slider or its parent view.
+
+    ```swift
+    ColorSlider(value: $progress, dataSource: dataSource)
+        .colorSliderStyle(DefaultColorSliderStyle(
+            trackShape: AnyShape(Rectangle()),
+            thumbShape: AnyShape(Circle()),
+            thumbColor: .white,
+            disableLiquidGlass: true,
+            previewHidden: false
+    ))
+    ```
+
+To build a custom layout, create a struct that conforms to the `ColorSliderStyle` protocol.
+
+### Layout and animation modifiers
+* `.colorSliderDimensions(length:thickness:thumbThickness:thumbLength:previewSize:previewOffset:)`
+* `.colorSliderAnimation(\_:)`
+* `.colorSliderDragMinimumDistance`
+* `.colorSliderAccessibilityStep(\_:)`
+
+## Customization
+
 `Moonbeam` uses SwiftUI environment values for slider styling. Apply these to a single `ColorSlider` or parent view.
 
 ### Slider
@@ -190,7 +222,6 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 ### Thumb and preview shadows
 * `.colorSliderThumbShadow(color:radius:x:y:)`
 * `.colorSliderPreviewShadow(color:radius:x:y:)`
-
 ## Structure
 
 <details>
@@ -200,12 +231,12 @@ This example demonstrates how to create a hard-edge slider with discrete color b
 Moonbeam/
 └── Sources/
   ├── Moonbeam/
-  │ ├── Environment/
-  │ │ ├── ColorSliderDefaults.swift: Global default metrics and constant values
-  │ │ ├── ColorSliderDimensions.swift: Layout dimensions and geometry definitions for sliders
-  │ │ ├── ColorSliderViewModifiers.swift: SwiftUI environment keys and global view modifiers
-  │ │ └── ShapeModifiers.swift: Shared types and modifiers for styling component shapes
-  │ ├── Models/
+  |-- Environment/
+  | |-- ColorSliderDefaults.swift: Global default metrics and constant values
+  | |-- ColorSliderDimensions.swift: Layout dimensions and geometry definitions for sliders
+  | |-- ColorSliderViewModifiers.swift: Layout-oriented SwiftUI environment keys
+  | |-- ShapeModifiers.swift: Shared shadow and stroke types for component shapes
+  |-- Models/
   │ │ ├── Gradient/
   │ │ │ └── GradientSliderModel.swift: Data source model for linear color gradient calculations
   │ │ ├── HardEdge/
@@ -215,15 +246,19 @@ Moonbeam/
   │ │ │ ├── OKLCHSpectrumModel.swift: Dynamic generator for perceptually uniform OKLCH spectrums
   │ │ │ ├── SpectrumComponents.swift: Definitions for monochrome colors and custom bend sections
   │ │ │ ├── SpectrumGenerator.swift: Core pure-Swift fallback logic for spectrum generation
-  │ │ │ └── SpectrumSliderModel.swift: Utilities, validations, and Metal data encoders for spectrums
+  │ │ │ └── SpectrumSliderModel.swift: Utilities, validations and Metal data encoders for spectrums
   │ │ ├── ColorSliderDataSource.swift: Protocols and enums defining data sources and rendering methods
-  │ │ ├── ColorSpaceConverter.swift: Mathematical conversions between OKLCH, OKLAB, and RGB
+  │ │ ├── ColorSpaceConverter.swift: Mathematical conversions between OKLCH, OKLAB and RGB
   │ │ └── DataSourceFactory.swift: Factory for resolving the correct data source from configurations
   │ ├── Shaders/
   │ │ └── ColorSliderShaders.metal: Metal shaders for hardware-accelerated gradient and spectrum rendering
-  │ ├── State/
-  │ │ └── ColorSliderState.swift: State manager handling layout math, gestures, and value clamping
-  │ └── Views/
+  |-- State/
+  | |-- ColorSliderState.swift: State manager handling layout math, gestures and value clamping
+  |-- Styles/
+  | |-- ColorSliderStyle.swift: Core protocol and type-erased wrapper for styling architecture
+  | |-- ColorSliderStyleConfiguration.swift: Exposes slider state and internal views to styles
+  | |-- DefaultColorSliderStyle.swift: The standard, customizable ZStack layout implementation
+  |-- Views/
   │   ├── Components/
   │   │ ├── ColorPreviewView.swift: Floating visual preview of the currently selected color
   │   │ ├── ThumbView.swift: Draggable thumb handle for the slider interface
