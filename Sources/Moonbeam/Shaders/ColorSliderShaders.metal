@@ -326,7 +326,12 @@ half4 spectrumShader(
                     half startingBrightness = select(0.0h, 1.0h, isWhiteSection == 1.0f);
                     half endingBrightness = select(0.0h, 1.0h, nextSectionIsWhite == 1.0f);
                     float brightnessDelta = endingBrightness - startingBrightness;
-                    float smoothProgress = nextSectionIsCubic > 0.5 ? smoothstep(0.0, 1.0, relativePositionInSection) : relativePositionInSection;
+                    float smoothProgress;
+                    if (nextSectionIsCubic > 0.5f) {
+                        smoothProgress = smoothstep(0.0f, 1.0f, relativePositionInSection);
+                    } else {
+                        smoothProgress = relativePositionInSection;
+                    }
                     float interpolatedBrightness = startingBrightness + brightnessDelta * smoothProgress;
                     return half4(
                         half3(resolveColor(colorSpaceFlag, minimumHue, 0.0, interpolatedBrightness))
@@ -443,7 +448,12 @@ half4 spectrumShader(
                 half startingBrightness = select(0.0h, 1.0h, previousSectionIsWhite == 1.0f);
                 half endingBrightness = select(0.0h, 1.0h, isWhiteSection == 1.0f);
                 float brightnessDelta = endingBrightness - startingBrightness;
-                float smoothProgress = isCubic > 0.5 ? smoothstep(0.0, 1.0, relativePositionInSection) : relativePositionInSection;
+                float smoothProgress;
+                if (isCubic > 0.5f) {
+                    smoothProgress = smoothstep(0.0f, 1.0f, relativePositionInSection);
+                } else {
+                    smoothProgress = relativePositionInSection;
+                }
                 float interpolatedBrightness = startingBrightness + brightnessDelta * smoothProgress;
                 return half4(
                     half3(resolveColor(colorSpaceFlag, maximumHue, 0.0, interpolatedBrightness))
