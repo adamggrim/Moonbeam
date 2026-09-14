@@ -2,7 +2,7 @@ import SwiftUI
 
 /// An isolated view for rendering the slider background track.
 internal struct TrackView: View {
-    let dataSource: any ColorSliderDataSource
+    let colorProvider: any ColorProvider
     let dimensions: ColorSliderDimensions
     let axis: Axis
     @Environment(\.controlSize) private var controlSize
@@ -15,7 +15,7 @@ internal struct TrackView: View {
         )
 
         Group {
-            switch dataSource.colorSource {
+            switch colorProvider.colorSource {
             case .array(let colors):
                 hardEdgeTrackView(colors: colors)
             case .function(let colorGenerator):

@@ -4,7 +4,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            dataSource: HardEdgeSliderModel(colors: [.green, .yellow, .orange, .red, .purple, .blue]),
+            colorProvider: HardEdgeColors(colors: [.green, .yellow, .orange, .red, .purple, .blue]),
             onColorChange: { selection.wrappedValue = $0 },
             axis: .horizontal
         )
@@ -15,7 +15,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            dataSource: HardEdgeSliderModel(colors: [.green, .yellow, .orange, .red, .purple, .blue]),
+            colorProvider: HardEdgeColors(colors: [.green, .yellow, .orange, .red, .purple, .blue]),
             onColorChange: { selection.wrappedValue = $0 },
             axis: .vertical
         )
@@ -24,7 +24,7 @@ import SwiftUI
 
 #Preview("Horizontal hard-edge HSB spectrum slider with bend sections") {
     PreviewContainer { selection, progress in
-        let dataSource = HSBSpectrumModel(
+        let colorProvider = HSBSpectrum(
             saturationBends: {
                 TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
             },
@@ -35,7 +35,7 @@ import SwiftUI
 
         ColorSlider(
             value: progress,
-            dataSource: dataSource,
+            colorProvider: colorProvider,
             onColorChange: { selection.wrappedValue = $0 },
             axis: .horizontal
         )

@@ -8,8 +8,8 @@ public enum GradientColorSpace: Sendable {
     case rgb, oklab, oklch
 }
 
-/// Model for calculating gradient colors on demand.
-public struct GradientSliderModel: ColorSliderDataSource {
+/// Color provider for calculating gradient colors on demand.
+public struct ColorGradient: ColorProvider {
     /// The starting color of the gradient.
     public let startColor: Color
 
@@ -20,7 +20,7 @@ public struct GradientSliderModel: ColorSliderDataSource {
     /// and ending colors.
     public let colorSpace: GradientColorSpace
 
-    public let colorSource: ColorSourceProvider
+    public let colorSource: ColorSource
 
     public init(startColor: Color, endColor: Color, colorSpace: GradientColorSpace = .rgb) {
         self.startColor = startColor

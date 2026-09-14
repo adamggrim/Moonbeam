@@ -3,7 +3,7 @@ import Testing
 import Foundation
 import MoonbeamShared
 
-@Suite struct SpectrumSliderModelTests {
+@Suite struct SpectrumCoreTests {
     @Test("Shader data encoding mapping to C-struct")
     func shaderDataEncoding() {
         let startSections: [MonochromeSection] = [BlackSection(weight: 0.2)]

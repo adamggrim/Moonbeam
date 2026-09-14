@@ -13,12 +13,12 @@ public enum SpectrumColorSpace: Sendable {
 
 // MARK: - Constants and validation
 
-fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "SpectrumModel")
+fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "Spectrum")
 
 /// A lightweight wrapper for telemetry and non-fatal production logging.
 public enum MoonbeamTelemetry {
     private static let loggerStorage = OSAllocatedUnfairLock(
-        initialState: Logger(subsystem: "com.moonbeam", category: "SpectrumModel")
+        initialState: Logger(subsystem: "com.moonbeam", category: "Spectrum")
     )
 
     @MainActor

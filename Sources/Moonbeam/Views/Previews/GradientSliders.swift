@@ -4,7 +4,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            dataSource: GradientSliderModel(startColor: .orange, endColor: .blue, colorSpace: .rgb),
+            colorProvider: ColorGradient(startColor: .orange, endColor: .blue, colorSpace: .rgb),
             onColorChange: { selection.wrappedValue = $0 },
             axis: .horizontal
         )
@@ -15,7 +15,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            dataSource: GradientSliderModel(startColor: .blue, endColor: .red, colorSpace: .oklab),
+            colorProvider: ColorGradient(startColor: .blue, endColor: .red, colorSpace: .oklab),
             onColorChange: { selection.wrappedValue = $0 },
             axis: .horizontal
         )
@@ -26,7 +26,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            dataSource: GradientSliderModel(startColor: .purple, endColor: .white, colorSpace: .oklch),
+            colorProvider: ColorGradient(startColor: .purple, endColor: .white, colorSpace: .oklch),
             onColorChange: { selection.wrappedValue = $0 },
             axis: .horizontal
         )
@@ -37,7 +37,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            dataSource: GradientSliderModel(startColor: .green, endColor: .yellow),
+            colorProvider: ColorGradient(startColor: .green, endColor: .yellow),
             onColorChange: { selection.wrappedValue = $0 },
             axis: .horizontal
         )

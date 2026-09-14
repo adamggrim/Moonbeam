@@ -2,12 +2,12 @@ import Testing
 @testable import Moonbeam
 import SwiftUI
 
-@Suite struct GradientSliderModelTests {
+@Suite struct ColorGradientTests {
     @Test("Gradient interpolation resolving to a valid color")
     func gradientInterpolation() {
-        let model = GradientSliderModel(startColor: .black, endColor: .white, colorSpace: .rgb)
+        let gradient = ColorGradient(startColor: .black, endColor: .white, colorSpace: .rgb)
 
-        guard case .shader(_, let fallback) = model.colorSource else {
+        guard case .shader(_, let fallback) = gradient.colorSource else {
             Issue.record("Expected shader color source with a pure-Swift fallback.")
             return
         }
@@ -20,9 +20,9 @@ import SwiftUI
 
     @Test("Property-based gradient interpolation across random bounds")
     func gradientInterpolationProperties() {
-        let model = GradientSliderModel(startColor: .black, endColor: .white, colorSpace: .rgb)
+        let gradient = ColorGradient(startColor: .black, endColor: .white, colorSpace: .rgb)
 
-        guard case .shader(_, let fallback) = model.colorSource else {
+        guard case .shader(_, let fallback) = gradient.colorSource else {
             Issue.record("Expected shader color source with a pure-Swift fallback.")
             return
         }

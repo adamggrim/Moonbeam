@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Represents whether the colors are defined by an array, a function or a Metal
 /// shader.
-public enum ColorSourceProvider: Sendable {
+public enum ColorSource: Sendable {
     /// Provides colors as a precomputed array.
     ///
     /// Designed for hard-edge color sliders.
@@ -20,29 +20,29 @@ public enum ColorSourceProvider: Sendable {
     ) -> Shader, fallback: @Sendable (_ position: Double) -> Color)
 }
 
-/// Protocol shared by `SpectrumSliderModel`, `GradientSliderModel` and `HardEdgeSliderModel`.
-public protocol ColorSliderDataSource: Sendable {
+/// Protocol shared by `SpectrumColorProvider`, `ColorGradient` and `HardEdgeColors`.
+public protocol ColorProvider: Sendable {
 
     /// Determines how the slider track is drawn on screen.
-    var colorSource: ColorSourceProvider { get }
+    var colorSource: ColorSource { get }
 
     /// Resolves a descriptive color name for VoiceOver.
     func accessibilityColorName(for value: Double) -> String?
 }
 
-public extension ColorSliderDataSource {
+public extension ColorProvider {
     /// A default that returns `nil` to indicate the data source does not
     /// provide color names.
     func accessibilityColorName(for value: Double) -> String? { return nil }
 
     /// Converts a continuous color slider into a hard-edge slider with discrete
     /// color blocks.
-    func hardEdge(into steps: Int) -> HardEdgeSliderModel {
-        guard steps > 1 else { return HardEdgeSliderModel(colors: []) }
+    func hardEdge(into steps: Int) -> HardEdgeColors {
+        guard steps > 1 else { return HardEdgeColors(colors: []) }
 
         switch self.colorSource {
         case .array(let colors):
-            return HardEdgeSliderModel(colors: colors)
+            return HardEdgeColors(colors: colors)
 
         case .function(let colorGenerator), .shader(_, let colorGenerator):
             let generatedColors = (0..<steps).map { i in
@@ -51,7 +51,7 @@ public extension ColorSliderDataSource {
                 let position = (Double(i) + 0.5) / Double(steps)
                 return colorGenerator(position)
             }
-            return HardEdgeSliderModel(colors: generatedColors)
+            return HardEdgeColors(colors: generatedColors)
         }
     }
 }

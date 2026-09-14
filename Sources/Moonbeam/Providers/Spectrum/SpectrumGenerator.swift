@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A model for generating a spectrum color for a given position, suitable for
+/// A utility for generating a spectrum color for a given position, suitable for
 /// shaders.
 internal struct SpectrumGenerator {
 
@@ -8,8 +8,8 @@ internal struct SpectrumGenerator {
 
     /// Calculates the color at a specific normalized position on the spectrum.
     ///
-    /// This function re-implements the logic from `HSBSpectrumModel` and
-    /// `OKLCHSpectrumModel` to calculate a single color on-demand without
+    /// This function re-implements the logic from `HSBSpectrum` and
+    /// `OKLCHSpectrum` to calculate a single color on-demand without
     /// pre-generating an array, providing a pure-Swift fallback for floating
     /// color previews or wherever Metal shaders are unavailable.
     ///

@@ -2,8 +2,8 @@ import SwiftUI
 
 import MoonbeamShared
 
-/// Model for calculating standard HSB spectrum colors dynamically.
-public struct HSBSpectrumModel: ColorSliderDataSource {
+/// Color provider for calculating standard HSB spectrum colors dynamically.
+public struct HSBSpectrum: ColorProvider {
     let startSections: [MonochromeSection]
     let endSections: [MonochromeSection]
     let startHue: Double
@@ -12,7 +12,7 @@ public struct HSBSpectrumModel: ColorSliderDataSource {
     let brightness: Double
     let saturationBends: [BendSection]
     let brightnessBends: [BendSection]
-    public let colorSource: ColorSourceProvider
+    public let colorSource: ColorSource
 
     public func accessibilityColorName(for value: Double) -> String? {
         guard let comps = SpectrumGenerator.components(
