@@ -28,7 +28,7 @@ internal struct AnyColorSliderStyle: ColorSliderStyle, @unchecked Sendable {
     /// - Parameter style: The underlying custom style to erase.
     init<S: ColorSliderStyle>(_ style: S) {
         self._makeBody = { configuration in
-            AnyView(style.makeBody(configuration: configuration))
+            AnyView(StyleResolver(style: style, configuration: configuration))
         }
     }
 
@@ -36,6 +36,15 @@ internal struct AnyColorSliderStyle: ColorSliderStyle, @unchecked Sendable {
     @MainActor
     func makeBody(configuration: Configuration) -> some View {
         _makeBody(configuration)
+    }
+}
+
+private struct StyleResolver<S: ColorSliderStyle>: View {
+    let style: S
+    let configuration: S.Configuration
+
+    var body: some View {
+        style.makeBody(configuration: configuration)
     }
 }
 

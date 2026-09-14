@@ -34,22 +34,19 @@ public struct ColorSliderStyleConfiguration {
 
     /// A view representing the track of the color slider.
     public struct Track: View {
-        private let content: AnyView
-        internal init<V: View>(_ content: V) { self.content = AnyView(content) }
-        public var body: some View { content }
+        public let body: AnyView
+        internal init<V: View>(_ content: V) { self.body = AnyView(content) }
     }
 
     /// A view representing the draggable thumb for the color slider.
     public struct Thumb: View {
-        private let content: AnyView
-        internal init<V: View>(_ content: V) { self.content = AnyView(content) }
-        public var body: some View { content }
+        public let body: AnyView
+        internal init<V: View>(_ content: V) { self.body = AnyView(content) }
     }
 
     /// A view representing the floating color preview for the color slider.
     public struct Preview: View {
-        private let content: AnyView
-        internal init<V: View>(_ content: V) { self.content = AnyView(content) }
-        public var body: some View { content }
+        public let body: AnyView
+        internal init<V: View>(_ content: V) { self.body = AnyView(content) }
     }
 }
