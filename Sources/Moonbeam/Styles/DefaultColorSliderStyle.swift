@@ -99,6 +99,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
                     }
                 }
                 .offset(configuration.thumbOffset)
+                .hoverEffect()
 
             configuration.preview
                 .clipShape(resolvedPreviewShape)
@@ -119,6 +120,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
                 )
                 .opacity((previewHidden && !configuration.isDragging) ? 0.0 : 1.0)
                 .offset(configuration.previewOffset)
+                .allowsHitTesting(false)
         }
     }
 
