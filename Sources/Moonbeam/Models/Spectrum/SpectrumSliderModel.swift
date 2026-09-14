@@ -21,7 +21,8 @@ public enum MoonbeamTelemetry {
         initialState: Logger(subsystem: "com.moonbeam", category: "SpectrumModel")
     )
 
-    nonisolated(unsafe) private static let errorSubject = PassthroughSubject<String, Never>()
+    @MainActor
+    private static let errorSubject = PassthroughSubject<String, Never>()
 
     public static var logger: Logger {
         get { loggerStorage.withLock { $0 } }
@@ -29,13 +30,16 @@ public enum MoonbeamTelemetry {
     }
 
     /// A publisher that emits non-fatal errors for consuming apps.
+    @MainActor
     public static var nonFatalErrors: AnyPublisher<String, Never> {
         errorSubject.eraseToAnyPublisher()
     }
 
     internal static func reportNonFatalError(_ message: String) {
         logger.error("Moonbeam configuration error: \(message, privacy: .public)")
-        errorSubject.send(message)
+        Task { @MainActor in
+            errorSubject.send(message)
+        }
     }
 }
 
