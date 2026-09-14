@@ -99,7 +99,9 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
                     }
                 }
                 .offset(configuration.thumbOffset)
+#if !os(macOS)
                 .hoverEffect()
+#endif
 
             configuration.preview
                 .clipShape(resolvedPreviewShape)
