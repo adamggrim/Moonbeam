@@ -21,8 +21,26 @@ private struct AccessibilityStepKey: EnvironmentKey {
 private struct AnimationKey: EnvironmentKey {
     static let defaultValue: Animation = .easeInOut(duration: ColorSliderDefaults.animationDuration)
 }
+private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: PreviewPosition? = nil }
+private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
+private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool = true }
 
 extension EnvironmentValues {
+    var colorSliderPreviewPosition: PreviewPosition? {
+        get { self[PreviewPositionKey.self] }
+        set { self[PreviewPositionKey.self] = newValue }
+    }
+
+    var colorSliderPreviewSpacing: CGFloat? {
+        get { self[PreviewSpacingKey.self] }
+        set { self[PreviewSpacingKey.self] = newValue }
+    }
+
+    var colorSliderPreviewHidden: Bool {
+        get { self[PreviewHiddenKey.self] }
+        set { self[PreviewHiddenKey.self] = newValue }
+    }
+
     var colorSliderDimensions: ColorSliderDimensions {
         get { self[DimensionsKey.self] }
         set { self[DimensionsKey.self] = newValue }
@@ -54,18 +72,22 @@ public extension View {
     func colorSliderDimensions(
         length: CGFloat? = nil,
         thickness: CGFloat? = nil,
+        cornerRadius: CGFloat? = nil,
         thumbThickness: CGFloat? = nil,
         thumbLength: CGFloat? = nil,
         previewSize: CGFloat? = nil,
-        previewOffset: CGFloat? = nil
+        previewOffset: CGFloat? = nil,
+        scaleRatio: CGFloat = ColorSliderDefaults.scaleRatio
     ) -> some View {
         let dimensions = ColorSliderDimensions(
             length: length,
             thickness: thickness,
+            cornerRadius: cornerRadius,
             thumbThickness: thumbThickness,
             thumbLength: thumbLength,
             previewSize: previewSize,
-            previewOffset: previewOffset
+            previewOffset: previewOffset,
+            scaleRatio: scaleRatio
         )
         return environment(\.colorSliderDimensions, dimensions)
     }
@@ -84,6 +106,18 @@ public extension View {
 
     /// Sets the animation used when the drag gesture starts and ends.
     func colorSliderAnimation(_ animation: Animation) -> some View {
-        environment(\.colorSliderAnimation, animation)
+            environment(\.colorSliderAnimation, animation)
+        }
+
+    /// Customizes the position and spacing of the floating color preview.
+    func colorSliderPreviewPosition(_ position: PreviewPosition, spacing: CGFloat? = nil) -> some View {
+        self
+            .environment(\.colorSliderPreviewPosition, position)
+            .environment(\.colorSliderPreviewSpacing, spacing)
+    }
+
+    /// Controls the visibility of the floating color preview when the slider is inactive.
+    func colorSliderPreviewHidden(_ hidden: Bool) -> some View {
+        environment(\.colorSliderPreviewHidden, hidden)
     }
 }

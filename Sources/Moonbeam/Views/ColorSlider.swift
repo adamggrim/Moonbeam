@@ -37,6 +37,9 @@ public struct ColorSlider<Source: ColorSliderDataSource>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorSliderAccessibilityStep) private var accessibilityStep
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.colorSliderPreviewPosition) private var previewPosition
+    @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
+    @Environment(\.colorSliderPreviewHidden) private var previewHidden
 
     // MARK: - Public properties
 
@@ -188,9 +191,9 @@ public struct ColorSlider<Source: ColorSliderDataSource>: View {
                         dimensions: resolvedDimensions,
                         axis: axis,
                         controlSize: controlSize,
-                        previewPosition: nil,
-                        previewSpacing: nil,
-                        previewHidden: true
+                        previewPosition: previewPosition,
+                        previewSpacing: previewSpacing,
+                        previewHidden: previewHidden
                     )
 
                     let initialTrackPosition = CGFloat(value) * sliderState.resolvedLength
