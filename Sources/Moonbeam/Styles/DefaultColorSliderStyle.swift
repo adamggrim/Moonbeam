@@ -21,6 +21,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     public var previewShadow: ShapeShadow
 
     @Environment(\.colorSliderDimensions) private var dimensions
+    @Environment(\.controlSize) private var controlSize
 
     // MARK: - Initialization
 
@@ -70,13 +71,17 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
                         if #available(iOS 26.0, macOS 26.0, *) { return !disableLiquidGlass }
                         return false
                     }()
-                    let dynamicScale: CGFloat = (configuration.isDragging && enableThumbScale) ? ColorSliderDefaults.dragScaleMultiplier : 1.0
+                    let dynamicScale: CGFloat = (configuration.isDragging && enableThumbScale)
+                        ? ColorSliderDefaults.dragScaleMultiplier
+                        : 1.0
 
                     Group {
 #if compiler(>=6.2)
                         if #available(iOS 26.0, macOS 26.0, *), !disableLiquidGlass {
                             Color.clear
-                                .glassEffect(configuration.isDragging ? .regular.interactive(true) : .identity, in: shape)
+                                .glassEffect(
+                                    configuration.isDragging ? .regular.interactive(true) : .identity, in: shape
+                                )
                                 .overlay(shape.fill(thumbColor).opacity(configuration.isDragging ? 0.0 : 1.0))
                         } else {
                             shape.fill(thumbColor)
@@ -102,8 +107,16 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
                         resolvedPreviewShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
                     }
                 }
-                .shadow(color: previewShadow.color, radius: previewShadow.radius, x: previewShadow.x, y: previewShadow.y)
-                .scaleEffect((previewHidden && !configuration.isDragging) ? dimensions.scaleRatio : 1.0, anchor: configuration.previewScaleAnchor)
+                .shadow(
+                    color: previewShadow.color,
+                    radius: previewShadow.radius,
+                    x: previewShadow.x,
+                    y: previewShadow.y
+                )
+                .scaleEffect(
+                    (previewHidden && !configuration.isDragging) ? dimensions.scaleRatio : 1.0,
+                    anchor: configuration.previewScaleAnchor
+                )
                 .opacity((previewHidden && !configuration.isDragging) ? 0.0 : 1.0)
                 .offset(configuration.previewOffset)
         }
@@ -122,7 +135,10 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
 
     private var resolvedPreviewShape: AnyShape {
         if let shape = previewShape { return shape }
-        return AnyShape(RoundedRectangle(cornerRadius: dimensions.previewCornerRadius, style: .continuous))
+        let size = dimensions.previewSize ?? ColorSliderDefaults.previewSize(for: controlSize)
+        return AnyShape(
+            RoundedRectangle(cornerRadius: size * ColorSliderDefaults.cornerRadiusMultiplier, style: .continuous)
+        )
     }
 }
 

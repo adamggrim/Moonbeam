@@ -4,10 +4,12 @@ import SwiftUI
 internal struct ColorPreviewView: View {
     let currentColor: Color
     let dimensions: ColorSliderDimensions
+    @Environment(\.controlSize) private var controlSize
 
     var body: some View {
+        let size = dimensions.previewSize ?? ColorSliderDefaults.previewSize(for: controlSize)
         Rectangle()
             .foregroundColor(currentColor)
-            .frame(width: dimensions.previewSize, height: dimensions.previewSize)
+            .frame(width: size, height: size)
     }
 }

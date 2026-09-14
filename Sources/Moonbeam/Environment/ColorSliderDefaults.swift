@@ -1,10 +1,40 @@
-import CoreGraphics
+import SwiftUI
 
 /// Global default metrics for  color sliders.
 public enum ColorSliderDefaults {
-    public static let trackThickness: CGFloat = 24.0
-    public static let previewSize: CGFloat = 60.0
-    public static let previewOffset: CGFloat = 70.0
+    public static func trackThickness(for controlSize: ControlSize) -> CGFloat {
+        switch controlSize {
+        case .mini: return 12.0
+        case .small: return 16.0
+        case .regular: return 24.0
+        case .large: return 32.0
+        case .extraLarge: return 40.0
+        @unknown default: return 24.0
+        }
+    }
+
+    public static func previewSize(for controlSize: ControlSize) -> CGFloat {
+        switch controlSize {
+        case .mini: return 32.0
+        case .small: return 44.0
+        case .regular: return 60.0
+        case .large: return 80.0
+        case .extraLarge: return 100.0
+        @unknown default: return 60.0
+        }
+    }
+
+    public static func previewOffset(for controlSize: ControlSize) -> CGFloat {
+        switch controlSize {
+        case .mini: return 40.0
+        case .small: return 52.0
+        case .regular: return 70.0
+        case .large: return 94.0
+        case .extraLarge: return 118.0
+        @unknown default: return 70.0
+        }
+    }
+
     public static let cornerRadiusMultiplier: CGFloat = 0.225
     public static let scaleRatio: CGFloat = 0.25
     public static let dragScaleMultiplier: CGFloat = 1.1

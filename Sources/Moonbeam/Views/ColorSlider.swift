@@ -31,6 +31,7 @@ public struct ColorSlider<Source: ColorSliderDataSource>: View {
 
     @Environment(\.colorSliderStyle) private var style
     @Environment(\.colorSliderDimensions) private var dimensions
+    @Environment(\.controlSize) private var controlSize
     @Environment(\.colorSliderDragMinimumDistance) private var minimumDragDistance
     @Environment(\.colorSliderAnimation) private var animation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -186,6 +187,7 @@ public struct ColorSlider<Source: ColorSliderDataSource>: View {
                     sliderState.update(
                         dimensions: resolvedDimensions,
                         axis: axis,
+                        controlSize: controlSize,
                         previewPosition: nil,
                         previewSpacing: nil,
                         previewHidden: true
@@ -227,6 +229,16 @@ public struct ColorSlider<Source: ColorSliderDataSource>: View {
                     }
                 }
                 .onChange(of: axis) { _, new in sliderState.axis = new }
+                .onChange(of: controlSize) { _, newSize in
+                    sliderState.controlSize = newSize
+                    if !sliderState.isDragging {
+                        let newTrackPosition = CGFloat(value) * sliderState.resolvedLength
+                        sliderState.persistedThumbPosition = min(
+                            max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
+                            sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
+                        )
+                    }
+                }
                 .onChange(of: value) { _, newValue in
                     if !sliderState.isDragging {
                         let newTrackPosition = CGFloat(newValue) * sliderState.resolvedLength

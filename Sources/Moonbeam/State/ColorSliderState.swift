@@ -8,6 +8,7 @@ internal struct ColorSliderState {
 
     var dimensions: ColorSliderDimensions = ColorSliderDimensions()
     var axis: Axis = .horizontal
+    var controlSize: ControlSize = .regular
     var previewPosition: PreviewPosition? = nil
     var previewSpacing: CGFloat? = nil
     var previewHidden: Bool = true
@@ -20,19 +21,20 @@ internal struct ColorSliderState {
     mutating func update(
         dimensions: ColorSliderDimensions,
         axis: Axis,
+        controlSize: ControlSize,
         previewPosition: PreviewPosition?,
         previewSpacing: CGFloat?,
         previewHidden: Bool
     ) {
         self.dimensions = dimensions
         self.axis = axis
+        self.controlSize = controlSize
         self.previewPosition = previewPosition
         self.previewSpacing = previewSpacing
         self.previewHidden = previewHidden
     }
 
     // MARK: - State
-
     /// Indicates whether a drag gesture is currently active.
     var isDragging: Bool = false
 
@@ -52,15 +54,18 @@ internal struct ColorSliderState {
 
     var resolvedLength: CGFloat { dimensions.length ?? 0 }
 
-    var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? dimensions.thickness }
-    var resolvedThumbLength: CGFloat { dimensions.thumbLength ?? dimensions.thickness * 2 }
+    var resolvedTrackThickness: CGFloat { dimensions.thickness ?? ColorSliderDefaults.trackThickness(for: controlSize) }
+    var resolvedPreviewSize: CGFloat { dimensions.previewSize ?? ColorSliderDefaults.previewSize(for: controlSize) }
+
+    var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? resolvedTrackThickness }
+    var resolvedThumbLength: CGFloat { dimensions.thumbLength ?? resolvedTrackThickness * 2 }
 
     var resolvedPreviewOffset: CGFloat {
-        let fallbackOffset = abs(dimensions.previewOffset ?? ColorSliderDefaults.previewOffset)
+        let fallbackOffset = abs(dimensions.previewOffset ?? ColorSliderDefaults.previewOffset(for: controlSize))
 
         let spacingOffset: CGFloat
         if let spacing = previewSpacing {
-            spacingOffset = (dimensions.thickness / 2) + (dimensions.previewSize / 2) + abs(spacing)
+            spacingOffset = (resolvedTrackThickness / 2) + (resolvedPreviewSize / 2) + abs(spacing)
         } else {
             spacingOffset = fallbackOffset
         }
@@ -72,8 +77,7 @@ internal struct ColorSliderState {
 
     /// Inset to adjust the left and right bounds of the thumb if it is thinner
     /// than the track.
-    var thumbInset: CGFloat { (dimensions.thickness - resolvedThumbThickness) / 2 }
-
+    var thumbInset: CGFloat { (resolvedTrackThickness - resolvedThumbThickness) / 2 }
     /// The current `liveContainerDrag` combined with the
     /// `persistedThumbPosition`. Equivalent to the main-axis position of the
     /// thumb's leading edge during a `DragGesture`.
@@ -104,7 +108,7 @@ internal struct ColorSliderState {
     /// Except at the ends of the slider, the floating color preview is centered
     /// above the thumb's center.
     var previewMainAxisOffset: CGFloat {
-        let halfPreviewSize = dimensions.previewSize / 2
+        let halfPreviewSize = resolvedPreviewSize / 2
         let leftBound = halfPreviewSize - halfThumbThickness
         let rightBound = resolvedLength - halfPreviewSize - halfThumbThickness
         let clampedValue = min(max(liveThumbPosition, leftBound), rightBound)
@@ -117,7 +121,7 @@ internal struct ColorSliderState {
     /// The preview always animates out of and back into the slider thumb.
     var previewScaleAnchor: UnitPoint {
         let halfThumbOffset = thumbOffset + halfThumbThickness
-        let relativeMainAxis = (halfThumbOffset - previewMainAxisOffset) / dimensions.previewSize
+        let relativeMainAxis = (halfThumbOffset - previewMainAxisOffset) / resolvedPreviewSize
 
         let crossAxisLimit = resolvedPreviewOffset > 0 ? 0.0 : 1.0
 

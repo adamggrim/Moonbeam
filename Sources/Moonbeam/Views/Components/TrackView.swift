@@ -5,11 +5,13 @@ internal struct TrackView: View {
     let dataSource: any ColorSliderDataSource
     let dimensions: ColorSliderDimensions
     let axis: Axis
+    @Environment(\.controlSize) private var controlSize
 
     var body: some View {
+        let thickness = dimensions.thickness ?? ColorSliderDefaults.trackThickness(for: controlSize)
         let size = CGSize(
-            width: axis == .horizontal ? (dimensions.length ?? 0) : dimensions.thickness,
-            height: axis == .horizontal ? dimensions.thickness : (dimensions.length ?? 0)
+            width: axis == .horizontal ? (dimensions.length ?? 0) : thickness,
+            height: axis == .horizontal ? thickness : (dimensions.length ?? 0)
         )
 
         Group {
