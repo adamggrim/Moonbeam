@@ -256,7 +256,14 @@ public struct ColorSlider<Source: ColorSliderDataSource>: View {
                 }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityValue(value.formatted(.percent))
+        .accessibilityValue({
+            let percentage = value.formatted(.percent)
+            if let colorName = dataSource.accessibilityColorName(for: value) {
+                let format = String(localized: "color_slider_value_format", defaultValue: "%1$@ at %2$@")
+                return Text(String(format: format, colorName, percentage))
+            }
+            return Text(percentage)
+        }())
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
         .frame(

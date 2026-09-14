@@ -14,6 +14,28 @@ public struct HSBSpectrumModel: ColorSliderDataSource {
     let brightnessBends: [BendSection]
     public let colorSource: ColorSourceProvider
 
+    public func accessibilityColorName(for value: Double) -> String? {
+        guard let comps = SpectrumGenerator.components(
+            at: value,
+            startSections: startSections,
+            endSections: endSections,
+            startHue: startHue,
+            endHue: endHue,
+            primaryValue: saturation,
+            secondaryValue: brightness,
+            colorSpace: .hsb,
+            primaryBends: saturationBends,
+            secondaryBends: brightnessBends
+        ) else { return nil }
+
+        return ColorNameResolver.name(
+            hue: comps.hue,
+            primary: comps.primary,
+            secondary: comps.secondary,
+            colorSpace: .hsb
+        )
+    }
+
     /// Creates a dynamically generated spectrum based on the HSB (Hue,
     /// Saturation, Brightness) color space.
     ///

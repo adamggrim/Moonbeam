@@ -45,13 +45,37 @@ internal struct SpectrumGenerator {
         primaryBends: [BendSection]?,
         secondaryBends: [BendSection]?
     ) -> Color {
+        guard let comps = components(
+            at: position, startSections: startSections, endSections: endSections,
+            startHue: startHue, endHue: endHue, primaryValue: primaryValue,
+            secondaryValue: secondaryValue, colorSpace: colorSpace,
+            primaryBends: primaryBends, secondaryBends: secondaryBends
+        ) else { return .clear }
 
+        return colorSpace == .oklch
+            ? ColorSpaceConverter.oklchToColor(lightness: comps.secondary, chroma: comps.primary, hue: comps.hue)
+            : Color(hue: comps.hue, saturation: comps.primary, brightness: comps.secondary)
+    }
+
+    /// Exposes the raw components of the spectrum before final color conversion.
+    static func components(
+        at position: CGFloat,
+        startSections: [MonochromeSection],
+        endSections: [MonochromeSection],
+        startHue: Double,
+        endHue: Double,
+        primaryValue: Double,
+        secondaryValue: Double,
+        colorSpace: SpectrumColorSpace,
+        primaryBends: [BendSection]?,
+        secondaryBends: [BendSection]?
+    ) -> (hue: Double, primary: Double, secondary: Double)? {
         let startWeight = startSections.reduce(0) { $0 + $1.weight }
         let hueWeight = abs(endHue - startHue)
         let endWeight = endSections.reduce(0) { $0 + $1.weight }
         let totalWeight = startWeight + hueWeight + endWeight
 
-        guard totalWeight > 0 else { return .clear }
+        guard totalWeight > 0 else { return nil }
 
         let startBoundary = startWeight / totalWeight
         let hueBoundary = (startWeight + hueWeight) / totalWeight
@@ -106,9 +130,7 @@ internal struct SpectrumGenerator {
                 minHue: startHue
             )
 
-            return colorSpace == .oklch
-            ? ColorSpaceConverter.oklchToColor(lightness: secondary, chroma: primary, hue: currentHue)
-            : Color(hue: currentHue, saturation: primary, brightness: secondary)
+            return (hue: currentHue, primary: primary, secondary: secondary)
         } else {
             var cumulativeEnd = hueBoundary
             for (index, section) in endSections.enumerated() {
@@ -141,7 +163,7 @@ internal struct SpectrumGenerator {
                 cumulativeEnd = sectionEnd
             }
         }
-        return .clear
+        return nil
     }
 
     // MARK: - Private helpers
@@ -157,7 +179,7 @@ internal struct SpectrumGenerator {
         colorSpace: SpectrumColorSpace,
         primaryBends: [BendSection]?,
         secondaryBends: [BendSection]?
-    ) -> Color {
+    ) -> (hue: Double, primary: Double, secondary: Double) {
         let hue = isStart ? startHue : endHue
         let linearFactor = isStart ? relativePosition : (1.0 - relativePosition)
 
@@ -194,18 +216,14 @@ internal struct SpectrumGenerator {
         case .black:
             let finalSecondaryValue = interpolationFactor * (isStart ? startTargetSecondary : endTargetSecondary)
             let finalPrimaryValue = isStart ? startTargetPrimary : endTargetPrimary
-            return colorSpace == .oklch
-            ? ColorSpaceConverter.oklchToColor(lightness: finalSecondaryValue, chroma: finalPrimaryValue, hue: hue)
-            : Color(hue: hue, saturation: finalPrimaryValue, brightness: finalSecondaryValue)
+            return (hue: hue, primary: finalPrimaryValue, secondary: finalSecondaryValue)
         case .white:
             let finalPrimaryValue = interpolationFactor * (isStart ? startTargetPrimary : endTargetPrimary)
             let finalTargetSecondary = isStart ? startTargetSecondary : endTargetSecondary
             let finalSecondaryValue = colorSpace == .oklch
                 ? 1.0 - (interpolationFactor * (1.0 - finalTargetSecondary))
                 : finalTargetSecondary
-            return colorSpace == .oklch
-            ? ColorSpaceConverter.oklchToColor(lightness: finalSecondaryValue, chroma: finalPrimaryValue, hue: hue)
-            : Color(hue: hue, saturation: finalPrimaryValue, brightness: finalSecondaryValue)
+            return (hue: hue, primary: finalPrimaryValue, secondary: finalSecondaryValue)
         }
     }
 
@@ -215,7 +233,7 @@ internal struct SpectrumGenerator {
         fromSection: MonochromeSection,
         toSection: MonochromeSection,
         hue: CGFloat
-    ) -> Color {
+    ) -> (hue: Double, primary: Double, secondary: Double) {
         let startBrightness: CGFloat = (fromSection.color == .white) ? 1.0 : 0.0
         let endBrightness: CGFloat = (toSection.color == .white) ? 1.0 : 0.0
 
@@ -228,7 +246,7 @@ internal struct SpectrumGenerator {
         }
 
         let brightness = startBrightness + (endBrightness - startBrightness) * curveProgress
-        return ColorSpaceConverter.oklchToColor(lightness: brightness, chroma: 0.0, hue: hue)
+        return (hue: hue, primary: 0.0, secondary: brightness)
     }
 
     private static func calculateBendValue(
@@ -276,5 +294,61 @@ internal struct SpectrumGenerator {
             return defaultValue - (valueDelta * smoothProgress)
         }
         return defaultValue
+    }
+}
+
+/// Mapping utility that returns color names based on  hue and intensity values.
+internal struct ColorNameResolver {
+    static func name(hue: Double, primary: Double, secondary: Double, colorSpace: SpectrumColorSpace) -> String {
+        let h = hue.truncatingRemainder(dividingBy: 1.0)
+        let degrees = (h < 0 ? h + 1.0 : h) * 360.0
+
+        let isGray: Bool
+        let isDark: Bool
+        let isPale: Bool
+        let isVibrant: Bool
+
+        if colorSpace == .oklch {
+            isGray = primary < 0.02
+            isDark = secondary < 0.35
+            isPale = secondary > 0.8 && primary < 0.1
+            isVibrant = primary > 0.15
+        } else {
+            isGray = primary < 0.05
+            isDark = secondary < 0.3
+            isPale = secondary > 0.8 && primary < 0.5
+            isVibrant = primary > 0.8
+        }
+
+        if isGray {
+            if secondary < 0.15 { return String(localized: "black") }
+            if secondary > 0.85 { return String(localized: "white") }
+            return String(localized: "gray")
+        }
+
+        let baseName: String
+        switch degrees {
+        case 0..<25: baseName = String(localized: "red")
+        case 25..<60: baseName = String(localized: "orange")
+        case 60..<110: baseName = String(localized: "yellow")
+        case 110..<160: baseName = String(localized: "green")
+        case 160..<210: baseName = String(localized: "cyan")
+        case 210..<280: baseName = String(localized: "blue")
+        case 280..<330: baseName = String(localized: "purple")
+        default: baseName = String(localized: "pink")
+        }
+
+        let adjective: String? = {
+            if isDark { return String(localized: "dark") }
+            if isPale { return String(localized: "pale") }
+            if isVibrant { return String(localized: "vibrant") }
+            return nil
+        }()
+
+        if let adj = adjective {
+            let format = String(localized: "color_name_format", defaultValue: "%1$@ %2$@")
+            return String(format: format, adj, baseName)
+        }
+        return baseName
     }
 }

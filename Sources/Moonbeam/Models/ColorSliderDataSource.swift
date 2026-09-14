@@ -25,9 +25,16 @@ public protocol ColorSliderDataSource: Sendable {
 
     /// Determines how the slider track is drawn on screen.
     var colorSource: ColorSourceProvider { get }
+
+    /// Resolves a descriptive color name for VoiceOver.
+    func accessibilityColorName(for value: Double) -> String?
 }
 
 public extension ColorSliderDataSource {
+    /// A default that returns `nil` to indicate the data source does not
+    /// provide color names.
+    func accessibilityColorName(for value: Double) -> String? { return nil }
+
     /// Converts a continuous color slider into a hard-edge slider with discrete
     /// color blocks.
     func hardEdge(into steps: Int) -> HardEdgeSliderModel {

@@ -14,6 +14,28 @@ public struct OKLCHSpectrumModel: ColorSliderDataSource {
     let chromaBends: [BendSection]
     public let colorSource: ColorSourceProvider
 
+    public func accessibilityColorName(for value: Double) -> String? {
+        guard let comps = SpectrumGenerator.components(
+            at: value,
+            startSections: startSections,
+            endSections: endSections,
+            startHue: startHue,
+            endHue: endHue,
+            primaryValue: chroma,
+            secondaryValue: lightness,
+            colorSpace: .oklch,
+            primaryBends: chromaBends,
+            secondaryBends: lightnessBends
+        ) else { return nil }
+
+        return ColorNameResolver.name(
+            hue: comps.hue,
+            primary: comps.primary,
+            secondary: comps.secondary,
+            colorSpace: .oklch
+        )
+    }
+
     /// Creates a dynamically generated spectrum based on the perceptually
     /// uniform OKLCH color space.
     ///
