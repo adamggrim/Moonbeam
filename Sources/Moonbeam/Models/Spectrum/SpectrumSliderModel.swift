@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import simd
 import os
+@preconcurrency import Combine
 
 import MoonbeamShared
 
@@ -20,13 +21,21 @@ public enum MoonbeamTelemetry {
         initialState: Logger(subsystem: "com.moonbeam", category: "SpectrumModel")
     )
 
+    nonisolated(unsafe) private static let errorSubject = PassthroughSubject<String, Never>()
+
     public static var logger: Logger {
         get { loggerStorage.withLock { $0 } }
         set { loggerStorage.withLock { $0 = newValue } }
     }
 
-    internal static func reportNonFatalIssue(_ message: String) {
+    /// A publisher that emits non-fatal errors for consuming apps.
+    public static var nonFatalErrors: AnyPublisher<String, Never> {
+        errorSubject.eraseToAnyPublisher()
+    }
+
+    internal static func reportNonFatalError(_ message: String) {
         logger.error("Moonbeam configuration error: \(message, privacy: .public)")
+        errorSubject.send(message)
     }
 }
 
@@ -62,7 +71,7 @@ internal func validateBends(_ bends: [BendSection], name: String) -> [BendSectio
         if !hasOverlap {
             validBends.append(bend)
         } else {
-            MoonbeamTelemetry.reportNonFatalIssue(
+            MoonbeamTelemetry.reportNonFatalError(
                 "Moonbeam: \(name) contains overlapping bend sections. Bend sections after the first will not appear."
             )
         }
@@ -78,7 +87,8 @@ internal func validateMonochromeSections(
 
     precondition(
         sections.count <= maxSections,
-        "Moonbeam: \(name) monochrome sections exceed the maximum of \(maxSections). You provided \(sections.count)."
+        "Moonbeam: \(name) monochrome sections exceeds the maximum of \(maxSections). \(sections.count) monochrome " +
+        "sections provided."
     )
 
     return sections
