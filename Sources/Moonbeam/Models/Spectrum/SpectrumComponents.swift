@@ -20,7 +20,7 @@ public protocol MonochromeSection: Sendable {
 
     /// The number of monochrome steps added to the hue section (each equal in
     /// width to a single hue).
-    var weight: CGFloat { get }
+    var weight: Double { get }
 
     /// The mathematical easing curve applied to the monochrome section.
     var easing: Easing { get }
@@ -30,24 +30,24 @@ public protocol MonochromeSection: Sendable {
 public extension MonochromeSection {
     /// The default proportionate width of a monochrome step (1/6th of a
     /// standard hue).
-    static var defaultWeight: CGFloat { 1.0 / 6.0 }
+    static var defaultWeight: Double { 1.0 / 6.0 }
 }
 
 /// A protocol for a section of the color slider with special conditions for
 /// saturation, brightness, lightness or chroma.
 public protocol BendSection: Sendable {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
-    var startHue: CGFloat { get }
+    var startHue: Double { get }
 
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
-    var endHue: CGFloat { get }
+    var endHue: Double { get }
 
     /// The saturation, brightness, lightness or chroma value where the bend
     /// peaks.
-    var targetValue: CGFloat { get }
+    var targetValue: Double { get }
 
     /// The difference between the start and end hues.
-    var hueCount: CGFloat { get }
+    var hueCount: Double { get }
 
     /// The mathematical easing curve applied to the bend section.
     var easing: Easing { get }
@@ -56,7 +56,7 @@ public protocol BendSection: Sendable {
 public extension BendSection {
     /// Helper to calculate the shortest distance between two hues in a
     /// wraparound (circular) hue range.
-    static func calculateHueCount(start: CGFloat, end: CGFloat) -> CGFloat {
+    static func calculateHueCount(start: Double, end: Double) -> Double {
         let diff = abs(end - start)
         return diff > 0.5 ? 1.0 - diff : diff
     }
@@ -76,13 +76,13 @@ public struct BendSectionBuilder {
 /// A spectrum section that resolves to pure black.
 public struct BlackSection: MonochromeSection {
     public let color: MonochromeColor = .black
-    public let weight: CGFloat
+    public let weight: Double
     public let easing: Easing
 
     /// Initializes a black section.
     ///   - Parameter weight: The proportionate width of the section relative
     ///     to a single hue.
-    public init(weight: CGFloat = Self.defaultWeight, easing: Easing = .cubic) {
+    public init(weight: Double = Self.defaultWeight, easing: Easing = .cubic) {
         self.weight = weight
         self.easing = easing
     }
@@ -90,13 +90,13 @@ public struct BlackSection: MonochromeSection {
 
 public struct WhiteSection: MonochromeSection {
     public let color: MonochromeColor = .white
-    public let weight: CGFloat
+    public let weight: Double
     public let easing: Easing
 
     /// Initializes a white section.
     /// - Parameter weight: The proportionate width of the section relative to
     ///   a single hue.
-    public init(weight: CGFloat = Self.defaultWeight, easing: Easing = .cubic) {
+    public init(weight: Double = Self.defaultWeight, easing: Easing = .cubic) {
         self.weight = weight
         self.easing = easing
     }
@@ -107,22 +107,22 @@ public struct WhiteSection: MonochromeSection {
 /// A bend section that fades into the start or end of a color slider.
 public struct OneWayBend: BendSection {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
-    public let startHue: CGFloat
+    public let startHue: Double
 
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
-    public let endHue: CGFloat
+    public let endHue: Double
 
     /// The saturation, brightness, lightness or chroma value where the
     /// bend peaks.
-    public let targetValue: CGFloat
+    public let targetValue: Double
 
     /// The difference between the start and end hues.
-    public let hueCount: CGFloat
+    public let hueCount: Double
 
     /// The mathematical easing curve applied to the bend section.
     public let easing: Easing
 
-    public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat, easing: Easing = .cubic) {
+    public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .cubic) {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target
@@ -134,22 +134,22 @@ public struct OneWayBend: BendSection {
 /// A bend section that occurs in the middle of a color slider.
 public struct TwoWayBend: BendSection {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
-    public let startHue: CGFloat
+    public let startHue: Double
 
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
-    public let endHue: CGFloat
+    public let endHue: Double
 
     /// The saturation, brightness, lightness or chroma value where the bend
     /// peaks.
-    public let targetValue: CGFloat
+    public let targetValue: Double
 
     /// The difference between the start and end hues.
-    public let hueCount: CGFloat
+    public let hueCount: Double
 
     /// The mathematical easing curve applied to the bend section.
     public let easing: Easing
 
-    public init(startHue: CGFloat, endHue: CGFloat, target: CGFloat, easing: Easing = .cubic) {
+    public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .cubic) {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target

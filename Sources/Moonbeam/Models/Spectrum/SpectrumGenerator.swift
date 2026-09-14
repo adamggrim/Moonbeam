@@ -34,7 +34,7 @@ internal struct SpectrumGenerator {
     /// - Returns: A `SwiftUI.Color` representing the computed color at the
     ///   provided position.
     static func color(
-        at position: CGFloat,
+        at position: Double,
         startSections: [MonochromeSection],
         endSections: [MonochromeSection],
         startHue: Double,
@@ -59,7 +59,7 @@ internal struct SpectrumGenerator {
 
     /// Exposes the raw components of the spectrum before final color conversion.
     static func components(
-        at position: CGFloat,
+        at position: Double,
         startSections: [MonochromeSection],
         endSections: [MonochromeSection],
         startHue: Double,
@@ -79,10 +79,10 @@ internal struct SpectrumGenerator {
 
         let startBoundary = startWeight / totalWeight
         let hueBoundary = (startWeight + hueWeight) / totalWeight
-        let clampedPosition = max(0.0, min(1.0, position))
+                let clampedPosition = max(0.0, min(1.0, position))
 
         if clampedPosition < startBoundary {
-            var cumulativeStart: CGFloat = 0.0
+            var cumulativeStart: Double = 0.0
             for (index, section) in startSections.enumerated() {
                 let sectionEnd = cumulativeStart + (section.weight / totalWeight)
                 if clampedPosition < sectionEnd {
@@ -169,7 +169,7 @@ internal struct SpectrumGenerator {
     // MARK: - Private helpers
 
     private static func monochromeToHueColor(
-        relativePosition: CGFloat,
+        relativePosition: Double,
         isStart: Bool,
         monochromeSection: MonochromeSection,
         startHue: Double,
@@ -183,7 +183,7 @@ internal struct SpectrumGenerator {
         let hue = isStart ? startHue : endHue
         let linearFactor = isStart ? relativePosition : (1.0 - relativePosition)
 
-        let interpolationFactor: CGFloat
+        let interpolationFactor: Double
         switch monochromeSection.easing {
         case .linear:
             interpolationFactor = linearFactor
@@ -229,15 +229,15 @@ internal struct SpectrumGenerator {
 
     /// Generates a smooth gradient between two monochrome sections.
     private static func monochromeToMonochromeColor(
-        relativePosition: CGFloat,
+        relativePosition: Double,
         fromSection: MonochromeSection,
         toSection: MonochromeSection,
-        hue: CGFloat
+        hue: Double
     ) -> (hue: Double, primary: Double, secondary: Double) {
-        let startBrightness: CGFloat = (fromSection.color == .white) ? 1.0 : 0.0
-        let endBrightness: CGFloat = (toSection.color == .white) ? 1.0 : 0.0
+        let startBrightness: Double = (fromSection.color == .white) ? 1.0 : 0.0
+        let endBrightness: Double = (toSection.color == .white) ? 1.0 : 0.0
 
-        let curveProgress: CGFloat
+        let curveProgress: Double
         switch toSection.easing {
         case .linear:
             curveProgress = relativePosition
@@ -250,11 +250,11 @@ internal struct SpectrumGenerator {
     }
 
     private static func calculateBendValue(
-        hue: CGFloat,
-        defaultValue: CGFloat,
+        hue: Double,
+        defaultValue: Double,
         bendSections: [BendSection]?,
         minHue: Double
-    ) -> CGFloat {
+    ) -> Double {
         guard let bends = bendSections,
               let bend = bends.first(where: {
                   min($0.startHue, $0.endHue) <= hue && hue <= max($0.startHue, $0.endHue)
@@ -268,7 +268,7 @@ internal struct SpectrumGenerator {
 
         if let oneWay = bend as? OneWayBend {
             let position = oneWay.hueCount != 0 ? (offset / oneWay.hueCount) : 0
-            let curveProgress: CGFloat
+            let curveProgress: Double
             switch oneWay.easing {
             case .linear:
                 curveProgress = position
@@ -284,7 +284,7 @@ internal struct SpectrumGenerator {
         } else if let twoWay = bend as? TwoWayBend {
             let position = (hue - twoWay.startHue) / twoWay.hueCount
             let linearProgress = 1.0 - abs(position * 2.0 - 1.0)
-            let smoothProgress: CGFloat
+            let smoothProgress: Double
             switch twoWay.easing {
             case .linear:
                 smoothProgress = linearProgress
