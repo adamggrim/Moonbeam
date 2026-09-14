@@ -19,11 +19,11 @@ public struct ColorSlider<Source: ColorProvider>: View {
     /// This is the slider's single source of truth.
     @Binding public var value: Double
 
+    /// The color output of the slider.
+    @Binding public var color: Color
+
     /// The data source driving the slider's colors.
     public var colorProvider: Source
-
-    /// An optional closure that emits the computed color.
-    public var onColorChange: ((Color) -> Void)?
 
     @State private var sliderState = ColorSliderState()
 
@@ -71,15 +71,15 @@ public struct ColorSlider<Source: ColorProvider>: View {
     ///     a drag gesture. Defaults to `true`.
     public init(
         value: Binding<Double>,
+        color: Binding<Color>,
         colorProvider: Source,
-        onColorChange: ((Color) -> Void)? = nil,
         label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal,
         isContinuous: Bool = true
     ) {
         self._value = value
+        self._color = color
         self.colorProvider = colorProvider
-        self.onColorChange = onColorChange
         self.label = label
         self.axis = axis
         self.isContinuous = isContinuous
@@ -203,9 +203,7 @@ public struct ColorSlider<Source: ColorProvider>: View {
                         sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
                     )
 
-                    if let onColorChange {
-                        onColorChange(calculatedColor)
-                    }
+                    self.color = calculatedColor
                 }
                 .onChange(of: dimensions) { _, newDimensions in
                     var updated = newDimensions
@@ -252,7 +250,7 @@ public struct ColorSlider<Source: ColorProvider>: View {
                                 sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
                             )
                         }
-                        onColorChange?(calculatedColor)
+                        self.color = calculatedColor
                     }
                 }
         }
@@ -304,13 +302,13 @@ public struct ColorSlider<Source: ColorProvider>: View {
         self.value = newProgress
 
         if isContinuous {
-            onColorChange?(calculatedColor)
+            self.color = calculatedColor
         }
     }
 
     private func onDragEnded(_: DragGesture.Value) {
         if !isContinuous {
-            onColorChange?(calculatedColor)
+            self.color = calculatedColor
         }
         withAnimation(reduceMotion ? nil : animation) {
             sliderState.finalizeDrag()
@@ -325,7 +323,7 @@ public struct ColorSlider<Source: ColorProvider>: View {
             step: accessibilityStep
         )
         self.value = mutableProgress
-        onColorChange?(calculatedColor)
+        self.color = calculatedColor
     }
 }
 
@@ -334,7 +332,7 @@ public extension ColorSlider where Source == HSBSpectrum {
     ///
     /// - Parameters:
     ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
-    ///   - onColorChange: An optional closure to receive the generated color.
+    ///   - color: A binding to the slider's color output.
     ///   - label: A localized string key used for VoiceOver accessibility.
     ///     Defaults to "Color Slider".
     ///   - axis: The layout orientation of the slider. Defaults to
@@ -343,15 +341,15 @@ public extension ColorSlider where Source == HSBSpectrum {
     ///     a drag gesture. Defaults to `true`.
     init(
         value: Binding<Double>,
-        onColorChange: ((Color) -> Void)? = nil,
+        color: Binding<Color>,
         label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal,
         isContinuous: Bool = true
     ) {
         self.init(
             value: value,
+            color: color,
             colorProvider: HSBSpectrum(),
-            onColorChange: onColorChange,
             label: label,
             axis: axis,
             isContinuous: isContinuous
