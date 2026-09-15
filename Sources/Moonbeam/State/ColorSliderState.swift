@@ -1,62 +1,21 @@
 import SwiftUI
 
-/// A state structure that isolates layout mathematics, `DragGesture` processing and state
-/// normalization away from the `ColorSlider` view.
-internal struct ColorSliderState {
-
-    // MARK: - Injected configuration
-
-    var dimensions: ColorSliderDimensions = ColorSliderDimensions()
-    var axis: Axis = .horizontal
-    var controlSize: ControlSize = .regular
-    var previewPosition: PreviewPosition? = nil
-    var previewSpacing: CGFloat? = nil
-
-    /// Updates the state structure with the latest environment properties from the view.
-    ///
-    /// The `ColorSlider` view must explicitly push these properties to
-    /// `ColorSliderState` via this method during `onAppear` and `onChange`
-    /// events.
-    mutating func update(
-        dimensions: ColorSliderDimensions,
-        axis: Axis,
-        controlSize: ControlSize,
-        previewPosition: PreviewPosition?,
-        previewSpacing: CGFloat?
-    ) {
-        self.dimensions = dimensions
-        self.axis = axis
-        self.controlSize = controlSize
-        self.previewPosition = previewPosition
-        self.previewSpacing = previewSpacing
-    }
-
-    // MARK: - State
-    /// Indicates whether a drag gesture is currently active.
-    var isDragging: Bool = false
-
-    ///  The current main-axis drag within the parent container view, equivalent
-    ///  to the `value.translation.width` of the `DragGesture`.
-    ///
-    ///  Can extend beyond the end of the slider.
-    var liveContainerDrag: CGFloat = .zero
-
-    /// The persisted main-axis position of the start of the thumb on the
-    /// slider.
-    ///
-    /// Cannot extend beyond the thumb's leading edge at the end of the slider.
-    var persistedThumbPosition: CGFloat = .zero
-
-    // MARK: - Layout calculations
+/// A structure that isolates layout mathematics and state normalization away
+/// from the `ColorSlider` view.
+internal struct ColorSliderLayout {
+    let state: ColorSliderState
+    let value: Double
+    let dimensions: ColorSliderDimensions
+    let axis: Axis
+    let controlSize: ControlSize
+    let previewPosition: PreviewPosition?
+    let previewSpacing: CGFloat?
 
     var resolvedLength: CGFloat { dimensions.length ?? 0 }
-
-    var resolvedTrackThickness: CGFloat { dimensions.thickness ?? ColorSliderDefaults.trackThickness(for: controlSize) }
+    var resolvedTrackThickness: CGFloat { dimensions.resolvedTrackThickness(for: controlSize) }
     var resolvedPreviewSize: CGFloat { dimensions.previewSize ?? ColorSliderDefaults.previewSize(for: controlSize) }
-
     var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? resolvedTrackThickness }
-    var resolvedThumbLength: CGFloat { dimensions.thumbLength ?? resolvedTrackThickness * 2 }
-
+    var resolvedThumbLength: CGFloat { dimensions.resolvedThumbLength(for: controlSize) }
     var resolvedPreviewOffset: CGFloat {
         let fallbackOffset = abs(dimensions.previewOffset ?? ColorSliderDefaults.previewOffset(for: controlSize))
 
@@ -69,18 +28,21 @@ internal struct ColorSliderState {
 
         return previewPosition == .bottomTrailing ? spacingOffset : -spacingOffset
     }
-
     var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
 
     /// Inset to adjust the left and right bounds of the thumb if it is thinner
     /// than the track.
     var thumbInset: CGFloat { (resolvedTrackThickness - resolvedThumbThickness) / 2 }
-    /// The current `liveContainerDrag` combined with the
-    /// `persistedThumbPosition`. Equivalent to the main-axis position of the
-    /// thumb's leading edge during a `DragGesture`.
-    ///
-    /// Like `liveContainerDrag`, can extend beyond the end of the slider.
-    var liveContainerThumbDrag: CGFloat { persistedThumbPosition + liveContainerDrag }
+
+    var liveContainerThumbDrag: CGFloat {
+        let baseValue = state.isDragging ? (state.dragStartValue ?? value) : value
+        let trackPosition = CGFloat(baseValue) * resolvedLength
+        let baseThumbPosition = min(
+            max(trackPosition - halfThumbThickness, thumbInset),
+            resolvedLength - resolvedThumbThickness - thumbInset
+        )
+        return state.isDragging ? baseThumbPosition + state.liveContainerDrag : baseThumbPosition
+    }
 
     /// The clamped main-axis position of the current selected color on the
     /// slider.
@@ -133,35 +95,25 @@ internal struct ColorSliderState {
     var thumbOffset: CGFloat {
         min(max(liveThumbPosition, thumbInset), resolvedLength - resolvedThumbThickness - thumbInset)
     }
+}
 
-    // MARK: - Mutating actions
+/// A state structure that isolates the drag gesture properties.
+internal struct ColorSliderState {
+    var isDragging: Bool = false
+    var dragStartValue: Double? = nil
+    var liveContainerDrag: CGFloat = .zero
 
-    mutating func updateDrag(translation: CGFloat) {
-        isDragging = true
+    mutating func updateDrag(translation: CGFloat, currentValue: Double) {
+        if !isDragging {
+            isDragging = true
+            dragStartValue = currentValue
+        }
         liveContainerDrag = translation
     }
 
     mutating func finalizeDrag() {
         isDragging = false
-        persistedThumbPosition = liveThumbPosition
-        liveContainerDrag = .zero
-    }
-
-    /// Adjusts the slider by a specific percentage step (for VoiceOver).
-    mutating func accessibilityAdjust(
-        direction: AccessibilityAdjustmentDirection,
-        progress: inout Double,
-        step: Double
-    ) {
-        let delta = direction == .increment ? step : -step
-        let newProgress = min(max(progress + delta, 0.0), 1.0)
-        progress = newProgress
-
-        let newTrackPosition = CGFloat(newProgress) * resolvedLength
-        persistedThumbPosition = min(
-            max(newTrackPosition - halfThumbThickness, thumbInset),
-            resolvedLength - resolvedThumbThickness - thumbInset
-        )
+        dragStartValue = nil
         liveContainerDrag = .zero
     }
 }

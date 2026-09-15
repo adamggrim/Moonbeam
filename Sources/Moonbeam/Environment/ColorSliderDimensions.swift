@@ -31,6 +31,24 @@ public struct ColorSliderDimensions: Sendable, Equatable {
     public var previewOffset: CGFloat? = nil
 
     /// The scale of the floating color preview when it is hidden and not
-    /// actively being dragged.
+        /// actively being dragged.
     public var scaleRatio: CGFloat = ColorSliderDefaults.scaleRatio
+
+    /// Calculates the effective track thickness, falling back to the control
+    /// size default if there is no provided thickness.
+    ///
+    /// - Parameter controlSize: The active control size from the environment.
+    /// - Returns: The resolved track thickness in points.
+    internal func resolvedTrackThickness(for controlSize: ControlSize) -> CGFloat {
+        thickness ?? ColorSliderDefaults.trackThickness(for: controlSize)
+    }
+
+    /// Calculates the effective thumb length, falling back to twice the
+    /// resolved track thickness if there is no provided length.
+    ///
+    /// - Parameter controlSize: The active control size from the environment.
+    /// - Returns: The resolved thumb length in points.
+    internal func resolvedThumbLength(for controlSize: ControlSize) -> CGFloat {
+        thumbLength ?? (resolvedTrackThickness(for: controlSize) * 2)
+    }
 }

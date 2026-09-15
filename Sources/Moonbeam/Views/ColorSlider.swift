@@ -89,9 +89,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     }
 
     /// The color calculated from the current `liveColorPosition` on the slider.
-    private var calculatedColor: Color {
-        let nonZeroLength = sliderState.resolvedLength > 0 ? sliderState.resolvedLength : 0.001
-        let clampedRatio = max(0.0, min(1.0, sliderState.liveColorPosition / nonZeroLength))
+        private func calculatedColor(layout: ColorSliderLayout) -> Color {
+        let nonZeroLength = layout.resolvedLength > 0 ? layout.resolvedLength : 0.001
+        let clampedRatio = max(0.0, min(1.0, layout.liveColorPosition / nonZeroLength))
         switch colorProvider.colorSource {
         case .array(let colors):
             guard !colors.isEmpty else { return .clear }
@@ -107,15 +107,15 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
 
     /// Calculates the discrete index of the slider (used to trigger haptics on
     /// hard-edge sliders).
-    private var discreteIndex: Int? {
+    private func discreteIndex(layout: ColorSliderLayout) -> Int? {
         let source = colorProvider.colorSource
 
         switch source {
         case .array(let colors) where !colors.isEmpty:
-            let length: CGFloat = sliderState.resolvedLength
+            let length: CGFloat = layout.resolvedLength
             let nonZeroLength: CGFloat = length > 0 ? length : 0.001
 
-            let position: CGFloat = sliderState.liveColorPosition
+            let position: CGFloat = layout.liveColorPosition
             let rawRatio: CGFloat = position / nonZeroLength
             let clampedRatio: CGFloat = max(0.0, min(1.0, rawRatio))
 
@@ -141,16 +141,26 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 return d
             }()
 
-            let thumbXOffset: CGFloat = axis == .horizontal ? sliderState.thumbOffset : 0
-            let thumbYOffset: CGFloat = axis == .horizontal ? 0 : -sliderState.thumbOffset
+            let layout = ColorSliderLayout(
+                state: sliderState,
+                value: value,
+                dimensions: resolvedDimensions,
+                axis: axis,
+                controlSize: controlSize,
+                previewPosition: previewPosition,
+                previewSpacing: previewSpacing
+            )
+
+            let thumbXOffset: CGFloat = axis == .horizontal ? layout.thumbOffset : 0
+            let thumbYOffset: CGFloat = axis == .horizontal ? 0 : -layout.thumbOffset
 
             let previewXOffset: CGFloat = axis == .horizontal
-                ? sliderState.previewMainAxisOffset
-                : sliderState.resolvedPreviewOffset
+                ? layout.previewMainAxisOffset
+                : layout.resolvedPreviewOffset
 
             let previewYOffset: CGFloat = axis == .horizontal
-                ? sliderState.resolvedPreviewOffset
-                : -sliderState.previewMainAxisOffset
+                ? layout.resolvedPreviewOffset
+                : -layout.previewMainAxisOffset
 
             let configuration = ColorSliderStyleConfiguration(
                 value: value,
@@ -158,7 +168,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 axis: axis,
                 thumbOffset: CGSize(width: thumbXOffset, height: thumbYOffset),
                 previewOffset: CGSize(width: previewXOffset, height: previewYOffset),
-                previewScaleAnchor: sliderState.previewScaleAnchor,
+                previewScaleAnchor: layout.previewScaleAnchor,
                 track: ColorSliderStyleConfiguration.Track(
                     TrackView(
                         colorProvider: colorProvider,
@@ -169,8 +179,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 thumb: ColorSliderStyleConfiguration.Thumb(
                     ThumbView(
                         axis: axis,
-                        resolvedThumbThickness: sliderState.resolvedThumbThickness,
-                        resolvedThumbLength: sliderState.resolvedThumbLength
+                        resolvedThumbThickness: layout.resolvedThumbThickness,
+                        resolvedThumbLength: layout.resolvedThumbLength
                     )
                 ),
                 preview: ColorSliderStyleConfiguration.Preview(
@@ -179,7 +189,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                             preview
                         } else if Preview.self == ColorPreviewView.self {
                             ColorPreviewView(
-                                currentColor: calculatedColor,
+                                currentColor: calculatedColor(layout: layout),
                                 dimensions: resolvedDimensions
                             )
                         }
@@ -188,77 +198,30 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             )
 
             style.makeBody(configuration: configuration)
+                .animation(sliderState.isDragging || reduceMotion ? nil : animation, value: value)
                 .gesture(
                     DragGesture(minimumDistance: minimumDragDistance)
-                        .onChanged(onDragChanged)
-                        .onEnded(onDragEnded)
+                        .onChanged { onDragChanged($0, layout: layout) }
+                        .onEnded { onDragEnded($0, layout: layout) }
                 )
                 .opacity(isEnabled ? 1.0 : 0.5)
                 .grayscale(isEnabled ? 0.0 : 0.99)
-                .sensoryFeedback(.selection, trigger: discreteIndex)
+                .sensoryFeedback(.selection, trigger: discreteIndex(layout: layout))
                 .onAppear {
-                    sliderState.update(
-                        dimensions: resolvedDimensions,
-                        axis: axis,
-                        controlSize: controlSize,
-                        previewPosition: previewPosition,
-                        previewSpacing: previewSpacing
-                    )
-
-                    let initialTrackPosition = CGFloat(value) * sliderState.resolvedLength
-                    sliderState.persistedThumbPosition = min(
-                        max(initialTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
-                        sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
-                    )
-
-                    self.color = calculatedColor
-                }
-                .onChange(of: dimensions) { _, newDimensions in
-                    var updated = newDimensions
-                    updated.length = updated.length ?? dynamicLength
-                    sliderState.dimensions = updated
-                    if !sliderState.isDragging {
-                        let newTrackPosition = CGFloat(value) * sliderState.resolvedLength
-                        sliderState.persistedThumbPosition = min(
-                            max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
-                            sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
-                        )
-                    }
-                }
-                .onChange(of: proxy.size) { _, newSize in
-                    let newLength = axis == .horizontal ? newSize.width : newSize.height
-                    var updated = dimensions
-                    updated.length = dimensions.length ?? newLength
-                    sliderState.dimensions = updated
-                    if !sliderState.isDragging {
-                        let newTrackPosition = CGFloat(value) * sliderState.resolvedLength
-                        sliderState.persistedThumbPosition = min(
-                            max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
-                            sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
-                        )
-                    }
-                }
-                .onChange(of: axis) { _, new in sliderState.axis = new }
-                .onChange(of: controlSize) { _, newSize in
-                    sliderState.controlSize = newSize
-                    if !sliderState.isDragging {
-                        let newTrackPosition = CGFloat(value) * sliderState.resolvedLength
-                        sliderState.persistedThumbPosition = min(
-                            max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
-                            sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
-                        )
-                    }
+                    self.color = calculatedColor(layout: layout)
                 }
                 .onChange(of: value) { _, newValue in
                     if !sliderState.isDragging {
-                        let newTrackPosition = CGFloat(newValue) * sliderState.resolvedLength
-                        withAnimation(reduceMotion ? nil : animation) {
-                            sliderState.persistedThumbPosition = min(
-                                max(newTrackPosition - sliderState.halfThumbThickness, sliderState.thumbInset),
-                                sliderState.resolvedLength - sliderState.resolvedThumbThickness - sliderState.thumbInset
-                            )
-                        }
-                        self.color = calculatedColor
+                        let newLayout = ColorSliderLayout(
+                            state: sliderState,
+                            value: newValue,
+                            dimensions: resolvedDimensions,
+                            axis: axis,
+                            controlSize: controlSize,
+                            previewPosition: previewPosition,
+                            previewSpacing: previewSpacing
+                        )
+                        self.color = calculatedColor(layout: newLayout)
                     }
                 }
         }
@@ -274,8 +237,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
         .frame(
-            width: axis == .vertical ? sliderState.resolvedThumbLength : dimensions.length,
-            height: axis == .horizontal ? sliderState.resolvedThumbLength : dimensions.length
+            width: axis == .vertical ? dimensions.resolvedThumbLength(for: controlSize) : dimensions.length,
+            height: axis == .horizontal ? dimensions.resolvedThumbLength(for: controlSize) : dimensions.length
         )
         .frame(
             maxWidth: axis == .horizontal && dimensions.length == nil ? .infinity : nil,
@@ -291,32 +254,53 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     /// Called continuously while the user is dragging the thumb. Calculates
     /// `liveContainerThumbDrag`, `liveColorPosition` and `liveThumbPosition`.
     ///
-    /// - Parameter dragValue: The current value of the `DragGesture`.
-    private func onDragChanged(_ dragValue: DragGesture.Value) {
+    /// - Parameters:
+    ///   - dragValue: The current value of the `DragGesture`.
+    ///   - layout: The layout context describing the dimensions of the active render pass.
+    private func onDragChanged(_ dragValue: DragGesture.Value, layout: ColorSliderLayout) {
         let translation = axis == .horizontal ? dragValue.translation.width : -dragValue.translation.height
 
         if !sliderState.isDragging {
             withAnimation(reduceMotion ? nil : animation) { sliderState.isDragging = true }
         }
 
-        sliderState.updateDrag(translation: translation)
+        sliderState.updateDrag(translation: translation, currentValue: value)
+
+        let newLayout = ColorSliderLayout(
+            state: sliderState,
+            value: value,
+            dimensions: layout.dimensions,
+            axis: layout.axis,
+            controlSize: layout.controlSize,
+            previewPosition: layout.previewPosition,
+            previewSpacing: layout.previewSpacing
+        )
 
         let newProgress = Double(
-            sliderState.resolvedLength > 0
-            ? sliderState.liveColorPosition / sliderState.resolvedLength
+            newLayout.resolvedLength > 0
+            ? newLayout.liveColorPosition / newLayout.resolvedLength
             : 0.0
         )
 
         self.value = newProgress
 
         if isContinuous {
-            self.color = calculatedColor
+            let colorLayout = ColorSliderLayout(
+                state: sliderState,
+                value: newProgress,
+                dimensions: layout.dimensions,
+                axis: layout.axis,
+                controlSize: layout.controlSize,
+                previewPosition: layout.previewPosition,
+                previewSpacing: layout.previewSpacing
+            )
+            self.color = calculatedColor(layout: colorLayout)
         }
     }
 
-    private func onDragEnded(_: DragGesture.Value) {
+    private func onDragEnded(_: DragGesture.Value, layout: ColorSliderLayout) {
         if !isContinuous {
-            self.color = calculatedColor
+            self.color = calculatedColor(layout: layout)
         }
         withAnimation(reduceMotion ? nil : animation) {
             sliderState.finalizeDrag()
@@ -324,14 +308,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     }
 
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
-        var mutableProgress = value
-        sliderState.accessibilityAdjust(
-            direction: direction,
-            progress: &mutableProgress,
-            step: accessibilityStep
-        )
-        self.value = mutableProgress
-        self.color = calculatedColor
+        let delta = direction == .increment ? accessibilityStep : -accessibilityStep
+        self.value = min(max(value + delta, 0.0), 1.0)
     }
 }
 
