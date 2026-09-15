@@ -17,7 +17,6 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     public var disableLiquidGlass: Bool
     public var previewShape: AnyShape?
     public var previewStroke: ShapeStroke?
-    public var previewHidden: Bool
     public var previewShadow: ShapeShadow
 
     @Environment(\.colorSliderDimensions) private var dimensions
@@ -35,7 +34,6 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
         disableLiquidGlass: Bool = false,
         previewShape: AnyShape? = nil,
         previewStroke: ShapeStroke? = nil,
-        previewHidden: Bool = true,
         previewShadow: ShapeShadow = ShapeShadow()
     ) {
         self.trackShape = trackShape
@@ -47,7 +45,6 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
         self.disableLiquidGlass = disableLiquidGlass
         self.previewShape = previewShape
         self.previewStroke = previewStroke
-        self.previewHidden = previewHidden
         self.previewShadow = previewShadow
     }
 
@@ -117,10 +114,10 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
                     y: previewShadow.y
                 )
                 .scaleEffect(
-                    (previewHidden && !configuration.isDragging) ? dimensions.scaleRatio : 1.0,
+                    (!configuration.isDragging) ? dimensions.scaleRatio : 1.0,
                     anchor: configuration.previewScaleAnchor
                 )
-                .opacity((previewHidden && !configuration.isDragging) ? 0.0 : 1.0)
+                .opacity((!configuration.isDragging) ? 0.0 : 1.0)
                 .offset(configuration.previewOffset)
                 .allowsHitTesting(false)
         }

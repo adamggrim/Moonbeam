@@ -11,7 +11,7 @@ public struct ColorSliderStyleConfiguration {
     /// slider thumb.
     public let isDragging: Bool
 
-    /// The layout orientation of the slider (horizontal or vertical).
+    /// The layout orientation of the slider (`.horizontal` or `.vertical`).
     public let axis: Axis
 
     /// The calculated spatial offset for the thumb along the slider track.

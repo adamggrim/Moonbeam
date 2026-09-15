@@ -11,7 +11,6 @@ internal struct ColorSliderState {
     var controlSize: ControlSize = .regular
     var previewPosition: PreviewPosition? = nil
     var previewSpacing: CGFloat? = nil
-    var previewHidden: Bool = true
 
     /// Updates the state structure with the latest environment properties from the view.
     ///
@@ -23,15 +22,13 @@ internal struct ColorSliderState {
         axis: Axis,
         controlSize: ControlSize,
         previewPosition: PreviewPosition?,
-        previewSpacing: CGFloat?,
-        previewHidden: Bool
+        previewSpacing: CGFloat?
     ) {
         self.dimensions = dimensions
         self.axis = axis
         self.controlSize = controlSize
         self.previewPosition = previewPosition
         self.previewSpacing = previewSpacing
-        self.previewHidden = previewHidden
     }
 
     // MARK: - State

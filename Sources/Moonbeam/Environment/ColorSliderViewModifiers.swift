@@ -23,7 +23,6 @@ private struct AnimationKey: EnvironmentKey {
 }
 private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: PreviewPosition? = nil }
 private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
-private struct PreviewHiddenKey: EnvironmentKey { static let defaultValue: Bool = true }
 
 extension EnvironmentValues {
     var colorSliderPreviewPosition: PreviewPosition? {
@@ -34,11 +33,6 @@ extension EnvironmentValues {
     var colorSliderPreviewSpacing: CGFloat? {
         get { self[PreviewSpacingKey.self] }
         set { self[PreviewSpacingKey.self] = newValue }
-    }
-
-    var colorSliderPreviewHidden: Bool {
-        get { self[PreviewHiddenKey.self] }
-        set { self[PreviewHiddenKey.self] = newValue }
     }
 
     var colorSliderDimensions: ColorSliderDimensions {
@@ -106,18 +100,13 @@ public extension View {
 
     /// Sets the animation used when the drag gesture starts and ends.
     func colorSliderAnimation(_ animation: Animation) -> some View {
-            environment(\.colorSliderAnimation, animation)
-        }
+        environment(\.colorSliderAnimation, animation)
+    }
 
     /// Customizes the position and spacing of the floating color preview.
     func colorSliderPreviewPosition(_ position: PreviewPosition, spacing: CGFloat? = nil) -> some View {
         self
             .environment(\.colorSliderPreviewPosition, position)
             .environment(\.colorSliderPreviewSpacing, spacing)
-    }
-
-    /// Controls the visibility of the floating color preview when the slider is inactive.
-    func colorSliderPreviewHidden(_ hidden: Bool) -> some View {
-        environment(\.colorSliderPreviewHidden, hidden)
     }
 }
