@@ -104,6 +104,8 @@ internal struct ColorSliderState {
     var liveContainerDrag: CGFloat = .zero
 
     mutating func updateDrag(translation: CGFloat, currentValue: Double) {
+        isDragging = true
+
         if dragStartValue == nil {
             dragStartValue = currentValue
         }
