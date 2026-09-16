@@ -89,9 +89,15 @@ extension ShaderBend {
 }
 
 internal func encodeSpectrumData(
-    startSections: [MonochromeSection], endSections: [MonochromeSection],
-    startHue: Double, endHue: Double, primaryValue: Double, secondaryValue: Double,
-    colorSpace: SpectrumColorSpace, primaryBendsCount: Int, secondaryBendsCount: Int
+    startSections: [MonochromeSection],
+    endSections: [MonochromeSection],
+    startHue: Double,
+    endHue: Double,
+    primaryValue: Double,
+    secondaryValue: Double,
+    colorSpace: SpectrumColorSpace,
+    primaryBendsCount: Int,
+    secondaryBendsCount: Int
 ) -> Data {
     let hueWeight = abs(endHue - startHue)
     let startWeight = startSections.reduce(0) { $0 + $1.weight }

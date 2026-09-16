@@ -39,8 +39,8 @@ internal struct SpectrumGenerator {
         endSections: [MonochromeSection],
         startHue: Double,
         endHue: Double,
-        primaryValue: Double, // Saturation or Chroma
-        secondaryValue: Double, // Brightness or Lightness
+        primaryValue: Double, // Saturation or chroma
+        secondaryValue: Double, // Brightness or lightness
         colorSpace: SpectrumColorSpace,
         primaryBends: [BendSection]?,
         secondaryBends: [BendSection]?

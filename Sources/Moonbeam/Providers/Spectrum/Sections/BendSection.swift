@@ -1,38 +1,5 @@
 import Foundation
 
-// MARK: - Core protocols
-
-/// Defines the mathematical curve used to interpolate values across a bend or
-/// monochrome section.
-public enum Easing: Sendable {
-    case linear, cubic
-}
-
-/// Represents the lightest and darkest endpoints of a spectrum.
-public enum MonochromeColor: Sendable {
-    case black, white
-}
-
-/// Section of the color slider that fades to or from a monochrome color.
-public protocol MonochromeSection: Sendable {
-    /// The color of a `MonochromeSection`, either `.black` or `.white`.
-    var color: MonochromeColor { get }
-
-    /// The number of monochrome steps added to the hue section (each equal in
-    /// width to a single hue).
-    var weight: Double { get }
-
-    /// The mathematical easing curve applied to the monochrome section.
-    var easing: Easing { get }
-}
-
-/// Provides shared default values shared across all monochrome sections.
-public extension MonochromeSection {
-    /// The default proportionate width of a monochrome step (1/6th of a
-    /// standard hue).
-    static var defaultWeight: Double { 1.0 / 6.0 }
-}
-
 /// A protocol for a section of the color slider with special conditions for
 /// saturation, brightness, lightness or chroma.
 public protocol BendSection: Sendable {
@@ -69,37 +36,6 @@ public struct BendSectionBuilder {
     public static func buildOptional(_ component: [BendSection]?) -> [BendSection] { return component ?? [] }
     public static func buildEither(first component: [BendSection]) -> [BendSection] { return component }
     public static func buildEither(second component: [BendSection]) -> [BendSection] { return component }
-}
-
-// MARK: - Monochrome sections
-
-/// A spectrum section that resolves to pure black.
-public struct BlackSection: MonochromeSection {
-    public let color: MonochromeColor = .black
-    public let weight: Double
-    public let easing: Easing
-
-    /// Initializes a black section.
-    ///   - Parameter weight: The proportionate width of the section relative
-    ///     to a single hue.
-    public init(weight: Double = Self.defaultWeight, easing: Easing = .cubic) {
-        self.weight = weight
-        self.easing = easing
-    }
-}
-
-public struct WhiteSection: MonochromeSection {
-    public let color: MonochromeColor = .white
-    public let weight: Double
-    public let easing: Easing
-
-    /// Initializes a white section.
-    /// - Parameter weight: The proportionate width of the section relative to
-    ///   a single hue.
-    public init(weight: Double = Self.defaultWeight, easing: Easing = .cubic) {
-        self.weight = weight
-        self.easing = easing
-    }
 }
 
 // MARK: - Bend sections
