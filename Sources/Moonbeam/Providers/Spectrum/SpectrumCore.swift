@@ -15,34 +15,6 @@ public enum SpectrumColorSpace: Sendable {
 
 fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "Spectrum")
 
-/// A lightweight wrapper for telemetry and non-fatal production logging.
-public enum MoonbeamTelemetry {
-    private static let loggerStorage = OSAllocatedUnfairLock(
-        initialState: Logger(subsystem: "com.moonbeam", category: "Spectrum")
-    )
-
-    @MainActor
-    private static let errorSubject = PassthroughSubject<String, Never>()
-
-    public static var logger: Logger {
-        get { loggerStorage.withLock { $0 } }
-        set { loggerStorage.withLock { $0 = newValue } }
-    }
-
-    /// A publisher that emits non-fatal errors for consuming apps.
-    @MainActor
-    public static var nonFatalErrors: AnyPublisher<String, Never> {
-        errorSubject.eraseToAnyPublisher()
-    }
-
-    internal static func reportNonFatalError(_ message: String) {
-        logger.error("Moonbeam configuration error: \(message, privacy: .public)")
-        Task { @MainActor in
-            errorSubject.send(message)
-        }
-    }
-}
-
 internal func validateBendSections(bendSections: [BendSection]) -> Bool {
     guard bendSections.count > 1 else { return true }
     let sortedBendSections = bendSections.sorted { min($0.startHue, $0.endHue) < min($1.startHue, $1.endHue) }
@@ -75,7 +47,7 @@ internal func validateBends(_ bends: [BendSection], name: String) -> [BendSectio
         if !hasOverlap {
             validBends.append(bend)
         } else {
-            MoonbeamTelemetry.reportNonFatalError(
+            Telemetry.reportNonFatalError(
                 "Moonbeam: \(name) contains overlapping bend sections. Bend sections after the first will not appear."
             )
         }
