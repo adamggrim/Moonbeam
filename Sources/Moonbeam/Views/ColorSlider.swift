@@ -56,8 +56,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
 
     /// Initializes a customizable color slider.
     ///
-    /// Created by providing a data source such as `HSBSpectrum`,
-    /// `OKLCHSpectrum`, `ColorGradient`, or `HardEdgeColors`.
+    /// Created by providing a data source such as `Spectrum<ColorSpace>`,
+    /// `ColorGradient`, or `HardEdgeColors`.
     ///
     /// - Parameters:
     ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
@@ -378,7 +378,7 @@ public extension ColorSlider where Preview == EmptyView {
     }
 }
 
-public extension ColorSlider where Source == HSBSpectrum {
+public extension ColorSlider where Source == Spectrum<HSB> {
     /// Initializes a customizable color slider with a default HSB spectrum and a custom preview view.
     ///
     /// - Parameters:
@@ -403,7 +403,7 @@ public extension ColorSlider where Source == HSBSpectrum {
         self.init(
             value: value,
             color: color,
-            colorProvider: HSBSpectrum(),
+            colorProvider: Spectrum<HSB>(),
             label: label,
             axis: axis,
             isContinuous: isContinuous,
@@ -412,7 +412,7 @@ public extension ColorSlider where Source == HSBSpectrum {
     }
 }
 
-public extension ColorSlider where Source == HSBSpectrum, Preview == ColorPreviewView {
+public extension ColorSlider where Source == Spectrum<HSB>, Preview == ColorPreviewView {
     /// Initializes a customizable color slider with a default HSB spectrum.
     ///
     /// - Parameters:
@@ -434,7 +434,7 @@ public extension ColorSlider where Source == HSBSpectrum, Preview == ColorPrevie
         self.init(
             value: value,
             color: color,
-            colorProvider: HSBSpectrum(),
+            colorProvider: Spectrum<HSB>(),
             label: label,
             axis: axis,
             isContinuous: isContinuous
@@ -442,7 +442,7 @@ public extension ColorSlider where Source == HSBSpectrum, Preview == ColorPrevie
     }
 }
 
-public extension ColorSlider where Source == HSBSpectrum, Preview == EmptyView {
+public extension ColorSlider where Source == Spectrum<HSB>, Preview == EmptyView {
     /// Initializes a customizable color slider with a default HSB spectrum and
     /// no floating color preview.
     ///
@@ -467,7 +467,7 @@ public extension ColorSlider where Source == HSBSpectrum, Preview == EmptyView {
         self.init(
             value: value,
             color: color,
-            colorProvider: HSBSpectrum(),
+            colorProvider: Spectrum<HSB>(),
             label: label,
             axis: axis,
             isContinuous: isContinuous,

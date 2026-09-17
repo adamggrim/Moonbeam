@@ -8,11 +8,6 @@ internal struct SpectrumGenerator {
 
     /// Calculates the color at a specific normalized position on the spectrum.
     ///
-    /// This function re-implements the logic from `HSBSpectrum` and
-    /// `OKLCHSpectrum` to calculate a single color on-demand without
-    /// pre-generating an array, providing a pure-Swift fallback for floating
-    /// color previews or wherever Metal shaders are unavailable.
-    ///
     /// - Parameters:
     ///   - position: The normalized position (0.0 to 1.0) on the slider.
     ///   - startSections: An array of monochrome sections appearing before the
@@ -25,7 +20,7 @@ internal struct SpectrumGenerator {
     ///     to the hue spectrum.
     ///   - secondaryValue: The base secondary value (brightness or lightness)
     ///     applied to the hue spectrum.
-    ///   - colorSpace:Whether to use HSB or OKLCH as the color space.
+    ///   - colorSpace: Whether to use the HSB or OKLCH color space.
     ///   - primaryBends: An optional array of `BendSection` objects to modify
     ///     primary values across hue ranges.
     ///   - secondaryBends: An optional array of `BendSection` objects to modify
@@ -79,7 +74,7 @@ internal struct SpectrumGenerator {
 
         let startBoundary = startWeight / totalWeight
         let hueBoundary = (startWeight + hueWeight) / totalWeight
-                let clampedPosition = max(0.0, min(1.0, position))
+        let clampedPosition = max(0.0, min(1.0, position))
 
         if clampedPosition < startBoundary {
             var cumulativeStart: Double = 0.0

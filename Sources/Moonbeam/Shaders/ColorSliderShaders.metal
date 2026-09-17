@@ -75,8 +75,8 @@ float3 convertOKLCHtoRGB(float L, float C, float h) {
     return convertOKLABtoRGB(L, a, b);
 }
 
-float3 resolveColor(uint space, float h, float s_c, float b_l) {
-    return space == MoonbeamColorSpaceOKLCH ? convertOKLCHtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
+float3 resolveColor(uint colorSpace, float h, float s_c, float b_l) {
+    return colorSpace == ColorSpaceOKLCH ? convertOKLCHtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
 }
 
 // Matrices to convert RGB to LMS and OKLAB constants.
@@ -133,7 +133,7 @@ float calculateBend(
             float valueDifference = defaultValue - targetValue;
             float hueOffset = currentHue - startHue;
 
-            if (bendType == float(MoonbeamBendTypeOneWay)) { // One-way bend
+            if (bendType == float(BendTypeOneWay)) { // One-way bend
                 float normalizedPosition = (hueCount != 0.0) ? (hueOffset / hueCount) : 0.0;
                 float curveProgress = isCubic > 0.5 ? smoothstep(0.0, 1.0, normalizedPosition) : normalizedPosition;
 
@@ -191,7 +191,7 @@ inline float2 calculateMonochromeFade(
         }
     }
 
-    if (isWhiteSection == 1.0 && colorSpaceFlag == MoonbeamColorSpaceOKLCH) {
+    if (isWhiteSection == 1.0 && colorSpaceFlag == ColorSpaceOKLCH) {
         finalBrightness = 1.0 - (fadeFactor * (1.0 - finalBrightness));
     }
 
@@ -219,9 +219,9 @@ half4 gradientShader(
 ) {
     float normalizedPosition = calculateNormalizedPosition(position, size, isVertical);
 
-    uint space = uint(colorSpaceFlag);
+    uint colorSpace = uint(colorSpaceFlag);
 
-    if (space == MoonbeamColorSpaceRGB) {
+    if (colorSpace == ColorSpaceRGB) {
         half4 blendedColor = mix(startColor, endColor, half(normalizedPosition));
         return half4(blendedColor.rgb * currentColor.a, blendedColor.a * currentColor.a);
     }
@@ -229,7 +229,7 @@ half4 gradientShader(
     float3 labStart = convertRGBtoOKLAB(float3(startColor.rgb));
     float3 labEnd = convertRGBtoOKLAB(float3(endColor.rgb));
 
-    if (space == MoonbeamColorSpaceOKLAB) {
+    if (colorSpace == ColorSpaceOKLAB) {
         float3 mixedLab = mix(labStart, labEnd, normalizedPosition);
         float3 rgbOut = convertOKLABtoRGB(mixedLab.x, mixedLab.y, mixedLab.z);
         return half4(half3(rgbOut) * currentColor.a, currentColor.a);

@@ -24,7 +24,7 @@ import SwiftUI
 
 #Preview("Horizontal hard-edge HSB spectrum slider with bend sections") {
     PreviewContainer { selection, progress in
-        let colorProvider = HSBSpectrum(
+        let colorProvider = Spectrum<HSB>(
             saturationBends: {
                 TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
             },

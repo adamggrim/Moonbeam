@@ -6,11 +6,6 @@ import os
 
 import MoonbeamShared
 
-/// The color space used to generate the spectrum.
-public enum SpectrumColorSpace: Sendable {
-    case hsb, oklch
-}
-
 // MARK: - Constants and validation
 
 fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "Spectrum")
@@ -77,7 +72,7 @@ extension ShaderBend {
     init(bend: BendSection) {
         self.init()
         self.data0 = simd_float4(
-            bend is OneWayBend ? Float(MoonbeamBendTypeOneWay.rawValue) : Float(MoonbeamBendTypeTwoWay.rawValue),
+            bend is OneWayBend ? Float(BendTypeOneWay.rawValue) : Float(MoonbeamBendTypeTwoWay.rawValue),
             Float(bend.startHue),
             Float(bend.endHue),
             Float(bend.targetValue)
@@ -128,6 +123,10 @@ internal func encodeSpectrumData(
         endData[i*2 + 1] = Float(cumulativeEnd)
     }
 
+    let shaderFlag = colorSpace == .oklch
+        ? ColorSpaceOKLCH.rawValue
+        : ColorSpaceHSB.rawValue
+
     var shaderData = SpectrumShaderData(
         totalWeight: Float(totalWeight),
         startSectionBoundary: Float(startWeight / totalWeight),
@@ -136,7 +135,7 @@ internal func encodeSpectrumData(
         maximumHue: Float(endHue),
         baseSaturation: Float(primaryValue),
         baseBrightness: Float(secondaryValue),
-        colorSpaceFlag: colorSpace == .oklch ? MoonbeamColorSpaceOKLCH.rawValue : MoonbeamColorSpaceHSB.rawValue,
+        colorSpaceFlag: shaderFlag,
         startSectionsCount: UInt32(startSections.count),
         endSectionsCount: UInt32(endSections.count),
         saturationBendsCount: UInt32(primaryBendsCount),

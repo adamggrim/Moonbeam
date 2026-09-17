@@ -5,7 +5,7 @@ import SwiftUI
         ColorSlider(
             value: progress,
             color: selection,
-            colorProvider: OKLCHSpectrum(startHue: 0.0, endHue: 1.0),
+            colorProvider: Spectrum<OKLCH>(startHue: 0.0, endHue: 1.0),
             axis: .horizontal
         )
     }

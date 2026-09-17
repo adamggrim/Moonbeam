@@ -33,7 +33,7 @@ import MoonbeamShared
             #expect(shaderData.endSectionsCount == 1)
             #expect(shaderData.saturationBendsCount == 1)
             #expect(shaderData.brightnessBendsCount == 2)
-            #expect(shaderData.colorSpaceFlag == MoonbeamColorSpaceHSB.rawValue)
+            #expect(shaderData.colorSpaceFlag == ColorSpaceHSB.rawValue)
         }
     }
 }

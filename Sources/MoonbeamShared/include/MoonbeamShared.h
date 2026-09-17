@@ -17,14 +17,14 @@ typedef struct {
 } ShaderBend;
 
 typedef enum {
-    MoonbeamColorSpaceRGB = 0,
-    MoonbeamColorSpaceHSB = 1,
-    MoonbeamColorSpaceOKLAB = 2,
-    MoonbeamColorSpaceOKLCH = 3
-} MoonbeamColorSpaceFlag;
+    ColorSpaceRGB = 0,
+    ColorSpaceHSB = 1,
+    ColorSpaceOKLAB = 2,
+    ColorSpaceOKLCH = 3
+} ColorSpaceFlag;
 
 typedef enum {
-    MoonbeamBendTypeOneWay = 1,
+    BendTypeOneWay = 1,
     MoonbeamBendTypeTwoWay = 2
 } MoonbeamBendType;
 
