@@ -197,7 +197,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 )
             )
 
-            style.makeBody(configuration: configuration)
+            style(configuration)
                 .animation(sliderState.isDragging || reduceMotion ? nil : animation, value: value)
                 .gesture(
                     DragGesture(minimumDistance: minimumDragDistance)

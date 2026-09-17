@@ -16,53 +16,23 @@ public protocol ColorSliderStyle: Sendable {
     typealias Configuration = ColorSliderStyleConfiguration
 }
 
-/// A type-erased wrapper for `ColorSliderStyle`.
-///
-/// SwiftUI environment values require a concrete type. This wrapper abstracts
-/// the underlying generic style so it can be safely stored and retrieved.
-internal struct AnyColorSliderStyle: ColorSliderStyle, @unchecked Sendable {
-    private let _makeBody: @MainActor (Configuration) -> AnyView
-
-    /// Initializes a type-erased style from any concrete `ColorSliderStyle`.
-    ///
-    /// - Parameter style: The underlying custom style to erase.
-    init<S: ColorSliderStyle>(_ style: S) {
-        self._makeBody = { configuration in
-            AnyView(StyleResolver(style: style, configuration: configuration))
-        }
-    }
-
-    /// Renders the type-erased body using the stored style closure.
-    @MainActor
-    func makeBody(configuration: Configuration) -> some View {
-        _makeBody(configuration)
-    }
-}
-
-private struct StyleResolver<S: ColorSliderStyle>: View {
-    let style: S
-    let configuration: S.Configuration
-
-    var body: some View {
-        style.makeBody(configuration: configuration)
-    }
-}
-
 // MARK: - Environment
 
 private struct ColorSliderStyleKey: EnvironmentKey {
-    static let defaultValue = AnyColorSliderStyle(DefaultColorSliderStyle())
+    static let defaultValue: @MainActor @Sendable (ColorSliderStyleConfiguration) -> AnyView = { configuration in
+        AnyView(DefaultColorSliderStyle().makeBody(configuration: configuration))
+    }
 }
 
 extension EnvironmentValues {
-    /// The active color slider style applied to the view hierarchy.
-    var colorSliderStyle: AnyColorSliderStyle {
+    /// A closure returning a type-erased layout view that represents the active color slider style applied to the view hierarchy.
+    var colorSliderStyle: @MainActor @Sendable (ColorSliderStyleConfiguration) -> AnyView {
         get { self[ColorSliderStyleKey.self] }
         set { self[ColorSliderStyleKey.self] = newValue }
     }
 }
 
-// MARK: - View Modifier
+// MARK: - View modifier
 
 public extension View {
     /// Sets the style for color sliders within this view.
@@ -73,6 +43,8 @@ public extension View {
     /// - Parameter style: The custom style to apply.
     /// - Returns: A view that utilizes the specified style for child sliders.
     func colorSliderStyle<S: ColorSliderStyle>(_ style: S) -> some View {
-        environment(\.colorSliderStyle, AnyColorSliderStyle(style))
+        environment(\.colorSliderStyle, { configuration in
+            AnyView(style.makeBody(configuration: configuration))
+        })
     }
 }
