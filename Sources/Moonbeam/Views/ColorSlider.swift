@@ -285,16 +285,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         self.value = newProgress
 
         if isContinuous {
-            let colorLayout = ColorSliderLayout(
-                state: sliderState,
-                value: newProgress,
-                dimensions: layout.dimensions,
-                axis: layout.axis,
-                controlSize: layout.controlSize,
-                previewPosition: layout.previewPosition,
-                previewSpacing: layout.previewSpacing
-            )
-            self.color = calculatedColor(layout: colorLayout)
+            self.color = calculatedColor(layout: newLayout)
         }
     }
 
