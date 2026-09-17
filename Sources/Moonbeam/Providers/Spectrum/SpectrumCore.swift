@@ -2,7 +2,6 @@ import Foundation
 import SwiftUI
 import simd
 import os
-@preconcurrency import Combine
 
 import MoonbeamShared
 
