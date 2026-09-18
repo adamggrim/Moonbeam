@@ -42,6 +42,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
     let primaryBends: [BendSection]
     let secondaryBends: [BendSection]
     public let colorSource: ColorSource
+    let accessibilityStrings: SpectrumAccessibilityStrings
 
     public func accessibilityColorName(for value: Double) -> String? {
         guard let comps = SpectrumGenerator.components(
@@ -61,7 +62,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
             hue: comps.hue,
             primary: comps.primary,
             secondary: comps.secondary,
-            colorSpace: ColorSpace.colorSpace
+            colorSpace: ColorSpace.colorSpace,
+            strings: accessibilityStrings
         )
     }
 
@@ -75,7 +77,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         primaryBends: [BendSection],
         secondaryBends: [BendSection],
         primaryName: String,
-        secondaryName: String
+        secondaryName: String,
+        accessibilityStrings: SpectrumAccessibilityStrings
     ) {
         let validStart = validateMonochromeSections(startSections, name: "\(ColorSpace.name) Start")
         let validEnd = validateMonochromeSections(endSections, name: "\(ColorSpace.name) End")
@@ -90,6 +93,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         self.secondaryValue = secondaryValue
         self.primaryBends = validPrimaryBends
         self.secondaryBends = validSecondaryBends
+        self.accessibilityStrings = accessibilityStrings
 
         let fallback: @Sendable (Double) -> Color = { position in
             SpectrumGenerator.color(
@@ -169,7 +173,8 @@ public extension Spectrum where ColorSpace == HSB {
         saturation: Double = 1.0,
         brightness: Double = 1.0,
         @BendSectionBuilder saturationBends: () -> [BendSection] = { [] },
-        @BendSectionBuilder brightnessBends: () -> [BendSection] = { [] }
+        @BendSectionBuilder brightnessBends: () -> [BendSection] = { [] },
+        accessibilityStrings: SpectrumAccessibilityStrings = SpectrumAccessibilityStrings()
     ) {
         self.init(
             startSections: startSections,
@@ -181,7 +186,8 @@ public extension Spectrum where ColorSpace == HSB {
             primaryBends: saturationBends(),
             secondaryBends: brightnessBends(),
             primaryName: "Saturation",
-            secondaryName: "Brightness"
+            secondaryName: "Brightness",
+            accessibilityStrings: accessibilityStrings
         )
     }
 }
@@ -215,7 +221,8 @@ public extension Spectrum where ColorSpace == OKLCH {
         startHue: Double = 0.0,
         endHue: Double = 1.0,
         @BendSectionBuilder lightnessBends: () -> [BendSection] = { [] },
-        @BendSectionBuilder chromaBends: () -> [BendSection] = { [] }
+        @BendSectionBuilder chromaBends: () -> [BendSection] = { [] },
+        accessibilityStrings: SpectrumAccessibilityStrings = SpectrumAccessibilityStrings()
     ) {
         self.init(
             startSections: startSections,
@@ -227,7 +234,8 @@ public extension Spectrum where ColorSpace == OKLCH {
             primaryBends: chromaBends(),
             secondaryBends: lightnessBends(),
             primaryName: "Chroma",
-            secondaryName: "Lightness"
+            secondaryName: "Lightness",
+            accessibilityStrings: accessibilityStrings
         )
     }
 }

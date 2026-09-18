@@ -248,7 +248,11 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         .accessibilityValue({
             let percentage = value.formatted(.percent)
             if let colorName = colorProvider.accessibilityColorName(for: value) {
-                let format = String(localized: "color_slider_value_format", defaultValue: "%1$@ at %2$@")
+                let format = String(
+                    localized: "color_slider_value_format",
+                    defaultValue: "%1$@, %2$@",
+                    bundle: .module
+                )
                 return Text(String(format: format, colorName, percentage))
             }
             return Text(percentage)
