@@ -11,8 +11,19 @@ public enum PreviewPosition: Sendable, Equatable {
     case bottomTrailing
 }
 
+/// Determines when the Liquid Glass effect is applied to the slider thumb.
+public enum LiquidGlassThumb: Sendable, Equatable {
+    /// Always renders the draggable thumb with Liquid Glass.
+    case always
+    /// Only renders Liquid Glass during an active drag.
+    case dragging
+    /// Never renders the draggable thumb with Liquid Glass.
+    case disabled
+}
+
 // MARK: - Environment keys
 
+private struct LiquidGlassThumbKey: EnvironmentKey { static let defaultValue: LiquidGlassThumb = .dragging }
 private struct DimensionsKey: EnvironmentKey { static let defaultValue = ColorSliderDimensions() }
 private struct DragMinimumDistanceKey: EnvironmentKey { static let defaultValue: CGFloat = 0 }
 private struct AccessibilityStepKey: EnvironmentKey {
@@ -25,6 +36,11 @@ private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: Pre
 private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
 
 extension EnvironmentValues {
+    var colorSliderLiquidGlassThumb: LiquidGlassThumb {
+        get { self[LiquidGlassThumbKey.self] }
+        set { self[LiquidGlassThumbKey.self] = newValue }
+    }
+
     var colorSliderPreviewPosition: PreviewPosition? {
         get { self[PreviewPositionKey.self] }
         set { self[PreviewPositionKey.self] = newValue }
@@ -108,5 +124,10 @@ public extension View {
         self
             .environment(\.colorSliderPreviewPosition, position)
             .environment(\.colorSliderPreviewSpacing, spacing)
+    }
+
+    /// Customizes when to render the draggable thumb with Liquid Glass.
+    func colorSliderLiquidGlassThumb(_ mode: LiquidGlassThumb) -> some View {
+        environment(\.colorSliderLiquidGlassThumb, mode)
     }
 }

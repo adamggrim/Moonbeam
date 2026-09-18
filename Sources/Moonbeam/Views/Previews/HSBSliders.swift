@@ -125,8 +125,6 @@ import SwiftUI
             colorProvider: Spectrum<HSB>(),
             axis: .horizontal
         )
-        .colorSliderStyle(DefaultColorSliderStyle(
-            disableLiquidGlass: true
-        ))
+        .colorSliderLiquidGlassThumb(.disabled)
     }
 }

@@ -20,8 +20,8 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     public var thumbStroke: ShapeStroke?
     /// The shadow properties applied to the draggable thumb.
     public var thumbShadow: ShapeShadow
-    /// Disables the Liquid Glass effect on the draggable thumb.
-    public var disableLiquidGlass: Bool
+    /// Determines when to render the draggable thumb with Liquid Glass.
+    public var liquidGlassThumb: LiquidGlassThumb?
     /// The shape applied to the floating color preview.
     public var previewShape: AnyShape?
     /// The stroke styling applied to the floating color preview.
@@ -29,6 +29,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     /// The shadow properties applied to the floating color preview.
     public var previewShadow: ShapeShadow
 
+    @Environment(\.colorSliderLiquidGlassThumb) private var envLiquidGlassThumb
     @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.controlSize) private var controlSize
 
@@ -41,7 +42,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
         thumbColor: Color = .white,
         thumbStroke: ShapeStroke? = nil,
         thumbShadow: ShapeShadow = ShapeShadow(),
-        disableLiquidGlass: Bool = false,
+        liquidGlassThumb: LiquidGlassThumb? = nil,
         previewShape: AnyShape? = nil,
         previewStroke: ShapeStroke? = nil,
         previewShadow: ShapeShadow = ShapeShadow()
@@ -52,7 +53,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
         self.thumbColor = thumbColor
         self.thumbStroke = thumbStroke
         self.thumbShadow = thumbShadow
-        self.disableLiquidGlass = disableLiquidGlass
+        self.liquidGlassThumb = liquidGlassThumb
         self.previewShape = previewShape
         self.previewStroke = previewStroke
         self.previewShadow = previewShadow
@@ -74,22 +75,27 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
             configuration.thumb
                 .overlay {
                     let shape = thumbShape ?? AnyShape(Capsule(style: .continuous))
-                    let enableThumbScale = {
-                        if #available(iOS 26.0, macOS 26.0, *) { return !disableLiquidGlass }
+                    let activeLiquidGlassThumb = liquidGlassThumb ?? envLiquidGlassThumb
+                    let isLiquidGlassActive: Bool = {
+                        if #available(iOS 26.0, macOS 26.0, *) {
+                            return activeLiquidGlassThumb == .always
+                                || (activeLiquidGlassThumb == .dragging && configuration.isDragging)
+                        }
                         return false
                     }()
-                    let dynamicScale: CGFloat = (configuration.isDragging && enableThumbScale)
+
+                    let dynamicScale: CGFloat = configuration.isDragging
                         ? ColorSliderDefaults.dragScaleMultiplier
                         : 1.0
 
                     Group {
 #if compiler(>=6.2)
-                        if #available(iOS 26.0, macOS 26.0, *), !disableLiquidGlass {
+                        if #available(iOS 26.0, macOS 26.0, *), activeLiquidGlassThumb != .disabled {
                             Color.clear
                                 .glassEffect(
-                                    configuration.isDragging ? .regular.interactive(true) : .identity, in: shape
+                                    isLiquidGlassActive ? .regular.interactive(true) : .identity, in: shape
                                 )
-                                .overlay(shape.fill(thumbColor).opacity(configuration.isDragging ? 0.0 : 1.0))
+                                .overlay(shape.fill(thumbColor).opacity(isLiquidGlassActive ? 0.0 : 1.0))
                         } else {
                             shape.fill(thumbColor)
                         }
