@@ -88,8 +88,27 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         self.preview = preview()
     }
 
+    /// Internal initializer to support cross-file convenience initializers.
+    internal init(
+        value: Binding<Double>,
+        color: Binding<Color>,
+        colorProvider: Source,
+        label: LocalizedStringKey,
+        axis: Axis,
+        isContinuous: Bool,
+        previewView: Preview?
+    ) {
+        self._value = value
+        self._color = color
+        self.colorProvider = colorProvider
+        self.label = label
+        self.axis = axis
+        self.isContinuous = isContinuous
+        self.preview = previewView
+    }
+
     /// The color calculated from the current `liveColorPosition` on the slider.
-        private func calculatedColor(layout: ColorSliderLayout) -> Color {
+    private func calculatedColor(layout: ColorSliderLayout) -> Color {
         let nonZeroLength = layout.resolvedLength > 0 ? layout.resolvedLength : 0.001
         let clampedRatio = max(0.0, min(1.0, layout.liveColorPosition / nonZeroLength))
         switch colorProvider.colorSource {
@@ -301,168 +320,5 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
         let delta = direction == .increment ? accessibilityStep : -accessibilityStep
         self.value = min(max(value + delta, 0.0), 1.0)
-    }
-}
-
-public extension ColorSlider where Preview == ColorPreviewView {
-    /// Initializes a customizable color slider with the default floating color preview.
-    ///
-    /// - Parameters:
-    ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
-    ///   - color: A binding to the slider's color output.
-    ///   - colorProvider: The source defining the color calculations and
-    ///     rendering.
-    ///   - label: A localized string key used for VoiceOver accessibility.
-    ///     Defaults to "Color Slider".
-    ///   - axis: The layout orientation of the slider (`.horizontal` or
-    ///     `.vertical`). Defaults to `.horizontal`.
-    ///   - isContinuous: Whether the output color updates continuously during
-    ///     a drag gesture. Defaults to `true`.
-    init(
-        value: Binding<Double>,
-        color: Binding<Color>,
-        colorProvider: Source,
-        label: LocalizedStringKey = "Color Slider",
-        axis: Axis = .horizontal,
-        isContinuous: Bool = true
-    ) {
-        self._value = value
-        self._color = color
-        self.colorProvider = colorProvider
-        self.label = label
-        self.axis = axis
-        self.isContinuous = isContinuous
-        self.preview = nil
-    }
-}
-
-public extension ColorSlider where Preview == EmptyView {
-    /// Initializes a customizable color slider without a floating color preview.
-    ///
-    /// - Parameters:
-    ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
-    ///   - color: A binding to the slider's color output.
-    ///   - colorProvider: The source defining the color calculations and rendering.
-    ///   - label: A localized string key used for VoiceOver accessibility.
-    ///     Defaults to "Color Slider".
-    ///   - axis: The layout orientation of the slider (`.horizontal` or
-    ///     `.vertical`). Defaults to `.horizontal`.
-    ///   - isContinuous: Whether the output color updates continuously during
-    ///     a drag gesture. Defaults to `true`.
-    ///   - preview: Explicitly pass `nil` or `EmptyView()` to hide the preview.
-    init(
-        value: Binding<Double>,
-        color: Binding<Color>,
-        colorProvider: Source,
-        label: LocalizedStringKey = "Color Slider",
-        axis: Axis = .horizontal,
-        isContinuous: Bool = true,
-        preview: Preview?
-    ) {
-        self._value = value
-        self._color = color
-        self.colorProvider = colorProvider
-        self.label = label
-        self.axis = axis
-        self.isContinuous = isContinuous
-        self.preview = nil
-    }
-}
-
-public extension ColorSlider where Source == Spectrum<HSB> {
-    /// Initializes a customizable color slider with a default HSB spectrum and a custom preview view.
-    ///
-    /// - Parameters:
-    ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
-    ///   - color: A binding to the slider's color output.
-    ///   - label: A localized string key used for VoiceOver accessibility.
-    ///     Defaults to "Color Slider".
-    ///   - axis: The layout orientation of the slider (`.horizontal` or
-    ///     `.vertical`). Defaults to `.horizontal`.
-    ///   - isContinuous: Whether the output color updates continuously during
-    ///     a drag gesture. Defaults to `true`.
-    ///   - preview: A view builder that creates the custom floating color
-    ///     preview.
-    init(
-        value: Binding<Double>,
-        color: Binding<Color>,
-        label: LocalizedStringKey = "Color Slider",
-        axis: Axis = .horizontal,
-        isContinuous: Bool = true,
-        @ViewBuilder preview: () -> Preview
-    ) {
-        self.init(
-            value: value,
-            color: color,
-            colorProvider: Spectrum<HSB>(),
-            label: label,
-            axis: axis,
-            isContinuous: isContinuous,
-            preview: preview
-        )
-    }
-}
-
-public extension ColorSlider where Source == Spectrum<HSB>, Preview == ColorPreviewView {
-    /// Initializes a customizable color slider with a default HSB spectrum.
-    ///
-    /// - Parameters:
-    ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
-    ///   - color: A binding to the slider's color output.
-    ///   - label: A localized string key used for VoiceOver accessibility.
-    ///     Defaults to "Color Slider".
-    ///   - axis: The layout orientation of the slider (`.horizontal` or
-    ///     `.vertical`). Defaults to `.horizontal`.
-    ///   - isContinuous: Whether the output color updates continuously during
-    ///     a drag gesture. Defaults to `true`.
-    init(
-        value: Binding<Double>,
-        color: Binding<Color>,
-        label: LocalizedStringKey = "Color Slider",
-        axis: Axis = .horizontal,
-        isContinuous: Bool = true
-    ) {
-        self.init(
-            value: value,
-            color: color,
-            colorProvider: Spectrum<HSB>(),
-            label: label,
-            axis: axis,
-            isContinuous: isContinuous
-        )
-    }
-}
-
-public extension ColorSlider where Source == Spectrum<HSB>, Preview == EmptyView {
-    /// Initializes a customizable color slider with a default HSB spectrum and
-    /// no floating color preview.
-    ///
-    /// - Parameters:
-    ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
-    ///   - color: A binding to the slider's color output.
-    ///   - label: A localized string key used for VoiceOver accessibility.
-    ///     Defaults to "Color Slider".
-    ///   - axis: The layout orientation of the slider (`.horizontal` or
-    ///     `.vertical`). Defaults to `.horizontal`.
-    ///   - isContinuous: Whether the output color updates continuously during
-    ///     a drag gesture. Defaults to `true`.
-    ///   - preview: Explicitly pass `nil` or `EmptyView()` to hide the preview.
-    init(
-        value: Binding<Double>,
-        color: Binding<Color>,
-        label: LocalizedStringKey = "Color Slider",
-        axis: Axis = .horizontal,
-        isContinuous: Bool = true,
-        preview: Preview?
-    ) {
-        self.init(
-            value: value,
-            color: color,
-            colorProvider: Spectrum<HSB>(),
-            label: label,
-            axis: axis,
-            isContinuous: isContinuous,
-            preview: preview
-        )
     }
 }
