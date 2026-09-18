@@ -57,7 +57,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
             secondaryBends: secondaryBends
         ) else { return nil }
 
-        return ColorNameResolver.name(
+        return SpectrumNameResolver.name(
             hue: comps.hue,
             primary: comps.primary,
             secondary: comps.secondary,
