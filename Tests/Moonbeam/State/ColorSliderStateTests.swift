@@ -65,7 +65,8 @@ import Foundation
         // The color position clamps to the track length, which is 0.0.
         #expect(layout.liveColorPosition == 0.0)
 
-        // The thumb position clamps to the track length (0.0) minus the thumb thickness (10.0).
+        // The thumb position clamps to the track length (0.0) minus the thumb
+        // thickness (10.0).
         #expect(layout.liveThumbPosition == -10.0)
 
         state.finalizeDrag()

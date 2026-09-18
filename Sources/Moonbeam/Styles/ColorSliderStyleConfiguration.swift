@@ -3,8 +3,8 @@ import SwiftUI
 /// The properties of a styled color slider instance.
 public struct ColorSliderStyleConfiguration {
 
-    /// The current value of the color slider, normalized between `0.0` and
-    /// `1.0`.
+    /// The current progress value of the color slider, normalized between
+    /// `0.0` and `1.0`.
     public let value: Double
 
     /// A boolean value indicating whether the user is currently dragging the
@@ -14,7 +14,8 @@ public struct ColorSliderStyleConfiguration {
     /// The layout orientation of the slider (`.horizontal` or `.vertical`).
     public let axis: Axis
 
-    /// The calculated spatial offset for the thumb along the slider track.
+    /// The calculated spatial offset for the leading edge of the draggable
+    /// thumb.
     public let thumbOffset: CGSize
 
     /// The calculated spatial offset for the floating color preview.
@@ -23,22 +24,22 @@ public struct ColorSliderStyleConfiguration {
     /// The anchor point used to animate the floating preview out of the thumb.
     public let previewScaleAnchor: UnitPoint
 
-    /// The pre-configured background track view.
+    /// The slider track.
     public let track: Track
 
-    /// The pre-configured draggable thumb view.
+    /// The draggable thumb.
     public let thumb: Thumb
 
-    /// The pre-configured floating color preview view.
+    /// The floating color preview.
     public let preview: Preview
 
-    /// A view representing the track of the color slider.
+    /// A view representing the color slider track.
     public struct Track: View {
         public let body: AnyView
         internal init<V: View>(_ content: V) { self.body = AnyView(content) }
     }
 
-    /// A view representing the draggable thumb for the color slider.
+    /// A view representing the draggable thumb.
     public struct Thumb: View {
         public let body: AnyView
         internal init<V: View>(_ content: V) { self.body = AnyView(content) }

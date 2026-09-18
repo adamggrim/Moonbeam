@@ -35,16 +35,28 @@ public enum ColorSliderDefaults {
         }
     }
 
+    /// The multiplier used to calculate the corner radius of the preview based
+    /// on its size.
     public static let cornerRadiusMultiplier: CGFloat = 0.225
+    /// The default scale ratio of the floating color preview when not actively
+    /// dragged.
     public static let scaleRatio: CGFloat = 0.25
+    /// The scale multiplier applied to the thumb during an active drag.
     public static let dragScaleMultiplier: CGFloat = 1.1
+    /// The default percentage step for VoiceOver adjustments.
     public static let accessibilityStepPercentage: Double = 0.05
 
+    /// The default blur radius applied to component shadows.
     public static let shadowRadius: CGFloat = 5.0
+    /// The default horizontal offset applied to component shadows.
     public static let shadowX: CGFloat = 0.0
+    /// The default vertical offset applied to component shadows.
     public static let shadowY: CGFloat = 0.0
+    /// The default opacity applied to component shadows.
     public static let shadowOpacity: Double = 0.33
 
+    /// The default line width applied to component strokes.
     public static let strokeLineWidth: CGFloat = 1.0
+    /// The default duration for slider animation in seconds.
     public static let animationDuration: Double = 0.25
 }

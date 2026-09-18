@@ -3,28 +3,57 @@ import Foundation
 /// An explicit configuration object that allows host apps to override default
 /// VoiceOver translations.
 public struct SpectrumAccessibilityStrings: Sendable {
+    /// The localized accessibility string for black colors.
     public let black: String
+    /// The localized accessibility string for white colors.
     public let white: String
+    /// The localized accessibility string for gray colors.
     public let gray: String
+    /// The localized accessibility string for red colors.
     public let red: String
+    /// The localized accessibility string for orange colors.
     public let orange: String
+    /// The localized accessibility string for yellow colors.
     public let yellow: String
+    /// The localized accessibility string for green colors.
     public let green: String
+    /// The localized accessibility string for cyan colors.
     public let cyan: String
+    /// The localized accessibility string for blue colors.
     public let blue: String
+    /// The localized accessibility string for purple colors.
     public let purple: String
+    /// The localized accessibility string for pink colors.
     public let pink: String
+
+    /// The localized adjective for dark colors.
     public let dark: String
+    /// The localized adjective for pale colors.
     public let pale: String
+    /// The localized adjective for vibrant colors.
     public let vibrant: String
+
+    /// The format string used to combine adjectives and base color names.
     public let format: String
 
     public init(
-        black: String? = nil, white: String? = nil, gray: String? = nil,
-        red: String? = nil, orange: String? = nil, yellow: String? = nil,
-        green: String? = nil, cyan: String? = nil, blue: String? = nil,
-        purple: String? = nil, pink: String? = nil, dark: String? = nil,
-        pale: String? = nil, vibrant: String? = nil, format: String? = nil
+        black: String? = nil,
+        white: String? = nil,
+        gray: String? = nil,
+        red: String? = nil,
+        orange: String? = nil,
+        yellow: String? = nil,
+        green: String? = nil,
+        cyan: String? = nil,
+        blue: String? = nil,
+        purple: String? = nil,
+        pink: String? = nil,
+
+        dark: String? = nil,
+        pale: String? = nil,
+        vibrant: String? = nil,
+
+        format: String? = nil
     ) {
         self.black = black ?? String(localized: "black", bundle: .module)
         self.white = white ?? String(localized: "white", bundle: .module)
@@ -37,9 +66,11 @@ public struct SpectrumAccessibilityStrings: Sendable {
         self.blue = blue ?? String(localized: "blue", bundle: .module)
         self.purple = purple ?? String(localized: "purple", bundle: .module)
         self.pink = pink ?? String(localized: "pink", bundle: .module)
+
         self.dark = dark ?? String(localized: "dark", bundle: .module)
         self.pale = pale ?? String(localized: "pale", bundle: .module)
         self.vibrant = vibrant ?? String(localized: "vibrant", bundle: .module)
+
         self.format = format ?? String(localized: "color_name_format", defaultValue: "%1$@ %2$@", bundle: .module)
     }
 }

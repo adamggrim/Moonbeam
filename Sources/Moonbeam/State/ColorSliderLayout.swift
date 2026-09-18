@@ -30,8 +30,8 @@ internal struct ColorSliderLayout {
     }
     var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
 
-    /// Inset to adjust the left and right bounds of the thumb if it is thinner
-    /// than the track.
+    /// Inset to adjust the left and right bounds of the draggble thumb if it is
+    /// thinner than the track.
     var thumbInset: CGFloat { (resolvedTrackThickness - resolvedThumbThickness) / 2 }
 
     var liveContainerThumbDrag: CGFloat {
@@ -48,16 +48,17 @@ internal struct ColorSliderLayout {
     /// slider.
     ///
     /// For most of the slider, corresponds with the horizontal position of the
-    /// thumb's center. At the start or end of the slider, can extend beyond the
-    /// thumb's center to the start or end of the thumb.
+    /// draggable thumb's center. At the start or end of the slider, can extend
+    /// beyond the thumb's center to the start or end of the thumb.
     var liveColorPosition: CGFloat {
         min(max(liveContainerThumbDrag + halfThumbThickness, 0), resolvedLength)
     }
 
-    /// The clamped main-axis position of the start of the thumb during an
-    /// active drag.
+    /// The clamped main-axis position of the leading edge of the draggable
+    /// thumb during an active drag.
     ///
-    /// Cannot extend beyond the thumb's leading edge at the end of the slider.
+    /// At the end of the slider, cannot extend beyond the draggable thumb's
+    /// leading edge.
     var liveThumbPosition: CGFloat {
         min(max(liveContainerThumbDrag, 0 + thumbInset), resolvedLength - resolvedThumbThickness - thumbInset)
     }
@@ -65,7 +66,7 @@ internal struct ColorSliderLayout {
     /// The main axis offset for the floating color preview.
     ///
     /// Except at the ends of the slider, the floating color preview is centered
-    /// above the thumb's center.
+    /// above the draggable thumb's center.
     var previewMainAxisOffset: CGFloat {
         let halfPreviewSize = resolvedPreviewSize / 2
         let leftBound = halfPreviewSize - halfThumbThickness
@@ -75,7 +76,8 @@ internal struct ColorSliderLayout {
         return clampedValue - halfPreviewSize + halfThumbThickness
     }
 
-    /// Calculates the exact relative position of the thumb inside the preview.
+    /// Calculates the exact relative position of the draggable thumb inside the
+    /// preview.
     ///
     /// The preview always animates out of and back into the slider thumb.
     var previewScaleAnchor: UnitPoint {

@@ -8,15 +8,25 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
 
     // MARK: - Properties
 
+    /// The shape of the slider track.
     public var trackShape: AnyShape?
+    /// The stroke applied to the slider track.
     public var trackStroke: ShapeStroke?
+    /// The shape of the draggable thumb.
     public var thumbShape: AnyShape?
+    /// The fill color of the draggable thumb.
     public var thumbColor: Color
+    /// The stroke styling applied to the draggable thumb.
     public var thumbStroke: ShapeStroke?
+    /// The shadow properties applied to the draggable thumb.
     public var thumbShadow: ShapeShadow
+    /// Disables the Liquid Glass effect on the draggable thumb.
     public var disableLiquidGlass: Bool
+    /// The shape applied to the floating color preview.
     public var previewShape: AnyShape?
+    /// The stroke styling applied to the floating color preview.
     public var previewStroke: ShapeStroke?
+    /// The shadow properties applied to the floating color preview.
     public var previewShadow: ShapeShadow
 
     @Environment(\.colorSliderDimensions) private var dimensions
