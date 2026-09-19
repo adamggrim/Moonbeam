@@ -85,7 +85,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
                     }()
 
                     let dynamicScale: CGFloat = configuration.isDragging
-                        ? ColorSliderDefaults.dragScaleMultiplier
+                        ? dimensions.thumbDragScale
                         : 1.0
 
                     Group {
@@ -130,7 +130,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
                     y: previewShadow.y
                 )
                 .scaleEffect(
-                    (!configuration.isDragging) ? dimensions.scaleRatio : 1.0,
+                    (!configuration.isDragging) ? dimensions.previewScale : 1.0,
                     anchor: configuration.previewScaleAnchor
                 )
                 .opacity((!configuration.isDragging) ? 0.0 : 1.0)

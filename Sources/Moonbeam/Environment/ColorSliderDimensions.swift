@@ -31,8 +31,11 @@ public struct ColorSliderDimensions: Sendable, Equatable {
     public var previewOffset: CGFloat? = nil
 
     /// The scale of the floating color preview when it is hidden and not
-        /// actively being dragged.
-    public var scaleRatio: CGFloat = ColorSliderDefaults.scaleRatio
+    /// actively being dragged.
+    public var previewScale: CGFloat = ColorSliderDefaults.previewScale
+
+    /// The scale applied to the thumb during an active drag interaction.
+    public var thumbDragScale: CGFloat = ColorSliderDefaults.thumbDragScale
 
     /// Calculates the effective track thickness, falling back to the control
     /// size default if there is no provided thickness.

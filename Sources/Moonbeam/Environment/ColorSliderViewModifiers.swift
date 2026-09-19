@@ -87,7 +87,8 @@ public extension View {
         thumbLength: CGFloat? = nil,
         previewSize: CGFloat? = nil,
         previewOffset: CGFloat? = nil,
-        scaleRatio: CGFloat = ColorSliderDefaults.scaleRatio
+        previewScale: CGFloat = ColorSliderDefaults.previewScale,
+        thumbDragScale: CGFloat = ColorSliderDefaults.thumbDragScale
     ) -> some View {
         let dimensions = ColorSliderDimensions(
             length: length,
@@ -97,7 +98,8 @@ public extension View {
             thumbLength: thumbLength,
             previewSize: previewSize,
             previewOffset: previewOffset,
-            scaleRatio: scaleRatio
+            previewScale: previewScale,
+            thumbDragScale: thumbDragScale
         )
         return environment(\.colorSliderDimensions, dimensions)
     }

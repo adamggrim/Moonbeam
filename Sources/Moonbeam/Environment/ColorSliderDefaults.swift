@@ -40,9 +40,9 @@ public enum ColorSliderDefaults {
     public static let cornerRadiusMultiplier: CGFloat = 0.225
     /// The default scale ratio of the floating color preview when not actively
     /// dragged.
-    public static let scaleRatio: CGFloat = 0.25
-    /// The scale multiplier applied to the thumb during an active drag.
-    public static let dragScaleMultiplier: CGFloat = 1.1
+    public static let previewScale: CGFloat = 0.25
+    /// The scale applied to the thumb during an active drag interaction.
+    public static let thumbDragScale: CGFloat = 1.1
     /// The default percentage step for VoiceOver adjustments.
     public static let accessibilityStepPercentage: Double = 0.05
 
