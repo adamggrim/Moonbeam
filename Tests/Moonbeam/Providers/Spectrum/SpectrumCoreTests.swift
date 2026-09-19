@@ -10,13 +10,13 @@ import MoonbeamShared
         let endSections: [MonochromeSection] = [WhiteSection(weight: 0.3)]
 
         let data = encodeSpectrumData(
+            colorSpace: .hsb,
             startSections: startSections,
             endSections: endSections,
             startHue: 0.1,
             endHue: 0.9,
             primaryValue: 0.8,
             secondaryValue: 0.9,
-            colorSpace: .hsb,
             primaryBendsCount: 1,
             secondaryBendsCount: 2
         )

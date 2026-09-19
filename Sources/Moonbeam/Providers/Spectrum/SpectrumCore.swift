@@ -83,13 +83,13 @@ extension ShaderBend {
 }
 
 internal func encodeSpectrumData(
+    colorSpace: SpectrumColorSpace,
     startSections: [MonochromeSection],
     endSections: [MonochromeSection],
     startHue: Double,
     endHue: Double,
     primaryValue: Double,
     secondaryValue: Double,
-    colorSpace: SpectrumColorSpace,
     primaryBendsCount: Int,
     secondaryBendsCount: Int
 ) -> Data {

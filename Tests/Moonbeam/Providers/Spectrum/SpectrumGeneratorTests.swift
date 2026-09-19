@@ -8,13 +8,13 @@ import SwiftUI
         let startSections = [BlackSection(weight: 1.0)]
         let color = SpectrumGenerator.color(
             at: 0.0,
+            colorSpace: .hsb,
             startSections: startSections,
             endSections: [],
             startHue: 0.0,
             endHue: 1.0,
             primaryValue: 1.0,
             secondaryValue: 1.0,
-            colorSpace: .hsb,
             primaryBends: nil,
             secondaryBends: nil
         )
@@ -25,13 +25,13 @@ import SwiftUI
     func middleOfSpectrum() {
         let color = SpectrumGenerator.color(
             at: 0.5,
+            colorSpace: .hsb,
             startSections: [],
             endSections: [],
             startHue: 0.0,
             endHue: 1.0,
             primaryValue: 1.0,
             secondaryValue: 1.0,
-            colorSpace: .hsb,
             primaryBends: nil,
             secondaryBends: nil
         )
@@ -43,13 +43,13 @@ import SwiftUI
         let bends = [OneWayBend(startHue: 0.0, endHue: 0.5, target: 0.2)]
         let color = SpectrumGenerator.color(
             at: 0.25, // Check halfway through the bend
+            colorSpace: .hsb,
             startSections: [],
             endSections: [],
             startHue: 0.0,
             endHue: 1.0,
             primaryValue: 1.0,
             secondaryValue: 1.0,
-            colorSpace: .hsb,
             primaryBends: bends,
             secondaryBends: nil
         )

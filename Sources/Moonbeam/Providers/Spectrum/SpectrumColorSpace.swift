@@ -47,13 +47,13 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
     public func accessibilityColorName(for value: Double) -> String? {
         guard let comps = SpectrumGenerator.components(
             at: value,
+            colorSpace: ColorSpace.colorSpace,
             startSections: startSections,
             endSections: endSections,
             startHue: startHue,
             endHue: endHue,
             primaryValue: primaryValue,
             secondaryValue: secondaryValue,
-            colorSpace: ColorSpace.colorSpace,
             primaryBends: primaryBends,
             secondaryBends: secondaryBends
         ) else { return nil }
@@ -98,26 +98,26 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         let fallback: @Sendable (Double) -> Color = { position in
             SpectrumGenerator.color(
                 at: position,
+                colorSpace: ColorSpace.colorSpace,
                 startSections: validStart,
                 endSections: validEnd,
                 startHue: startHue,
                 endHue: endHue,
                 primaryValue: primaryValue,
                 secondaryValue: secondaryValue,
-                colorSpace: ColorSpace.colorSpace,
                 primaryBends: validPrimaryBends,
                 secondaryBends: validSecondaryBends
             )
         }
 
         let shaderData = encodeSpectrumData(
+            colorSpace: ColorSpace.colorSpace,
             startSections: validStart,
             endSections: validEnd,
             startHue: startHue,
             endHue: endHue,
             primaryValue: primaryValue,
             secondaryValue: secondaryValue,
-            colorSpace: ColorSpace.colorSpace,
             primaryBendsCount: validPrimaryBends.count,
             secondaryBendsCount: validSecondaryBends.count
         )

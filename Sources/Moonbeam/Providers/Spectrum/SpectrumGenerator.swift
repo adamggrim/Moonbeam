@@ -10,6 +10,7 @@ internal struct SpectrumGenerator {
     ///
     /// - Parameters:
     ///   - position: The normalized position (0.0 to 1.0) on the slider.
+    ///   - colorSpace: Whether to use the HSB or OKLCH color space.
     ///   - startSections: An array of monochrome sections appearing before the
     ///     hue spectrum.
     ///   - endSections: An array of monochrome sections appearing after the hue
@@ -20,7 +21,6 @@ internal struct SpectrumGenerator {
     ///     to the hue spectrum.
     ///   - secondaryValue: The base secondary value (brightness or lightness)
     ///     applied to the hue spectrum.
-    ///   - colorSpace: Whether to use the HSB or OKLCH color space.
     ///   - primaryBends: An optional array of `BendSection` objects to modify
     ///     primary values across hue ranges.
     ///   - secondaryBends: An optional array of `BendSection` objects to modify
@@ -30,21 +30,27 @@ internal struct SpectrumGenerator {
     ///   provided position.
     static func color(
         at position: Double,
+        colorSpace: SpectrumColorSpace,
         startSections: [MonochromeSection],
         endSections: [MonochromeSection],
         startHue: Double,
         endHue: Double,
         primaryValue: Double, // Saturation or chroma
         secondaryValue: Double, // Brightness or lightness
-        colorSpace: SpectrumColorSpace,
         primaryBends: [BendSection]?,
         secondaryBends: [BendSection]?
     ) -> Color {
         guard let comps = components(
-            at: position, startSections: startSections, endSections: endSections,
-            startHue: startHue, endHue: endHue, primaryValue: primaryValue,
-            secondaryValue: secondaryValue, colorSpace: colorSpace,
-            primaryBends: primaryBends, secondaryBends: secondaryBends
+            at: position,
+            colorSpace: colorSpace,
+            startSections: startSections,
+            endSections: endSections,
+            startHue: startHue,
+            endHue: endHue,
+            primaryValue: primaryValue,
+            secondaryValue: secondaryValue,
+            primaryBends: primaryBends,
+            secondaryBends: secondaryBends
         ) else { return .clear }
 
         return colorSpace == .oklch
@@ -55,13 +61,13 @@ internal struct SpectrumGenerator {
     /// Exposes the raw components of the spectrum before final color conversion.
     static func components(
         at position: Double,
+        colorSpace: SpectrumColorSpace,
         startSections: [MonochromeSection],
         endSections: [MonochromeSection],
         startHue: Double,
         endHue: Double,
         primaryValue: Double,
         secondaryValue: Double,
-        colorSpace: SpectrumColorSpace,
         primaryBends: [BendSection]?,
         secondaryBends: [BendSection]?
     ) -> (hue: Double, primary: Double, secondary: Double)? {
