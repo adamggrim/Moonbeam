@@ -28,6 +28,16 @@ typedef enum {
     MoonbeamBendTypeTwoWay = 2
 } MoonbeamBendType;
 
+typedef enum {
+    MonochromeSectionTypeBlack = 0,
+    MonochromeSectionTypeWhite = 1
+} MonochromeSectionType;
+
+typedef enum {
+    EasingTypeLinear = 0,
+    EasingTypeCubic = 2
+} EasingTypeFlag;
+
 typedef struct {
     float totalWeight;
     float startSectionBoundary;

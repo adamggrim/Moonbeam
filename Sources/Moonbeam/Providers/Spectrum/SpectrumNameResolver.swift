@@ -75,6 +75,38 @@ public struct SpectrumAccessibilityStrings: Sendable {
     }
 }
 
+internal enum ColorThresholds {
+    enum HSB {
+        static let grayMaxSaturation = 0.05
+        static let darkMaxBrightness = 0.3
+        static let paleMinBrightness = 0.8
+        static let paleMaxSaturation = 0.5
+        static let vibrantMinSaturation = 0.8
+        static let blackMaxBrightness = 0.15
+        static let whiteMinBrightness = 0.85
+    }
+
+    enum OKLCH {
+        static let grayMaxChroma = 0.02
+        static let darkMaxLightness = 0.35
+        static let paleMinLightness = 0.8
+        static let paleMaxChroma = 0.1
+        static let vibrantMinChroma = 0.15
+        static let blackMaxLightness = 0.15
+        static let whiteMinLightness = 0.85
+    }
+}
+
+internal enum HueDegrees {
+    static let redEnd = 25.0
+    static let orangeEnd = 60.0
+    static let yellowEnd = 110.0
+    static let greenEnd = 160.0
+    static let cyanEnd = 210.0
+    static let blueEnd = 280.0
+    static let purpleEnd = 330.0
+}
+
 /// Mapping utility that returns color names based on hue and intensity values.
 internal struct SpectrumNameResolver {
     static func name(
@@ -91,34 +123,41 @@ internal struct SpectrumNameResolver {
         let isDark: Bool
         let isPale: Bool
         let isVibrant: Bool
+        let isBlack: Bool
+        let isWhite: Bool
 
         if colorSpace == .oklch {
-            isGray = primary < 0.02
-            isDark = secondary < 0.35
-            isPale = secondary > 0.8 && primary < 0.1
-            isVibrant = primary > 0.15
+            isGray = primary < ColorThresholds.OKLCH.grayMaxChroma
+            isDark = secondary < ColorThresholds.OKLCH.darkMaxLightness
+            isPale = secondary > ColorThresholds.OKLCH.paleMinLightness && primary < ColorThresholds.OKLCH.paleMaxChroma
+            isVibrant = primary > ColorThresholds.OKLCH.vibrantMinChroma
+            isBlack = secondary < ColorThresholds.OKLCH.blackMaxLightness
+            isWhite = secondary > ColorThresholds.OKLCH.whiteMinLightness
         } else {
-            isGray = primary < 0.05
-            isDark = secondary < 0.3
-            isPale = secondary > 0.8 && primary < 0.5
-            isVibrant = primary > 0.8
+            isGray = primary < ColorThresholds.HSB.grayMaxSaturation
+            isDark = secondary < ColorThresholds.HSB.darkMaxBrightness
+            isPale = secondary > ColorThresholds.HSB.paleMinBrightness
+                && primary < ColorThresholds.HSB.paleMaxSaturation
+            isVibrant = primary > ColorThresholds.HSB.vibrantMinSaturation
+            isBlack = secondary < ColorThresholds.HSB.blackMaxBrightness
+            isWhite = secondary > ColorThresholds.HSB.whiteMinBrightness
         }
 
         if isGray {
-            if secondary < 0.15 { return strings.black }
-            if secondary > 0.85 { return strings.white }
+            if isBlack { return strings.black }
+            if isWhite { return strings.white }
             return strings.gray
         }
 
         let baseName: String
         switch degrees {
-        case 0..<25: baseName = strings.red
-        case 25..<60: baseName = strings.orange
-        case 60..<110: baseName = strings.yellow
-        case 110..<160: baseName = strings.green
-        case 160..<210: baseName = strings.cyan
-        case 210..<280: baseName = strings.blue
-        case 280..<330: baseName = strings.purple
+        case 0..<HueDegrees.redEnd: baseName = strings.red
+        case HueDegrees.redEnd..<HueDegrees.orangeEnd: baseName = strings.orange
+        case HueDegrees.orangeEnd..<HueDegrees.yellowEnd: baseName = strings.yellow
+        case HueDegrees.yellowEnd..<HueDegrees.greenEnd: baseName = strings.green
+        case HueDegrees.greenEnd..<HueDegrees.cyanEnd: baseName = strings.cyan
+        case HueDegrees.cyanEnd..<HueDegrees.blueEnd: baseName = strings.blue
+        case HueDegrees.blueEnd..<HueDegrees.purpleEnd: baseName = strings.purple
         default: baseName = strings.pink
         }
 

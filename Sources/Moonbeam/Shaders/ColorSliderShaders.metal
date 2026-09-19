@@ -15,16 +15,23 @@ float3 convertHSBtoRGB(float hue, float saturation, float brightness) {
 
 // MARK: - Gamma transfer functions
 
+constant float sRGBGammaThreshold = 0.0031308;
+constant float sRGBLinearThreshold = 0.04045;
+constant float sRGBGammaScale = 12.92;
+constant float sRGBGammaOffset = 0.055;
+constant float sRGBGammaPower = 2.4;
+constant float sRGBGammaHighScale = 1.055;
+
 float3 linearToSRGB(float3 c) {
-    float3 linear_low = 12.92 * c;
-    float3 linear_high = 1.055 * pow(c, 1.0 / 2.4) - 0.055;
-    return select(linear_high, linear_low, c <= 0.0031308);
+    float3 linear_low = sRGBGammaScale * c;
+    float3 linear_high = sRGBGammaHighScale * pow(c, 1.0 / sRGBGammaPower) - sRGBGammaOffset;
+    return select(linear_high, linear_low, c <= sRGBGammaThreshold);
 }
 
 float3 sRGBToLinear(float3 c) {
-    float3 srgb_low = c / 12.92;
-    float3 srgb_high = pow((c + 0.055) / 1.055, 2.4);
-    return select(srgb_high, srgb_low, c <= 0.04045);
+    float3 srgb_low = c / sRGBGammaScale;
+    float3 srgb_high = pow((c + sRGBGammaOffset) / sRGBGammaHighScale, sRGBGammaPower);
+    return select(srgb_high, srgb_low, c <= sRGBLinearThreshold);
 }
 
 // Matrices to convert LMS constants to/from OKLAB and RGB.

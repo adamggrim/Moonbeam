@@ -105,8 +105,12 @@ internal func encodeSpectrumData(
     for (i, section) in startSections.enumerated() {
         if i >= maxSections { break }
         cumulativeStart += section.weight / totalWeight
-        let colorVal: Float = section.color == .white ? 1.0 : 0.0
-        let easingVal: Float = section.easing == .cubic ? 2.0 : 0.0
+        let colorVal: Float = section.color == .white
+            ? Float(MonochromeSectionTypeWhite.rawValue)
+            : Float(MonochromeSectionTypeBlack.rawValue)
+        let easingVal: Float = section.easing == .cubic
+            ? Float(EasingTypeCubic.rawValue)
+            : Float(EasingTypeLinear.rawValue)
         startData[i*2] = colorVal + easingVal
         startData[i*2 + 1] = Float(cumulativeStart)
     }
@@ -116,8 +120,12 @@ internal func encodeSpectrumData(
     for (i, section) in endSections.enumerated() {
         if i >= maxSections { break }
         cumulativeEnd += section.weight / totalWeight
-        let colorVal: Float = section.color == .white ? 1.0 : 0.0
-        let easingVal: Float = section.easing == .cubic ? 2.0 : 0.0
+        let colorVal: Float = section.color == .white
+            ? Float(MonochromeSectionTypeWhite.rawValue)
+            : Float(MonochromeSectionTypeBlack.rawValue)
+        let easingVal: Float = section.easing == .cubic
+            ? Float(EasingTypeCubic.rawValue)
+            : Float(EasingTypeLinear.rawValue)
         endData[i*2] = colorVal + easingVal
         endData[i*2 + 1] = Float(cumulativeEnd)
     }
