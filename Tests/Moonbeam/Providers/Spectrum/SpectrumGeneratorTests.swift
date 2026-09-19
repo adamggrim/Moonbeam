@@ -6,8 +6,7 @@ import SwiftUI
     @Test("Generator output for a monochrome start section")
     func monochromeStartSection() {
         let startSections = [BlackSection(weight: 1.0)]
-        let color = SpectrumGenerator.color(
-            at: 0.0,
+        let configuration = SpectrumConfiguration(
             colorSpace: .hsb,
             startSections: startSections,
             endSections: [],
@@ -18,13 +17,16 @@ import SwiftUI
             primaryBends: nil,
             secondaryBends: nil
         )
+        let color = SpectrumGenerator.color(
+            at: 0.0,
+            configuration: configuration
+        )
         #expect(color == Color(hue: 0.0, saturation: 1.0, brightness: 0.0))
     }
 
     @Test("Generator output for the middle of a spectrum slider without bends")
     func middleOfSpectrum() {
-        let color = SpectrumGenerator.color(
-            at: 0.5,
+        let configuration = SpectrumConfiguration(
             colorSpace: .hsb,
             startSections: [],
             endSections: [],
@@ -35,14 +37,17 @@ import SwiftUI
             primaryBends: nil,
             secondaryBends: nil
         )
+        let color = SpectrumGenerator.color(
+            at: 0.5,
+            configuration: configuration
+        )
         #expect(color == Color(hue: 0.5, saturation: 1.0, brightness: 1.0))
     }
 
     @Test("Generator application of the correct bend target to primary values")
     func appliedSpectrumBend() {
         let bends = [OneWayBend(startHue: 0.0, endHue: 0.5, target: 0.2)]
-        let color = SpectrumGenerator.color(
-            at: 0.25, // Check halfway through the bend
+        let configuration = SpectrumConfiguration(
             colorSpace: .hsb,
             startSections: [],
             endSections: [],
@@ -52,6 +57,10 @@ import SwiftUI
             secondaryValue: 1.0,
             primaryBends: bends,
             secondaryBends: nil
+        )
+        let color = SpectrumGenerator.color(
+            at: 0.25,
+            configuration: configuration
         )
         #expect(color == Color(hue: 0.25, saturation: 0.6, brightness: 1.0))
     }

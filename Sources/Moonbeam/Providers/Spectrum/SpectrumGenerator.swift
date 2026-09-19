@@ -1,5 +1,31 @@
 import SwiftUI
 
+/// A configuration for the static properties of a spectrum.
+internal struct SpectrumConfiguration {
+    /// Whether to use the HSB or OKLCH color space.
+    let colorSpace: SpectrumColorSpace
+    /// An array of monochrome sections appearing before the hue spectrum.
+    let startSections: [MonochromeSection]
+    /// An array of monochrome sections appearing after the hue spectrum.
+    let endSections: [MonochromeSection]
+    /// The hue at the beginning of the hue section.
+    let startHue: Double
+    /// The hue at the end of the hue section.
+    let endHue: Double
+    /// The base primary value (saturation or chroma) applied to the hue
+    /// spectrum.
+    let primaryValue: Double
+    /// The base secondary value (brightness or lightness) applied to the hue
+    /// spectrum.
+    let secondaryValue: Double
+    /// An optional array of `BendSection` objects to modify primary values
+    /// across hue ranges.
+    let primaryBends: [BendSection]?
+    /// An optional array of `BendSection` objects to modify secondary values
+    /// across hue ranges.
+    let secondaryBends: [BendSection]?
+}
+
 /// A utility for generating a spectrum color for a given position, suitable for
 /// shaders.
 internal struct SpectrumGenerator {
@@ -10,67 +36,39 @@ internal struct SpectrumGenerator {
     ///
     /// - Parameters:
     ///   - position: The normalized position (0.0 to 1.0) on the slider.
-    ///   - colorSpace: Whether to use the HSB or OKLCH color space.
-    ///   - startSections: An array of monochrome sections appearing before the
-    ///     hue spectrum.
-    ///   - endSections: An array of monochrome sections appearing after the hue
-    ///     spectrum.
-    ///   - startHue: The hue at the beginning of the hue section.
-    ///   - endHue: The hue at the end of the hue section.
-    ///   - primaryValue: The base primary value (saturation or chroma) applied
-    ///     to the hue spectrum.
-    ///   - secondaryValue: The base secondary value (brightness or lightness)
-    ///     applied to the hue spectrum.
-    ///   - primaryBends: An optional array of `BendSection` objects to modify
-    ///     primary values across hue ranges.
-    ///   - secondaryBends: An optional array of `BendSection` objects to modify
-    ///     secondary values across hue ranges.
+    ///   - configuration: The static properties of a spectrum.
     ///
     /// - Returns: A `SwiftUI.Color` representing the computed color at the
     ///   provided position.
     static func color(
         at position: Double,
-        colorSpace: SpectrumColorSpace,
-        startSections: [MonochromeSection],
-        endSections: [MonochromeSection],
-        startHue: Double,
-        endHue: Double,
-        primaryValue: Double, // Saturation or chroma
-        secondaryValue: Double, // Brightness or lightness
-        primaryBends: [BendSection]?,
-        secondaryBends: [BendSection]?
+        configuration: SpectrumConfiguration
     ) -> Color {
         guard let comps = components(
             at: position,
-            colorSpace: colorSpace,
-            startSections: startSections,
-            endSections: endSections,
-            startHue: startHue,
-            endHue: endHue,
-            primaryValue: primaryValue,
-            secondaryValue: secondaryValue,
-            primaryBends: primaryBends,
-            secondaryBends: secondaryBends
+            configuration: configuration
         ) else { return .clear }
 
-        return colorSpace == .oklch
+        return configuration.colorSpace == .oklch
             ? ColorSpaceConverter.oklchToColor(lightness: comps.secondary, chroma: comps.primary, hue: comps.hue)
             : Color(hue: comps.hue, saturation: comps.primary, brightness: comps.secondary)
     }
 
-    /// Exposes the raw components of the spectrum before final color conversion.
     static func components(
         at position: Double,
-        colorSpace: SpectrumColorSpace,
-        startSections: [MonochromeSection],
-        endSections: [MonochromeSection],
-        startHue: Double,
-        endHue: Double,
-        primaryValue: Double,
-        secondaryValue: Double,
-        primaryBends: [BendSection]?,
-        secondaryBends: [BendSection]?
+        configuration: SpectrumConfiguration
     ) -> (hue: Double, primary: Double, secondary: Double)? {
+        // Map to local variables to minimize changes to existing internal math.
+        let startSections = configuration.startSections
+        let endSections = configuration.endSections
+        let startHue = configuration.startHue
+        let endHue = configuration.endHue
+        let primaryValue = configuration.primaryValue
+        let secondaryValue = configuration.secondaryValue
+        let colorSpace = configuration.colorSpace
+        let primaryBends = configuration.primaryBends
+        let secondaryBends = configuration.secondaryBends
+
         let startWeight = startSections.reduce(0) { $0 + $1.weight }
         let hueWeight = abs(endHue - startHue)
         let endWeight = endSections.reduce(0) { $0 + $1.weight }
@@ -93,13 +91,7 @@ internal struct SpectrumGenerator {
                             relativePosition: relativePosition,
                             isStart: true,
                             monochromeSection: section,
-                            startHue: startHue,
-                            endHue: endHue,
-                            primaryValue: primaryValue,
-                            secondaryValue: secondaryValue,
-                            colorSpace: colorSpace,
-                            primaryBends: primaryBends,
-                            secondaryBends: secondaryBends
+                            configuration: configuration
                         )
                     } else {
                         return monochromeToMonochromeColor(
@@ -144,13 +136,7 @@ internal struct SpectrumGenerator {
                             relativePosition: relativePosition,
                             isStart: false,
                             monochromeSection: section,
-                            startHue: startHue,
-                            endHue: endHue,
-                            primaryValue: primaryValue,
-                            secondaryValue: secondaryValue,
-                            colorSpace: colorSpace,
-                            primaryBends: primaryBends,
-                            secondaryBends: secondaryBends
+                            configuration: configuration
                         )
                     } else {
                         return monochromeToMonochromeColor(
@@ -173,14 +159,16 @@ internal struct SpectrumGenerator {
         relativePosition: Double,
         isStart: Bool,
         monochromeSection: MonochromeSection,
-        startHue: Double,
-        endHue: Double,
-        primaryValue: Double,
-        secondaryValue: Double,
-        colorSpace: SpectrumColorSpace,
-        primaryBends: [BendSection]?,
-        secondaryBends: [BendSection]?
+        configuration: SpectrumConfiguration
     ) -> (hue: Double, primary: Double, secondary: Double) {
+        let startHue = configuration.startHue
+        let endHue = configuration.endHue
+        let primaryValue = configuration.primaryValue
+        let secondaryValue = configuration.secondaryValue
+        let colorSpace = configuration.colorSpace
+        let primaryBends = configuration.primaryBends
+        let secondaryBends = configuration.secondaryBends
+
         let hue = isStart ? startHue : endHue
         let linearFactor = isStart ? relativePosition : (1.0 - relativePosition)
 

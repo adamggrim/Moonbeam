@@ -45,8 +45,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
     let accessibilityStrings: SpectrumAccessibilityStrings
 
     public func accessibilityColorName(for value: Double) -> String? {
-        guard let comps = SpectrumGenerator.components(
-            at: value,
+        let configuration = SpectrumConfiguration(
             colorSpace: ColorSpace.colorSpace,
             startSections: startSections,
             endSections: endSections,
@@ -56,6 +55,11 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
             secondaryValue: secondaryValue,
             primaryBends: primaryBends,
             secondaryBends: secondaryBends
+        )
+
+        guard let comps = SpectrumGenerator.components(
+            at: value,
+            configuration: configuration
         ) else { return nil }
 
         return SpectrumNameResolver.name(
@@ -95,18 +99,22 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         self.secondaryBends = validSecondaryBends
         self.accessibilityStrings = accessibilityStrings
 
+        let configuration = SpectrumConfiguration(
+            colorSpace: ColorSpace.colorSpace,
+            startSections: validStart,
+            endSections: validEnd,
+            startHue: startHue,
+            endHue: endHue,
+            primaryValue: primaryValue,
+            secondaryValue: secondaryValue,
+            primaryBends: validPrimaryBends,
+            secondaryBends: validSecondaryBends
+        )
+
         let fallback: @Sendable (Double) -> Color = { position in
             SpectrumGenerator.color(
                 at: position,
-                colorSpace: ColorSpace.colorSpace,
-                startSections: validStart,
-                endSections: validEnd,
-                startHue: startHue,
-                endHue: endHue,
-                primaryValue: primaryValue,
-                secondaryValue: secondaryValue,
-                primaryBends: validPrimaryBends,
-                secondaryBends: validSecondaryBends
+                configuration: configuration
             )
         }
 
