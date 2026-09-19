@@ -5,9 +5,9 @@ import SwiftUI
 internal struct ColorSliderLayout {
     let state: ColorSliderState
     let value: Double
-    let dimensions: ColorSliderDimensions
     let axis: Axis
     let controlSize: ControlSize
+    let dimensions: ColorSliderDimensions
     let previewPosition: PreviewPosition?
     let previewSpacing: CGFloat?
 

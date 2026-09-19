@@ -163,9 +163,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             let layout = ColorSliderLayout(
                 state: sliderState,
                 value: value,
-                dimensions: resolvedDimensions,
                 axis: axis,
                 controlSize: controlSize,
+                dimensions: resolvedDimensions,
                 previewPosition: previewPosition,
                 previewSpacing: previewSpacing
             )
@@ -234,9 +234,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                         let newLayout = ColorSliderLayout(
                             state: sliderState,
                             value: newValue,
-                            dimensions: resolvedDimensions,
                             axis: axis,
                             controlSize: controlSize,
+                            dimensions: resolvedDimensions,
                             previewPosition: previewPosition,
                             previewSpacing: previewSpacing
                         )
@@ -292,9 +292,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         let newLayout = ColorSliderLayout(
             state: sliderState,
             value: value,
-            dimensions: layout.dimensions,
             axis: layout.axis,
             controlSize: layout.controlSize,
+            dimensions: layout.dimensions,
             previewPosition: layout.previewPosition,
             previewSpacing: layout.previewSpacing
         )

@@ -9,8 +9,13 @@ import Foundation
         state.updateDrag(translation: -500.0, currentValue: 0.1)
 
         let layout = ColorSliderLayout(
-            state: state, value: 0.1, dimensions: ColorSliderDimensions(length: 300.0),
-            axis: .horizontal, controlSize: .regular, previewPosition: nil, previewSpacing: nil
+            state: state,
+            value: 0.1,
+            axis: .horizontal,
+            controlSize: .regular,
+            dimensions: ColorSliderDimensions(length: 300.0),
+            previewPosition: nil,
+            previewSpacing: nil
         )
 
         #expect(layout.liveColorPosition == 0.0)
@@ -22,8 +27,13 @@ import Foundation
         state.updateDrag(translation: 500.0, currentValue: 0.9)
 
         let layout = ColorSliderLayout(
-            state: state, value: 0.9, dimensions: ColorSliderDimensions(length: 300.0),
-            axis: .horizontal, controlSize: .regular, previewPosition: nil, previewSpacing: nil
+            state: state,
+            value: 0.9,
+            axis: .horizontal,
+            controlSize: .regular,
+            dimensions: ColorSliderDimensions(length: 300.0),
+            previewPosition: nil,
+            previewSpacing: nil
         )
 
         #expect(layout.liveColorPosition == 300.0)
@@ -35,8 +45,13 @@ import Foundation
         state.updateDrag(translation: 20.0, currentValue: 0.5)
 
         let layout = ColorSliderLayout(
-            state: state, value: 0.5, dimensions: ColorSliderDimensions(length: 100.0, thickness: 10.0),
-            axis: .horizontal, controlSize: .regular, previewPosition: nil, previewSpacing: nil
+            state: state,
+            value: 0.5,
+            axis: .horizontal,
+            controlSize: .regular,
+            dimensions: ColorSliderDimensions(length: 100.0, thickness: 10.0),
+            previewPosition: nil,
+            previewSpacing: nil
         )
 
         #expect(state.isDragging == true)
@@ -55,8 +70,13 @@ import Foundation
         state.updateDrag(translation: 100.0, currentValue: 0.0)
 
         let layout = ColorSliderLayout(
-            state: state, value: 0.0, dimensions: ColorSliderDimensions(length: 0.0, thickness: 10.0),
-            axis: .horizontal, controlSize: .regular, previewPosition: nil, previewSpacing: nil
+            state: state,
+            value: 0.0,
+            axis: .horizontal,
+            controlSize: .regular,
+            dimensions: ColorSliderDimensions(length: 0.0, thickness: 10.0),
+            previewPosition: nil,
+            previewSpacing: nil
         )
 
         #expect(state.isDragging == true)

@@ -9,8 +9,11 @@ import SwiftUI
         let layout = ColorSliderLayout(
             state: state,
             value: 0.5,
+            axis: .horizontal,
+            controlSize: .regular,
             dimensions: ColorSliderDimensions(length: 100.0, thickness: 10.0, previewSize: 30.0),
-            axis: .horizontal, controlSize: .regular, previewPosition: nil, previewSpacing: nil
+            previewPosition: nil,
+            previewSpacing: nil
         )
 
         #expect(layout.previewMainAxisOffset == 35.0)
@@ -25,8 +28,11 @@ import SwiftUI
         let layout = ColorSliderLayout(
             state: state,
             value: 0.0,
+            axis: .horizontal,
+            controlSize: .regular,
             dimensions: ColorSliderDimensions(length: 100.0, thickness: 10.0, previewSize: 30.0),
-            axis: .horizontal, controlSize: .regular, previewPosition: nil, previewSpacing: nil
+            previewPosition: nil,
+            previewSpacing: nil
         )
 
         #expect(layout.previewMainAxisOffset == 0.0)
@@ -41,8 +47,11 @@ import SwiftUI
         let layout = ColorSliderLayout(
             state: state,
             value: 1.0,
+            axis: .horizontal,
+            controlSize: .regular,
             dimensions: ColorSliderDimensions(length: 100.0, thickness: 10.0, previewSize: 30.0),
-            axis: .horizontal, controlSize: .regular, previewPosition: nil, previewSpacing: nil
+            previewPosition: nil,
+            previewSpacing: nil
         )
 
         #expect(layout.previewMainAxisOffset == 70.0)
