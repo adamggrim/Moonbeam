@@ -75,7 +75,12 @@ public struct SpectrumAccessibilityStrings: Sendable {
     }
 }
 
+/// Thresholds for VoiceOver color descriptions.
 internal enum ColorThresholds {
+
+    /// Thresholds for HSB spectrum sliders.
+    ///
+    /// Manually calibrated because HSB is not perceptually uniform.
     enum HSB {
         static let grayMaxSaturation = 0.05
         static let darkMaxBrightness = 0.3
@@ -86,6 +91,7 @@ internal enum ColorThresholds {
         static let whiteMinBrightness = 0.85
     }
 
+    /// Thresholds for OKLCH spectrum sliders.
     enum OKLCH {
         static let grayMaxChroma = 0.02
         static let darkMaxLightness = 0.35

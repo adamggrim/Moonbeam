@@ -9,6 +9,11 @@ import MoonbeamShared
 
 fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "Spectrum")
 
+/// Determines if an array of bend sections contains any overlapping sections.
+///
+/// - Parameter bendSections: An array of `BendSection` objects.
+/// - Returns: `true` if all sections occupy distinct hue ranges, otherwise
+///   `false`.
 internal func validateBendSections(bendSections: [BendSection]) -> Bool {
     guard bendSections.count > 1 else { return true }
     let sortedBendSections = bendSections.sorted { min($0.startHue, $0.endHue) < min($1.startHue, $1.endHue) }
@@ -20,13 +25,14 @@ internal func validateBendSections(bendSections: [BendSection]) -> Bool {
     return true
 }
 
-/// Validates bend sections.
+/// Drops bend sections that overlap with previously sections.
 ///
 /// - Parameters:
 ///   - bends: The user-provided array of `BendSection` objects.
-///   - name: A descriptive identifier for the `BendSection` objects.
+///   - name: A descriptive identifier (e.g., "HSB Saturation") used to format
+///     the telemetry error message.
 ///
-/// - Returns: A validated array of bend sections.
+/// - Returns: The sanitized array of bend sections.
 internal func validateBends(_ bends: [BendSection], name: String) -> [BendSection] {
     var validBends: [BendSection] = []
 
@@ -66,7 +72,8 @@ internal func validateMonochromeSections(
 
 // MARK: - Metal data structures
 
-/// Adds an initializer to the C-bridged `ShaderBend` struct to map Swift `BendSection` properties.
+/// Adds an initializer to the C-bridged `ShaderBend` struct to map Swift
+/// `BendSection` properties.
 extension ShaderBend {
     init(bend: BendSection) {
         self.init()
@@ -100,6 +107,13 @@ internal func encodeSpectrumData(
 
     let maxSections = Int(MAX_MONOCHROME_SECTIONS)
 
+    /// Pack up to two monochrome start sections into a single `simd_float4`.
+    ///
+    /// For each section `i` (0 or 1), we use two consecutive floats in the vector:
+    /// - Index `i * 2`: Multiplexed state combining the section color (0.0 or 1.0)
+    ///   and the easing curve (0.0 or 2.0). The fragment shader reconstructs these
+    ///   using `fmod(val, 2.0)` for color and `val >= 2.0` for the easing flag.
+    /// - Index `i * 2 + 1`: The cumulative boundary position on the slider.
     var startData = simd_float4(0, 0, 0, 0)
     var cumulativeStart = 0.0
     for (i, section) in startSections.enumerated() {
@@ -115,6 +129,9 @@ internal func encodeSpectrumData(
         startData[i*2 + 1] = Float(cumulativeStart)
     }
 
+    // Apply the identical SIMD packing strategy to the end sections,
+    // multiplexing
+    // color and easing types into the even indices, and spatial boundaries into the odd.
     var endData = simd_float4(0, 0, 0, 0)
     var cumulativeEnd = (startWeight + hueWeight) / totalWeight
     for (i, section) in endSections.enumerated() {
