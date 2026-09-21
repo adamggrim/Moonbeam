@@ -5,7 +5,7 @@ import SwiftUI
 public enum ColorSource: Sendable {
     /// Provides colors as a precomputed array.
     ///
-    /// Designed for hard-edge color sliders.
+    /// Designed for hard-edge sliders.
     case array([Color])
 
     /// Dynamically calculates a color based on normalized position (i.e., 0.0

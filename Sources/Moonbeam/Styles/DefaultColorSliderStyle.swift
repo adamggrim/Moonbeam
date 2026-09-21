@@ -5,9 +5,6 @@ import SwiftUI
 /// This style includes a Liquid Glass slider thumb (on supported platforms),
 /// rounded geometry and a floating color preview.
 public struct DefaultColorSliderStyle: ColorSliderStyle {
-
-    // MARK: - Properties
-
     /// The shape of the slider track.
     public var trackShape: AnyShape?
     /// The stroke applied to the slider track.
@@ -33,8 +30,6 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.controlSize) private var controlSize
 
-    // MARK: - Initialization
-
     public init(
         trackShape: AnyShape? = nil,
         trackStroke: ShapeStroke? = nil,
@@ -58,8 +53,6 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
         self.previewStroke = previewStroke
         self.previewShadow = previewShadow
     }
-
-    // MARK: - Body
 
     public func makeBody(configuration: Configuration) -> some View {
         ZStack(alignment: configuration.axis == .horizontal ? .leading : .bottom) {
@@ -139,8 +132,6 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
         }
     }
 
-    // MARK: - Geometry resolution
-
     private var resolvedTrackShape: AnyShape {
         if let shape = trackShape { return shape }
         if let radius = dimensions.cornerRadius {
@@ -158,8 +149,6 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
         )
     }
 }
-
-// MARK: - Dot syntax extension
 
 public extension ColorSliderStyle where Self == DefaultColorSliderStyle {
     static var automatic: DefaultColorSliderStyle { DefaultColorSliderStyle() }

@@ -38,8 +38,6 @@ public struct BendSectionBuilder {
     public static func buildEither(second component: [BendSection]) -> [BendSection] { return component }
 }
 
-// MARK: - Bend sections
-
 /// A bend section that fades into the start or end of a color slider.
 public struct OneWayBend: BendSection {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.

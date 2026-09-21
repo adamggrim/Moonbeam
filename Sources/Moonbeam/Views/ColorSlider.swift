@@ -12,10 +12,8 @@ typealias PlatformColor = NSColor
 /// from a dynamically generated spectrum or gradient.
 @MainActor
 public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
-
-    // MARK: - State and bindings
-
     /// The position of the slider, normalized to a range from 0.0 to 1.0.
+    ///
     /// This is the slider's single source of truth.
     @Binding public var value: Double
 
@@ -27,8 +25,6 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
 
     @State private var sliderState = ColorSliderState()
 
-    // MARK: - Environment variables
-
     @Environment(\.colorSliderStyle) private var style
     @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.controlSize) private var controlSize
@@ -39,8 +35,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorSliderPreviewPosition) private var previewPosition
     @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
-
-    // MARK: - Public properties
+    @Environment(\.colorSliderAccessibilityPercentageHidden) private var hidePercentage
+    @Environment(\.colorSliderAccessibilityFormatter) private var accessibilityFormatter
 
     /// A localized string key used for VoiceOver accessibility.
     public var label: LocalizedStringKey
@@ -148,8 +144,6 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             return nil
         }
     }
-
-    // MARK: - Views
 
     public var body: some View {
         GeometryReader { proxy in
@@ -276,8 +270,6 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             maxHeight: axis == .vertical && dimensions.length == nil ? .infinity : nil
         )
     }
-
-    // MARK: - Drag event handlers
 
     /// Updates the view's state when the position of the `DragGesture`
     /// changes.

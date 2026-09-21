@@ -70,7 +70,7 @@ internal func validateMonochromeSections(
     return sections
 }
 
-// MARK: - Metal data structures
+// MARK: - Metal data bridging
 
 /// Adds an initializer to the C-bridged `ShaderBend` struct to map Swift
 /// `BendSection` properties.

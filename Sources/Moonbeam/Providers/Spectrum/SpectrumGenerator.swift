@@ -40,9 +40,6 @@ internal enum Interpolation {
 /// A utility for generating a spectrum color for a given position, suitable for
 /// shaders.
 internal struct SpectrumGenerator {
-
-    // MARK: - Core generator
-
     /// Calculates the color at a specific normalized position on the spectrum.
     ///
     /// - Parameters:
@@ -69,7 +66,6 @@ internal struct SpectrumGenerator {
         at position: Double,
         configuration: SpectrumConfiguration
     ) -> (hue: Double, primary: Double, secondary: Double)? {
-        // Map to local variables to minimize changes to existing internal math.
         let startSections = configuration.startSections
         let endSections = configuration.endSections
         let startHue = configuration.startHue
@@ -162,8 +158,6 @@ internal struct SpectrumGenerator {
         }
         return nil
     }
-
-    // MARK: - Private helpers
 
     private static func monochromeToHueColor(
         relativePosition: Double,

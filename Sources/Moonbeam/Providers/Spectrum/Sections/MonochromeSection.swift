@@ -1,7 +1,5 @@
 import Foundation
 
-// MARK: - Monochrome sections
-
 /// Represents the lightest and darkest endpoints of a spectrum.
 public enum MonochromeColor: Sendable {
     case black, white
@@ -26,8 +24,6 @@ public extension MonochromeSection {
     /// hue spectrum).
     static var defaultWeight: Double { 1.0 / 6.0 }
 }
-
-// MARK: - Monochrome sections
 
 /// A spectrum section that starts or end with black.
 public struct BlackSection: MonochromeSection {
