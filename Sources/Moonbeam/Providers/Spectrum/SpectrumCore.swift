@@ -107,12 +107,11 @@ internal func encodeSpectrumData(
 
     let maxSections = Int(MAX_MONOCHROME_SECTIONS)
 
-    /// Pack up to two monochrome start sections into a single `simd_float4`.
+    /// Packs two monochrome start sections into a single four-part vector.
     ///
-    /// For each section `i` (0 or 1), we use two consecutive floats in the vector:
+    /// For each section `i` (0 or 1), there are two consecutive floats:
     /// - Index `i * 2`: Multiplexed state combining the section color (0.0 or 1.0)
-    ///   and the easing curve (0.0 or 2.0). The fragment shader reconstructs these
-    ///   using `fmod(val, 2.0)` for color and `val >= 2.0` for the easing flag.
+    ///   and the mathematical easing curve (0.0 or 2.0).
     /// - Index `i * 2 + 1`: The cumulative boundary position on the slider.
     var startData = simd_float4(0, 0, 0, 0)
     var cumulativeStart = 0.0
@@ -129,9 +128,12 @@ internal func encodeSpectrumData(
         startData[i*2 + 1] = Float(cumulativeStart)
     }
 
-    // Apply the identical SIMD packing strategy to the end sections,
-    // multiplexing
-    // color and easing types into the even indices, and spatial boundaries into the odd.
+    /// Packs two monochrome end sections into a single four-part vector.
+    ///
+    /// For each section `i` (0 or 1), there are two consecutive floats:
+    /// - Index `i * 2`: Multiplexed state combining the section color (0.0 or 1.0)
+    ///   and the mathematical easing curve (0.0 or 2.0).
+    /// - Index `i * 2 + 1`: The cumulative boundary position on the slider.
     var endData = simd_float4(0, 0, 0, 0)
     var cumulativeEnd = (startWeight + hueWeight) / totalWeight
     for (i, section) in endSections.enumerated() {

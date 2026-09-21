@@ -10,7 +10,7 @@ public enum SpectrumColorSpace: Sendable {
 
 /// A protocol defining a color space profile for a spectrum slider.
 public protocol SpectrumColorSpaceProfile: Sendable {
-    /// The color space identifier.
+    /// The color space used to generate the spectrum.
     static var colorSpace: SpectrumColorSpace { get }
     /// The descriptive name of the color space used for telemetry and
     /// validation.
@@ -41,6 +41,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
     let secondaryValue: Double
     let primaryBends: [BendSection]
     let secondaryBends: [BendSection]
+
+    /// Determines how to draw the spectrum onscreen.
     public let colorSource: ColorSource
 
     public func accessibilityColorName(for value: Double) -> String? {
@@ -159,9 +161,10 @@ public extension Spectrum where ColorSpace == HSB {
     ///     the hue spectrum. Capped at `MAX_MONOCHROME_SECTIONS`.
     ///   - endSections: Monochrome sections that fade out of the end of the hue
     ///     spectrum.
-    ///   - startHue: The starting hue value in degrees normalized to 0.0 to 1.0
+    ///   - startHue: The starting hue in degrees normalized to 0.0 to 1.0
     ///     (e.g., 180° = 0.5).
-    ///   - endHue: The ending hue value in degrees normalized to 0.0 - 1.0.
+    ///   - endHue: The ending hue in degrees normalized to 0.0  to 1.0 (e.g.,
+    ///     360° = 1.0).
     ///   - saturation: The baseline saturation applied to the entire hue range
     ///     (0.0 to 1.0).
     ///   - brightness: The baseline brightness applied to the entire hue range

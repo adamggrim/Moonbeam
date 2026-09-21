@@ -1,7 +1,5 @@
 import SwiftUI
 
-// MARK: - Shared types
-
 /// Defines the stroke style and width applied to slider components.
 public struct ShapeStroke: Sendable {
     /// The styling applied to the stroke.

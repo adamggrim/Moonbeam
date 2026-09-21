@@ -3,7 +3,7 @@ import SwiftUI
 
 import MoonbeamShared
 
-/// The color space used to interpolate between starting and ending colors.
+/// The color space used to interpolate between `startColor` and `endColor`.
 public enum GradientColorSpace: Sendable {
     case rgb, oklab, oklch
 }
@@ -16,12 +16,19 @@ public struct ColorGradient: ColorProvider {
     /// The ending color of the gradient.
     public let endColor: Color
 
-    /// The color space used to calculate the interpolation between the starting
-    /// and ending colors.
+    /// The color space used to interpolate between  `startColor` and `endColor`.
     public let colorSpace: GradientColorSpace
 
+    /// Determines how to draw the gradient.
     public let colorSource: ColorSource
 
+    /// Initializes a gradient color provider.
+    ///
+    /// - Parameters:
+    ///   - startColor: The starting color of the gradient.
+    ///   - endColor: The ending color of the gradient.
+    ///   - colorSpace: The color space used to interpolate between `startColor`
+    ///     and `endColor`.
     public init(startColor: Color, endColor: Color, colorSpace: GradientColorSpace = .rgb) {
         self.startColor = startColor
         self.endColor = endColor

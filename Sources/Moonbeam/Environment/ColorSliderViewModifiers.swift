@@ -87,10 +87,21 @@ extension EnvironmentValues {
 // MARK: - View modifiers
 
 public extension View {
-
-    // MARK: Global modifiers
-
     /// Customizes the layout dimensions of the color slider.
+    ///
+    /// - Parameters:
+    ///   - length: The length of the slider track along the main axis.
+    ///   - thickness: The thickness of cross axis.
+    ///   - cornerRadius: The corner radius of the slider track.
+    ///   - thumbThickness: The thickness of the draggable thumb.
+    ///   - thumbLength: The length of the draggable thumb.
+    ///   - previewSize: The width and height of the floating color preview.
+    ///   - previewOffset: The distance between the floating color preview and
+    ///     the thumb.
+    ///   - previewScale: The scale of the preview when not actively being
+    ///     dragged.
+    ///   - thumbDragScale: The scale applied to the thumb during an active
+    ///     drag.
     func colorSliderDimensions(
         length: CGFloat? = nil,
         thickness: CGFloat? = nil,

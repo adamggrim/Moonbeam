@@ -32,8 +32,10 @@ public struct BlackSection: MonochromeSection {
     public let easing: Easing
 
     /// Initializes a black section.
-    ///   - Parameter weight: The proportionate width of the section relative
-    ///     to a single hue.
+    ///   - Parameters:
+    ///     - weight: The proportionate width of the section relative
+    ///       to a single hue.
+    ///     - easing: The mathematical easing curve applied to the section.
     public init(weight: Double = Self.defaultWeight, easing: Easing = .cubic) {
         self.weight = weight
         self.easing = easing
@@ -47,8 +49,10 @@ public struct WhiteSection: MonochromeSection {
     public let easing: Easing
 
     /// Initializes a white section.
-    /// - Parameter weight: The proportionate width of the section relative to
-    ///   a single hue.
+    ///   - Parameters:
+    ///     - weight: The proportionate width of the section relative to
+    ///       a single hue.
+    ///     - easing: The mathematical easing curve applied to the section.
     public init(weight: Double = Self.defaultWeight, easing: Easing = .cubic) {
         self.weight = weight
         self.easing = easing

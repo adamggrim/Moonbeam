@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Global default metrics for  color sliders.
 public enum ColorSliderDefaults {
+    /// Returns the default track thickness for a given control size.
     public static func trackThickness(for controlSize: ControlSize) -> CGFloat {
         switch controlSize {
         case .mini: return 12.0
@@ -13,6 +14,8 @@ public enum ColorSliderDefaults {
         }
     }
 
+    /// Returns the default floating color preview size for a given control
+    /// size.
     public static func previewSize(for controlSize: ControlSize) -> CGFloat {
         switch controlSize {
         case .mini: return 32.0
@@ -24,6 +27,8 @@ public enum ColorSliderDefaults {
         }
     }
 
+    /// Returns the default spacing offset between the track and the floating
+    /// color preview.
     public static func previewOffset(for controlSize: ControlSize) -> CGFloat {
         switch controlSize {
         case .mini: return 40.0

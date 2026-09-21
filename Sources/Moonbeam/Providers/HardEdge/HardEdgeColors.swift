@@ -17,7 +17,10 @@ public struct HardEdgeColors: ColorProvider {
     /// slider track renders as discrete color blocks.
     public let colorSource: ColorSource
 
-    /// Creates a hard-edge slider model using an discrete array of colors.
+    /// Creates a hard-edge slider model using a discrete array of colors.
+    ///
+    /// - Parameter colors: The sequence of colors constituting the discrete
+    ///   blocks.
     public init(colors: [Color]) {
         self.colors = colors
         self.colorSource = .array(colors)
@@ -27,6 +30,9 @@ public struct HardEdgeColors: ColorProvider {
 public extension ColorProvider {
     /// Converts a continuous color slider into a hard-edge slider with discrete
     /// color blocks.
+    ///
+    /// - Parameter steps: The number of discrete color blocks to generate.
+    /// - Returns: A `HardEdgeColors` provider containing the sampled colors.
     func hardEdge(into steps: Int) -> HardEdgeColors {
         guard steps > 1 else { return HardEdgeColors(colors: []) }
 

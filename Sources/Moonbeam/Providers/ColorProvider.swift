@@ -20,8 +20,7 @@ public enum ColorSource: Sendable {
     ) -> Shader, fallback: @Sendable (_ position: Double) -> Color)
 }
 
-/// Protocol shared by `SpectrumColorProvider`, `ColorGradient` and
-/// `HardEdgeColors`.
+/// Protocol shared by `Spectrum`, `ColorGradient` and `HardEdgeColors`.
 public protocol ColorProvider: Sendable {
 
     /// Determines how the slider track is drawn on screen.

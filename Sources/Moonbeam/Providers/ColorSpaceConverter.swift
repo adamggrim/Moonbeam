@@ -25,7 +25,7 @@ internal enum ColorSpaceConverter {
             static let oklabPower: CGFloat = 3.0
     }
 
-    /// Matrix to convert OKLCH to a linear RGB color.
+    /// Converts an OKLCH color to an sRGB `Color`.
     ///
     /// Taken from  "A perceptual color space for image processing" by Björn
     /// Ottosson (2020).

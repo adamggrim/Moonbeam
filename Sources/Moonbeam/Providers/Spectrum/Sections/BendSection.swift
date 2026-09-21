@@ -5,17 +5,13 @@ import Foundation
 public protocol BendSection: Sendable {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     var startHue: Double { get }
-
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     var endHue: Double { get }
-
     /// The saturation, brightness, lightness or chroma value where the bend
     /// peaks.
     var targetValue: Double { get }
-
     /// The difference between the start and end hues.
     var hueCount: Double { get }
-
     /// The mathematical easing curve applied to the bend section.
     var easing: Easing { get }
 }
@@ -23,6 +19,11 @@ public protocol BendSection: Sendable {
 public extension BendSection {
     /// Helper to calculate the shortest distance between two hues in a
     /// wraparound (circular) hue range.
+    ///
+    /// - Parameters:
+    ///   - start: The starting hue.
+    ///   - end: The ending hue.
+    /// - Returns: The shortest calculated distance between the two hues.
     static func calculateHueCount(start: Double, end: Double) -> Double {
         let diff = abs(end - start)
         return diff > 0.5 ? 1.0 - diff : diff
@@ -42,20 +43,24 @@ public struct BendSectionBuilder {
 public struct OneWayBend: BendSection {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     public let startHue: Double
-
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     public let endHue: Double
-
     /// The saturation, brightness, lightness or chroma value where the
     /// bend peaks.
     public let targetValue: Double
-
     /// The difference between the start and end hues.
     public let hueCount: Double
-
     /// The mathematical easing curve applied to the bend section.
     public let easing: Easing
 
+    /// Initializes a bend section.
+    ///
+    /// - Parameters:
+    ///   - startHue: The starting hue of the bend section.
+    ///   - endHue: The ending hue of the bend section.
+    ///   - target: The saturation, brightness, lightness or chroma value where
+    ///     the bend peaks.
+    ///   - easing: The mathematical curve applied to the bend.
     public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .cubic) {
         self.startHue = startHue
         self.endHue = endHue
@@ -69,20 +74,24 @@ public struct OneWayBend: BendSection {
 public struct TwoWayBend: BendSection {
     /// The starting hue of the bend section, normalized from 0.0 to 1.0.
     public let startHue: Double
-
     /// The ending hue of the bend section, normalized from 0.0 to 1.0.
     public let endHue: Double
-
     /// The saturation, brightness, lightness or chroma value where the bend
     /// peaks.
     public let targetValue: Double
-
     /// The difference between the start and end hues.
     public let hueCount: Double
-
     /// The mathematical easing curve applied to the bend section.
     public let easing: Easing
 
+    /// Initializes a bend section.
+    ///
+    /// - Parameters:
+    ///   - startHue: The starting hue of the bend section.
+    ///   - endHue: The ending hue of the bend section.
+    ///   - target: The saturation, brightness, lightness or chroma value where
+    ///     the bend peaks.
+    ///   - easing: The mathematical curve applied to the bend.
     public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .cubic) {
         self.startHue = startHue
         self.endHue = endHue

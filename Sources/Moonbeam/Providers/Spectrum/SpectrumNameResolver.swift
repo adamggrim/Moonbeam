@@ -27,18 +27,19 @@ public struct SpectrumAccessibilityStrings: Sendable {
     /// The localized accessibility string for pink colors.
     public var pink: String = String(localized: "pink", bundle: .module)
 
-    /// The localized adjective for light colors.
+    /// The localized tone modifier for light colors.
     public var light: String? = String(localized: "light", bundle: .module)
-    /// The localized adjective for dark colors.
+    /// The localized tone modifier for dark colors.
     public var dark: String? = String(localized: "dark", bundle: .module)
-    /// The localized adjective for bright colors.
+    /// The localized tone modifier for bright colors.
     public var bright: String? = String(localized: "bright", bundle: .module)
-    /// The localized adjective for dull colors.
+    /// The localized tone modifier for dull colors.
     public var dull: String? = String(localized: "dull", bundle: .module)
 
-    /// The format string used to combine adjectives and base color names.
+    /// The format string used to combine tone modifiers and base color names.
     public var format: String = String(localized: "color_name_format", defaultValue: "%1$@ %2$@", bundle: .module)
 
+    /// Initializes a new set of localized accessibility strings.
     public init() {}
 }
 

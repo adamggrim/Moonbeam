@@ -21,7 +21,7 @@ public struct ColorSliderStyleConfiguration {
     /// The calculated spatial offset for the floating color preview.
     public let previewOffset: CGSize
 
-    /// The anchor point used to animate the floating preview out of the thumb.
+    /// The anchor point used to animate the floating color preview out of the thumb.
     public let previewScaleAnchor: UnitPoint
 
     /// The slider track.

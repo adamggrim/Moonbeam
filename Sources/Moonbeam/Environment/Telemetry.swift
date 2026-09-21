@@ -9,6 +9,7 @@ public enum Telemetry {
 
     private static let (stream, continuation) = AsyncStream.makeStream(of: String.self)
 
+    /// The logger used for internal package telemetry.
     public static var logger: Logger {
         get { loggerStorage.withLock { $0 } }
         set { loggerStorage.withLock { $0 = newValue } }

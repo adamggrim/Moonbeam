@@ -47,7 +47,7 @@ internal struct ColorSliderLayout {
     /// The clamped main-axis position of the current selected color on the
     /// slider.
     ///
-    /// For most of the slider, corresponds with the horizontal position of the
+    /// For most of the slider, corresponds with the main-axis position of the
     /// draggable thumb's center. At the start or end of the slider, can extend
     /// beyond the thumb's center to the start or end of the thumb.
     var liveColorPosition: CGFloat {

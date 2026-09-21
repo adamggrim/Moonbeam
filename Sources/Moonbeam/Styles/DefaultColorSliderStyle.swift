@@ -30,6 +30,20 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.controlSize) private var controlSize
 
+    /// Initializes a default color slider style.
+    ///
+    /// - Parameters:
+    ///   - trackShape: The shape of the slider track.
+    ///   - trackStroke: The stroke applied to the slider track.
+    ///   - thumbShape: The shape of the draggable thumb.
+    ///   - thumbColor: The fill color of the draggable thumb.
+    ///   - thumbStroke: The stroke styling applied to the draggable thumb.
+    ///   - thumbShadow: The shadow properties applied to the draggable thumb.
+    ///   - liquidGlassThumb: Determines when to render the thumb with Liquid
+    ///     Glass.
+    ///   - previewShape: The shape applied to the floating color preview.
+    ///   - previewStroke: The stroke styling applied to the floating color preview.
+    ///   - previewShadow: The shadow properties applied to the floating color preview.
     public init(
         trackShape: AnyShape? = nil,
         trackStroke: ShapeStroke? = nil,
