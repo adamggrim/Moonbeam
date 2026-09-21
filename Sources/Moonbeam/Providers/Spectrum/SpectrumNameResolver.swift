@@ -44,7 +44,6 @@ public struct SpectrumAccessibilityStrings: Sendable {
 
 /// Thresholds for VoiceOver color descriptions.
 internal enum ColorThresholds {
-
     /// Thresholds for HSB spectrum sliders.
     ///
     /// Manually calibrated because HSB is not perceptually uniform.
@@ -137,19 +136,19 @@ internal struct SpectrumNameResolver {
             return strings.gray
         }
 
-        let baseName: String
+        let baseHueName: String
         switch degrees {
-        case 0..<HueDegrees.redEnd: baseName = strings.red
-        case HueDegrees.redEnd..<HueDegrees.orangeEnd: baseName = strings.orange
-        case HueDegrees.orangeEnd..<HueDegrees.yellowEnd: baseName = strings.yellow
-        case HueDegrees.yellowEnd..<HueDegrees.greenEnd: baseName = strings.green
-        case HueDegrees.greenEnd..<HueDegrees.cyanEnd: baseName = strings.cyan
-        case HueDegrees.cyanEnd..<HueDegrees.blueEnd: baseName = strings.blue
-        case HueDegrees.blueEnd..<HueDegrees.purpleEnd: baseName = strings.purple
-        default: baseName = strings.pink
+        case 0..<HueDegrees.redEnd: baseHueName = strings.red
+        case HueDegrees.redEnd..<HueDegrees.orangeEnd: baseHueName = strings.orange
+        case HueDegrees.orangeEnd..<HueDegrees.yellowEnd: baseHueName = strings.yellow
+        case HueDegrees.yellowEnd..<HueDegrees.greenEnd: baseHueName = strings.green
+        case HueDegrees.greenEnd..<HueDegrees.cyanEnd: baseHueName = strings.cyan
+        case HueDegrees.cyanEnd..<HueDegrees.blueEnd: baseHueName = strings.blue
+        case HueDegrees.blueEnd..<HueDegrees.purpleEnd: baseHueName = strings.purple
+        default: baseHueName = strings.pink
         }
 
-        let adjective: String? = {
+        let toneModifierName: String? = {
             if isLight { return strings.light }
             if isDark { return strings.dark }
             if isBright { return strings.bright }
@@ -157,9 +156,9 @@ internal struct SpectrumNameResolver {
             return nil
         }()
 
-        if let adj = adjective, !adj.isEmpty {
-            return String(format: strings.format, adj, baseName)
+        if let toneModifierName, !toneModifierName.isEmpty {
+            return String(format: strings.format, toneModifierName, baseHueName)
         }
-        return baseName
+        return baseHueName
     }
 }

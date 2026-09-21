@@ -40,8 +40,8 @@ import Foundation
         #expect(cyan == strings.cyan)
     }
 
-    @Test("Resolving combined adjectives")
-    func adjectives() {
+    @Test("Resolving tone modifiers")
+    func toneModifiers() {
         // HSB dark boundary: secondary < 0.3
         let darkBlue = SpectrumNameResolver.name(
             hue: 0.65, primary: 0.6, secondary: 0.2, colorSpace: .hsb, strings: strings

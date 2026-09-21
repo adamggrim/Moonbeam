@@ -26,7 +26,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     /// The shadow properties applied to the floating color preview.
     public var previewShadow: ShapeShadow
 
-    @Environment(\.colorSliderLiquidGlassThumb) private var envLiquidGlassThumb
+    @Environment(\.colorSliderLiquidGlassThumb) private var defaultLiquidGlassThumb
     @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.controlSize) private var controlSize
 
@@ -68,7 +68,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
             configuration.thumb
                 .overlay {
                     let shape = thumbShape ?? AnyShape(Capsule(style: .continuous))
-                    let activeLiquidGlassThumb = liquidGlassThumb ?? envLiquidGlassThumb
+                    let activeLiquidGlassThumb = liquidGlassThumb ?? defaultLiquidGlassThumb
                     let isLiquidGlassActive: Bool = {
                         if #available(iOS 26.0, macOS 26.0, *) {
                             return activeLiquidGlassThumb == .always
