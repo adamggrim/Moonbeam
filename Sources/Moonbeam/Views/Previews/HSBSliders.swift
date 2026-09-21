@@ -4,7 +4,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: Spectrum<HSB>(),
             axis: .horizontal
         )
@@ -15,7 +14,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: Spectrum<HSB>(
                 startSections: [BlackSection()],
                 endSections: [WhiteSection()]
@@ -37,7 +35,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: Spectrum<HSB>(
                 saturationBends: {
                     OneWayBend(startHue: 0.0, endHue: 40.0 / 360, target: 0.5)
@@ -53,7 +50,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: Spectrum<HSB>(
                 saturationBends: {
                     TwoWayBend(startHue: 120.0 / 360, endHue: 240.0 / 360, target: 0.3)
@@ -71,7 +67,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: Spectrum<HSB>(
                 startSections: [BlackSection(), WhiteSection()],
                 endSections: [BlackSection(), WhiteSection()]
@@ -85,7 +80,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: Spectrum<HSB>(
                 startSections: [BlackSection()],
                 endSections: [WhiteSection()]
@@ -103,7 +97,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: Spectrum<HSB>(
                 startSections: [BlackSection()],
                 endSections: [WhiteSection()]
@@ -121,7 +114,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: Spectrum<HSB>(),
             axis: .horizontal
         )

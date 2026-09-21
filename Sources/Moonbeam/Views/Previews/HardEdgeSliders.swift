@@ -4,7 +4,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: HardEdgeColors(colors: [.green, .yellow, .orange, .red, .purple, .blue]),
             axis: .horizontal
         )
@@ -15,7 +14,6 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: HardEdgeColors(colors: [.green, .yellow, .orange, .red, .purple, .blue]),
             axis: .vertical
         )
@@ -35,7 +33,6 @@ import SwiftUI
 
         ColorSlider(
             value: progress,
-            color: selection,
             colorProvider: colorProvider,
             axis: .horizontal
         )

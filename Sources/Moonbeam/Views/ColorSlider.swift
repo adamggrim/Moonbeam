@@ -17,9 +17,6 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     /// This is the slider's single source of truth.
     @Binding public var value: Double
 
-    /// The color output of the slider.
-    @Binding public var color: Color
-
     /// The data source driving the slider's colors.
     public var colorProvider: Source
 
@@ -40,14 +37,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
 
     /// A localized string key used for VoiceOver accessibility.
     public var label: LocalizedStringKey
-
     /// The layout orientation of the slider (`.horizontal` or `.vertical`).
     public var axis: Axis
-
-    /// Determines whether the bound `color` output updates continuously during a
-    /// drag gesture (`true`), or only when the drag ends (`false`).
-    public var isContinuous: Bool
-
+    /// Whether the slider displays a floating color preview.
     public var preview: Preview?
 
     /// Initializes a customizable color slider.
@@ -59,65 +51,44 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
     ///   - colorProvider: The source defining the color calculations and
     ///     rendering.
-    ///   - onColorChange: An optional closure to receive the generated color.
     ///   - label: A localized string key used for VoiceOver accessibility.
     ///     Defaults to "Color Slider".
     ///   - axis: The layout orientation of the slider (`.horizontal` or
     ///     `.vertical`). Defaults to `.horizontal`.
-    ///   - isContinuous: Whether the output color updates continuously during
-    ///     a drag gesture. Defaults to `true`.
+    ///   - preview: A view builder that creates a floating color preview.
     public init(
         value: Binding<Double>,
-        color: Binding<Color>,
         colorProvider: Source,
         label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal,
-        isContinuous: Bool = true,
         @ViewBuilder preview: () -> Preview
     ) {
         self._value = value
-        self._color = color
         self.colorProvider = colorProvider
         self.label = label
         self.axis = axis
-        self.isContinuous = isContinuous
         self.preview = preview()
     }
 
     /// Internal initializer to support cross-file convenience initializers.
     internal init(
         value: Binding<Double>,
-        color: Binding<Color>,
         colorProvider: Source,
         label: LocalizedStringKey,
         axis: Axis,
-        isContinuous: Bool,
         previewView: Preview?
     ) {
         self._value = value
-        self._color = color
         self.colorProvider = colorProvider
         self.label = label
         self.axis = axis
-        self.isContinuous = isContinuous
         self.preview = previewView
     }
 
     /// The color calculated from the current `liveColorPosition` on the slider.
     private func calculatedColor(layout: ColorSliderLayout) -> Color {
         let nonZeroLength = layout.resolvedLength > 0 ? layout.resolvedLength : 0.001
-        let clampedRatio = max(0.0, min(1.0, layout.liveColorPosition / nonZeroLength))
-        switch colorProvider.colorSource {
-        case .array(let colors):
-            guard !colors.isEmpty else { return .clear }
-            let calculatedIndex = Int(CGFloat(colors.count) * clampedRatio)
-            let clampedIndex = max(0, min(colors.count - 1, calculatedIndex))
-            return colors[clampedIndex]
-        case .function(let colorGenerator):
-            return colorGenerator(clampedRatio)
-        case .shader(_, let fallback):
-            return fallback(clampedRatio)
-        }
+        return colorProvider.color(at: Double(layout.liveColorPosition / nonZeroLength))
     }
 
     /// Calculates the discrete index of the slider (used to trigger haptics on
@@ -220,23 +191,6 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 .opacity(isEnabled ? 1.0 : 0.5)
                 .grayscale(isEnabled ? 0.0 : 0.99)
                 .sensoryFeedback(.selection, trigger: discreteIndex(layout: layout))
-                .onAppear {
-                    self.color = calculatedColor(layout: layout)
-                }
-                .onChange(of: value) { _, newValue in
-                    if !sliderState.isDragging {
-                        let newLayout = ColorSliderLayout(
-                            state: sliderState,
-                            value: newValue,
-                            axis: axis,
-                            controlSize: controlSize,
-                            dimensions: resolvedDimensions,
-                            previewPosition: previewPosition,
-                            previewSpacing: previewSpacing
-                        )
-                        self.color = calculatedColor(layout: newLayout)
-                    }
-                }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityValue({
@@ -306,16 +260,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         )
 
         self.value = newProgress
-
-        if isContinuous {
-            self.color = calculatedColor(layout: newLayout)
-        }
     }
 
     private func onDragEnded(_: DragGesture.Value, layout: ColorSliderLayout) {
-        if !isContinuous {
-            self.color = calculatedColor(layout: layout)
-        }
         withAnimation(reduceMotion ? nil : animation) {
             sliderState.finalizeDrag()
         }
