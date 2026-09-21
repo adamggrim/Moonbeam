@@ -34,4 +34,20 @@ public extension ColorProvider {
     /// A default that returns `nil` to indicate the data source does not
     /// provide color names.
     func accessibilityColorName(for value: Double) -> String? { return nil }
+
+    /// Resolves the calculated color at a normalized position (0.0 to 1.0).
+    func color(at position: Double) -> Color {
+        let clampedRatio = max(0.0, min(1.0, position))
+        switch colorSource {
+        case .array(let colors):
+            guard !colors.isEmpty else { return .clear }
+            let calculatedIndex = Int(Double(colors.count) * clampedRatio)
+            let clampedIndex = max(0, min(colors.count - 1, calculatedIndex))
+            return colors[clampedIndex]
+        case .function(let colorGenerator):
+            return colorGenerator(clampedRatio)
+        case .shader(_, let fallback):
+            return fallback(clampedRatio)
+        }
+    }
 }
