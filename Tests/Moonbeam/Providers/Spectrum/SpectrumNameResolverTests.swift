@@ -46,12 +46,12 @@ import Foundation
         let darkBlue = SpectrumNameResolver.name(
             hue: 0.65, primary: 0.6, secondary: 0.2, colorSpace: .hsb, strings: strings
         )
-        #expect(darkBlue == String(format: strings.format, strings.dark, strings.blue))
+        #expect(darkBlue == String(format: strings.format, strings.dark!, strings.blue))
 
-        // OKLCH pale boundary: secondary > 0.8 && primary < 0.1
-        let paleGreen = SpectrumNameResolver.name(
+        // OKLCH light boundary: secondary > 0.8 && primary < 0.1
+        let lightGreen = SpectrumNameResolver.name(
             hue: 0.35, primary: 0.05, secondary: 0.9, colorSpace: .oklch, strings: strings
         )
-        #expect(paleGreen == String(format: strings.format, strings.pale, strings.green))
+        #expect(lightGreen == String(format: strings.format, strings.light!, strings.green))
     }
 }

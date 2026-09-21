@@ -34,8 +34,15 @@ private struct AnimationKey: EnvironmentKey {
 }
 private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: PreviewPosition? = nil }
 private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
+private struct AccessibilityPercentageHiddenKey: EnvironmentKey { static let defaultValue: Bool = false }
+private struct AccessibilityFormatterKey: EnvironmentKey { static let defaultValue: (@Sendable (Double, String?) -> String)? = nil }
 
 extension EnvironmentValues {
+    var colorSliderAccessibilityFormatter: (@Sendable (Double, String?) -> String)? {
+        get { self[AccessibilityFormatterKey.self] }
+        set { self[AccessibilityFormatterKey.self] = newValue }
+    }
+
     var colorSliderLiquidGlassThumb: LiquidGlassThumb {
         get { self[LiquidGlassThumbKey.self] }
         set { self[LiquidGlassThumbKey.self] = newValue }
@@ -69,6 +76,11 @@ extension EnvironmentValues {
     var colorSliderAnimation: Animation {
         get { self[AnimationKey.self] }
         set { self[AnimationKey.self] = newValue }
+    }
+
+    var colorSliderAccessibilityPercentageHidden: Bool {
+        get { self[AccessibilityPercentageHiddenKey.self] }
+        set { self[AccessibilityPercentageHiddenKey.self] = newValue }
     }
 }
 
@@ -131,5 +143,16 @@ public extension View {
     /// Customizes when to render the draggable thumb with Liquid Glass.
     func colorSliderLiquidGlassThumb(_ mode: LiquidGlassThumb) -> some View {
         environment(\.colorSliderLiquidGlassThumb, mode)
+    }
+
+    /// Determines whether the slider announces its value as a percentage in
+    /// VoiceOver.
+    func colorSliderAccessibilityPercentageHidden(_ hidden: Bool = true) -> some View {
+        environment(\.colorSliderAccessibilityPercentageHidden, hidden)
+    }
+
+    /// Sets a custom VoiceOver formatter to override default descriptions.
+    func colorSliderAccessibilityFormatter(_ formatter: @escaping @Sendable (Double, String?) -> String) -> some View {
+        environment(\.colorSliderAccessibilityFormatter, formatter)
     }
 }
