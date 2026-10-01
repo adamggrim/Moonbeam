@@ -24,7 +24,7 @@ typedef simd_float4 mb_float4;
 ///
 /// Mapping for `data1`:
 /// - x: Hue Count (difference between start and end hues)
-/// - y: Easing curve type (1.0 = Cubic, 0.0 = Linear)
+/// - y: Unused padding to force 16-byte GPU memory alignment
 /// - z: Unused padding to force 16-byte GPU memory alignment
 /// - w: Unused padding to force 16-byte GPU memory alignment
 typedef struct {
@@ -56,21 +56,13 @@ typedef enum {
     MonochromeSectionTypeWhite = 1
 } MonochromeSectionType;
 
-/// Determines the mathematical smoothing curve applied to a bend.
-/// Values are spaced by two to allow for multiplexed bit-packing with
-/// `MonochromeSectionType`.
-typedef enum {
-    EasingTypeLinear = 0,
-    EasingTypeCubic = 2
-} EasingTypeFlag;
-
 /// The shared memory layout bridging a spectrum's state from Swift to Metal
 /// shaders.
 ///
 /// Vector mapping for `startSectionsData` / `endSectionsData`:
-/// - x: Section 0 config (`MonochromeSectionType` + `EasingTypeFlag`)
+/// - x: Section 0 color (`MonochromeSectionType`)
 /// - y: Section 0 cumulative boundary (normalized coordinate)
-/// - z: Section 1 config (`MonochromeSectionType` + `EasingTypeFlag`)
+/// - z: Section 1 color (`MonochromeSectionType`)
 /// - w: Section 1 cumulative boundary (normalized coordinate)
 typedef struct {
     float totalWeight;

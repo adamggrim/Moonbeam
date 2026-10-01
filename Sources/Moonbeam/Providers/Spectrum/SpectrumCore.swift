@@ -83,7 +83,7 @@ extension ShaderBend {
             Float(bend.endHue),
             Float(bend.targetValue)
         )
-        self.data1 = simd_float4(Float(bend.hueCount), bend.easing == .cubic ? 1.0 : 0.0, 0, 0)
+        self.data1 = simd_float4(Float(bend.hueCount), 0, 0, 0)
     }
 
     static let empty = ShaderBend(data0: .zero, data1: .zero)
@@ -110,8 +110,7 @@ internal func encodeSpectrumData(
     /// Packs two monochrome start sections into a single four-part vector.
     ///
     /// For each section `i` (0 or 1), there are two consecutive floats:
-    /// - Index `i * 2`: Multiplexed state combining the section color (0.0 or 1.0)
-    ///   and the mathematical easing curve (0.0 or 2.0).
+    /// - Index `i * 2`: The section color (0.0 for black, 1.0 for white).
     /// - Index `i * 2 + 1`: The cumulative boundary position on the slider.
     var startData = simd_float4(0, 0, 0, 0)
     var cumulativeStart = 0.0
@@ -121,18 +120,14 @@ internal func encodeSpectrumData(
         let colorVal: Float = section.color == .white
             ? Float(MonochromeSectionTypeWhite.rawValue)
             : Float(MonochromeSectionTypeBlack.rawValue)
-        let easingVal: Float = section.easing == .cubic
-            ? Float(EasingTypeCubic.rawValue)
-            : Float(EasingTypeLinear.rawValue)
-        startData[i*2] = colorVal + easingVal
+        startData[i*2] = colorVal
         startData[i*2 + 1] = Float(cumulativeStart)
     }
 
     /// Packs two monochrome end sections into a single four-part vector.
     ///
     /// For each section `i` (0 or 1), there are two consecutive floats:
-    /// - Index `i * 2`: Multiplexed state combining the section color (0.0 or 1.0)
-    ///   and the mathematical easing curve (0.0 or 2.0).
+    /// - Index `i * 2`: The section color (0.0 for black, 1.0 for white).
     /// - Index `i * 2 + 1`: The cumulative boundary position on the slider.
     var endData = simd_float4(0, 0, 0, 0)
     var cumulativeEnd = (startWeight + hueWeight) / totalWeight
@@ -142,10 +137,7 @@ internal func encodeSpectrumData(
         let colorVal: Float = section.color == .white
             ? Float(MonochromeSectionTypeWhite.rawValue)
             : Float(MonochromeSectionTypeBlack.rawValue)
-        let easingVal: Float = section.easing == .cubic
-            ? Float(EasingTypeCubic.rawValue)
-            : Float(EasingTypeLinear.rawValue)
-        endData[i*2] = colorVal + easingVal
+        endData[i*2] = colorVal
         endData[i*2 + 1] = Float(cumulativeEnd)
     }
 

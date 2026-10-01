@@ -13,9 +13,6 @@ public protocol MonochromeSection: Sendable {
     /// The number of monochrome steps added to the hue section (each equal in
     /// width to a single hue).
     var weight: Double { get }
-
-    /// The mathematical easing curve applied to the monochrome section.
-    var easing: Easing { get }
 }
 
 /// Provides shared default values shared across all monochrome sections.
@@ -25,36 +22,30 @@ public extension MonochromeSection {
     static var defaultWeight: Double { 1.0 / 6.0 }
 }
 
-/// A spectrum section that starts or ends with black.
+/// A spectrum section that starts or end with black.
 public struct BlackSection: MonochromeSection {
     public let color: MonochromeColor = .black
     public let weight: Double
-    public let easing: Easing
 
     /// Initializes a black section.
     ///   - Parameters:
     ///     - weight: The proportionate width of the section relative
     ///       to a single hue.
-    ///     - easing: The mathematical easing curve applied to the section.
-    public init(weight: Double = Self.defaultWeight, easing: Easing = .linear) {
+    public init(weight: Double = Self.defaultWeight) {
         self.weight = weight
-        self.easing = easing
     }
 }
 
-/// A spectrum section that starts or ends with white.
+/// A spectrum section that starts or end with white.
 public struct WhiteSection: MonochromeSection {
     public let color: MonochromeColor = .white
     public let weight: Double
-    public let easing: Easing
 
     /// Initializes a white section.
     ///   - Parameters:
     ///     - weight: The proportionate width of the section relative to
     ///       a single hue.
-    ///     - easing: The mathematical easing curve applied to the section.
-    public init(weight: Double = Self.defaultWeight, easing: Easing = .linear) {
+    public init(weight: Double = Self.defaultWeight) {
         self.weight = weight
-        self.easing = easing
     }
 }

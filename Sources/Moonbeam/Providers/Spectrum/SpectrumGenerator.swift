@@ -26,17 +26,6 @@ internal struct SpectrumConfiguration {
     let secondaryBends: [BendSection]?
 }
 
-internal enum Interpolation {
-    static let hermiteMultiplier = 3.0
-    static let hermiteSubtrahend = 2.0
-
-    /// Performs Hermite interpolation between 0 and 1.
-    static func smoothstep(_ value: Double) -> Double {
-        let clamped = max(0.0, min(1.0, value))
-        return clamped * clamped * (hermiteMultiplier - hermiteSubtrahend * clamped)
-    }
-}
-
 /// A utility for generating a spectrum color for a given position, suitable for
 /// shaders.
 internal struct SpectrumGenerator {
@@ -174,15 +163,7 @@ internal struct SpectrumGenerator {
         let secondaryBends = configuration.secondaryBends
 
         let hue = isStart ? startHue : endHue
-        let linearFactor = isStart ? relativePosition : (1.0 - relativePosition)
-
-        let interpolationFactor: Double
-        switch monochromeSection.easing {
-        case .linear:
-            interpolationFactor = linearFactor
-        case .cubic:
-            interpolationFactor = Interpolation.smoothstep(linearFactor)
-        }
+        let interpolationFactor = isStart ? relativePosition : (1.0 - relativePosition)
 
         var startTargetPrimary = primaryValue, startTargetSecondary = secondaryValue
         var endTargetPrimary = primaryValue, endTargetSecondary = secondaryValue
@@ -220,7 +201,7 @@ internal struct SpectrumGenerator {
         }
     }
 
-    /// Generates a smooth gradient between two monochrome sections.
+    /// Generates a linear gradient between two monochrome sections.
     private static func monochromeToMonochromeColor(
         relativePosition: Double,
         fromSection: MonochromeSection,
@@ -230,15 +211,7 @@ internal struct SpectrumGenerator {
         let startBrightness: Double = (fromSection.color == .white) ? 1.0 : 0.0
         let endBrightness: Double = (toSection.color == .white) ? 1.0 : 0.0
 
-        let curveProgress: Double
-        switch toSection.easing {
-        case .linear:
-            curveProgress = relativePosition
-        case .cubic:
-            curveProgress = Interpolation.smoothstep(relativePosition)
-        }
-
-        let brightness = startBrightness + (endBrightness - startBrightness) * curveProgress
+        let brightness = startBrightness + (endBrightness - startBrightness) * relativePosition
         return (hue: hue, primary: 0.0, secondary: brightness)
     }
 
@@ -261,30 +234,16 @@ internal struct SpectrumGenerator {
 
         if let oneWay = bend as? OneWayBend {
             let position = oneWay.hueCount != 0 ? (offset / oneWay.hueCount) : 0
-            let curveProgress: Double
-            switch oneWay.easing {
-            case .linear:
-                curveProgress = position
-            case .cubic:
-                curveProgress = Interpolation.smoothstep(position)
-            }
 
             if oneWay.startHue == minHue {
-                return bend.targetValue + (valueDelta * curveProgress)
+                return bend.targetValue + (valueDelta * position)
             } else {
-                return defaultValue - (valueDelta * curveProgress)
+                return defaultValue - (valueDelta * position)
             }
         } else if let twoWay = bend as? TwoWayBend {
             let position = (hue - twoWay.startHue) / twoWay.hueCount
             let linearProgress = 1.0 - abs(position * 2.0 - 1.0)
-            let smoothProgress: Double
-            switch twoWay.easing {
-            case .linear:
-                smoothProgress = linearProgress
-            case .cubic:
-                smoothProgress = Interpolation.smoothstep(linearProgress)
-            }
-            return defaultValue - (valueDelta * smoothProgress)
+            return defaultValue - (valueDelta * linearProgress)
         }
         return defaultValue
     }

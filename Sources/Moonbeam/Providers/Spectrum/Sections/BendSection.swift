@@ -12,8 +12,6 @@ public protocol BendSection: Sendable {
     var targetValue: Double { get }
     /// The difference between the start and end hues.
     var hueCount: Double { get }
-    /// The mathematical easing curve applied to the bend section.
-    var easing: Easing { get }
 }
 
 public extension BendSection {
@@ -50,8 +48,6 @@ public struct OneWayBend: BendSection {
     public let targetValue: Double
     /// The difference between the start and end hues.
     public let hueCount: Double
-    /// The mathematical easing curve applied to the bend section.
-    public let easing: Easing
 
     /// Initializes a bend section.
     ///
@@ -60,12 +56,10 @@ public struct OneWayBend: BendSection {
     ///   - endHue: The ending hue of the bend section.
     ///   - target: The saturation, brightness, lightness or chroma value where
     ///     the bend peaks.
-    ///   - easing: The mathematical curve applied to the bend.
-    public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .linear) {
+    public init(startHue: Double, endHue: Double, target: Double) {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target
-        self.easing = easing
         self.hueCount = Self.calculateHueCount(start: startHue, end: endHue)
     }
 }
@@ -81,8 +75,6 @@ public struct TwoWayBend: BendSection {
     public let targetValue: Double
     /// The difference between the start and end hues.
     public let hueCount: Double
-    /// The mathematical easing curve applied to the bend section.
-    public let easing: Easing
 
     /// Initializes a bend section.
     ///
@@ -91,12 +83,10 @@ public struct TwoWayBend: BendSection {
     ///   - endHue: The ending hue of the bend section.
     ///   - target: The saturation, brightness, lightness or chroma value where
     ///     the bend peaks.
-    ///   - easing: The mathematical curve applied to the bend.
-    public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .linear) {
+    public init(startHue: Double, endHue: Double, target: Double) {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target
-        self.easing = easing
         self.hueCount = Self.calculateHueCount(start: startHue, end: endHue)
     }
 }

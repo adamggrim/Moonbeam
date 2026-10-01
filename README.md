@@ -237,7 +237,6 @@ Moonbeam/
   │ │ ├── Spectrum/
   │ │ │ ├── Sections/
   │ │ │ │ ├── BendSection.swift: Bend section definitions
-  │ │ │ │ ├── Easing.swift: Mathematical easing curves for color transitions
   │ │ │ │ └── MonochromeSection.swift: Black and white secion definitions
   │ │ │ ├── SpectrumColorSpace.swift: Dynamic generator for spectrum colors
   │ │ │ ├── SpectrumCore.swift: Utilities and Metal encoders for spectrums
