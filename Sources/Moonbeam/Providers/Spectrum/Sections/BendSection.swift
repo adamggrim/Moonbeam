@@ -61,7 +61,7 @@ public struct OneWayBend: BendSection {
     ///   - target: The saturation, brightness, lightness or chroma value where
     ///     the bend peaks.
     ///   - easing: The mathematical curve applied to the bend.
-    public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .cubic) {
+    public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .linear) {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target
@@ -92,7 +92,7 @@ public struct TwoWayBend: BendSection {
     ///   - target: The saturation, brightness, lightness or chroma value where
     ///     the bend peaks.
     ///   - easing: The mathematical curve applied to the bend.
-    public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .cubic) {
+    public init(startHue: Double, endHue: Double, target: Double, easing: Easing = .linear) {
         self.startHue = startHue
         self.endHue = endHue
         self.targetValue = target

@@ -25,7 +25,7 @@ public extension MonochromeSection {
     static var defaultWeight: Double { 1.0 / 6.0 }
 }
 
-/// A spectrum section that starts or end with black.
+/// A spectrum section that starts or ends with black.
 public struct BlackSection: MonochromeSection {
     public let color: MonochromeColor = .black
     public let weight: Double
@@ -36,13 +36,13 @@ public struct BlackSection: MonochromeSection {
     ///     - weight: The proportionate width of the section relative
     ///       to a single hue.
     ///     - easing: The mathematical easing curve applied to the section.
-    public init(weight: Double = Self.defaultWeight, easing: Easing = .cubic) {
+    public init(weight: Double = Self.defaultWeight, easing: Easing = .linear) {
         self.weight = weight
         self.easing = easing
     }
 }
 
-/// A spectrum section that starts or end with white.
+/// A spectrum section that starts or ends with white.
 public struct WhiteSection: MonochromeSection {
     public let color: MonochromeColor = .white
     public let weight: Double
@@ -53,7 +53,7 @@ public struct WhiteSection: MonochromeSection {
     ///     - weight: The proportionate width of the section relative to
     ///       a single hue.
     ///     - easing: The mathematical easing curve applied to the section.
-    public init(weight: Double = Self.defaultWeight, easing: Easing = .cubic) {
+    public init(weight: Double = Self.defaultWeight, easing: Easing = .linear) {
         self.weight = weight
         self.easing = easing
     }
