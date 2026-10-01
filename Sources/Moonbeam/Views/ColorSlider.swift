@@ -20,6 +20,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     /// The data source driving the slider's colors.
     public var colorProvider: Source
 
+    private static var dragCoordinateSpace: NamedCoordinateSpace { .named("MoonbeamColorSliderDragSpace") }
+
     @State private var sliderState = ColorSliderState()
 
     @Environment(\.colorSliderStyle) private var style
@@ -135,23 +137,12 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 previewSpacing: previewSpacing
             )
 
-            let thumbXOffset: CGFloat = axis == .horizontal ? layout.thumbOffset : 0
-            let thumbYOffset: CGFloat = axis == .horizontal ? 0 : -layout.thumbOffset
-
-            let previewXOffset: CGFloat = axis == .horizontal
-                ? layout.previewMainAxisOffset
-                : layout.resolvedPreviewOffset
-
-            let previewYOffset: CGFloat = axis == .horizontal
-                ? layout.resolvedPreviewOffset
-                : -layout.previewMainAxisOffset
-
             let configuration = ColorSliderStyleConfiguration(
                 value: value,
                 isDragging: sliderState.isDragging,
                 axis: axis,
-                thumbOffset: CGSize(width: thumbXOffset, height: thumbYOffset),
-                previewOffset: CGSize(width: previewXOffset, height: previewYOffset),
+                thumbOffset: layout.thumbOffsetSize,
+                previewOffset: layout.previewOffsetSize,
                 previewScaleAnchor: layout.previewScaleAnchor,
                 track: ColorSliderStyleConfiguration.Track(
                     TrackView(
@@ -165,6 +156,11 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                         axis: axis,
                         resolvedThumbThickness: layout.resolvedThumbThickness,
                         resolvedThumbLength: layout.resolvedThumbLength
+                    )
+                    .gesture(
+                        DragGesture(minimumDistance: minimumDragDistance, coordinateSpace: Self.dragCoordinateSpace)
+                            .onChanged { onDragChanged($0, layout: layout) }
+                            .onEnded { onDragEnded($0, layout: layout) }
                     )
                 ),
                 preview: ColorSliderStyleConfiguration.Preview(
@@ -182,12 +178,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             )
 
             style(configuration)
+                .coordinateSpace(Self.dragCoordinateSpace)
                 .animation(sliderState.isDragging || reduceMotion ? nil : animation, value: value)
-                .gesture(
-                    DragGesture(minimumDistance: minimumDragDistance)
-                        .onChanged { onDragChanged($0, layout: layout) }
-                        .onEnded { onDragEnded($0, layout: layout) }
-                )
                 .opacity(isEnabled ? 1.0 : 0.5)
                 .grayscale(isEnabled ? 0.0 : 0.99)
                 .sensoryFeedback(.selection, trigger: discreteIndex(layout: layout))
@@ -242,24 +234,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         }
 
         sliderState.updateDrag(translation: translation, currentValue: value)
-
-        let newLayout = ColorSliderLayout(
-            state: sliderState,
-            value: value,
-            axis: layout.axis,
-            controlSize: layout.controlSize,
-            dimensions: layout.dimensions,
-            previewPosition: layout.previewPosition,
-            previewSpacing: layout.previewSpacing
-        )
-
-        let newProgress = Double(
-            newLayout.resolvedLength > 0
-            ? newLayout.liveColorPosition / newLayout.resolvedLength
-            : 0.0
-        )
-
-        self.value = newProgress
+        self.value = layout.normalizedValue(for: sliderState)
     }
 
     private func onDragEnded(_: DragGesture.Value, layout: ColorSliderLayout) {

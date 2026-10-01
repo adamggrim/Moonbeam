@@ -3,7 +3,7 @@ import SwiftUI
 /// A structure that isolates layout mathematics and state normalization away
 /// from the `ColorSlider` view.
 internal struct ColorSliderLayout {
-    let state: ColorSliderState
+    var state: ColorSliderState
     let value: Double
     let axis: Axis
     let controlSize: ControlSize
@@ -95,6 +95,30 @@ internal struct ColorSliderLayout {
 
     /// The offset of the thumb's leading edge.
     var thumbOffset: CGFloat {
-        min(max(liveThumbPosition, thumbInset), resolvedLength - resolvedThumbThickness - thumbInset)
+        liveThumbPosition
+    }
+
+    /// The 2D spatial offset for the draggable thumb.
+    var thumbOffsetSize: CGSize {
+        CGSize(
+            width: axis == .horizontal ? thumbOffset : 0,
+            height: axis == .horizontal ? 0 : -thumbOffset
+        )
+    }
+
+    /// The 2D spatial offset for the floating color preview.
+    var previewOffsetSize: CGSize {
+        CGSize(
+            width: axis == .horizontal ? previewMainAxisOffset : resolvedPreviewOffset,
+            height: axis == .horizontal ? resolvedPreviewOffset : -previewMainAxisOffset
+        )
+    }
+
+    /// Calculates the normalized slider value (0.0 to 1.0) for a given drag state.
+    func normalizedValue(for updatedState: ColorSliderState) -> Double {
+        guard resolvedLength > 0 else { return 0.0 }
+        var updatedLayout = self
+        updatedLayout.state = updatedState
+        return Double(updatedLayout.liveColorPosition / resolvedLength)
     }
 }

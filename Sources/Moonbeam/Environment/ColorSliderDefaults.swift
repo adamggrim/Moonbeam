@@ -64,4 +64,6 @@ public enum ColorSliderDefaults {
     public static let strokeLineWidth: CGFloat = 1.0
     /// The default duration for slider animation in seconds.
     public static let animationDuration: Double = 0.25
+    /// The minimum interactive touch target size in points.
+    public static let minimumTouchTarget: CGFloat = 44.0
 }

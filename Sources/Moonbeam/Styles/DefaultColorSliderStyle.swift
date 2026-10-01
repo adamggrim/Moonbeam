@@ -81,7 +81,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
 
             configuration.thumb
                 .overlay {
-                    let shape = thumbShape ?? AnyShape(Capsule(style: .continuous))
+                    let shape = resolvedThumbShape
                     let activeLiquidGlassThumb = liquidGlassThumb ?? defaultLiquidGlassThumb
                     let isLiquidGlassActive: Bool = {
                         if #available(iOS 26.0, macOS 26.0, *) {
@@ -117,11 +117,13 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
                             shape.stroke(stroke.style, lineWidth: stroke.lineWidth)
                         }
                     }
+                    .allowsHitTesting(false)
                 }
-                .offset(configuration.thumbOffset)
 #if !os(macOS)
+                .contentShape(.hoverEffect, resolvedThumbShape)
                 .hoverEffect()
 #endif
+                .offset(configuration.thumbOffset)
 
             configuration.preview
                 .clipShape(resolvedPreviewShape)
@@ -153,6 +155,10 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
         } else {
             return AnyShape(Capsule(style: .continuous))
         }
+    }
+
+    private var resolvedThumbShape: AnyShape {
+        thumbShape ?? AnyShape(Capsule(style: .continuous))
     }
 
     private var resolvedPreviewShape: AnyShape {
