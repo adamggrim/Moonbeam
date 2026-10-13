@@ -55,19 +55,44 @@ internal func validateBends(_ bends: [BendSection], name: String) -> [BendSectio
     return validBends
 }
 
-/// Validates monochrome sections  to prevent shader errors.
+/// Validates monochrome sections to prevent shader errors.
 internal func validateMonochromeSections(
-    _ sections: [MonochromeSection], name: String
-) -> [MonochromeSection] {
+    startSections: [MonochromeSection],
+    endSections: [MonochromeSection],
+    name: String
+) -> (start: [MonochromeSection], end: [MonochromeSection]) {
     let maxSections = Int(MAX_MONOCHROME_SECTIONS)
 
-    precondition(
-        sections.count <= maxSections,
-        "Moonbeam: \(name) monochrome sections exceeds the maximum of \(maxSections). \(sections.count) monochrome " +
-        "sections provided."
-    )
+    var validStart = Array(startSections.prefix(maxSections))
+    var validEnd = Array(endSections.prefix(maxSections))
 
-    return sections
+    let startSum = validStart.reduce(0) { $0 + $1.fraction }
+    let endSum = validEnd.reduce(0) { $0 + $1.fraction }
+    let totalFraction = startSum + endSum
+
+    if totalFraction >= 1.0 {
+        Telemetry.reportNonFatalError(
+            "Moonbeam: \(name) monochrome sections total fraction (\(totalFraction)) exceeds 1.0. Sections scaled to "
+            + "fit."
+        )
+        let scale = 1.0 / totalFraction
+
+        validStart = validStart.map { section in
+            let newFraction = section.fraction * scale
+            return section.color == .black
+                ? BlackSection(fraction: newFraction)
+                : WhiteSection(fraction: newFraction) as MonochromeSection
+        }
+
+        validEnd = validEnd.map { section in
+            let newFraction = section.fraction * scale
+            return section.color == .black
+                ? BlackSection(fraction: newFraction)
+                : WhiteSection(fraction: newFraction) as MonochromeSection
+        }
+    }
+
+    return (validStart, validEnd)
 }
 
 // MARK: - Metal data bridging
@@ -100,10 +125,8 @@ internal func encodeSpectrumData(
     primaryBendsCount: Int,
     secondaryBendsCount: Int
 ) -> Data {
-    let hueWeight = abs(endHue - startHue)
-    let startWeight = startSections.reduce(0) { $0 + $1.weight }
-    let endWeight = endSections.reduce(0) { $0 + $1.weight }
-    let totalWeight = startWeight + hueWeight + endWeight
+    let startFraction = startSections.reduce(0) { $0 + $1.fraction }
+    let endFraction = endSections.reduce(0) { $0 + $1.fraction }
 
     let maxSections = Int(MAX_MONOCHROME_SECTIONS)
 
@@ -116,7 +139,7 @@ internal func encodeSpectrumData(
     var cumulativeStart = 0.0
     for (i, section) in startSections.enumerated() {
         if i >= maxSections { break }
-        cumulativeStart += section.weight / totalWeight
+        cumulativeStart += section.fraction
         let colorVal: Float = section.color == .white
             ? Float(MonochromeSectionTypeWhite.rawValue)
             : Float(MonochromeSectionTypeBlack.rawValue)
@@ -130,10 +153,10 @@ internal func encodeSpectrumData(
     /// - Index `i * 2`: The section color (0.0 for black, 1.0 for white).
     /// - Index `i * 2 + 1`: The cumulative boundary position on the slider.
     var endData = simd_float4(0, 0, 0, 0)
-    var cumulativeEnd = (startWeight + hueWeight) / totalWeight
+    var cumulativeEnd = 1.0 - endFraction
     for (i, section) in endSections.enumerated() {
         if i >= maxSections { break }
-        cumulativeEnd += section.weight / totalWeight
+        cumulativeEnd += section.fraction
         let colorVal: Float = section.color == .white
             ? Float(MonochromeSectionTypeWhite.rawValue)
             : Float(MonochromeSectionTypeBlack.rawValue)
@@ -146,9 +169,8 @@ internal func encodeSpectrumData(
         : ColorSpaceHSB.rawValue
 
     var shaderData = SpectrumShaderData(
-        totalWeight: Float(totalWeight),
-        startSectionBoundary: Float(startWeight / totalWeight),
-        hueSectionBoundary: Float((startWeight + hueWeight) / totalWeight),
+        startSectionBoundary: Float(startFraction),
+        hueSectionBoundary: Float(1.0 - endFraction),
         minimumHue: Float(startHue),
         maximumHue: Float(endHue),
         baseSaturation: Float(primaryValue),
@@ -158,6 +180,7 @@ internal func encodeSpectrumData(
         endSectionsCount: UInt32(endSections.count),
         saturationBendsCount: UInt32(primaryBendsCount),
         brightnessBendsCount: UInt32(secondaryBendsCount),
+        padding: 0,
         startSectionsData: startData,
         endSectionsData: endData
     )

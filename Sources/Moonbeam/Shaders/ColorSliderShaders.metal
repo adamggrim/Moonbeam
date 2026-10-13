@@ -272,9 +272,6 @@ half4 spectrumShader(
 ) {
     float normalizedPosition = calculateNormalizedPosition(position, size, isVertical);
 
-    float totalWeight = data->totalWeight;
-    if (totalWeight <= 0.0) return half4(0.0);
-
     float startSectionBoundary = data->startSectionBoundary;
     float hueSectionBoundary = data->hueSectionBoundary;
     float minimumHue = data->minimumHue;

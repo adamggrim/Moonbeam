@@ -10,42 +10,41 @@ public protocol MonochromeSection: Sendable {
     /// The color of a `MonochromeSection`, either `.black` or `.white`.
     var color: MonochromeColor { get }
 
-    /// The number of monochrome steps added to the hue section (each equal in
-    /// width to a single hue).
-    var weight: Double { get }
+    /// The proportion of the total slider track this section occupies.
+    var fraction: Double { get }
 }
 
 /// Provides shared default values shared across all monochrome sections.
 public extension MonochromeSection {
     /// The default proportionate width of a monochrome section (1/6th of the
-    /// hue spectrum).
-    static var defaultWeight: Double { 1.0 / 6.0 }
+    /// entire slider).
+    static var defaultFraction: Double { 1.0 / 6.0 }
 }
 
 /// A spectrum section that starts or end with black.
 public struct BlackSection: MonochromeSection {
     public let color: MonochromeColor = .black
-    public let weight: Double
+    public let fraction: Double
 
     /// Initializes a black section.
     ///   - Parameters:
-    ///     - weight: The proportionate width of the section relative
-    ///       to a single hue.
-    public init(weight: Double = Self.defaultWeight) {
-        self.weight = weight
+    ///     - fraction: The proportion of the total slider track this section
+    ///       occupies (0.0 to 1.0).
+    public init(fraction: Double = Self.defaultFraction) {
+        self.fraction = fraction
     }
 }
 
 /// A spectrum section that starts or end with white.
 public struct WhiteSection: MonochromeSection {
     public let color: MonochromeColor = .white
-    public let weight: Double
+    public let fraction: Double
 
     /// Initializes a white section.
     ///   - Parameters:
-    ///     - weight: The proportionate width of the section relative to
-    ///       a single hue.
-    public init(weight: Double = Self.defaultWeight) {
-        self.weight = weight
+    ///     - fraction: The proportion of the total slider track this section
+    ///       occupies (0.0 to 1.0).
+    public init(fraction: Double = Self.defaultFraction) {
+        self.fraction = fraction
     }
 }

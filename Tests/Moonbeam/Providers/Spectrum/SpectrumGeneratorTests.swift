@@ -5,7 +5,7 @@ import SwiftUI
 @Suite struct SpectrumGeneratorTests {
     @Test("Generator output for a monochrome start section")
     func monochromeStartSection() {
-        let startSections = [BlackSection(weight: 1.0)]
+        let startSections = [BlackSection(fraction: 0.999)]
         let configuration = SpectrumConfiguration(
             colorSpace: .hsb,
             startSections: startSections,

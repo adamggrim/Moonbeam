@@ -6,8 +6,8 @@ import MoonbeamShared
 @Suite struct SpectrumCoreTests {
     @Test("Shader data encoding mapping to C-struct")
     func shaderDataEncoding() {
-        let startSections: [MonochromeSection] = [BlackSection(weight: 0.2)]
-        let endSections: [MonochromeSection] = [WhiteSection(weight: 0.3)]
+        let startSections: [MonochromeSection] = [BlackSection(fraction: 0.2)]
+        let endSections: [MonochromeSection] = [WhiteSection(fraction: 0.3)]
 
         let data = encodeSpectrumData(
             colorSpace: .hsb,
@@ -24,7 +24,6 @@ import MoonbeamShared
         data.withUnsafeBytes { rawBuffer in
             let shaderData = rawBuffer.load(as: SpectrumShaderData.self)
 
-            #expect(abs(shaderData.totalWeight - 1.3) < 0.0001)
             #expect(shaderData.minimumHue == 0.1)
             #expect(shaderData.maximumHue == 0.9)
             #expect(shaderData.baseSaturation == 0.8)

@@ -64,21 +64,17 @@ internal struct SpectrumGenerator {
         let primaryBends = configuration.primaryBends
         let secondaryBends = configuration.secondaryBends
 
-        let startWeight = startSections.reduce(0) { $0 + $1.weight }
-        let hueWeight = abs(endHue - startHue)
-        let endWeight = endSections.reduce(0) { $0 + $1.weight }
-        let totalWeight = startWeight + hueWeight + endWeight
+        let startFraction = startSections.reduce(0) { $0 + $1.fraction }
+        let endFraction = endSections.reduce(0) { $0 + $1.fraction }
 
-        guard totalWeight > 0 else { return nil }
-
-        let startBoundary = startWeight / totalWeight
-        let hueBoundary = (startWeight + hueWeight) / totalWeight
+        let startBoundary = startFraction
+        let hueBoundary = 1.0 - endFraction
         let clampedPosition = max(0.0, min(1.0, position))
 
         if clampedPosition < startBoundary {
             var cumulativeStart: Double = 0.0
             for (index, section) in startSections.enumerated() {
-                let sectionEnd = cumulativeStart + (section.weight / totalWeight)
+                let sectionEnd = cumulativeStart + section.fraction
                 if clampedPosition < sectionEnd {
                     let relativePosition = (clampedPosition - cumulativeStart) / (sectionEnd - cumulativeStart)
                     if index == startSections.count - 1 {
@@ -122,7 +118,7 @@ internal struct SpectrumGenerator {
         } else {
             var cumulativeEnd = hueBoundary
             for (index, section) in endSections.enumerated() {
-                let sectionEnd = cumulativeEnd + (section.weight / totalWeight)
+                let sectionEnd = cumulativeEnd + section.fraction
                 if clampedPosition <= sectionEnd || (index == endSections.count - 1) {
                     let sectionProgress = (clampedPosition - cumulativeEnd) / (sectionEnd - cumulativeEnd)
                     let relativePosition = min(1.0, max(0.0, sectionProgress))

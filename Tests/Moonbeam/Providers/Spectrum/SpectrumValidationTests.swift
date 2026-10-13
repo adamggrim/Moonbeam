@@ -30,11 +30,11 @@ import Foundation
 
     @Test("Valid monochrome sections preservation")
     func validMonochromeSections() {
-        let sections: [MonochromeSection] = [BlackSection(weight: 0.1), WhiteSection(weight: 0.2)]
+        let sections: [MonochromeSection] = [BlackSection(fraction: 0.1), WhiteSection(fraction: 0.2)]
 
-        let validated = validateMonochromeSections(sections, name: "Test")
+        let validated = validateMonochromeSections(startSections: sections, endSections: [], name: "Test")
 
-        #expect(validated.count == 2)
-        #expect(validated.first?.weight == 0.1)
+        #expect(validated.start.count == 2)
+        #expect(validated.start.first?.fraction == 0.1)
     }
 }
