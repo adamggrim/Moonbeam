@@ -65,7 +65,6 @@ typedef enum {
 /// - z: Section 1 color (`MonochromeSectionType`)
 /// - w: Section 1 cumulative boundary (normalized coordinate)
 typedef struct {
-    float totalWeight;
     float startSectionBoundary;
     float hueSectionBoundary;
     float minimumHue;
@@ -78,6 +77,8 @@ typedef struct {
     uint32_t endSectionsCount;
     uint32_t saturationBendsCount;
     uint32_t brightnessBendsCount;
+
+    uint32_t padding;
 
     mb_float4 startSectionsData;
     mb_float4 endSectionsData;
