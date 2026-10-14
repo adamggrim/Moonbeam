@@ -10,6 +10,7 @@ internal struct ColorSliderLayout {
     let dimensions: ColorSliderDimensions
     let previewPosition: PreviewPosition?
     let previewSpacing: CGFloat?
+    let layoutDirection: LayoutDirection
 
     var resolvedLength: CGFloat { dimensions.length ?? 0 }
     var resolvedTrackThickness: CGFloat { dimensions.resolvedTrackThickness(for: controlSize) }
@@ -84,11 +85,15 @@ internal struct ColorSliderLayout {
         let halfThumbOffset = thumbOffset + halfThumbThickness
         let relativeMainAxis = (halfThumbOffset - previewMainAxisOffset) / resolvedPreviewSize
 
-        let crossAxisLimit = resolvedPreviewOffset > 0 ? 0.0 : 1.0
+        let isRightToLeft = layoutDirection == .rightToLeft
 
         if axis == .horizontal {
-            return UnitPoint(x: relativeMainAxis, y: crossAxisLimit)
+            let anchorX = isRightToLeft ? (1.0 - relativeMainAxis) : relativeMainAxis
+            let crossAxisLimit = resolvedPreviewOffset > 0 ? 0.0 : 1.0
+            return UnitPoint(x: anchorX, y: crossAxisLimit)
         } else {
+            let crossOffset = isRightToLeft ? -resolvedPreviewOffset : resolvedPreviewOffset
+            let crossAxisLimit = crossOffset > 0 ? 0.0 : 1.0
             return UnitPoint(x: crossAxisLimit, y: 1.0 - relativeMainAxis)
         }
     }
@@ -100,16 +105,24 @@ internal struct ColorSliderLayout {
 
     /// The 2D spatial offset for the draggable thumb.
     var thumbOffsetSize: CGSize {
-        CGSize(
-            width: axis == .horizontal ? thumbOffset : 0,
+        let isRightToLeft = layoutDirection == .rightToLeft
+        let xOffset = axis == .horizontal ? (isRightToLeft ? -thumbOffset : thumbOffset) : 0
+
+        return CGSize(
+            width: xOffset,
             height: axis == .horizontal ? 0 : -thumbOffset
         )
     }
 
     /// The 2D spatial offset for the floating color preview.
     var previewOffsetSize: CGSize {
-        CGSize(
-            width: axis == .horizontal ? previewMainAxisOffset : resolvedPreviewOffset,
+        let isRightToLeft = layoutDirection == .rightToLeft
+
+        let horizontalMain = isRightToLeft ? -previewMainAxisOffset : previewMainAxisOffset
+        let verticalCross = isRightToLeft ? -resolvedPreviewOffset : resolvedPreviewOffset
+
+        return CGSize(
+            width: axis == .horizontal ? horizontalMain : verticalCross,
             height: axis == .horizontal ? resolvedPreviewOffset : -previewMainAxisOffset
         )
     }

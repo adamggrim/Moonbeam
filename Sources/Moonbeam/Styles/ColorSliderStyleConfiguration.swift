@@ -14,6 +14,9 @@ public struct ColorSliderStyleConfiguration {
     /// The layout orientation of the slider (`.horizontal` or `.vertical`).
     public let axis: Axis
 
+    /// The layout direction of the view.
+    public let layoutDirection: LayoutDirection
+
     /// The calculated spatial offset for the leading edge of the draggable
     /// thumb.
     public let thumbOffset: CGSize

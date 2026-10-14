@@ -8,8 +8,8 @@ import AppKit
 typealias PlatformColor = NSColor
 #endif
 
-/// A customizable, interactive view that allows users to select a color
-/// from a dynamically generated spectrum or gradient.
+/// A customizable, interactive view that enables selection from a dynamically
+/// generated spectrum or gradient.
 @MainActor
 public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     /// The position of the slider, normalized to a range from 0.0 to 1.0.
@@ -36,6 +36,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     @Environment(\.colorSliderPreviewSpacing) private var previewSpacing
     @Environment(\.colorSliderAccessibilityPercentageHidden) private var hidePercentage
     @Environment(\.colorSliderAccessibilityFormatter) private var accessibilityFormatter
+    @Environment(\.layoutDirection) private var layoutDirection
 
     /// A localized string key used for VoiceOver accessibility.
     public var label: LocalizedStringKey
@@ -134,13 +135,15 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 controlSize: controlSize,
                 dimensions: resolvedDimensions,
                 previewPosition: previewPosition,
-                previewSpacing: previewSpacing
+                previewSpacing: previewSpacing,
+                layoutDirection: layoutDirection
             )
 
             let configuration = ColorSliderStyleConfiguration(
                 value: value,
                 isDragging: sliderState.isDragging,
                 axis: axis,
+                layoutDirection: layoutDirection,
                 thumbOffset: layout.thumbOffsetSize,
                 previewOffset: layout.previewOffsetSize,
                 previewScaleAnchor: layout.previewScaleAnchor,
@@ -227,7 +230,10 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     ///   - dragValue: The current value of the `DragGesture`.
     ///   - layout: The layout context describing the dimensions of the active render pass.
     private func onDragChanged(_ dragValue: DragGesture.Value, layout: ColorSliderLayout) {
-        let translation = axis == .horizontal ? dragValue.translation.width : -dragValue.translation.height
+        let horizontalTranslation = layout.layoutDirection == .rightToLeft
+            ? -dragValue.translation.width
+            : dragValue.translation.width
+        let translation = axis == .horizontal ? horizontalTranslation : -dragValue.translation.height
 
         if !sliderState.isDragging {
             withAnimation(reduceMotion ? nil : animation) { sliderState.isDragging = true }

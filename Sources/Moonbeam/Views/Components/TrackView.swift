@@ -25,6 +25,7 @@ internal struct TrackView: View {
                 Rectangle()
                     .fill(Color.white) // Pixels for Metal to paint on.
                     .colorEffect(shaderGenerator(size, axis == .vertical))
+                    .flipsForRightToLeftLayoutDirection(true)
             }
         }
         .frame(width: size.width, height: size.height)
