@@ -8,10 +8,9 @@ struct PreviewContainer<Content: View>: View {
     @State private var progress: Double = 0.0
 
     var body: some View {
-        ZStack {
-            backgroundColor.ignoresSafeArea()
-            content($selection, $progress)
-                .padding()
-        }
+        content($selection, $progress)
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(backgroundColor.ignoresSafeArea())
     }
 }
