@@ -84,13 +84,16 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         primaryName: String,
         secondaryName: String
     ) {
-        let validStart = validateMonochromeSections(startSections, name: "\(ColorSpace.name) Start")
-        let validEnd = validateMonochromeSections(endSections, name: "\(ColorSpace.name) End")
+        let validMonochromeSections = validateMonochromeSections(
+            startSections: startSections,
+            endSections: endSections,
+            name: "\(ColorSpace.name) Monochrome"
+        )
         let validPrimaryBends = validateBends(primaryBends, name: "\(ColorSpace.name) \(primaryName)")
         let validSecondaryBends = validateBends(secondaryBends, name: "\(ColorSpace.name) \(secondaryName)")
 
-        self.startSections = validStart
-        self.endSections = validEnd
+        self.startSections = validMonochromeSections.start
+        self.endSections = validMonochromeSections.end
         self.startHue = startHue
         self.endHue = endHue
         self.primaryValue = primaryValue
@@ -100,8 +103,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
 
         let configuration = SpectrumConfiguration(
             colorSpace: ColorSpace.colorSpace,
-            startSections: validStart,
-            endSections: validEnd,
+            startSections: validMonochromeSections.start,
+            endSections: validMonochromeSections.end,
             startHue: startHue,
             endHue: endHue,
             primaryValue: primaryValue,
@@ -119,8 +122,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
 
         let shaderData = encodeSpectrumData(
             colorSpace: ColorSpace.colorSpace,
-            startSections: validStart,
-            endSections: validEnd,
+            startSections: validMonochromeSections.start,
+            endSections: validMonochromeSections.end,
             startHue: startHue,
             endHue: endHue,
             primaryValue: primaryValue,
