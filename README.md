@@ -237,7 +237,7 @@ Moonbeam/
   │ │ ├── Spectrum/
   │ │ │ ├── Sections/
   │ │ │ │ ├── BendSection.swift: Bend section definitions
-  │ │ │ │ └── MonochromeSection.swift: Black and white secion definitions
+  │ │ │ │ └── MonochromeSection.swift: Black and white section definitions
   │ │ │ ├── SpectrumColorSpace.swift: Dynamic generator for spectrum colors
   │ │ │ ├── SpectrumCore.swift: Utilities and Metal encoders for spectrums
   │ │ │ ├── SpectrumGenerator.swift: Pure-Swift fallback logic for spectrums
@@ -270,7 +270,7 @@ Moonbeam/
   ├── include/
   │ ├── MoonbeamShared.h: Shared C/Metal headers and data structures
   │ └── module.modulemap: Clang module map for bridging MoonbeamShared
-  └── MoonbeamShared.c: Blank C file to satisfy Swift Pacakge Manager (SPM) requirements
+  └── MoonbeamShared.c: Blank C file to satisfy Swift Package Manager (SPM) requirements
 ```
 </details>
 
