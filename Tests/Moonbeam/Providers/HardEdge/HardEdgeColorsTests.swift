@@ -36,7 +36,7 @@ import SwiftUI
 
         let modifiedProvider = originalProvider.hardEdge(into: 10)
 
-        // Rreturn the original array when the source was already hard-edge.
+        // Return the original array when the source was already hard-edge.
         #expect(modifiedProvider.colors.count == 3)
     }
 }

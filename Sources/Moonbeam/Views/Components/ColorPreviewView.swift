@@ -2,7 +2,7 @@ import SwiftUI
 
 /// An isolated view responsible for rendering the floating color preview.
 public struct ColorPreviewView: View {
-    /// The currently color displayed in the preview.
+    /// The current color displayed in the preview.
     public let currentColor: Color
     /// The dimensions for the preview's size and position.
     public let dimensions: ColorSliderDimensions

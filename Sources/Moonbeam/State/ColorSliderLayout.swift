@@ -31,7 +31,7 @@ internal struct ColorSliderLayout {
     }
     var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
 
-    /// Inset to adjust the left and right bounds of the draggble thumb if it is
+    /// Inset to adjust the left and right bounds of the draggable thumb if it is
     /// thinner than the track.
     var thumbInset: CGFloat { (resolvedTrackThickness - resolvedThumbThickness) / 2 }
 

@@ -5,7 +5,7 @@ import os
 
 import MoonbeamShared
 
-// MARK: - Constants and validation
+// MARK: - Validation
 
 fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "Spectrum")
 
@@ -25,7 +25,7 @@ internal func validateBendSections(bendSections: [BendSection]) -> Bool {
     return true
 }
 
-/// Drops bend sections that overlap with previously sections.
+/// Drops bend sections that overlap with another bend section.
 ///
 /// - Parameters:
 ///   - bends: The user-provided array of `BendSection` objects.
