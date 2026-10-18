@@ -1,8 +1,6 @@
 #ifndef MoonbeamShared_h
 #define MoonbeamShared_h
 
-#define MAX_MONOCHROME_SECTIONS 2
-
 #ifdef __METAL_VERSION__
 #include <metal_stdlib>
 typedef metal::float4 mb_float4;
@@ -56,6 +54,12 @@ typedef enum {
     MonochromeSectionTypeWhite = 1
 } MonochromeSectionType;
 
+/// Represents a single monochrome section passed to the Metal shader.
+typedef struct {
+    float isWhite;
+    float endPosition;
+} ShaderMonochromeSection;
+
 /// The shared memory layout bridging a spectrum's state from Swift to Metal
 /// shaders.
 typedef struct {
@@ -71,11 +75,6 @@ typedef struct {
     uint32_t endSectionsCount;
     uint32_t saturationBendsCount;
     uint32_t brightnessBendsCount;
-
-    uint32_t padding;
-
-    mb_float4 startSectionsData;
-    mb_float4 endSectionsData;
 } SpectrumShaderData;
 
 #endif /* MoonbeamShared_h */
