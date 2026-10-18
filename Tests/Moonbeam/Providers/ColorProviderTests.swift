@@ -3,9 +3,14 @@ import Testing
 import SwiftUI
 
 private struct CustomFunctionProvider: ColorProvider {
-    let colorSource: ColorSource = .function { position in
-        Color(red: position, green: 1.0 - position, blue: 0.5)
-    }
+    let colorSource: ColorSource = .shader(
+        generator: { _, _ in
+            Shader(function: .init(library: .bundle(.module), name: "gradientShader"), arguments: [])
+        },
+        fallback: { position in
+            Color(red: position, green: 1.0 - position, blue: 0.5)
+        }
+    )
 }
 
 @Suite struct ColorProviderTests {

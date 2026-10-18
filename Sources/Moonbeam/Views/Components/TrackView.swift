@@ -18,9 +18,6 @@ internal struct TrackView: View {
             switch colorProvider.colorSource {
             case .array(let colors):
                 hardEdgeTrackView(colors: colors)
-            case .function(let colorGenerator):
-                Rectangle()
-                    .fill(colorGenerator(0.5))
             case .shader(let shaderGenerator, _):
                 Rectangle()
                     .fill(Color.white) // Pixels for Metal to paint on.

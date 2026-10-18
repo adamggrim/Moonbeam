@@ -40,7 +40,7 @@ public extension ColorProvider {
         case .array(let colors):
             return HardEdgeColors(colors: colors)
 
-        case .function(let colorGenerator), .shader(_, let colorGenerator):
+        case .shader(_, let colorGenerator):
             let generatedColors = (0..<steps).map { i in
                 // Sample from the center of the color block's position.
                 let position = (Double(i) + 0.5) / Double(steps)
