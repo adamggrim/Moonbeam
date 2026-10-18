@@ -58,12 +58,6 @@ typedef enum {
 
 /// The shared memory layout bridging a spectrum's state from Swift to Metal
 /// shaders.
-///
-/// Vector mapping for `startSectionsData` / `endSectionsData`:
-/// - x: Section 0 color (`MonochromeSectionType`)
-/// - y: Section 0 cumulative boundary (normalized coordinate)
-/// - z: Section 1 color (`MonochromeSectionType`)
-/// - w: Section 1 cumulative boundary (normalized coordinate)
 typedef struct {
     float startSectionBoundary;
     float hueSectionBoundary;

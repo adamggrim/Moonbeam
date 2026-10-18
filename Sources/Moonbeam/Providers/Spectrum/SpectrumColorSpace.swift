@@ -161,12 +161,12 @@ public extension Spectrum where ColorSpace == HSB {
     ///
     /// - Parameters:
     ///   - startSections: Monochrome sections that fade into the beginning of
-    ///     the hue spectrum. Capped at `MAX_MONOCHROME_SECTIONS`.
+    ///     the hue spectrum.
     ///   - endSections: Monochrome sections that fade out of the end of the hue
     ///     spectrum.
     ///   - startHue: The starting hue in degrees normalized to 0.0 to 1.0
     ///     (e.g., 180° = 0.5).
-    ///   - endHue: The ending hue in degrees normalized to 0.0  to 1.0 (e.g.,
+    ///   - endHue: The ending hue in degrees normalized to 0.0 to 1.0 (e.g.,
     ///     360° = 1.0).
     ///   - saturation: The baseline saturation applied to the entire hue range
     ///     (0.0 to 1.0).
@@ -209,7 +209,7 @@ public extension Spectrum where ColorSpace == OKLCH {
     ///
     /// - Parameters:
     ///   - startSections: Monochrome sections that fade into the beginning of
-    ///     the hue spectrum. Capped at `MAX_MONOCHROME_SECTIONS`.
+    ///     the hue spectrum.
     ///   - endSections: Monochrome sections that fade out of the end of the hue
     ///     spectrum.
     ///   - lightness: The perceived brightness of the color. Standard range is

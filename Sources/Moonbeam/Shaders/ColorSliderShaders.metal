@@ -55,7 +55,7 @@ constant float3x3 oklabRGBMatrix = float3x3(
 
 // Matrix to convert OKLAB constants to RGB.
 //
-// Taken from  "A perceptual color space for image processing" by Björn Ottosson
+// Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
 // https://bottosson.github.io/posts/oklab/
 float3 convertOKLABtoRGB(float L, float a, float b) {
@@ -72,7 +72,7 @@ float3 convertOKLABtoRGB(float L, float a, float b) {
 
 // Matrix to convert OKLCH constants to RGB.
 //
-// Taken from  "A perceptual color space for image processing" by Björn Ottosson
+// Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
 // https://bottosson.github.io/posts/oklab/
 float3 convertOKLCHtoRGB(float L, float C, float h) {
@@ -107,7 +107,7 @@ constant float3x3 lmsToOKLABMatrix = float3x3(
 
 // Matrix to convert RGB to OKLAB.
 //
-// Taken from  "A perceptual color space for image processing" by Björn Ottosson
+// Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
 // https://bottosson.github.io/posts/oklab/
 float3 convertRGBtoOKLAB(float3 c) {

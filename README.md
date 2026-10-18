@@ -98,7 +98,7 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
     @State private var selectedColor: Color = .cyan
     ```
 
-2. **Create the slider and add modifiers **
+2. **Create the slider and add modifiers**
 
     `Moonbeam` gradient sliders also support OKLCH and OKLAB color spaces.
 

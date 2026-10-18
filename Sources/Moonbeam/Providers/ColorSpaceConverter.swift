@@ -27,7 +27,7 @@ internal enum ColorSpaceConverter {
 
     /// Converts an OKLCH color to an sRGB `Color`.
     ///
-    /// Taken from  "A perceptual color space for image processing" by Björn
+    /// Taken from "A perceptual color space for image processing" by Björn
     /// Ottosson (2020).
     ///
     /// - SeeAlso:

@@ -16,7 +16,7 @@ public struct ColorGradient: ColorProvider {
     /// The ending color of the gradient.
     public let endColor: Color
 
-    /// The color space used to interpolate between  `startColor` and `endColor`.
+    /// The color space used to interpolate between `startColor` and `endColor`.
     public let colorSpace: GradientColorSpace
 
     /// Determines how to draw the gradient.

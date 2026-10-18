@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Global default metrics for  color sliders.
+/// Global default metrics for color sliders.
 public enum ColorSliderDefaults {
     /// Returns the default track thickness for a given control size.
     public static func trackThickness(for controlSize: ControlSize) -> CGFloat {
