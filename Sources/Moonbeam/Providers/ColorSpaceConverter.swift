@@ -22,7 +22,7 @@ internal enum ColorSpaceConverter {
         )
 
         static let fullCircleRadians: CGFloat = 2.0 * .pi
-            static let oklabPower: CGFloat = 3.0
+        static let oklabPower: CGFloat = 3.0
     }
 
     /// Converts an OKLCH color to an sRGB `Color`.

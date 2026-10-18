@@ -21,7 +21,7 @@ public struct ColorPreviewView: View {
     public var body: some View {
         let size = dimensions.previewSize ?? ColorSliderDefaults.previewSize(for: controlSize)
         Rectangle()
-            .foregroundColor(currentColor)
+            .fill(currentColor)
             .frame(width: size, height: size)
     }
 }

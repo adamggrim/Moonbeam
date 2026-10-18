@@ -132,6 +132,16 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
             secondaryBendsCount: validSecondaryBends.count
         )
 
+        let endFraction = validMonochromeSections.end.reduce(0) { $0 + $1.fraction }
+        let startSectionsData = encodeMonochromeSections(
+            validMonochromeSections.start,
+            startingAt: 0.0
+        )
+        let endSectionsData = encodeMonochromeSections(
+            validMonochromeSections.end,
+            startingAt: 1.0 - endFraction
+        )
+
         let primaryBendsMapped = validPrimaryBends.map { ShaderBend(bend: $0) }
         let nonEmptyPrimaryBends = primaryBendsMapped.isEmpty ? [ShaderBend.empty] : primaryBendsMapped
         let primaryBendsData = nonEmptyPrimaryBends.withUnsafeBufferPointer { Data(buffer: $0) }
@@ -146,6 +156,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
                     .float2(size.width, size.height),
                     .float(isVertical ? 1.0 : 0.0),
                     .data(shaderData),
+                    .data(startSectionsData),
+                    .data(endSectionsData),
                     .data(primaryBendsData),
                     .data(secondaryBendsData)
                 )

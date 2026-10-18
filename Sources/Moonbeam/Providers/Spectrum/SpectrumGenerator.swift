@@ -75,8 +75,9 @@ internal struct SpectrumGenerator {
             var cumulativeStart: Double = 0.0
             for (index, section) in startSections.enumerated() {
                 let sectionEnd = cumulativeStart + section.fraction
-                if clampedPosition < sectionEnd {
-                    let relativePosition = (clampedPosition - cumulativeStart) / (sectionEnd - cumulativeStart)
+                if clampedPosition < sectionEnd || (index == startSections.count - 1) {
+                    let sectionProgress = (clampedPosition - cumulativeStart) / (sectionEnd - cumulativeStart)
+                    let relativePosition = min(1.0, max(0.0, sectionProgress))
                     if index == startSections.count - 1 {
                         return monochromeToHueColor(
                             relativePosition: relativePosition,
@@ -226,18 +227,16 @@ internal struct SpectrumGenerator {
         }
 
         let valueDelta = defaultValue - bend.targetValue
-        let offset = hue - bend.startHue
+        let offset = abs(hue - bend.startHue)
+        let position = bend.hueCount != 0 ? (offset / bend.hueCount) : 0
 
         if let oneWay = bend as? OneWayBend {
-            let position = oneWay.hueCount != 0 ? (offset / oneWay.hueCount) : 0
-
             if oneWay.startHue == minHue {
                 return bend.targetValue + (valueDelta * position)
             } else {
                 return defaultValue - (valueDelta * position)
             }
-        } else if let twoWay = bend as? TwoWayBend {
-            let position = (hue - twoWay.startHue) / twoWay.hueCount
+        } else if bend is TwoWayBend {
             let linearProgress = 1.0 - abs(position * 2.0 - 1.0)
             return defaultValue - (valueDelta * linearProgress)
         }

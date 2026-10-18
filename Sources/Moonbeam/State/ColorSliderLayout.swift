@@ -10,7 +10,7 @@ internal struct ColorSliderLayout {
     let dimensions: ColorSliderDimensions
     let previewPosition: PreviewPosition?
     let previewSpacing: CGFloat?
-    let layoutDirection: LayoutDirection
+    var layoutDirection: LayoutDirection = .leftToRight
 
     var resolvedLength: CGFloat { dimensions.length ?? 0 }
     var resolvedTrackThickness: CGFloat { dimensions.resolvedTrackThickness(for: controlSize) }

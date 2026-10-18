@@ -1,29 +1,10 @@
 import Foundation
 import SwiftUI
 import simd
-import os
 
 import MoonbeamShared
 
 // MARK: - Validation
-
-fileprivate let logger = Logger(subsystem: "com.moonbeam", category: "Spectrum")
-
-/// Determines if an array of bend sections contains any overlapping sections.
-///
-/// - Parameter bendSections: An array of `BendSection` objects.
-/// - Returns: `true` if all sections occupy distinct hue ranges, otherwise
-///   `false`.
-internal func validateBendSections(bendSections: [BendSection]) -> Bool {
-    guard bendSections.count > 1 else { return true }
-    let sortedBendSections = bendSections.sorted { min($0.startHue, $0.endHue) < min($1.startHue, $1.endHue) }
-    for (currentSection, nextSection) in zip(sortedBendSections, sortedBendSections.dropFirst()) {
-        if max(currentSection.startHue, currentSection.endHue) > min(nextSection.startHue, nextSection.endHue) {
-            return false
-        }
-    }
-    return true
-}
 
 /// Drops bend sections that overlap with another bend section.
 ///
@@ -61,16 +42,14 @@ internal func validateMonochromeSections(
     endSections: [MonochromeSection],
     name: String
 ) -> (start: [MonochromeSection], end: [MonochromeSection]) {
-    let maxSections = Int(MAX_MONOCHROME_SECTIONS)
-
-    var validStart = Array(startSections.prefix(maxSections))
-    var validEnd = Array(endSections.prefix(maxSections))
+    var validStart = startSections.filter { $0.fraction > 0.0 }
+    var validEnd = endSections.filter { $0.fraction > 0.0 }
 
     let startSum = validStart.reduce(0) { $0 + $1.fraction }
     let endSum = validEnd.reduce(0) { $0 + $1.fraction }
     let totalFraction = startSum + endSum
 
-    if totalFraction >= 1.0 {
+    if totalFraction > 1.0 {
         Telemetry.reportNonFatalError(
             "Moonbeam: \(name) monochrome sections total fraction (\(totalFraction)) exceeds 1.0. Sections scaled to "
             + "fit."
@@ -114,6 +93,32 @@ extension ShaderBend {
     static let empty = ShaderBend(data0: .zero, data1: .zero)
 }
 
+extension ShaderMonochromeSection {
+    static let empty = ShaderMonochromeSection(isWhite: 0, endPosition: 0)
+}
+
+internal func encodeMonochromeSections(
+    _ sections: [MonochromeSection],
+    startingAt initialPosition: Double
+) -> Data {
+    guard !sections.isEmpty else {
+        return [ShaderMonochromeSection.empty].withUnsafeBufferPointer { Data(buffer: $0) }
+    }
+
+    var cumulativePosition = initialPosition
+    let mapped = sections.map { section -> ShaderMonochromeSection in
+        cumulativePosition += section.fraction
+        let colorVal: Float = section.color == .white
+            ? Float(MonochromeSectionTypeWhite.rawValue)
+            : Float(MonochromeSectionTypeBlack.rawValue)
+        return ShaderMonochromeSection(
+            isWhite: colorVal,
+            endPosition: Float(cumulativePosition)
+        )
+    }
+    return mapped.withUnsafeBufferPointer { Data(buffer: $0) }
+}
+
 internal func encodeSpectrumData(
     colorSpace: SpectrumColorSpace,
     startSections: [MonochromeSection],
@@ -127,42 +132,6 @@ internal func encodeSpectrumData(
 ) -> Data {
     let startFraction = startSections.reduce(0) { $0 + $1.fraction }
     let endFraction = endSections.reduce(0) { $0 + $1.fraction }
-
-    let maxSections = Int(MAX_MONOCHROME_SECTIONS)
-
-    /// Packs two monochrome start sections into a single four-part vector.
-    ///
-    /// For each section `i` (0 or 1), there are two consecutive floats:
-    /// - Index `i * 2`: The section color (0.0 for black, 1.0 for white).
-    /// - Index `i * 2 + 1`: The cumulative boundary position on the slider.
-    var startData = simd_float4(0, 0, 0, 0)
-    var cumulativeStart = 0.0
-    for (i, section) in startSections.enumerated() {
-        if i >= maxSections { break }
-        cumulativeStart += section.fraction
-        let colorVal: Float = section.color == .white
-            ? Float(MonochromeSectionTypeWhite.rawValue)
-            : Float(MonochromeSectionTypeBlack.rawValue)
-        startData[i*2] = colorVal
-        startData[i*2 + 1] = Float(cumulativeStart)
-    }
-
-    /// Packs two monochrome end sections into a single four-part vector.
-    ///
-    /// For each section `i` (0 or 1), there are two consecutive floats:
-    /// - Index `i * 2`: The section color (0.0 for black, 1.0 for white).
-    /// - Index `i * 2 + 1`: The cumulative boundary position on the slider.
-    var endData = simd_float4(0, 0, 0, 0)
-    var cumulativeEnd = 1.0 - endFraction
-    for (i, section) in endSections.enumerated() {
-        if i >= maxSections { break }
-        cumulativeEnd += section.fraction
-        let colorVal: Float = section.color == .white
-            ? Float(MonochromeSectionTypeWhite.rawValue)
-            : Float(MonochromeSectionTypeBlack.rawValue)
-        endData[i*2] = colorVal
-        endData[i*2 + 1] = Float(cumulativeEnd)
-    }
 
     let shaderFlag = colorSpace == .oklch
         ? ColorSpaceOKLCH.rawValue
@@ -179,10 +148,7 @@ internal func encodeSpectrumData(
         startSectionsCount: UInt32(startSections.count),
         endSectionsCount: UInt32(endSections.count),
         saturationBendsCount: UInt32(primaryBendsCount),
-        brightnessBendsCount: UInt32(secondaryBendsCount),
-        padding: 0,
-        startSectionsData: startData,
-        endSectionsData: endData
+        brightnessBendsCount: UInt32(secondaryBendsCount)
     )
 
     return withUnsafeBytes(of: &shaderData) { Data($0) }
