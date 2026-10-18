@@ -3,7 +3,20 @@ import Testing
 import Foundation
 
 @Suite struct SpectrumNameResolverTests {
-    let strings = SpectrumAccessibilityStrings()
+    let strings: SpectrumAccessibilityStrings = {
+        var strings = SpectrumAccessibilityStrings()
+        strings.gray = "Grau, teurer Freund, ist alle Theorie"
+        strings.black = "No light; but rather darkness visible"
+        strings.white = "Hail holy light, offspring of Heaven first-born"
+        strings.red = "ἦμος δ᾿ ἠριγένεια φάνη ῥοδοδάκτυλος Ἠώς"
+        strings.cyan = "ψάμμῳ κυανέη· τοὺς δὲ χλωρὸν δέος ᾕρει"
+        strings.format = "%1$@ %2$@"
+        strings.dark = "Thou who didst waken from his summer dreams"
+        strings.blue = "The blue Mediterranean, where he lay"
+        strings.light = "Tasting of Flora"
+        strings.green = "and the country green"
+        return strings
+    }()
 
     @Test("Resolving pure gray in HSB")
     func hsbGray() {
