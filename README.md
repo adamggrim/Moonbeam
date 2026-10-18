@@ -19,10 +19,10 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 
 ## Variations
 
-`Moonbeam` supports two color slider modes—spectrum (HSB- and OKLCH-based) and gradient (color mixing-based).
+`Moonbeam` supports two color slider modes—spectrum (HSB- and Oklch-based) and gradient (color mixing-based).
 
-- **For spectrum sliders:** Use either the HSB or OKLCH color space. To improve the legibility of certain colors, you can bend saturation and brightness (HSB) or lightness and chroma (OKLCH) in specific sections using the `saturationBends`, `brightnessBends`, `lightnessBends`, and `chromaBends` parameters. `Moonbeam` also supports starting or ending spectrum sliders with black or white `monochromeSections`.
-- **For gradient sliders**: Create a precise gradient between any two colors using the RGB, OKLAB or OKLCH color space.
+- **For spectrum sliders:** Use either the HSB or Oklch color space. To improve the legibility of certain colors, you can bend saturation and brightness (HSB) or lightness and chroma (Oklch) in specific sections using the `saturationBends`, `brightnessBends`, `lightnessBends`, and `chromaBends` parameters. `Moonbeam` also supports starting or ending spectrum sliders with black or white `monochromeSections`.
+- **For gradient sliders**: Create a precise gradient between any two colors using the RGB, Oklab or Oklch color space.
 - **For hard-edge sliders**: Create a slider with discrete color blocks by providing an explicit array of colors or adding the `.hardEdge(into:)` modifier to an existing slider.
 
 `Moonbeam` also offers layout and thumb style customization:
@@ -69,12 +69,12 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
     )
     ```
 
-    OKLCH spectrum:
+    Oklch spectrum:
 
     ```swift
     ColorSlider(
         value: $progress,
-        colorProvider: Spectrum<OKLCH>(
+        colorProvider: Spectrum<Oklch>(
             lightness: 0.75,
             chroma: 0.15,
             startHue: 0.0,
@@ -100,7 +100,7 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
 
 2. **Create the slider and add modifiers**
 
-    `Moonbeam` gradient sliders also support OKLCH and OKLAB color spaces.
+    `Moonbeam` gradient sliders also support Oklch and Oklab color spaces.
 
     ```swift
     ColorSlider(
@@ -243,7 +243,7 @@ Moonbeam/
   │ │ │ ├── SpectrumGenerator.swift: Pure-Swift fallback logic for spectrums
   │ │ │ └── SpectrumNameResolver.swift: Mapping utility that returns color names based on hue and intensity values
   │ │ ├── ColorProvider.swift: Protocols and enums defining data sources and rendering methods
-  │ │ └── ColorSpaceConverter.swift: Mathematical conversions between OKLCH, OKLAB and RGB
+  │ │ └── ColorSpaceConverter.swift: Mathematical conversions between Oklch, Oklab and RGB
   │ ├── Shaders/
   │ │ └── ColorSliderShaders.metal: Metal shaders for hardware-accelerated gradient and spectrum rendering
   │ ├── State/
@@ -262,7 +262,7 @@ Moonbeam/
   │   │ ├── GradientSliders.swift: Previews for gradient sliders
   │   │ ├── HardEdgeSliders.swift: Previews for hard-edge block sliders
   │   │ ├── HSBSliders.swift: Previews for HSB sliders
-  │   │ ├── OKLCHSliders.swift: Previews for OKLCH sliders
+  │   │ ├── OklchSliders.swift: Previews for Oklch sliders
   │   │ └── PreviewContainer.swift: Helper container view for standardized previews
   │   ├── ColorSlider.swift: Main color slider view
   │   └── ColorSlider+Initializers.swift: Color slider convenience initializers

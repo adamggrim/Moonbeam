@@ -34,7 +34,7 @@ float3 sRGBToLinear(float3 c) {
     return select(srgb_high, srgb_low, c <= sRGBLinearThreshold);
 }
 
-// Matrices to convert LMS constants to/from OKLAB and RGB.
+// Matrices to convert LMS constants to/from Oklab and RGB.
 //
 // Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
@@ -51,14 +51,14 @@ constant float3x3 oklabRGBMatrix = float3x3(
     float3(0.2309699292, -0.3413193965, 1.7076147010)
 );
 
-// MARK: - OKLAB and OKLCH to RGB
+// MARK: - Oklab and Oklch to RGB
 
-// Matrix to convert OKLAB constants to RGB.
+// Matrix to convert Oklab constants to RGB.
 //
 // Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
 // https://bottosson.github.io/posts/oklab/
-float3 convertOKLABtoRGB(float L, float a, float b) {
+float3 convertOklabtoRGB(float L, float a, float b) {
     float3 lms_ = oklabLMSMatrix * float3(L, a, b);
 
     float l = sign(lms_.x) * pow(abs(lms_.x), 3.0);
@@ -70,23 +70,23 @@ float3 convertOKLABtoRGB(float L, float a, float b) {
     return linearToSRGB(clamp(lin, 0.0, 1.0));
 }
 
-// Matrix to convert OKLCH constants to RGB.
+// Matrix to convert Oklch constants to RGB.
 //
 // Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
 // https://bottosson.github.io/posts/oklab/
-float3 convertOKLCHtoRGB(float L, float C, float h) {
+float3 convertOklchtoRGB(float L, float C, float h) {
     float hueAngle = h * 2.0 * M_PI_F;
     float a = C * cos(hueAngle);
     float b = C * sin(hueAngle);
-    return convertOKLABtoRGB(L, a, b);
+    return convertOklabtoRGB(L, a, b);
 }
 
 float3 resolveColor(uint colorSpace, float h, float s_c, float b_l) {
-    return colorSpace == ColorSpaceOKLCH ? convertOKLCHtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
+    return colorSpace == ColorSpaceOklch ? convertOklchtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
 }
 
-// Matrices to convert RGB to LMS and OKLAB constants.
+// Matrices to convert RGB to LMS and Oklab constants.
 //
 // Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
@@ -97,26 +97,26 @@ constant float3x3 rgbToLMSMatrix = float3x3(
     float3(0.0514459929, 0.1073969566, 0.6299787005)
 );
 
-constant float3x3 lmsToOKLABMatrix = float3x3(
+constant float3x3 lmsToOklabMatrix = float3x3(
     float3(0.2104542553, 1.9779984951, 0.0259040371),
     float3(0.7936177850, -2.4285922050, 0.7827717662),
     float3(-0.0040720468, 0.4505937099, -0.8086757660)
 );
 
-// MARK: - RGB to OKLAB
+// MARK: - RGB to Oklab
 
-// Matrix to convert RGB to OKLAB.
+// Matrix to convert RGB to Oklab.
 //
 // Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
 // https://bottosson.github.io/posts/oklab/
-float3 convertRGBtoOKLAB(float3 c) {
+float3 convertRGBtoOklab(float3 c) {
     float3 lin = sRGBToLinear(c);
 
     float3 lms = rgbToLMSMatrix * lin;
     lms = sign(lms) * pow(abs(lms), 1.0/3.0);
 
-    return lmsToOKLABMatrix * lms;
+    return lmsToOklabMatrix * lms;
 }
 
 // MARK: – Spectrum bends
@@ -194,7 +194,7 @@ inline float2 calculateMonochromeFade(
         }
     }
 
-    if (isWhiteSection == 1.0 && colorSpaceFlag == ColorSpaceOKLCH) {
+    if (isWhiteSection == 1.0 && colorSpaceFlag == ColorSpaceOklch) {
         finalBrightness = 1.0 - (fadeFactor * (1.0 - finalBrightness));
     }
 
@@ -229,12 +229,12 @@ half4 gradientShader(
         return half4(blendedColor.rgb * currentColor.a, blendedColor.a * currentColor.a);
     }
 
-    float3 labStart = convertRGBtoOKLAB(float3(startColor.rgb));
-    float3 labEnd = convertRGBtoOKLAB(float3(endColor.rgb));
+    float3 labStart = convertRGBtoOklab(float3(startColor.rgb));
+    float3 labEnd = convertRGBtoOklab(float3(endColor.rgb));
 
-    if (colorSpace == ColorSpaceOKLAB) {
+    if (colorSpace == ColorSpaceOklab) {
         float3 mixedLab = mix(labStart, labEnd, normalizedPosition);
-        float3 rgbOut = convertOKLABtoRGB(mixedLab.x, mixedLab.y, mixedLab.z);
+        float3 rgbOut = convertOklabtoRGB(mixedLab.x, mixedLab.y, mixedLab.z);
         return half4(half3(rgbOut) * currentColor.a, currentColor.a);
     } else {
         float cStart = sqrt(labStart.y*labStart.y + labStart.z*labStart.z);
@@ -253,7 +253,7 @@ half4 gradientShader(
         float C = mix(cStart, cEnd, normalizedPosition);
         float h = mix(hStart, hEnd, normalizedPosition) / (2.0 * M_PI_F);
 
-        float3 rgbOut = convertOKLCHtoRGB(L, C, h);
+        float3 rgbOut = convertOklchtoRGB(L, C, h);
         return half4(half3(rgbOut) * currentColor.a, currentColor.a);
     }
 }

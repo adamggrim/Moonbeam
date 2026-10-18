@@ -73,7 +73,7 @@ import Foundation
         )
         #expect(darkBlue == String(format: strings.format, strings.dark!, strings.blue))
 
-        // OKLCH light boundary: secondary > 0.8 && primary < 0.1
+        // Oklch light boundary: secondary > 0.8 && primary < 0.1
         let lightGreen = SpectrumNameResolver.name(
             hue: 0.35, primary: 0.05, secondary: 0.9, colorSpace: .oklch, strings: strings
         )

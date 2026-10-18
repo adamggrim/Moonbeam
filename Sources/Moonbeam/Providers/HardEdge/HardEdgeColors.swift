@@ -7,7 +7,7 @@ import SwiftUI
 /// 1. **Explicit**: Initialize the slider using a custom array of `Color`
 ///   objects.
 /// 2. **Implicit**: Apply the `.hardEdge(into:)` modifier to convert a
-///   `Spectrum<HSB>`, `Spectrum<OKLCH>` or `ColorGradient` into
+///   `Spectrum<HSB>`, `Spectrum<Oklch>` or `ColorGradient` into
 ///   discrete color blocks sampled from the center of each block.
 public struct HardEdgeColors: ColorProvider {
     /// The sequence of colors that make up the discrete blocks on the slider.

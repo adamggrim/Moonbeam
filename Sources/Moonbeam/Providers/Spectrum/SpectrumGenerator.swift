@@ -2,7 +2,7 @@ import SwiftUI
 
 /// A configuration for the static properties of a spectrum.
 internal struct SpectrumConfiguration {
-    /// Whether to use the HSB or OKLCH color space.
+    /// Whether to use the HSB or Oklch color space.
     let colorSpace: SpectrumColorSpace
     /// An array of monochrome sections appearing before the hue spectrum.
     let startSections: [MonochromeSection]

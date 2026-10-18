@@ -134,7 +134,7 @@ internal func encodeSpectrumData(
     let endFraction = endSections.reduce(0) { $0 + $1.fraction }
 
     let shaderFlag = colorSpace == .oklch
-        ? ColorSpaceOKLCH.rawValue
+        ? ColorSpaceOklch.rawValue
         : ColorSpaceHSB.rawValue
 
     var shaderData = SpectrumShaderData(

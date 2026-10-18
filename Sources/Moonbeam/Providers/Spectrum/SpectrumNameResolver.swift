@@ -61,8 +61,8 @@ internal enum ColorThresholds {
         static let dullMaxSaturation = 0.35
     }
 
-    /// Thresholds for OKLCH spectrum sliders.
-    enum OKLCH {
+    /// Thresholds for Oklch spectrum sliders.
+    enum Oklch {
         static let grayMaxChroma = 0.02
         static let whiteMinLightness = 0.85
         static let blackMaxLightness = 0.15
@@ -120,16 +120,16 @@ internal struct SpectrumNameResolver {
         let isDull: Bool
 
         if colorSpace == .oklch {
-            isGray = primary < ColorThresholds.OKLCH.grayMaxChroma
-            isWhite = secondary > ColorThresholds.OKLCH.whiteMinLightness
-            isBlack = secondary < ColorThresholds.OKLCH.blackMaxLightness
+            isGray = primary < ColorThresholds.Oklch.grayMaxChroma
+            isWhite = secondary > ColorThresholds.Oklch.whiteMinLightness
+            isBlack = secondary < ColorThresholds.Oklch.blackMaxLightness
 
-            isLight = secondary > ColorThresholds.OKLCH.lightMinLightness
-                && primary < ColorThresholds.OKLCH.lightMaxChroma
-            isDark = secondary < ColorThresholds.OKLCH.darkMaxLightness
+            isLight = secondary > ColorThresholds.Oklch.lightMinLightness
+                && primary < ColorThresholds.Oklch.lightMaxChroma
+            isDark = secondary < ColorThresholds.Oklch.darkMaxLightness
 
-            isBright = primary > ColorThresholds.OKLCH.brightMinChroma
-            isDull = primary < ColorThresholds.OKLCH.dullMaxChroma && !isGray
+            isBright = primary > ColorThresholds.Oklch.brightMinChroma
+            isDull = primary < ColorThresholds.Oklch.dullMaxChroma && !isGray
         } else {
             isGray = primary < ColorThresholds.HSB.grayMaxSaturation
             isWhite = secondary > ColorThresholds.HSB.whiteMinBrightness

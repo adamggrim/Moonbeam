@@ -23,10 +23,10 @@ public enum HSB: SpectrumColorSpaceProfile {
     public static let name = "HSB"
 }
 
-/// The OKLCH (Lightness, Chroma, Hue) color space profile.
-public enum OKLCH: SpectrumColorSpaceProfile {
+/// The Oklch (Lightness, Chroma, Hue) color space profile.
+public enum Oklch: SpectrumColorSpaceProfile {
     public static let colorSpace: SpectrumColorSpace = .oklch
-    public static let name = "OKLCH"
+    public static let name = "Oklch"
 }
 
 // MARK: - Generic base struct
@@ -213,11 +213,11 @@ public extension Spectrum where ColorSpace == HSB {
     }
 }
 
-// MARK: - OKLCH initialization
+// MARK: - Oklch initialization
 
-public extension Spectrum where ColorSpace == OKLCH {
+public extension Spectrum where ColorSpace == Oklch {
     /// Creates a dynamically generated spectrum based on the perceptually
-    /// uniform OKLCH color space.
+    /// uniform Oklch color space.
     ///
     /// - Parameters:
     ///   - startSections: Monochrome sections that fade into the beginning of

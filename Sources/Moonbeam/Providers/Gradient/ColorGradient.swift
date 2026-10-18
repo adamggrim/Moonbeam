@@ -44,8 +44,8 @@ public struct ColorGradient: ColorProvider {
         self.colorSource = .shader(generator: { size, isVertical in
             let spaceFlag: Float
             switch colorSpace {
-            case .oklch: spaceFlag = Float(ColorSpaceOKLCH.rawValue)
-            case .oklab: spaceFlag = Float(ColorSpaceOKLAB.rawValue)
+            case .oklch: spaceFlag = Float(ColorSpaceOklch.rawValue)
+            case .oklab: spaceFlag = Float(ColorSpaceOklab.rawValue)
             default:     spaceFlag = Float(ColorSpaceRGB.rawValue)
             }
             return ShaderLibrary.bundle(.module).gradientShader(

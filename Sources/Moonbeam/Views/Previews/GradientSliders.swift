@@ -10,7 +10,7 @@ import SwiftUI
     }
 }
 
-#Preview("Horizontal OKLAB gradient slider") {
+#Preview("Horizontal Oklab gradient slider") {
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
@@ -20,7 +20,7 @@ import SwiftUI
     }
 }
 
-#Preview("Horizontal OKLCH gradient slider") {
+#Preview("Horizontal Oklch gradient slider") {
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,

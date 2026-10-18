@@ -35,8 +35,8 @@ typedef struct {
 typedef enum {
     ColorSpaceRGB = 0,
     ColorSpaceHSB = 1,
-    ColorSpaceOKLAB = 2,
-    ColorSpaceOKLCH = 3
+    ColorSpaceOklab = 2,
+    ColorSpaceOklch = 3
 } ColorSpaceFlag;
 
 /// Defines the bend type of a bend section.
