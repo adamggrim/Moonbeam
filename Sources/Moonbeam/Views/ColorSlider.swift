@@ -1,13 +1,5 @@
 import SwiftUI
 
-#if canImport(UIKit)
-import UIKit
-typealias PlatformColor = UIColor
-#elseif canImport(AppKit)
-import AppKit
-typealias PlatformColor = NSColor
-#endif
-
 /// A customizable, interactive view that enables selection from a dynamically
 /// generated spectrum or gradient.
 @MainActor
