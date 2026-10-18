@@ -77,13 +77,25 @@ internal enum ColorThresholds {
 }
 
 internal enum HueDegrees {
-    static let redEnd = 25.0
-    static let orangeEnd = 60.0
-    static let yellowEnd = 110.0
-    static let greenEnd = 160.0
-    static let cyanEnd = 210.0
-    static let blueEnd = 280.0
-    static let purpleEnd = 330.0
+    enum HSB {
+        static let redEnd = 25.0
+        static let orangeEnd = 60.0
+        static let yellowEnd = 110.0
+        static let greenEnd = 160.0
+        static let cyanEnd = 210.0
+        static let blueEnd = 280.0
+        static let purpleEnd = 330.0
+    }
+
+    enum Oklch {
+        static let redEnd = 45.0
+        static let orangeEnd = 85.0
+        static let yellowEnd = 122.0
+        static let greenEnd = 175.0
+        static let cyanEnd = 225.0
+        static let blueEnd = 285.0
+        static let purpleEnd = 325.0
+    }
 }
 
 /// Mapping utility that returns color names based on hue and intensity values.
@@ -138,15 +150,30 @@ internal struct SpectrumNameResolver {
         }
 
         let baseHueName: String
-        switch degrees {
-        case 0..<HueDegrees.redEnd: baseHueName = strings.red
-        case HueDegrees.redEnd..<HueDegrees.orangeEnd: baseHueName = strings.orange
-        case HueDegrees.orangeEnd..<HueDegrees.yellowEnd: baseHueName = strings.yellow
-        case HueDegrees.yellowEnd..<HueDegrees.greenEnd: baseHueName = strings.green
-        case HueDegrees.greenEnd..<HueDegrees.cyanEnd: baseHueName = strings.cyan
-        case HueDegrees.cyanEnd..<HueDegrees.blueEnd: baseHueName = strings.blue
-        case HueDegrees.blueEnd..<HueDegrees.purpleEnd: baseHueName = strings.purple
-        default: baseHueName = strings.pink
+        switch colorSpace {
+        case .hsb:
+            switch degrees {
+            case 0..<HueDegrees.HSB.redEnd: baseHueName = strings.red
+            case HueDegrees.HSB.redEnd..<HueDegrees.HSB.orangeEnd: baseHueName = strings.orange
+            case HueDegrees.HSB.orangeEnd..<HueDegrees.HSB.yellowEnd: baseHueName = strings.yellow
+            case HueDegrees.HSB.yellowEnd..<HueDegrees.HSB.greenEnd: baseHueName = strings.green
+            case HueDegrees.HSB.greenEnd..<HueDegrees.HSB.cyanEnd: baseHueName = strings.cyan
+            case HueDegrees.HSB.cyanEnd..<HueDegrees.HSB.blueEnd: baseHueName = strings.blue
+            case HueDegrees.HSB.blueEnd..<HueDegrees.HSB.purpleEnd: baseHueName = strings.purple
+            default: baseHueName = strings.pink
+            }
+
+        case .oklch:
+            switch degrees {
+            case 0..<HueDegrees.Oklch.redEnd: baseHueName = strings.red
+            case HueDegrees.Oklch.redEnd..<HueDegrees.Oklch.orangeEnd: baseHueName = strings.orange
+            case HueDegrees.Oklch.orangeEnd..<HueDegrees.Oklch.yellowEnd: baseHueName = strings.yellow
+            case HueDegrees.Oklch.yellowEnd..<HueDegrees.Oklch.greenEnd: baseHueName = strings.green
+            case HueDegrees.Oklch.greenEnd..<HueDegrees.Oklch.cyanEnd: baseHueName = strings.cyan
+            case HueDegrees.Oklch.cyanEnd..<HueDegrees.Oklch.blueEnd: baseHueName = strings.blue
+            case HueDegrees.Oklch.blueEnd..<HueDegrees.Oklch.purpleEnd: baseHueName = strings.purple
+            default: baseHueName = strings.pink
+            }
         }
 
         let toneModifierName: String? = {

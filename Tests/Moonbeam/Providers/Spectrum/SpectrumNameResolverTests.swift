@@ -40,17 +40,29 @@ import Foundation
         #expect(white == strings.white)
     }
 
-    @Test("Resolving base hue names")
+    @Test("Resolving base hue names in HSB and Oklch")
     func baseHues() {
-        let red = SpectrumNameResolver.name(
+        let hsbRed = SpectrumNameResolver.name(
             hue: 0.0, primary: 0.6, secondary: 0.6, colorSpace: .hsb, strings: strings
         )
-        #expect(red == strings.red)
+        #expect(hsbRed == strings.red)
 
-        let cyan = SpectrumNameResolver.name(
+        let hsbCyan = SpectrumNameResolver.name(
             hue: 0.5, primary: 0.6, secondary: 0.6, colorSpace: .hsb, strings: strings
         )
-        #expect(cyan == strings.cyan)
+        #expect(hsbCyan == strings.cyan)
+
+        // Pure sRGB red in Oklch sits at ~29.2° (hue ≈ 0.081).
+        let oklchRed = SpectrumNameResolver.name(
+            hue: 29.2 / 360.0, primary: 0.14, secondary: 0.63, colorSpace: .oklch, strings: strings
+        )
+        #expect(oklchRed == strings.red)
+
+        // Pure sRGB cyan in Oklch sits at ~194.8° (hue ≈ 0.541).
+        let oklchCyan = SpectrumNameResolver.name(
+            hue: 194.8 / 360.0, primary: 0.14, secondary: 0.75, colorSpace: .oklch, strings: strings
+        )
+        #expect(oklchCyan == strings.cyan)
     }
 
     @Test("Resolving tone modifiers")
