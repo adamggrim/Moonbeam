@@ -28,8 +28,8 @@ import SwiftUI
         let green = components[1]
         let blue = components[2]
 
-        #expect(abs(red - 0.0) < 0.001) // Red resolves to 0.0.
-        #expect(abs(green - (212.0 / 255.0)) < 0.01) // Green resolves to ~0.831.
-        #expect(abs(blue - (133.0 / 255.0)) < 0.01) // Blue resolves to ~0.521.
+        #expect(abs(red - 0.0) < 0.001) // Red reaches the 0.0 gamut boundary at C ≈ 0.0907.
+        #expect(abs(green - (116.0 / 255.0)) < 0.01) // Green resolves to ~0.454, preserving L = 0.5.
+        #expect(abs(blue - (101.0 / 255.0)) < 0.01) // Blue resolves to ~0.397, preserving L = 0.5.
     }
 }

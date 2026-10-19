@@ -36,8 +36,12 @@ public struct ColorGradient: ColorProvider {
 
         let fallback: @Sendable (Double) -> Color = { position in
             switch colorSpace {
-            case .rgb: return startColor.mix(with: endColor, by: position)
-            case .oklab, .oklch: return startColor.mix(with: endColor, by: position, in: .perceptual)
+            case .rgb:
+                return startColor.mix(with: endColor, by: position)
+            case .oklab:
+                return startColor.mix(with: endColor, by: position, in: .perceptual)
+            case .oklch:
+                return ColorSpaceConverter.interpolateOklch(from: startColor, to: endColor, at: position)
             }
         }
 
