@@ -32,4 +32,44 @@ import SwiftUI
         #expect(abs(green - (116.0 / 255.0)) < 0.01) // Green resolves to ~0.454, preserving L = 0.5.
         #expect(abs(blue - (101.0 / 255.0)) < 0.01) // Blue resolves to ~0.397, preserving L = 0.5.
     }
+
+    @Test("Dynamic color resolution adapts to Light and Dark Mode environments")
+    func colorToOklabEnvironmentResolution() {
+        var lightEnvironment = EnvironmentValues()
+        lightEnvironment.colorScheme = .light
+
+        var darkEnvironment = EnvironmentValues()
+        darkEnvironment.colorScheme = .dark
+
+        let lightOklab = ColorSpaceConverter.colorToOklab(.primary, in: lightEnvironment)
+        let darkOklab = ColorSpaceConverter.colorToOklab(.primary, in: darkEnvironment)
+
+        #expect(lightOklab.L < 0.2)
+        #expect(darkOklab.L > 0.8)
+    }
+
+    @Test("Oklch interpolation preserves unpremultiplied lightness and interpolates opacity")
+    func interpolateOklchTranslucentColors() {
+        let startColor = Color(red: 1.0, green: 0.0, blue: 0.0).opacity(0.2)
+        let endColor = Color(red: 0.0, green: 0.0, blue: 1.0).opacity(0.8)
+
+        let midTranslucent = ColorSpaceConverter.interpolateOklch(
+            from: startColor,
+            to: endColor,
+            at: 0.5
+        )
+        let midOpaque = ColorSpaceConverter.interpolateOklch(
+            from: Color(red: 1.0, green: 0.0, blue: 0.0),
+            to: Color(red: 0.0, green: 0.0, blue: 1.0),
+            at: 0.5
+        )
+
+        let translucentLab = ColorSpaceConverter.colorToOklab(midTranslucent)
+        let opaqueLab = ColorSpaceConverter.colorToOklab(midOpaque)
+
+        #expect(abs(translucentLab.opacity - 0.5) < 0.001)
+        #expect(abs(translucentLab.L - opaqueLab.L) < 0.001)
+        #expect(abs(translucentLab.a - opaqueLab.a) < 0.001)
+        #expect(abs(translucentLab.b - opaqueLab.b) < 0.001)
+    }
 }

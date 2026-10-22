@@ -68,4 +68,24 @@ import SwiftUI
 
         #expect(oklchMidChroma > oklabMidChroma + 0.05)
     }
+
+    @Test("Oklch gradient resolves dynamic colors using the provided EnvironmentValues")
+    func oklchEnvironmentAwareResolution() {
+        let gradient = ColorGradient(startColor: .primary, endColor: .primary, colorSpace: .oklch)
+
+        var lightEnvironment = EnvironmentValues()
+        lightEnvironment.colorScheme = .light
+
+        var darkEnvironment = EnvironmentValues()
+        darkEnvironment.colorScheme = .dark
+
+        let lightMidColor = gradient.color(at: 0.5, in: lightEnvironment)
+        let darkMidColor = gradient.color(at: 0.5, in: darkEnvironment)
+
+        let lightLab = ColorSpaceConverter.colorToOklab(lightMidColor, in: lightEnvironment)
+        let darkLab = ColorSpaceConverter.colorToOklab(darkMidColor, in: darkEnvironment)
+
+        #expect(lightLab.L < 0.2)
+        #expect(darkLab.L > 0.8)
+    }
 }

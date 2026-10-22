@@ -62,6 +62,76 @@ import SwiftUI
             at: 0.25,
             configuration: configuration
         )
-        #expect(color == Color(hue: 0.25, saturation: 0.6, brightness: 1.0))
+        #expect(color == Color(hue: 0.25, saturation: 0.7, brightness: 1.0))
+    }
+
+    @Test("Reversed spectrum applies leading OneWayBend ease-out from startHue")
+    func reversedSpectrumLeadingOneWayBend() throws {
+        let bends = [OneWayBend(startHue: 0.5, endHue: 0.9, target: 0.2)]
+        let configuration = SpectrumConfiguration(
+            colorSpace: .hsb,
+            startSections: [],
+            endSections: [],
+            startHue: 0.9,
+            endHue: 0.1,
+            primaryValue: 1.0,
+            secondaryValue: 1.0,
+            primaryBends: bends,
+            secondaryBends: nil
+        )
+
+        let startComponents = try #require(
+            SpectrumGenerator.components(at: 0.0, configuration: configuration)
+        )
+        let midBendComponents = try #require(
+            SpectrumGenerator.components(at: 0.25, configuration: configuration)
+        )
+        let endBendComponents = try #require(
+            SpectrumGenerator.components(at: 0.5, configuration: configuration)
+        )
+
+        #expect(abs(startComponents.hue - 0.9) < 0.0001)
+        #expect(abs(startComponents.primary - 0.2) < 0.0001)
+
+        #expect(abs(midBendComponents.hue - 0.7) < 0.0001)
+        #expect(abs(midBendComponents.primary - 0.7) < 0.0001)
+
+        #expect(abs(endBendComponents.hue - 0.5) < 0.0001)
+        #expect(abs(endBendComponents.primary - 1.0) < 0.0001)
+    }
+
+    @Test("Reversed spectrum applies trailing OneWayBend ease-in toward endHue")
+    func reversedSpectrumTrailingOneWayBend() throws {
+        let bends = [OneWayBend(startHue: 0.5, endHue: 0.1, target: 0.2)]
+        let configuration = SpectrumConfiguration(
+            colorSpace: .hsb,
+            startSections: [],
+            endSections: [],
+            startHue: 0.9,
+            endHue: 0.1,
+            primaryValue: 1.0,
+            secondaryValue: 1.0,
+            primaryBends: bends,
+            secondaryBends: nil
+        )
+
+        let entryComponents = try #require(
+            SpectrumGenerator.components(at: 0.5, configuration: configuration)
+        )
+        let midBendComponents = try #require(
+            SpectrumGenerator.components(at: 0.75, configuration: configuration)
+        )
+        let endComponents = try #require(
+            SpectrumGenerator.components(at: 1.0, configuration: configuration)
+        )
+
+        #expect(abs(entryComponents.hue - 0.5) < 0.0001)
+        #expect(abs(entryComponents.primary - 1.0) < 0.0001)
+
+        #expect(abs(midBendComponents.hue - 0.3) < 0.0001)
+        #expect(abs(midBendComponents.primary - 0.7) < 0.0001)
+
+        #expect(abs(endComponents.hue - 0.1) < 0.0001)
+        #expect(abs(endComponents.primary - 0.2) < 0.0001)
     }
 }

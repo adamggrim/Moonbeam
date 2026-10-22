@@ -79,4 +79,21 @@ import Foundation
         )
         #expect(lightGreen == String(format: strings.format, strings.light!, strings.green))
     }
+
+    @Test("Spectrum provider resolves accessibility names using stored configuration and shared strings")
+    func spectrumAccessibilityColorNameResolution() {
+        let spectrum = Spectrum<HSB>(
+            startSections: [BlackSection(fraction: 0.2)],
+            endSections: [WhiteSection(fraction: 0.2)],
+            startHue: 0.0,
+            endHue: 1.0,
+            saturation: 0.6,
+            brightness: 1.0
+        )
+
+        #expect(spectrum.accessibilityColorName(for: 0.0) == SpectrumAccessibilityStrings.shared.black)
+        #expect(spectrum.accessibilityColorName(for: 0.2) == SpectrumAccessibilityStrings.shared.red)
+        #expect(spectrum.accessibilityColorName(for: 0.5) == SpectrumAccessibilityStrings.shared.cyan)
+        #expect(spectrum.accessibilityColorName(for: 1.0) == SpectrumAccessibilityStrings.shared.white)
+    }
 }
