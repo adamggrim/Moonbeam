@@ -16,6 +16,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
 
     @State private var sliderState = ColorSliderState()
 
+    @Environment(\.self) private var environment
     @Environment(\.colorSliderStyle) private var style
     @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.controlSize) private var controlSize
@@ -83,7 +84,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     /// The color calculated from the current `liveColorPosition` on the slider.
     private func calculatedColor(layout: ColorSliderLayout) -> Color {
         let nonZeroLength = layout.resolvedLength > 0 ? layout.resolvedLength : 0.001
-        return colorProvider.color(at: Double(layout.liveColorPosition / nonZeroLength))
+        let normalizedPosition = Double(layout.liveColorPosition / nonZeroLength)
+        return colorProvider.color(at: normalizedPosition, in: environment)
     }
 
     /// Calculates the discrete index of the slider (used to trigger haptics on

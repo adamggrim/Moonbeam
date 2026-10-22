@@ -45,8 +45,11 @@ internal enum ColorSpaceConverter {
     }
 
     /// Converts an sRGB `Color` into Oklab `(L, a, b)` coordinates and opacity.
-    internal static func colorToOklab(_ color: Color) -> (L: CGFloat, a: CGFloat, b: CGFloat, opacity: CGFloat) {
-        let resolved = color.resolve(in: EnvironmentValues())
+    internal static func colorToOklab(
+        _ color: Color,
+        in environment: EnvironmentValues = EnvironmentValues()
+    ) -> (L: CGFloat, a: CGFloat, b: CGFloat, opacity: CGFloat) {
+        let resolved = color.resolve(in: environment)
 
         func sRGBToLinear(_ value: CGFloat) -> CGFloat {
             let clamped = min(max(value, 0.0), 1.0)
@@ -95,11 +98,12 @@ internal enum ColorSpaceConverter {
     internal static func interpolateOklch(
         from startColor: Color,
         to endColor: Color,
-        at position: Double
+        at position: Double,
+        in environment: EnvironmentValues = EnvironmentValues()
     ) -> Color {
         let t = CGFloat(min(max(position, 0.0), 1.0))
-        let labStart = colorToOklab(startColor)
-        let labEnd = colorToOklab(endColor)
+        let labStart = colorToOklab(startColor, in: environment)
+        let labEnd = colorToOklab(endColor, in: environment)
 
         let cStart = hypot(labStart.a, labStart.b)
         var hStart = atan2(labStart.b, labStart.a)

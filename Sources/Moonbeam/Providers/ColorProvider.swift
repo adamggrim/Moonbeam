@@ -21,6 +21,10 @@ public protocol ColorProvider: Sendable {
 
     /// Resolves a descriptive color name for VoiceOver.
     func accessibilityColorName(for value: Double) -> String?
+
+    /// Resolves the calculated color at a normalized position (0.0 to 1.0)
+    /// within a given environment.
+    func color(at position: Double, in environment: EnvironmentValues) -> Color
 }
 
 public extension ColorProvider {
@@ -30,6 +34,12 @@ public extension ColorProvider {
 
     /// Resolves the calculated color at a normalized position (0.0 to 1.0).
     func color(at position: Double) -> Color {
+        color(at: position, in: EnvironmentValues())
+    }
+
+    /// Resolves the calculated color at a normalized position (0.0 to 1.0)
+    /// within a given environment.
+    func color(at position: Double, in environment: EnvironmentValues) -> Color {
         let clampedRatio = max(0.0, min(1.0, position))
         switch colorSource {
         case .array(let colors):

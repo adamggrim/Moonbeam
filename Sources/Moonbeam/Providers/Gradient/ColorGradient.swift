@@ -61,4 +61,21 @@ public struct ColorGradient: ColorProvider {
             )
         }, fallback: fallback)
     }
+
+    public func color(at position: Double, in environment: EnvironmentValues) -> Color {
+        let clampedRatio = max(0.0, min(1.0, position))
+        switch colorSpace {
+        case .rgb:
+            return startColor.mix(with: endColor, by: clampedRatio)
+        case .oklab:
+            return startColor.mix(with: endColor, by: clampedRatio, in: .perceptual)
+        case .oklch:
+            return ColorSpaceConverter.interpolateOklch(
+                from: startColor,
+                to: endColor,
+                at: clampedRatio,
+                in: environment
+            )
+        }
+    }
 }
