@@ -163,8 +163,11 @@ float calculateBend(
     device const ShaderBend* bendsData,
     uint totalBends,
     float minimumHue,
+    float maximumHue,
     uint colorSpaceFlag
 ) {
+    bool isReversedSpectrum = minimumHue > maximumHue;
+
     for (uint bendIndex = 0; bendIndex < totalBends; bendIndex++) {
         float bendType = bendsData[bendIndex].data0.x;
         float startHue = bendsData[bendIndex].data0.y;
@@ -177,11 +180,12 @@ float calculateBend(
 
         if (currentHue >= minBendHue && currentHue <= maxBendHue) {
             float valueDifference = defaultValue - targetValue;
-            float hueOffset = abs(currentHue - startHue);
+            float entryHue = isReversedSpectrum ? maxBendHue : minBendHue;
+            float hueOffset = abs(currentHue - entryHue);
             float normalizedPosition = clamp((hueCount != 0.0f) ? (hueOffset / hueCount) : 0.0f, 0.0f, 1.0f);
 
             if (bendType == float(BendTypeOneWay)) { // One-way bend
-                if (abs(startHue - minimumHue) < hueComparisonTolerance) {
+                if (abs(entryHue - minimumHue) < hueComparisonTolerance) {
                     float easeOut = normalizedPosition * (1.0f + normalizedPosition * (1.0f - normalizedPosition));
                     return targetValue + (valueDifference * easeOut);
                 } else {
@@ -212,6 +216,7 @@ inline float2 calculateMonochromeFade(
     float baseBrightness,
     uint colorSpaceFlag,
     float targetHue,
+    bool isReversedSpectrum,
     device const ShaderBend* saturationBendsData,
     uint saturationBendsCount,
     device const ShaderBend* brightnessBendsData,
@@ -222,7 +227,11 @@ inline float2 calculateMonochromeFade(
     float finalBrightness = isWhiteSection == 1.0 ? baseBrightness : fadeFactor * baseBrightness;
 
     for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
-        float bendHue = isStartBend ? saturationBendsData[bendIndex].data0.y : saturationBendsData[bendIndex].data0.z;
+        float startHue = saturationBendsData[bendIndex].data0.y;
+        float endHue = saturationBendsData[bendIndex].data0.z;
+        float leadingEdge = isReversedSpectrum ? max(startHue, endHue) : min(startHue, endHue);
+        float trailingEdge = isReversedSpectrum ? min(startHue, endHue) : max(startHue, endHue);
+        float bendHue = isStartBend ? leadingEdge : trailingEdge;
         if (abs(bendHue - targetHue) < hueComparisonTolerance
             && saturationBendsData[bendIndex].data0.x == float(BendTypeOneWay)) {
             finalSaturation = isWhiteSection == 1.0
@@ -232,7 +241,11 @@ inline float2 calculateMonochromeFade(
     }
 
     for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
-        float bendHue = isStartBend ? brightnessBendsData[bendIndex].data0.y : brightnessBendsData[bendIndex].data0.z;
+        float startHue = brightnessBendsData[bendIndex].data0.y;
+        float endHue = brightnessBendsData[bendIndex].data0.z;
+        float leadingEdge = isReversedSpectrum ? max(startHue, endHue) : min(startHue, endHue);
+        float trailingEdge = isReversedSpectrum ? min(startHue, endHue) : max(startHue, endHue);
+        float bendHue = isStartBend ? leadingEdge : trailingEdge;
         if (abs(bendHue - targetHue) < hueComparisonTolerance
             && brightnessBendsData[bendIndex].data0.x == float(BendTypeOneWay)) {
             finalBrightness = isWhiteSection == 1.0
@@ -361,6 +374,8 @@ half4 spectrumShader(
     uint saturationBendsCount = data->saturationBendsCount;
     uint brightnessBendsCount = data->brightnessBendsCount;
 
+    bool isReversedSpectrum = minimumHue > maximumHue;
+
     if (normalizedPosition < startSectionBoundary) {
         float cumulativeStartPosition = 0.0;
 
@@ -381,7 +396,8 @@ half4 spectrumShader(
                         : rawFade * (1.0f + rawFade * (1.0f - rawFade));
                     float2 fade = calculateMonochromeFade(
                         isWhiteSection, easedFade, baseSaturation, baseBrightness,
-                        colorSpaceFlag, minimumHue, saturationBendsData, saturationBendsCount,
+                        colorSpaceFlag, minimumHue, isReversedSpectrum,
+                        saturationBendsData, saturationBendsCount,
                         brightnessBendsData, brightnessBendsCount, true
                     );
                     return half4(
@@ -420,6 +436,7 @@ half4 spectrumShader(
             saturationBendsData,
             saturationBendsCount,
             minimumHue,
+            maximumHue,
             colorSpaceFlag
         );
         float calculatedBrightness = calculateBend(
@@ -428,6 +445,7 @@ half4 spectrumShader(
             brightnessBendsData,
             brightnessBendsCount,
             minimumHue,
+            maximumHue,
             colorSpaceFlag
         );
 
@@ -456,7 +474,8 @@ half4 spectrumShader(
                         : rawFade * (1.0f + rawFade * (1.0f - rawFade));
                     float2 fade = calculateMonochromeFade(
                         isWhiteSection, easedFade, baseSaturation, baseBrightness,
-                        colorSpaceFlag, maximumHue, saturationBendsData, saturationBendsCount,
+                        colorSpaceFlag, maximumHue, isReversedSpectrum,
+                        saturationBendsData, saturationBendsCount,
                         brightnessBendsData, brightnessBendsCount, false
                     );
                     return half4(

@@ -108,14 +108,16 @@ internal struct SpectrumGenerator {
                 hue: currentHue,
                 defaultValue: primaryValue,
                 bendSections: primaryBends,
-                minHue: startHue,
+                spectrumStartHue: startHue,
+                spectrumEndHue: endHue,
                 colorSpace: configuration.colorSpace
             )
             let secondary = calculateBendValue(
                 hue: currentHue,
                 defaultValue: secondaryValue,
                 bendSections: secondaryBends,
-                minHue: startHue,
+                spectrumStartHue: startHue,
+                spectrumEndHue: endHue,
                 colorSpace: configuration.colorSpace
             )
 
@@ -164,6 +166,7 @@ internal struct SpectrumGenerator {
         let secondaryBends = configuration.secondaryBends
 
         let hue = isStart ? startHue : endHue
+        let isReversedSpectrum = startHue > endHue
         let rawFactor = min(max(isStart ? relativePosition : (1.0 - relativePosition), 0.0), 1.0)
         let hasAdjacentMonochrome = isStart
             ? (configuration.startSections.count > 1)
@@ -178,9 +181,11 @@ internal struct SpectrumGenerator {
         if let primaryBends = primaryBends {
             for bend in primaryBends {
                 if let oneWay = bend as? OneWayBend {
-                    if abs(oneWay.startHue - startHue) < hueComparisonTolerance {
+                    let leadingEdge = isReversedSpectrum ? max(oneWay.startHue, oneWay.endHue) : min(oneWay.startHue, oneWay.endHue)
+                    let trailingEdge = isReversedSpectrum ? min(oneWay.startHue, oneWay.endHue) : max(oneWay.startHue, oneWay.endHue)
+                    if abs(leadingEdge - startHue) < hueComparisonTolerance {
                         startTargetPrimary = oneWay.targetValue
-                    } else if abs(oneWay.endHue - endHue) < hueComparisonTolerance {
+                    } else if abs(trailingEdge - endHue) < hueComparisonTolerance {
                         endTargetPrimary = oneWay.targetValue
                     }
                 }
@@ -190,9 +195,11 @@ internal struct SpectrumGenerator {
         if let secondaryBends = secondaryBends {
             for bend in secondaryBends {
                 if let oneWay = bend as? OneWayBend {
-                    if abs(oneWay.startHue - startHue) < hueComparisonTolerance {
+                    let leadingEdge = isReversedSpectrum ? max(oneWay.startHue, oneWay.endHue) : min(oneWay.startHue, oneWay.endHue)
+                    let trailingEdge = isReversedSpectrum ? min(oneWay.startHue, oneWay.endHue) : max(oneWay.startHue, oneWay.endHue)
+                    if abs(leadingEdge - startHue) < hueComparisonTolerance {
                         startTargetSecondary = oneWay.targetValue
-                    } else if abs(oneWay.endHue - endHue) < hueComparisonTolerance {
+                    } else if abs(trailingEdge - endHue) < hueComparisonTolerance {
                         endTargetSecondary = oneWay.targetValue
                     }
                 }
@@ -259,7 +266,8 @@ internal struct SpectrumGenerator {
         hue: Double,
         defaultValue: Double,
         bendSections: [BendSection]?,
-        minHue: Double,
+        spectrumStartHue: Double,
+        spectrumEndHue: Double,
         colorSpace: SpectrumColorSpace
     ) -> Double {
         guard let bends = bendSections,
@@ -270,12 +278,15 @@ internal struct SpectrumGenerator {
             return defaultValue
         }
 
+        let isReversedSpectrum = spectrumStartHue > spectrumEndHue
+        let entryHue = isReversedSpectrum ? max(bend.startHue, bend.endHue) : min(bend.startHue, bend.endHue)
         let valueDelta = defaultValue - bend.targetValue
-        let offset = abs(hue - bend.startHue)
+        let offset = abs(hue - entryHue)
         let position = min(max(bend.hueCount != 0 ? (offset / bend.hueCount) : 0, 0.0), 1.0)
 
-        if let oneWay = bend as? OneWayBend {
-            if abs(oneWay.startHue - minHue) < hueComparisonTolerance {
+        if bend is OneWayBend {
+            let touchesLeadingEdge = abs(entryHue - spectrumStartHue) < hueComparisonTolerance
+            if touchesLeadingEdge {
                 let easeOut = position * (1.0 + position * (1.0 - position))
                 return bend.targetValue + (valueDelta * easeOut)
             } else {
