@@ -428,7 +428,8 @@ half4 spectrumShader(
         float relativeHuePosition = (hueSectionBoundary > startSectionBoundary)
             ? (distanceFromStart / hueSectionWidth)
             : 0.0;
-        float currentHue = minimumHue + relativeHuePosition * (maximumHue - minimumHue);
+        float rawHue = minimumHue + relativeHuePosition * (maximumHue - minimumHue);
+        float currentHue = clamp(rawHue, min(minimumHue, maximumHue), max(minimumHue, maximumHue));
 
         float calculatedSaturation = calculateBend(
             currentHue,

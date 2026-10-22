@@ -3,8 +3,8 @@ import Foundation
 /// An explicit configuration object that allows host apps to override default
 /// VoiceOver translations.
 public struct SpectrumAccessibilityStrings: Sendable {
-    /// Cached default localized strings to avoid repeated bundle lookups during drag gestures.
-    public static let defaultStrings = SpectrumAccessibilityStrings()
+    /// Shared default instance initialized once per process to avoid repeated bundle lookups.
+    internal static let shared = SpectrumAccessibilityStrings()
 
     /// The localized accessibility string for gray colors.
     public var gray: String = String(localized: "gray", bundle: .module)
@@ -146,9 +146,9 @@ internal struct SpectrumNameResolver {
             isDull = primary < ColorThresholds.HSB.dullMaxSaturation && !isGray
         }
 
+        if isBlack { return strings.black }
         if isGray {
             if isWhite { return strings.white }
-            if isBlack { return strings.black }
             return strings.gray
         }
 

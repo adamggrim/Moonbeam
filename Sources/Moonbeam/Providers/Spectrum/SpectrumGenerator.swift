@@ -102,7 +102,8 @@ internal struct SpectrumGenerator {
             let relativeHuePos = (hueBoundary > startBoundary)
                 ? (clampedPosition - startBoundary) / (hueBoundary - startBoundary)
                 : 0.0
-            let currentHue = startHue + relativeHuePos * (endHue - startHue)
+            let rawHue = startHue + relativeHuePos * (endHue - startHue)
+            let currentHue = min(max(rawHue, min(startHue, endHue)), max(startHue, endHue))
 
             let primary = calculateBendValue(
                 hue: currentHue,

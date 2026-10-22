@@ -72,7 +72,6 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         primaryBends: [BendSection],
         secondaryBends: [BendSection],
         primaryName: String,
-        secondaryName: String,
         accessibilityStrings: SpectrumAccessibilityStrings = .defaultStrings
     ) {
         let validMonochromeSections = validateMonochromeSections(
