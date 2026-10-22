@@ -29,6 +29,7 @@ jobs:
 
       - name: Run tests
         run: |
+          xcrun simctl list > /dev/null
           xcodebuild test \
             -scheme Moonbeam \
             -destination "${{ matrix.destination }}" \
