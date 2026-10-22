@@ -278,13 +278,21 @@ half4 gradientShader(
         return half4(blendedColor.rgb * currentColor.a, blendedColor.a * currentColor.a);
     }
 
-    float3 labStart = convertRGBtoOklab(float3(startColor.rgb));
-    float3 labEnd = convertRGBtoOklab(float3(endColor.rgb));
+    float3 unpremultipliedStart = startColor.a > 0.0001h
+        ? float3(startColor.rgb) / float(startColor.a)
+        : float3(0.0);
+    float3 unpremultipliedEnd = endColor.a > 0.0001h
+        ? float3(endColor.rgb) / float(endColor.a)
+        : float3(0.0);
+
+    float3 labStart = convertRGBtoOklab(unpremultipliedStart);
+    float3 labEnd = convertRGBtoOklab(unpremultipliedEnd);
+    half outAlpha = mix(startColor.a, endColor.a, half(normalizedPosition)) * currentColor.a;
 
     if (colorSpace == ColorSpaceOklab) {
         float3 mixedLab = mix(labStart, labEnd, normalizedPosition);
         float3 rgbOut = convertOklabtoRGB(mixedLab.x, mixedLab.y, mixedLab.z);
-        return half4(half3(rgbOut) * currentColor.a, currentColor.a);
+        return half4(half3(rgbOut) * outAlpha, outAlpha);
     } else {
         float cStart = sqrt(labStart.y * labStart.y + labStart.z * labStart.z);
         float hStart = atan2(labStart.z, labStart.y);
@@ -315,7 +323,7 @@ half4 gradientShader(
         float h = mix(hStart, hEnd, normalizedPosition) / (2.0 * M_PI_F);
 
         float3 rgbOut = convertOklchtoRGB(L, C, h);
-        return half4(half3(rgbOut) * currentColor.a, currentColor.a);
+        return half4(half3(rgbOut) * outAlpha, outAlpha);
     }
 }
 
