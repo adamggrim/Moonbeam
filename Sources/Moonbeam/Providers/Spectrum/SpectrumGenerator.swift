@@ -29,6 +29,8 @@ internal struct SpectrumConfiguration {
 /// A utility for generating a spectrum color for a given position, suitable for
 /// shaders.
 internal struct SpectrumGenerator {
+    private static let hueComparisonTolerance: Double = 0.0001
+
     /// Calculates the color at a specific normalized position on the spectrum.
     ///
     /// - Parameters:
@@ -106,13 +108,15 @@ internal struct SpectrumGenerator {
                 hue: currentHue,
                 defaultValue: primaryValue,
                 bendSections: primaryBends,
-                minHue: startHue
+                minHue: startHue,
+                colorSpace: configuration.colorSpace
             )
             let secondary = calculateBendValue(
                 hue: currentHue,
                 defaultValue: secondaryValue,
                 bendSections: secondaryBends,
-                minHue: startHue
+                minHue: startHue,
+                colorSpace: configuration.colorSpace
             )
 
             return (hue: currentHue, primary: primary, secondary: secondary)
@@ -160,7 +164,13 @@ internal struct SpectrumGenerator {
         let secondaryBends = configuration.secondaryBends
 
         let hue = isStart ? startHue : endHue
-        let interpolationFactor = isStart ? relativePosition : (1.0 - relativePosition)
+        let rawFactor = min(max(isStart ? relativePosition : (1.0 - relativePosition), 0.0), 1.0)
+        let hasAdjacentMonochrome = isStart
+            ? (configuration.startSections.count > 1)
+            : (configuration.endSections.count > 1)
+        let interpolationFactor = hasAdjacentMonochrome
+            ? smoothstep(rawFactor)
+            : rawFactor * (1.0 + rawFactor * (1.0 - rawFactor))
 
         var startTargetPrimary = primaryValue, startTargetSecondary = secondaryValue
         var endTargetPrimary = primaryValue, endTargetSecondary = secondaryValue
@@ -168,8 +178,11 @@ internal struct SpectrumGenerator {
         if let primaryBends = primaryBends {
             for bend in primaryBends {
                 if let oneWay = bend as? OneWayBend {
-                    if oneWay.startHue == startHue { startTargetPrimary = oneWay.targetValue }
-                    else if oneWay.endHue == endHue { endTargetPrimary = oneWay.targetValue }
+                    if abs(oneWay.startHue - startHue) < hueComparisonTolerance {
+                        startTargetPrimary = oneWay.targetValue
+                    } else if abs(oneWay.endHue - endHue) < hueComparisonTolerance {
+                        endTargetPrimary = oneWay.targetValue
+                    }
                 }
             }
         }
@@ -177,8 +190,11 @@ internal struct SpectrumGenerator {
         if let secondaryBends = secondaryBends {
             for bend in secondaryBends {
                 if let oneWay = bend as? OneWayBend {
-                    if oneWay.startHue == startHue { startTargetSecondary = oneWay.targetValue }
-                    else if oneWay.endHue == endHue { endTargetSecondary = oneWay.targetValue }
+                    if abs(oneWay.startHue - startHue) < hueComparisonTolerance {
+                        startTargetSecondary = oneWay.targetValue
+                    } else if abs(oneWay.endHue - endHue) < hueComparisonTolerance {
+                        endTargetSecondary = oneWay.targetValue
+                    }
                 }
             }
         }
@@ -198,7 +214,7 @@ internal struct SpectrumGenerator {
         }
     }
 
-    /// Generates a linear gradient between two monochrome sections.
+    /// Generates a Hermite-smoothed gradient between two monochrome sections.
     private static func monochromeToMonochromeColor(
         relativePosition: Double,
         fromSection: MonochromeSection,
@@ -207,16 +223,44 @@ internal struct SpectrumGenerator {
     ) -> (hue: Double, primary: Double, secondary: Double) {
         let startBrightness: Double = (fromSection.color == .white) ? 1.0 : 0.0
         let endBrightness: Double = (toSection.color == .white) ? 1.0 : 0.0
+        let smoothT = smoothstep(relativePosition)
 
-        let brightness = startBrightness + (endBrightness - startBrightness) * relativePosition
+        let brightness = startBrightness + (endBrightness - startBrightness) * smoothT
         return (hue: hue, primary: 0.0, secondary: brightness)
+    }
+
+    private static func smoothstep(_ x: Double) -> Double {
+        let clamped = min(max(x, 0.0), 1.0)
+        return clamped * clamped * (3.0 - 2.0 * clamped)
+    }
+
+    private static func hermiteTwoWayBend(
+        _ u: Double,
+        defaultValue: Double,
+        targetValue: Double,
+        hueCount: Double,
+        colorSpace: SpectrumColorSpace
+    ) -> Double {
+        let clampedU = min(max(u, 0.0), 1.0)
+        let valueDelta = defaultValue - targetValue
+
+        let peakSlope: Double
+        if colorSpace == .hsb && valueDelta > hueComparisonTolerance {
+            let idealSlope = (1.5 * hueCount * targetValue) / valueDelta
+            peakSlope = min(max(idealSlope, 0.0), 2.0)
+        } else {
+            peakSlope = 0.0
+        }
+
+        return clampedU * clampedU * ((3.0 - peakSlope) - (2.0 - peakSlope) * clampedU)
     }
 
     private static func calculateBendValue(
         hue: Double,
         defaultValue: Double,
         bendSections: [BendSection]?,
-        minHue: Double
+        minHue: Double,
+        colorSpace: SpectrumColorSpace
     ) -> Double {
         guard let bends = bendSections,
               let bend = bends.first(where: {
@@ -228,17 +272,26 @@ internal struct SpectrumGenerator {
 
         let valueDelta = defaultValue - bend.targetValue
         let offset = abs(hue - bend.startHue)
-        let position = bend.hueCount != 0 ? (offset / bend.hueCount) : 0
+        let position = min(max(bend.hueCount != 0 ? (offset / bend.hueCount) : 0, 0.0), 1.0)
 
         if let oneWay = bend as? OneWayBend {
-            if oneWay.startHue == minHue {
-                return bend.targetValue + (valueDelta * position)
+            if abs(oneWay.startHue - minHue) < hueComparisonTolerance {
+                let easeOut = position * (1.0 + position * (1.0 - position))
+                return bend.targetValue + (valueDelta * easeOut)
             } else {
-                return defaultValue - (valueDelta * position)
+                let easeIn = position * position * (2.0 - position)
+                return defaultValue - (valueDelta * easeIn)
             }
         } else if bend is TwoWayBend {
             let linearProgress = 1.0 - abs(position * 2.0 - 1.0)
-            return defaultValue - (valueDelta * linearProgress)
+            let hermiteProgress = hermiteTwoWayBend(
+                linearProgress,
+                defaultValue: defaultValue,
+                targetValue: bend.targetValue,
+                hueCount: bend.hueCount,
+                colorSpace: colorSpace
+            )
+            return defaultValue - (valueDelta * hermiteProgress)
         }
         return defaultValue
     }

@@ -9,9 +9,9 @@ import Foundation
         #expect(distance == 0.3)
     }
 
-    @Test("Wraparound hue distance calculation")
-    func wraparoundHueDistance() {
+    @Test("Wide hue distance calculation across more than half the spectrum")
+    func wideHueDistance() {
         let distance = OneWayBend.calculateHueCount(start: 0.9, end: 0.1)
-        #expect(abs(distance - 0.2) < 0.0001)
+        #expect(abs(distance - 0.8) < 0.0001)
     }
 }

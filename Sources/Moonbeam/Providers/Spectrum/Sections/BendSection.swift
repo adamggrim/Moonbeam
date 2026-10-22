@@ -15,16 +15,15 @@ public protocol BendSection: Sendable {
 }
 
 public extension BendSection {
-    /// Helper to calculate the shortest distance between two hues in a
-    /// wraparound (circular) hue range.
+    /// Helper to calculate the linear distance between two hues along the
+    /// slider track.
     ///
     /// - Parameters:
     ///   - start: The starting hue.
     ///   - end: The ending hue.
-    /// - Returns: The shortest calculated distance between the two hues.
+    /// - Returns: The linear span between the two hues.
     static func calculateHueCount(start: Double, end: Double) -> Double {
-        let diff = abs(end - start)
-        return diff > 0.5 ? 1.0 - diff : diff
+        abs(end - start)
     }
 }
 

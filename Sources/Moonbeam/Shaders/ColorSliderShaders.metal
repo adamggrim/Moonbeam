@@ -155,12 +155,15 @@ float3 convertRGBtoOklab(float3 c) {
 
 // MARK: – Spectrum bends
 
+constant float hueComparisonTolerance = 0.0001f;
+
 float calculateBend(
     float currentHue,
     float defaultValue,
     device const ShaderBend* bendsData,
     uint totalBends,
-    float minimumHue
+    float minimumHue,
+    uint colorSpaceFlag
 ) {
     for (uint bendIndex = 0; bendIndex < totalBends; bendIndex++) {
         float bendType = bendsData[bendIndex].data0.x;
@@ -175,17 +178,25 @@ float calculateBend(
         if (currentHue >= minBendHue && currentHue <= maxBendHue) {
             float valueDifference = defaultValue - targetValue;
             float hueOffset = abs(currentHue - startHue);
-            float normalizedPosition = (hueCount != 0.0) ? (hueOffset / hueCount) : 0.0;
+            float normalizedPosition = clamp((hueCount != 0.0f) ? (hueOffset / hueCount) : 0.0f, 0.0f, 1.0f);
 
             if (bendType == float(BendTypeOneWay)) { // One-way bend
-                if (startHue == minimumHue) {
-                    return targetValue + (valueDifference * normalizedPosition);
+                if (abs(startHue - minimumHue) < hueComparisonTolerance) {
+                    float easeOut = normalizedPosition * (1.0f + normalizedPosition * (1.0f - normalizedPosition));
+                    return targetValue + (valueDifference * easeOut);
                 } else {
-                    return defaultValue - (valueDifference * normalizedPosition);
+                    float easeIn = normalizedPosition * normalizedPosition * (2.0f - normalizedPosition);
+                    return defaultValue - (valueDifference * easeIn);
                 }
             } else { // Two-way bend
-                float linearProgress = 1.0 - abs(normalizedPosition * 2.0 - 1.0);
-                return defaultValue - (valueDifference * linearProgress);
+                float u = clamp(1.0f - abs(normalizedPosition * 2.0f - 1.0f), 0.0f, 1.0f);
+                float peakSlope = 0.0f;
+                if (colorSpaceFlag == ColorSpaceHSB && valueDifference > hueComparisonTolerance) {
+                    float idealSlope = (1.5f * hueCount * targetValue) / valueDifference;
+                    peakSlope = clamp(idealSlope, 0.0f, 2.0f);
+                }
+                float hermiteProgress = u * u * ((3.0f - peakSlope) - (2.0f - peakSlope) * u);
+                return defaultValue - (valueDifference * hermiteProgress);
             }
         }
     }
@@ -212,7 +223,8 @@ inline float2 calculateMonochromeFade(
 
     for (uint bendIndex = 0; bendIndex < saturationBendsCount; bendIndex++) {
         float bendHue = isStartBend ? saturationBendsData[bendIndex].data0.y : saturationBendsData[bendIndex].data0.z;
-        if (bendHue == targetHue && saturationBendsData[bendIndex].data0.x == 1.0) {
+        if (abs(bendHue - targetHue) < hueComparisonTolerance
+            && saturationBendsData[bendIndex].data0.x == float(BendTypeOneWay)) {
             finalSaturation = isWhiteSection == 1.0
                 ? fadeFactor * saturationBendsData[bendIndex].data0.w
                 : saturationBendsData[bendIndex].data0.w;
@@ -221,7 +233,8 @@ inline float2 calculateMonochromeFade(
 
     for (uint bendIndex = 0; bendIndex < brightnessBendsCount; bendIndex++) {
         float bendHue = isStartBend ? brightnessBendsData[bendIndex].data0.y : brightnessBendsData[bendIndex].data0.z;
-        if (bendHue == targetHue && brightnessBendsData[bendIndex].data0.x == 1.0) {
+        if (abs(bendHue - targetHue) < hueComparisonTolerance
+            && brightnessBendsData[bendIndex].data0.x == float(BendTypeOneWay)) {
             finalBrightness = isWhiteSection == 1.0
                 ? brightnessBendsData[bendIndex].data0.w
                 : fadeFactor * brightnessBendsData[bendIndex].data0.w;
@@ -354,8 +367,12 @@ half4 spectrumShader(
                 float relativePositionInSection = clamp(distanceMoved / sectionWidth, 0.0, 1.0);
 
                 if (isLastSection) {
+                    float rawFade = relativePositionInSection;
+                    float easedFade = (startSectionsCount > 1)
+                        ? smoothstep(0.0f, 1.0f, rawFade)
+                        : rawFade * (1.0f + rawFade * (1.0f - rawFade));
                     float2 fade = calculateMonochromeFade(
-                        isWhiteSection, relativePositionInSection, baseSaturation, baseBrightness,
+                        isWhiteSection, easedFade, baseSaturation, baseBrightness,
                         colorSpaceFlag, minimumHue, saturationBendsData, saturationBendsCount,
                         brightnessBendsData, brightnessBendsCount, true
                     );
@@ -369,7 +386,8 @@ half4 spectrumShader(
                     half startingBrightness = select(0.0h, 1.0h, isWhiteSection == 1.0f);
                     half endingBrightness = select(0.0h, 1.0h, nextSectionIsWhite == 1.0f);
                     float brightnessDelta = endingBrightness - startingBrightness;
-                    float interpolatedBrightness = startingBrightness + brightnessDelta * relativePositionInSection;
+                    float smoothRel = smoothstep(0.0f, 1.0f, relativePositionInSection);
+                    float interpolatedBrightness = startingBrightness + brightnessDelta * smoothRel;
                     return half4(
                         half3(resolveColor(colorSpaceFlag, minimumHue, 0.0, interpolatedBrightness))
                             * currentColor.a,
@@ -393,14 +411,16 @@ half4 spectrumShader(
             baseSaturation,
             saturationBendsData,
             saturationBendsCount,
-            minimumHue
+            minimumHue,
+            colorSpaceFlag
         );
         float calculatedBrightness = calculateBend(
             currentHue,
             baseBrightness,
             brightnessBendsData,
             brightnessBendsCount,
-            minimumHue
+            minimumHue,
+            colorSpaceFlag
         );
 
         return half4(
@@ -422,9 +442,12 @@ half4 spectrumShader(
                 float relativePositionInSection = clamp(distanceFromEnd / sectionWidth, 0.0, 1.0);
 
                 if (sectionIndex == 0) {
-                    float fadeFactor = 1.0 - relativePositionInSection;
+                    float rawFade = 1.0f - relativePositionInSection;
+                    float easedFade = (endSectionsCount > 1)
+                        ? smoothstep(0.0f, 1.0f, rawFade)
+                        : rawFade * (1.0f + rawFade * (1.0f - rawFade));
                     float2 fade = calculateMonochromeFade(
-                        isWhiteSection, fadeFactor, baseSaturation, baseBrightness,
+                        isWhiteSection, easedFade, baseSaturation, baseBrightness,
                         colorSpaceFlag, maximumHue, saturationBendsData, saturationBendsCount,
                         brightnessBendsData, brightnessBendsCount, false
                     );
@@ -438,7 +461,8 @@ half4 spectrumShader(
                     half startingBrightness = select(0.0h, 1.0h, previousSectionIsWhite == 1.0f);
                     half endingBrightness = select(0.0h, 1.0h, isWhiteSection == 1.0f);
                     float brightnessDelta = endingBrightness - startingBrightness;
-                    float interpolatedBrightness = startingBrightness + brightnessDelta * relativePositionInSection;
+                    float smoothRel = smoothstep(0.0f, 1.0f, relativePositionInSection);
+                    float interpolatedBrightness = startingBrightness + brightnessDelta * smoothRel;
                     return half4(
                         half3(resolveColor(colorSpaceFlag, maximumHue, 0.0, interpolatedBrightness))
                             * currentColor.a,
