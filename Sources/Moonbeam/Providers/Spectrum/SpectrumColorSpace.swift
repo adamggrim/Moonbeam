@@ -42,7 +42,6 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
     let primaryBends: [BendSection]
     let secondaryBends: [BendSection]
     private let configuration: SpectrumConfiguration
-    private let accessibilityStrings: SpectrumAccessibilityStrings
 
     /// Determines how to draw the spectrum onscreen.
     public let colorSource: ColorSource
@@ -58,7 +57,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
             primary: comps.primary,
             secondary: comps.secondary,
             colorSpace: ColorSpace.colorSpace,
-            strings: accessibilityStrings
+            strings: .shared
         )
     }
 
@@ -72,7 +71,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         primaryBends: [BendSection],
         secondaryBends: [BendSection],
         primaryName: String,
-        accessibilityStrings: SpectrumAccessibilityStrings = .defaultStrings
+        secondaryName: String
     ) {
         let validMonochromeSections = validateMonochromeSections(
             startSections: startSections,
@@ -103,7 +102,6 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
             secondaryBends: validSecondaryBends
         )
         self.configuration = configuration
-        self.accessibilityStrings = accessibilityStrings
 
         let fallback: @Sendable (Double) -> Color = { position in
             SpectrumGenerator.color(
