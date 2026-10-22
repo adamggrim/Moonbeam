@@ -41,23 +41,13 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
     let secondaryValue: Double
     let primaryBends: [BendSection]
     let secondaryBends: [BendSection]
+    private let configuration: SpectrumConfiguration
+    private let accessibilityStrings: SpectrumAccessibilityStrings
 
     /// Determines how to draw the spectrum onscreen.
     public let colorSource: ColorSource
 
     public func accessibilityColorName(for value: Double) -> String? {
-        let configuration = SpectrumConfiguration(
-            colorSpace: ColorSpace.colorSpace,
-            startSections: startSections,
-            endSections: endSections,
-            startHue: startHue,
-            endHue: endHue,
-            primaryValue: primaryValue,
-            secondaryValue: secondaryValue,
-            primaryBends: primaryBends,
-            secondaryBends: secondaryBends
-        )
-
         guard let comps = SpectrumGenerator.components(
             at: value,
             configuration: configuration
@@ -68,7 +58,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
             primary: comps.primary,
             secondary: comps.secondary,
             colorSpace: ColorSpace.colorSpace,
-            strings: SpectrumAccessibilityStrings()
+            strings: accessibilityStrings
         )
     }
 
@@ -82,7 +72,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         primaryBends: [BendSection],
         secondaryBends: [BendSection],
         primaryName: String,
-        secondaryName: String
+        secondaryName: String,
+        accessibilityStrings: SpectrumAccessibilityStrings = .defaultStrings
     ) {
         let validMonochromeSections = validateMonochromeSections(
             startSections: startSections,
@@ -112,6 +103,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
             primaryBends: validPrimaryBends,
             secondaryBends: validSecondaryBends
         )
+        self.configuration = configuration
+        self.accessibilityStrings = accessibilityStrings
 
         let fallback: @Sendable (Double) -> Color = { position in
             SpectrumGenerator.color(

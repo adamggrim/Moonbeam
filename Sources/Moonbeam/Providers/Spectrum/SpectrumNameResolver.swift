@@ -3,6 +3,9 @@ import Foundation
 /// An explicit configuration object that allows host apps to override default
 /// VoiceOver translations.
 public struct SpectrumAccessibilityStrings: Sendable {
+    /// Cached default localized strings to avoid repeated bundle lookups during drag gestures.
+    public static let defaultStrings = SpectrumAccessibilityStrings()
+
     /// The localized accessibility string for gray colors.
     public var gray: String = String(localized: "gray", bundle: .module)
     /// The localized accessibility string for white colors.
