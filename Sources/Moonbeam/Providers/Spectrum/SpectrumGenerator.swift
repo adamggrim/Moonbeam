@@ -48,9 +48,12 @@ internal struct SpectrumGenerator {
             configuration: configuration
         ) else { return .clear }
 
+        let wrappedHue = comps.hue.truncatingRemainder(dividingBy: 1.0)
+        let normalizedHue = wrappedHue < 0 ? wrappedHue + 1.0 : wrappedHue
+
         return configuration.colorSpace == .oklch
-            ? ColorSpaceConverter.oklchToColor(lightness: comps.secondary, chroma: comps.primary, hue: comps.hue)
-            : Color(hue: comps.hue, saturation: comps.primary, brightness: comps.secondary)
+            ? ColorSpaceConverter.oklchToColor(lightness: comps.secondary, chroma: comps.primary, hue: normalizedHue)
+            : Color(hue: normalizedHue, saturation: comps.primary, brightness: comps.secondary)
     }
 
     static func components(
