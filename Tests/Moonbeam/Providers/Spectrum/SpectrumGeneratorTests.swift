@@ -44,7 +44,7 @@ import SwiftUI
         #expect(color == Color(hue: 0.5, saturation: 1.0, brightness: 1.0))
     }
 
-    @Test("Generator application of the correct bend target to primary values")
+    @Test("Generator applies the correct bend target to primary values")
     func appliedSpectrumBend() {
         let bends = [OneWayBend(startHue: 0.0, endHue: 0.5, target: 0.2)]
         let configuration = SpectrumConfiguration(

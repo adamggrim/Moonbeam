@@ -14,7 +14,7 @@ private struct CustomFunctionProvider: ColorProvider {
 }
 
 @Suite struct ColorProviderTests {
-    @Test("Evaluating colors across normalized positions")
+    @Test("Evaluate colors across normalized positions")
     func functionProviderEvaluation() {
         let provider = CustomFunctionProvider()
 
@@ -24,7 +24,7 @@ private struct CustomFunctionProvider: ColorProvider {
         #expect(provider.color(at: 1.0) == Color(red: 1.0, green: 0.0, blue: 0.5))
     }
 
-    @Test("Clamping out-of-bounds positions")
+    @Test("Clamp out-of-bounds positions")
     func functionProviderClamping() {
         let provider = CustomFunctionProvider()
 
@@ -32,7 +32,7 @@ private struct CustomFunctionProvider: ColorProvider {
         #expect(provider.color(at: 1.5) == Color(red: 1.0, green: 0.0, blue: 0.5))
     }
 
-    @Test("Converting into center-sampled hard-edge stops")
+    @Test("Convert into center-sampled hard-edge stops")
     func functionProviderHardEdgeConversion() {
         let provider = CustomFunctionProvider()
         let hardEdge = provider.hardEdge(into: 4)

@@ -3,9 +3,9 @@ import Testing
 import SwiftUI
 
 @Suite struct ColorGradientTests {
-    @Test("Gradient interpolation resolving to a valid color")
+    @Test("Gradient interpolation resolves to a valid color")
     func gradientInterpolation() {
-        let gradient = ColorGradient(startColor: .black, endColor: .white, colorSpace: .rgb)
+        let gradient = ColorGradient(colors: [.black, .white], colorSpace: .rgb)
 
         guard case .shader(_, let fallback) = gradient.colorSource else {
             Issue.record("Expected shader color source with a pure-Swift fallback.")
@@ -18,9 +18,9 @@ import SwiftUI
         #expect(midColor == expectedColor)
     }
 
-    @Test("Property-based gradient interpolation across random bounds")
+    @Test("Property-based gradient interpolates across random bounds")
     func gradientInterpolationProperties() {
-        let gradient = ColorGradient(startColor: .black, endColor: .white, colorSpace: .rgb)
+        let gradient = ColorGradient(colors: [.black, .white], colorSpace: .rgb)
 
         guard case .shader(_, let fallback) = gradient.colorSource else {
             Issue.record("Expected shader color source with a pure-Swift fallback.")
@@ -38,7 +38,7 @@ import SwiftUI
 
     @Test("Oklch purple-to-white gradient carries over hue without spiraling")
     func oklchAchromaticHueCarryOver() {
-        let gradient = ColorGradient(startColor: .purple, endColor: .white, colorSpace: .oklch)
+        let gradient = ColorGradient(colors: [.purple, .white], colorSpace: .oklch)
         let startLab = ColorSpaceConverter.colorToOklab(.purple)
         let expectedHue = atan2(startLab.b, startLab.a)
 
@@ -57,8 +57,8 @@ import SwiftUI
 
     @Test("Oklch chromatic gradient interpolates along polar hue arc instead of Cartesian Oklab")
     func oklchPolarVsOklabCartesian() {
-        let oklchGradient = ColorGradient(startColor: .blue, endColor: .red, colorSpace: .oklch)
-        let oklabGradient = ColorGradient(startColor: .blue, endColor: .red, colorSpace: .oklab)
+        let oklchGradient = ColorGradient(colors: [.blue, .red], colorSpace: .oklch)
+        let oklabGradient = ColorGradient(colors: [.blue, .red], colorSpace: .oklab)
 
         let oklchMidLab = ColorSpaceConverter.colorToOklab(oklchGradient.color(at: 0.5))
         let oklabMidLab = ColorSpaceConverter.colorToOklab(oklabGradient.color(at: 0.5))
@@ -71,7 +71,7 @@ import SwiftUI
 
     @Test("Oklch gradient resolves dynamic colors using the provided EnvironmentValues")
     func oklchEnvironmentAwareResolution() {
-        let gradient = ColorGradient(startColor: .primary, endColor: .primary, colorSpace: .oklch)
+        let gradient = ColorGradient(colors: [.primary, .primary], colorSpace: .oklch)
 
         var lightEnvironment = EnvironmentValues()
         lightEnvironment.colorScheme = .light

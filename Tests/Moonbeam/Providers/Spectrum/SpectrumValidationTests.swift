@@ -3,7 +3,7 @@ import Testing
 import Foundation
 
 @Suite struct SpectrumValidationTests {
-    @Test("Non-overlapping bend sections validation")
+    @Test("Validate non-overlapping bend sections")
     func validBends() {
         let bends = [
             OneWayBend(startHue: 0.0, endHue: 0.2, target: 0.5),
@@ -17,7 +17,7 @@ import Foundation
         #expect(validated.count == 2)
     }
 
-    @Test("Overlapping bend sections validation")
+    @Test("Validate overlapping bend sections")
     func overlappingBendsDropped() {
         let bends = [
             OneWayBend(startHue: 0.0, endHue: 0.5, target: 0.5),
@@ -58,7 +58,7 @@ import Foundation
         #expect(validated.end.last?.fraction == 0.1)
     }
 
-    @Test("Filtering out zero and negative monochrome section fractions")
+    @Test("Filter out zero and negative monochrome section fractions")
     func nonPositiveMonochromeFractionsFiltered() {
         let startSections: [MonochromeSection] = [
             BlackSection(fraction: 0.0),

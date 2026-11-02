@@ -5,7 +5,7 @@ import SwiftUI
 @Suite struct HardEdgeColorsTests {
     @Test("Hard-edge modifier bounds validation")
     func boundsValidation() {
-        let gradient = ColorGradient(startColor: .black, endColor: .white)
+        let gradient = ColorGradient(colors: [.black, .white])
 
         let edgeZero = gradient.hardEdge(into: 0)
         let edgeOne = gradient.hardEdge(into: 1)
@@ -16,7 +16,7 @@ import SwiftUI
 
     @Test("Hard-edge modifier array conversion")
     func modifierConversion() {
-        let gradient = ColorGradient(startColor: .black, endColor: .white)
+        let gradient = ColorGradient(colors: [.black, .white])
         let hardEdgeProvider = gradient.hardEdge(into: 4)
 
         #expect(hardEdgeProvider.colors.count == 4)

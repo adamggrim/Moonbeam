@@ -20,7 +20,7 @@ import SwiftUI
         #expect(layout.previewScaleAnchor.x == 0.5)
     }
 
-    @Test("Preview clamping at the minimum edge of the track")
+    @Test("Preview clamps at the minimum edge of the track")
     func previewClampsToMinEdge() {
         var state = ColorSliderState()
         state.updateDrag(translation: -500.0, currentValue: 0.1)
@@ -39,7 +39,7 @@ import SwiftUI
         #expect(abs(layout.previewScaleAnchor.x - 0.166) < 0.01)
     }
 
-    @Test("Preview clamping at the maximum edge of the track")
+    @Test("Preview clamps at the maximum edge of the track")
     func previewClampsToMaxEdge() {
         var state = ColorSliderState()
         state.updateDrag(translation: 500.0, currentValue: 0.9)
