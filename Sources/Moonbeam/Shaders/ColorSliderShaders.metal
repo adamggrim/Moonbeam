@@ -277,17 +277,31 @@ half4 gradientShader(
     float2 position,
     half4 currentColor,
     float2 size,
-    half4 startColor,
-    half4 endColor,
+    device const half4* colors,
+    int colorsCount,
     float isVertical,
-    float colorSpaceFlag
+    float colorSpaceFlag,
+    float distributeEvenly
 ) {
     float normalizedPosition = calculateNormalizedPosition(position, size, isVertical);
+
+    if (distributeEvenly > 0.5f && colorsCount > 0) {
+        float inset = 0.5f / float(colorsCount);
+        normalizedPosition = clamp(normalizedPosition, inset, 1.0f - inset);
+        normalizedPosition = (normalizedPosition - inset) / (1.0f - 2.0f * inset);
+    }
+
+    float scaledPosition = normalizedPosition * float(colorsCount - 1);
+    int index = min(int(scaledPosition), colorsCount - 2);
+    float localRatio = scaledPosition - float(index);
+
+    half4 startColor = colors[index];
+    half4 endColor = colors[index + 1];
 
     uint colorSpace = uint(colorSpaceFlag);
 
     if (colorSpace == ColorSpaceRGB) {
-        half4 blendedColor = mix(startColor, endColor, half(normalizedPosition));
+        half4 blendedColor = mix(startColor, endColor, half(localRatio));
         return half4(blendedColor.rgb * currentColor.a, blendedColor.a * currentColor.a);
     }
 
@@ -300,10 +314,10 @@ half4 gradientShader(
 
     float3 labStart = convertRGBtoOklab(unpremultipliedStart);
     float3 labEnd = convertRGBtoOklab(unpremultipliedEnd);
-    half outAlpha = mix(startColor.a, endColor.a, half(normalizedPosition)) * currentColor.a;
+    half outAlpha = mix(startColor.a, endColor.a, half(localRatio)) * currentColor.a;
 
     if (colorSpace == ColorSpaceOklab) {
-        float3 mixedLab = mix(labStart, labEnd, normalizedPosition);
+        float3 mixedLab = mix(labStart, labEnd, localRatio);
         float3 rgbOut = convertOklabtoRGB(mixedLab.x, mixedLab.y, mixedLab.z);
         return half4(half3(rgbOut) * outAlpha, outAlpha);
     } else {
@@ -331,9 +345,9 @@ half4 gradientShader(
             else if (hDelta < -0.5) hStart -= 2.0 * M_PI_F;
         }
 
-        float L = mix(labStart.x, labEnd.x, normalizedPosition);
-        float C = mix(cStart, cEnd, normalizedPosition);
-        float h = mix(hStart, hEnd, normalizedPosition) / (2.0 * M_PI_F);
+        float L = mix(labStart.x, labEnd.x, localRatio);
+        float C = mix(cStart, cEnd, localRatio);
+        float h = mix(hStart, hEnd, localRatio) / (2.0 * M_PI_F);
 
         float3 rgbOut = convertOklchtoRGB(L, C, h);
         return half4(half3(rgbOut) * outAlpha, outAlpha);

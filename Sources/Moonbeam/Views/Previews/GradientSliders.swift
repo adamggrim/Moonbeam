@@ -4,7 +4,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            colorProvider: ColorGradient(startColor: .orange, endColor: .blue, colorSpace: .rgb),
+            colorProvider: ColorGradient(colors: [.orange, .blue], colorSpace: .rgb),
             axis: .horizontal
         )
     }
@@ -14,7 +14,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            colorProvider: ColorGradient(startColor: .blue, endColor: .red, colorSpace: .oklab),
+            colorProvider: ColorGradient(colors: [.blue, .red], colorSpace: .oklab),
             axis: .horizontal
         )
     }
@@ -24,7 +24,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            colorProvider: ColorGradient(startColor: .purple, endColor: .white, colorSpace: .oklch),
+            colorProvider: ColorGradient(colors: [.purple, .white], colorSpace: .oklch),
             axis: .horizontal
         )
     }
@@ -34,7 +34,7 @@ import SwiftUI
     PreviewContainer { selection, progress in
         ColorSlider(
             value: progress,
-            colorProvider: ColorGradient(startColor: .green, endColor: .yellow),
+            colorProvider: ColorGradient(colors: [.green, .yellow]),
             axis: .horizontal
         )
         .colorSliderDimensions(
