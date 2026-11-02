@@ -27,6 +27,11 @@ public struct ColorSliderStyleConfiguration {
     /// The anchor point used to animate the floating color preview out of the thumb.
     public let previewScaleAnchor: UnitPoint
 
+    /// The number of discrete colors in the data source.
+    ///
+    /// Numbered at zero for non-hard edge sliders.
+    public let colorCount: Int
+
     /// The slider track.
     public let track: Track
 

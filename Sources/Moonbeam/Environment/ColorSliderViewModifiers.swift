@@ -11,6 +11,20 @@ public enum PreviewPosition: Sendable, Equatable {
     case bottomTrailing
 }
 
+/// Determines the visual rendering style of the draggable thumb.
+public enum ColorSliderThumbStyle: Sendable, Equatable {
+    /// The standard solid draggable thumb shape.
+    case standard
+
+    /// An outline wrapping the selected discrete color section of a hard-edge
+    /// slider.
+    ///
+    /// - Parameters:
+    ///   - lineWidth: The thickness of the outline stroke.
+    ///   - padding: The empty space between the color section and the outline.
+    case colorOutline(lineWidth: CGFloat = 2.0, padding: CGFloat = 4.0)
+}
+
 /// Determines when the Liquid Glass effect is applied to the slider thumb.
 public enum LiquidGlassThumb: Sendable, Equatable {
     /// Always renders the draggable thumb with Liquid Glass.
@@ -36,8 +50,20 @@ private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: Pre
 private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
 private struct AccessibilityPercentageHiddenKey: EnvironmentKey { static let defaultValue: Bool = false }
 private struct AccessibilityFormatterKey: EnvironmentKey { static let defaultValue: (@Sendable (Double, String?) -> String)? = nil }
+private struct ThumbStyleKey: EnvironmentKey { static let defaultValue: ColorSliderThumbStyle = .standard }
+private struct SnapToColorKey: EnvironmentKey { static let defaultValue: Bool? = nil }
 
 extension EnvironmentValues {
+    var colorSliderThumbStyle: ColorSliderThumbStyle {
+        get { self[ThumbStyleKey.self] }
+        set { self[ThumbStyleKey.self] = newValue }
+    }
+
+    var colorSliderSnapsToColor: Bool? {
+        get { self[SnapToColorKey.self] }
+        set { self[SnapToColorKey.self] = newValue }
+    }
+
     var colorSliderAccessibilityFormatter: (@Sendable (Double, String?) -> String)? {
         get { self[AccessibilityFormatterKey.self] }
         set { self[AccessibilityFormatterKey.self] = newValue }
@@ -165,5 +191,16 @@ public extension View {
     /// Sets a custom VoiceOver formatter to override default descriptions.
     func colorSliderAccessibilityFormatter(_ formatter: @escaping @Sendable (Double, String?) -> String) -> some View {
         environment(\.colorSliderAccessibilityFormatter, formatter)
+    }
+
+    /// Sets the visual style of the draggable thumb.
+    func colorSliderThumbStyle(_ style: ColorSliderThumbStyle) -> some View {
+        environment(\.colorSliderThumbStyle, style)
+    }
+
+    /// Determines whether the slider automatically snaps to the nearest color
+    /// block.
+    func colorSliderSnapsToColor(_ snaps: Bool) -> some View {
+        environment(\.colorSliderSnapsToColor, snaps)
     }
 }

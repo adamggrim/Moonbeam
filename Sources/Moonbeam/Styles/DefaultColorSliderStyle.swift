@@ -26,10 +26,6 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     /// The shadow properties applied to the floating color preview.
     public var previewShadow: ShapeShadow
 
-    @Environment(\.colorSliderLiquidGlassThumb) private var defaultLiquidGlassThumb
-    @Environment(\.colorSliderDimensions) private var dimensions
-    @Environment(\.controlSize) private var controlSize
-
     /// Initializes a default color slider style.
     ///
     /// - Parameters:
@@ -69,12 +65,26 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     }
 
     public func makeBody(configuration: Configuration) -> some View {
+        DefaultColorSliderStyleView(style: self, configuration: configuration)
+    }
+}
+
+private struct DefaultColorSliderStyleView: View {
+    let style: DefaultColorSliderStyle
+    let configuration: ColorSliderStyleConfiguration
+
+    @Environment(\.colorSliderLiquidGlassThumb) private var defaultLiquidGlassThumb
+    @Environment(\.colorSliderThumbStyle) private var thumbStyle
+    @Environment(\.colorSliderDimensions) private var dimensions
+    @Environment(\.controlSize) private var controlSize
+
+    var body: some View {
         ZStack(alignment: configuration.axis == .horizontal ? .leading : .bottom) {
 
             configuration.track
                 .clipShape(resolvedTrackShape)
                 .overlay {
-                    if let stroke = trackStroke {
+                    if let stroke = style.trackStroke {
                         resolvedTrackShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
                     }
                 }
@@ -82,38 +92,47 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
             configuration.thumb
                 .overlay {
                     let shape = resolvedThumbShape
-                    let activeLiquidGlassThumb = liquidGlassThumb ?? defaultLiquidGlassThumb
-                    let isLiquidGlassActive: Bool = {
-                        if #available(iOS 26.0, macOS 26.0, *) {
-                            return activeLiquidGlassThumb == .always
-                                || (activeLiquidGlassThumb == .dragging && configuration.isDragging)
-                        }
-                        return false
-                    }()
-
-                    let dynamicScale: CGFloat = configuration.isDragging
-                        ? dimensions.thumbDragScale
-                        : 1.0
+                    let dynamicScale: CGFloat = configuration.isDragging ? dimensions.thumbDragScale : 1.0
 
                     Group {
+                        switch thumbStyle {
+                        case .colorOutline(let lineWidth, _):
+                            shape.stroke(style.thumbColor, lineWidth: lineWidth)
+
+                        case .standard:
+                            let activeLiquidGlassThumb = style.liquidGlassThumb ?? defaultLiquidGlassThumb
+                            let isLiquidGlassActive: Bool = {
+                                if #available(iOS 26.0, macOS 26.0, *) {
+                                    return activeLiquidGlassThumb == .always
+                                        || (activeLiquidGlassThumb == .dragging && configuration.isDragging)
+                                }
+                                return false
+                            }()
+
 #if compiler(>=6.2)
-                        if #available(iOS 26.0, macOS 26.0, *), activeLiquidGlassThumb != .disabled {
-                            Color.clear
-                                .glassEffect(
-                                    isLiquidGlassActive ? .regular.interactive(true) : .identity, in: shape
-                                )
-                                .overlay(shape.fill(thumbColor).opacity(isLiquidGlassActive ? 0.0 : 1.0))
-                        } else {
-                            shape.fill(thumbColor)
-                        }
+                            if #available(iOS 26.0, macOS 26.0, *), activeLiquidGlassThumb != .disabled {
+                                Color.clear
+                                    .glassEffect(
+                                        isLiquidGlassActive ? .regular.interactive(true) : .identity, in: shape
+                                    )
+                                    .overlay(shape.fill(style.thumbColor).opacity(isLiquidGlassActive ? 0.0 : 1.0))
+                            } else {
+                                shape.fill(style.thumbColor)
+                            }
 #else
-                        shape.fill(thumbColor)
+                            shape.fill(style.thumbColor)
 #endif
+                        }
                     }
                     .scaleEffect(dynamicScale)
-                    .shadow(color: thumbShadow.color, radius: thumbShadow.radius, x: thumbShadow.x, y: thumbShadow.y)
+                    .shadow(
+                        color: style.thumbShadow.color,
+                        radius: style.thumbShadow.radius,
+                        x: style.thumbShadow.x,
+                        y: style.thumbShadow.y
+                    )
                     .overlay {
-                        if let stroke = thumbStroke {
+                        if thumbStyle == .standard, let stroke = style.thumbStroke {
                             shape.stroke(stroke.style, lineWidth: stroke.lineWidth)
                         }
                     }
@@ -128,15 +147,15 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
             configuration.preview
                 .clipShape(resolvedPreviewShape)
                 .overlay {
-                    if let stroke = previewStroke {
+                    if let stroke = style.previewStroke {
                         resolvedPreviewShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
                     }
                 }
                 .shadow(
-                    color: previewShadow.color,
-                    radius: previewShadow.radius,
-                    x: previewShadow.x,
-                    y: previewShadow.y
+                    color: style.previewShadow.color,
+                    radius: style.previewShadow.radius,
+                    x: style.previewShadow.x,
+                    y: style.previewShadow.y
                 )
                 .scaleEffect(
                     (!configuration.isDragging) ? dimensions.previewScale : 1.0,
@@ -149,7 +168,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     }
 
     private var resolvedTrackShape: AnyShape {
-        if let shape = trackShape { return shape }
+        if let shape = style.trackShape { return shape }
         if let radius = dimensions.cornerRadius {
             return AnyShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         } else {
@@ -158,11 +177,51 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     }
 
     private var resolvedThumbShape: AnyShape {
-        thumbShape ?? AnyShape(Capsule(style: .continuous))
+        if let shape = style.thumbShape { return shape }
+        switch thumbStyle {
+        case .colorOutline(_, let padding):
+            let colorCount = configuration.colorCount
+
+            let baseRadius = dimensions.cornerRadius ?? (dimensions.resolvedTrackThickness(for: controlSize) / 2)
+            let radius = baseRadius + padding
+
+            if colorCount <= 1 {
+                return AnyShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+            }
+
+            let firstBlockMultiplier = max(0.0, min(1.0, 2.0 * (1.0 - (configuration.value * Double(colorCount)))))
+            let lastBlockMultiplier = max(
+                0.0, min(1.0, 2.0 * ((configuration.value * Double(colorCount)) - Double(colorCount - 1)))
+            )
+
+            let firstRadius = radius * firstBlockMultiplier
+            let lastRadius = radius * lastBlockMultiplier
+
+            if configuration.axis == .horizontal {
+                return AnyShape(UnevenRoundedRectangle(
+                    topLeadingRadius: firstRadius,
+                    bottomLeadingRadius: firstRadius,
+                    bottomTrailingRadius: lastRadius,
+                    topTrailingRadius: lastRadius,
+                    style: .continuous
+                ))
+            } else {
+                return AnyShape(UnevenRoundedRectangle(
+                    topLeadingRadius: lastRadius,
+                    bottomLeadingRadius: firstRadius,
+                    bottomTrailingRadius: firstRadius,
+                    topTrailingRadius: lastRadius,
+                    style: .continuous
+                ))
+            }
+
+        case .standard:
+            return AnyShape(Capsule(style: .continuous))
+        }
     }
 
     private var resolvedPreviewShape: AnyShape {
-        if let shape = previewShape { return shape }
+        if let shape = style.previewShape { return shape }
         let size = dimensions.previewSize ?? ColorSliderDefaults.previewSize(for: controlSize)
         return AnyShape(
             RoundedRectangle(cornerRadius: size * ColorSliderDefaults.cornerRadiusMultiplier, style: .continuous)

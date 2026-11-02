@@ -10,6 +10,17 @@ import SwiftUI
     }
 }
 
+#Preview("Horizontal explicit hard-edge slider with outline") {
+    PreviewContainer { selection, progress in
+        ColorSlider(
+            value: progress,
+            colorProvider: HardEdgeColors(colors: [.green, .yellow, .orange, .red, .purple, .blue]),
+            axis: .horizontal
+        )
+        .colorSliderThumbStyle(.colorOutline(lineWidth: 3, padding: 4))
+    }
+}
+
 #Preview("Vertical explicit hard-edge slider") {
     PreviewContainer { selection, progress in
         ColorSlider(

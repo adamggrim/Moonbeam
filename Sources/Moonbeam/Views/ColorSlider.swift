@@ -30,6 +30,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     @Environment(\.colorSliderAccessibilityPercentageHidden) private var hidePercentage
     @Environment(\.colorSliderAccessibilityFormatter) private var accessibilityFormatter
     @Environment(\.layoutDirection) private var layoutDirection
+    @Environment(\.colorSliderThumbStyle) private var thumbStyle
+    @Environment(\.colorSliderSnapsToColor) private var snapsToColor
 
     /// A localized string key used for VoiceOver accessibility.
     public var label: LocalizedStringKey
@@ -78,14 +80,22 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         self.colorProvider = colorProvider
         self.label = label
         self.axis = axis
-        self.preview = previewView
-    }
+            self.preview = previewView
+        }
 
-    /// The color calculated from the current `liveColorPosition` on the slider.
-    private func calculatedColor(layout: ColorSliderLayout) -> Color {
-        let nonZeroLength = layout.resolvedLength > 0 ? layout.resolvedLength : 0.001
-        let normalizedPosition = Double(layout.liveColorPosition / nonZeroLength)
-        return colorProvider.color(at: normalizedPosition, in: environment)
+        private var colorCount: Int {
+            if case .array(let colors) = colorProvider.colorSource {
+                return colors.count
+            }
+            return 0
+        }
+
+        /// The color calculated from the current `liveColorPosition` on the
+        /// slider.
+        private func calculatedColor(layout: ColorSliderLayout) -> Color {
+            let nonZeroLength = layout.resolvedLength > 0 ? layout.resolvedLength : 0.001
+            let normalizedPosition = Double(layout.liveColorPosition / nonZeroLength)
+            return colorProvider.color(at: normalizedPosition, in: environment)
     }
 
     /// Calculates the discrete index of the slider (used to trigger haptics on
@@ -130,7 +140,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 dimensions: resolvedDimensions,
                 previewPosition: previewPosition,
                 previewSpacing: previewSpacing,
-                layoutDirection: layoutDirection
+                layoutDirection: layoutDirection,
+                thumbStyle: thumbStyle,
+                colorCount: colorCount
             )
 
             let configuration = ColorSliderStyleConfiguration(
@@ -141,6 +153,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 thumbOffset: layout.thumbOffsetSize,
                 previewOffset: layout.previewOffsetSize,
                 previewScaleAnchor: layout.previewScaleAnchor,
+                colorCount: colorCount,
                 track: ColorSliderStyleConfiguration.Track(
                     TrackView(
                         colorProvider: colorProvider,
@@ -240,6 +253,17 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     private func onDragEnded(_: DragGesture.Value, layout: ColorSliderLayout) {
         withAnimation(reduceMotion ? nil : animation) {
             sliderState.finalizeDrag()
+
+            let shouldSnap: Bool = {
+                if let explicitlySet = snapsToColor { return explicitlySet }
+                if case .colorOutline = thumbStyle, layout.colorCount > 0 { return true }
+                return false
+            }()
+
+            if shouldSnap, layout.colorCount > 0 {
+                let index = min(max(0, Int(value * Double(layout.colorCount))), layout.colorCount - 1)
+                value = (Double(index) + 0.5) / Double(layout.colorCount)
+            }
         }
     }
 

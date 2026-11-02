@@ -11,12 +11,34 @@ internal struct ColorSliderLayout {
     let previewPosition: PreviewPosition?
     let previewSpacing: CGFloat?
     var layoutDirection: LayoutDirection = .leftToRight
+    let thumbStyle: ColorSliderThumbStyle
+    let colorCount: Int
 
     var resolvedLength: CGFloat { dimensions.length ?? 0 }
     var resolvedTrackThickness: CGFloat { dimensions.resolvedTrackThickness(for: controlSize) }
     var resolvedPreviewSize: CGFloat { dimensions.previewSize ?? ColorSliderDefaults.previewSize(for: controlSize) }
-    var resolvedThumbThickness: CGFloat { dimensions.thumbThickness ?? resolvedTrackThickness }
-    var resolvedThumbLength: CGFloat { dimensions.resolvedThumbLength(for: controlSize) }
+
+    var resolvedThumbThickness: CGFloat {
+        switch thumbStyle {
+        case .colorOutline(_, let padding):
+            let blockWidth = colorCount > 0
+                ? (resolvedLength / CGFloat(colorCount))
+                : (dimensions.thumbThickness ?? resolvedTrackThickness)
+            return blockWidth + (padding * 2)
+        case .standard:
+            return dimensions.thumbThickness ?? resolvedTrackThickness
+        }
+    }
+
+    var resolvedThumbLength: CGFloat {
+        switch thumbStyle {
+        case .colorOutline(_, let padding):
+            return resolvedTrackThickness + (padding * 2)
+        case .standard:
+            return dimensions.resolvedThumbLength(for: controlSize)
+        }
+    }
+
     var resolvedPreviewOffset: CGFloat {
         let fallbackOffset = abs(dimensions.previewOffset ?? ColorSliderDefaults.previewOffset(for: controlSize))
 
@@ -31,16 +53,23 @@ internal struct ColorSliderLayout {
     }
     var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
 
-    /// Inset to adjust the left and right bounds of the draggable thumb if it is
-    /// thinner than the track.
-    var thumbInset: CGFloat { (resolvedTrackThickness - resolvedThumbThickness) / 2 }
+    /// Inset to adjust the leading and trailing bounds of the draggable thumb
+    /// on the main axis.
+    var mainAxisThumbInset: CGFloat {
+        switch thumbStyle {
+        case .colorOutline(_, let padding):
+            return -padding
+        case .standard:
+            return (resolvedTrackThickness - resolvedThumbThickness) / 2
+        }
+    }
 
     var liveContainerThumbDrag: CGFloat {
         let baseValue = state.isDragging ? (state.dragStartValue ?? value) : value
         let trackPosition = CGFloat(baseValue) * resolvedLength
         let baseThumbPosition = min(
-            max(trackPosition - halfThumbThickness, thumbInset),
-            resolvedLength - resolvedThumbThickness - thumbInset
+            max(trackPosition - halfThumbThickness, mainAxisThumbInset),
+            resolvedLength - resolvedThumbThickness - mainAxisThumbInset
         )
         return state.isDragging ? baseThumbPosition + state.liveContainerDrag : baseThumbPosition
     }
@@ -61,7 +90,7 @@ internal struct ColorSliderLayout {
     /// At the end of the slider, cannot extend beyond the draggable thumb's
     /// leading edge.
     var liveThumbPosition: CGFloat {
-        min(max(liveContainerThumbDrag, 0 + thumbInset), resolvedLength - resolvedThumbThickness - thumbInset)
+        min(max(liveContainerThumbDrag, mainAxisThumbInset), resolvedLength - resolvedThumbThickness - mainAxisThumbInset)
     }
 
     /// The main axis offset for the floating color preview.
