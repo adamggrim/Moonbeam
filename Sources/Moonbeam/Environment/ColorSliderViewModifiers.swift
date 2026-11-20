@@ -49,9 +49,13 @@ private struct AnimationKey: EnvironmentKey {
 private struct PreviewPositionKey: EnvironmentKey { static let defaultValue: PreviewPosition? = nil }
 private struct PreviewSpacingKey: EnvironmentKey { static let defaultValue: CGFloat? = nil }
 private struct AccessibilityPercentageHiddenKey: EnvironmentKey { static let defaultValue: Bool = false }
-private struct AccessibilityFormatterKey: EnvironmentKey { static let defaultValue: (@Sendable (Double, String?) -> String)? = nil }
+private struct AccessibilityFormatterKey: EnvironmentKey {
+    static let defaultValue: (@Sendable (Double, String?) -> String)? = nil
+}
 private struct ThumbStyleKey: EnvironmentKey { static let defaultValue: ColorSliderThumbStyle = .standard }
 private struct SnapToColorKey: EnvironmentKey { static let defaultValue: Bool? = nil }
+private struct ThumbBounceKey: EnvironmentKey { static let defaultValue: Bool? = nil }
+private struct TapToSeekKey: EnvironmentKey { static let defaultValue: Bool = false }
 
 extension EnvironmentValues {
     var colorSliderThumbStyle: ColorSliderThumbStyle {
@@ -62,6 +66,16 @@ extension EnvironmentValues {
     var colorSliderSnapsToColor: Bool? {
         get { self[SnapToColorKey.self] }
         set { self[SnapToColorKey.self] = newValue }
+    }
+
+    var colorSliderThumbBounce: Bool? {
+        get { self[ThumbBounceKey.self] }
+        set { self[ThumbBounceKey.self] = newValue }
+    }
+
+    var colorSliderTapToSeek: Bool {
+        get { self[TapToSeekKey.self] }
+        set { self[TapToSeekKey.self] = newValue }
     }
 
     var colorSliderAccessibilityFormatter: (@Sendable (Double, String?) -> String)? {
@@ -202,5 +216,20 @@ public extension View {
     /// block.
     func colorSliderSnapsToColor(_ snaps: Bool) -> some View {
         environment(\.colorSliderSnapsToColor, snaps)
+    }
+
+    /// Determines whether the thumb uses spring overshoot easing when dragged,
+    /// released, or tapped.
+    ///
+    /// Defaults to `true` for `.colorOutline` thumbs and `false` for
+    /// `.standard` thumbs.
+    func colorSliderThumbBounce(_ bounces: Bool = true) -> some View {
+        environment(\.colorSliderThumbBounce, bounces)
+    }
+
+    /// Determines whether tapping directly on the slider track to jumps to that
+    /// position. Defaults to `false`.
+    func colorSliderTapToSeek(_ enabled: Bool = true) -> some View {
+        environment(\.colorSliderTapToSeek, enabled)
     }
 }

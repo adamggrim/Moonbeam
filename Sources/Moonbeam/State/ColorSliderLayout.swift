@@ -10,6 +10,7 @@ internal struct ColorSliderLayout {
     let dimensions: ColorSliderDimensions
     let previewPosition: PreviewPosition?
     let previewSpacing: CGFloat?
+    
     var layoutDirection: LayoutDirection = .leftToRight
     let thumbStyle: ColorSliderThumbStyle
     let colorCount: Int
@@ -64,13 +65,20 @@ internal struct ColorSliderLayout {
         }
     }
 
-    var liveContainerThumbDrag: CGFloat {
-        let baseValue = state.isDragging ? (state.dragStartValue ?? value) : value
-        let trackPosition = CGFloat(baseValue) * resolvedLength
-        let baseThumbPosition = min(
+    /// Calculates the resting leading-edge thumb position for a normalized
+    /// slider value.
+    func thumbPosition(for normalizedValue: Double) -> CGFloat {
+        let clampedValue = min(max(normalizedValue, 0.0), 1.0)
+        let trackPosition = CGFloat(clampedValue) * resolvedLength
+        return min(
             max(trackPosition - halfThumbThickness, mainAxisThumbInset),
             resolvedLength - resolvedThumbThickness - mainAxisThumbInset
         )
+    }
+
+    var liveContainerThumbDrag: CGFloat {
+        let baseValue = state.isDragging ? (state.dragStartValue ?? value) : value
+        let baseThumbPosition = thumbPosition(for: baseValue)
         return state.isDragging ? baseThumbPosition + state.liveContainerDrag : baseThumbPosition
     }
 
@@ -85,12 +93,11 @@ internal struct ColorSliderLayout {
     }
 
     /// The clamped main-axis position of the leading edge of the draggable
-    /// thumb during an active drag.
-    ///
-    /// At the end of the slider, cannot extend beyond the draggable thumb's
-    /// leading edge.
+    /// thumb.
     var liveThumbPosition: CGFloat {
-        min(max(liveContainerThumbDrag, mainAxisThumbInset), resolvedLength - resolvedThumbThickness - mainAxisThumbInset)
+        let minPosition = mainAxisThumbInset
+        let maxPosition = resolvedLength - resolvedThumbThickness - mainAxisThumbInset
+        return min(max(liveContainerThumbDrag, minPosition), maxPosition)
     }
 
     /// The main axis offset for the floating color preview.
@@ -162,5 +169,22 @@ internal struct ColorSliderLayout {
         var updatedLayout = self
         updatedLayout.state = updatedState
         return Double(updatedLayout.liveColorPosition / resolvedLength)
+    }
+
+    /// Calculates the normalized slider value (0.0 to 1.0) for a tap location
+    /// on the track.
+    func normalizedValue(forTrackLocation location: CGPoint) -> Double {
+        guard resolvedLength > 0 else { return 0.0 }
+
+        let rawPosition: CGFloat
+        if axis == .horizontal {
+            rawPosition = layoutDirection == .rightToLeft
+                ? (resolvedLength - location.x)
+                : location.x
+        } else {
+            rawPosition = resolvedLength - location.y
+        }
+
+        return min(max(Double(rawPosition / resolvedLength), 0.0), 1.0)
     }
 }

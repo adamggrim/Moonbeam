@@ -32,6 +32,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     @Environment(\.layoutDirection) private var layoutDirection
     @Environment(\.colorSliderThumbStyle) private var thumbStyle
     @Environment(\.colorSliderSnapsToColor) private var snapsToColor
+    @Environment(\.colorSliderThumbBounce) private var thumbBounce
+    @Environment(\.colorSliderTapToSeek) private var tapToSeek
 
     /// A localized string key used for VoiceOver accessibility.
     public var label: LocalizedStringKey
@@ -88,6 +90,25 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 return colors.count
             }
             return 0
+        }
+
+        private var resolvedThumbBounce: Bool {
+            if let explicitlySet = thumbBounce { return explicitlySet }
+            if case .colorOutline = thumbStyle { return true }
+            return false
+        }
+
+        private var shouldSnapToColor: Bool {
+            if let explicitlySet = snapsToColor { return explicitlySet }
+            if case .colorOutline = thumbStyle, colorCount > 0 { return true }
+            return false
+        }
+
+        private func resolvedTargetValue(for rawValue: Double, layout: ColorSliderLayout) -> Double {
+            let clamped = min(max(rawValue, 0.0), 1.0)
+            guard shouldSnapToColor, layout.colorCount > 0 else { return clamped }
+            let index = min(max(0, Int(clamped * Double(layout.colorCount))), layout.colorCount - 1)
+            return (Double(index) + 0.5) / Double(layout.colorCount)
         }
 
         /// The color calculated from the current `liveColorPosition` on the
@@ -160,6 +181,12 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                         dimensions: resolvedDimensions,
                         axis: axis
                     )
+                    .contentShape(Rectangle())
+                    .gesture(
+                        SpatialTapGesture(coordinateSpace: .local)
+                            .onEnded { onTrackTapped($0.location, layout: layout) },
+                        including: tapToSeek ? .all : .none
+                    )
                 ),
                 thumb: ColorSliderStyleConfiguration.Thumb(
                     ThumbView(
@@ -189,7 +216,13 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
 
             style(configuration)
                 .coordinateSpace(Self.dragCoordinateSpace)
-                .animation(sliderState.isDragging || reduceMotion ? nil : animation, value: value)
+                .transaction(value: value) { transaction in
+                    if sliderState.isDragging || reduceMotion {
+                        transaction.animation = nil
+                    } else if transaction.animation == nil {
+                        transaction.animation = animation
+                    }
+                }
                 .opacity(isEnabled ? 1.0 : 0.5)
                 .grayscale(isEnabled ? 0.0 : 0.99)
                 .sensoryFeedback(.selection, trigger: discreteIndex(layout: layout))
@@ -250,20 +283,59 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         self.value = layout.normalizedValue(for: sliderState)
     }
 
-    private func onDragEnded(_: DragGesture.Value, layout: ColorSliderLayout) {
-        withAnimation(reduceMotion ? nil : animation) {
-            sliderState.finalizeDrag()
+    private func onDragEnded(_ dragValue: DragGesture.Value, layout: ColorSliderLayout) {
+        let targetValue = resolvedTargetValue(for: value, layout: layout)
 
-            let shouldSnap: Bool = {
-                if let explicitlySet = snapsToColor { return explicitlySet }
-                if case .colorOutline = thumbStyle, layout.colorCount > 0 { return true }
-                return false
-            }()
+        let releaseAnimation: Animation? = {
+            guard !reduceMotion else { return nil }
+            guard resolvedThumbBounce else { return animation }
 
-            if shouldSnap, layout.colorCount > 0 {
-                let index = min(max(0, Int(value * Double(layout.colorCount))), layout.colorCount - 1)
-                value = (Double(index) + 0.5) / Double(layout.colorCount)
+            let horizontalVelocity = layout.layoutDirection == .rightToLeft
+                ? -dragValue.velocity.width
+                : dragValue.velocity.width
+            let axisVelocity = axis == .horizontal ? horizontalVelocity : -dragValue.velocity.height
+
+            let targetThumbPosition = layout.thumbPosition(for: targetValue)
+            let distancePoints = targetThumbPosition - layout.liveThumbPosition
+
+            let normalizedVelocity: Double
+            if abs(distancePoints) >= 1.0 {
+                normalizedVelocity = max(-5.0, min(5.0, Double(axisVelocity / distancePoints)))
+            } else {
+                normalizedVelocity = 0.0
             }
+
+            return .interpolatingSpring(
+                duration: ColorSliderDefaults.thumbBounceDuration,
+                bounce: ColorSliderDefaults.thumbBounce,
+                initialVelocity: normalizedVelocity
+            )
+        }()
+
+        withAnimation(releaseAnimation) {
+            sliderState.finalizeDrag()
+            value = targetValue
+        }
+    }
+
+    private func onTrackTapped(_ location: CGPoint, layout: ColorSliderLayout) {
+        guard !sliderState.isDragging else { return }
+
+        let rawValue = layout.normalizedValue(forTrackLocation: location)
+        let targetValue = resolvedTargetValue(for: rawValue, layout: layout)
+
+        let tapAnimation: Animation? = {
+            guard !reduceMotion else { return nil }
+            return resolvedThumbBounce
+                ? .spring(
+                    duration: ColorSliderDefaults.thumbBounceDuration,
+                    bounce: ColorSliderDefaults.thumbBounce
+                )
+                : animation
+        }()
+
+        withAnimation(tapAnimation) {
+            value = targetValue
         }
     }
 

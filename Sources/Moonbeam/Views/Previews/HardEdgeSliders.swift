@@ -18,6 +18,7 @@ import SwiftUI
             axis: .horizontal
         )
         .colorSliderThumbStyle(.colorOutline(lineWidth: 3, padding: 4))
+        .colorSliderTapToSeek()
     }
 }
 
