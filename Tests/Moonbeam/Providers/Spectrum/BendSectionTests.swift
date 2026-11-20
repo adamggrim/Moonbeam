@@ -3,13 +3,13 @@ import Testing
 import Foundation
 
 @Suite struct BendSectionTests {
-    @Test("Standard hue distance calculation")
+    @Test("Bend section calculates standard hue distance")
     func standardHueDistance() {
         let distance = OneWayBend.calculateHueCount(start: 0.2, end: 0.5)
         #expect(distance == 0.3)
     }
 
-    @Test("Wide hue distance calculation across more than half the spectrum")
+    @Test("Bend section calculates wide hue distance across more than half the spectrum")
     func wideHueDistance() {
         let distance = OneWayBend.calculateHueCount(start: 0.9, end: 0.1)
         #expect(abs(distance - 0.8) < 0.0001)

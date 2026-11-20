@@ -32,7 +32,7 @@ import Foundation
         #expect(validated.first?.targetValue == 0.5)
     }
 
-    @Test("Preserving more than two valid monochrome sections")
+    @Test("Preserve more than two valid monochrome sections")
     func validMonochromeSections() {
         let startSections: [MonochromeSection] = [
             BlackSection(fraction: 0.05),

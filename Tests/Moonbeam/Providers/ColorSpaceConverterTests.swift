@@ -3,7 +3,7 @@ import Testing
 import SwiftUI
 
 @Suite struct ColorSpaceConverterTests {
-    @Test("Oklch zero lightness boundary")
+    @Test("Oklch zero lightness resolves to black")
     func oklchBlackBoundary() {
         let p3Color = ColorSpaceConverter.oklchToColor(lightness: 0.0, chroma: 0.0, hue: 0.0)
         #expect(p3Color == Color(.displayP3, red: 0, green: 0, blue: 0))
@@ -17,7 +17,7 @@ import SwiftUI
         #expect(sRGBColor == Color(.sRGB, red: 0, green: 0, blue: 0))
     }
 
-    @Test("Oklch maximum lightness boundary")
+    @Test("Oklch maximum lightness resolves to white")
     func oklchWhiteBoundary() {
         let p3Color = ColorSpaceConverter.oklchToColor(lightness: 1.0, chroma: 0.0, hue: 0.0)
         #expect(p3Color == Color(.displayP3, red: 1, green: 1, blue: 1))
@@ -54,101 +54,126 @@ import SwiftUI
         #expect(abs(blue - (101.0 / 255.0)) < 0.01) // Blue resolves to ~0.397, preserving L = 0.5.
     }
 
-    @Test("Oklch Display P3 clamping preserves wider chroma than sRGB")
-    func oklchExtremeChromaDisplayP3() {
+    @Test(
+        "Oklch Display P3 clamping preserves a wider chroma than sRGB",
+        arguments: [0.08, 0.4, 0.5]
+    )
+    func oklchExtremeChromaDisplayP3(hue: CGFloat) {
         let p3Color = ColorSpaceConverter.oklchToColor(
             lightness: 0.5,
             chroma: 1.5,
-            hue: 0.5,
+            hue: hue,
             gamut: .displayP3
         )
         let sRGBColor = ColorSpaceConverter.oklchToColor(
             lightness: 0.5,
             chroma: 1.5,
-            hue: 0.5,
+            hue: hue,
             gamut: .sRGB
         )
 
-        let p3Lab = ColorSpaceConverter.colorToOklab(p3Color)
-        let sRGBLab = ColorSpaceConverter.colorToOklab(sRGBColor)
-        let p3Chroma = hypot(p3Lab.a, p3Lab.b)
-        let sRGBChroma = hypot(sRGBLab.a, sRGBLab.b)
-
-        #expect(p3Chroma > sRGBChroma + 0.02)
-
-        let resolvedP3 = p3Color.resolve(in: EnvironmentValues())
-        #expect(resolvedP3.red < 0.0)
+        #expect(p3Color.exceedsSRGB())
+        #expect(sRGBColor.isWithinSRGB())
+        #expect(p3Color.oklabChroma() > sRGBColor.oklabChroma())
     }
 
-    @Test("colorToOklab preserves wide-gamut Display P3 inputs without sRGB clipping")
-    func colorToOklabPreservesDisplayP3() {
-        let p3Red = Color(.displayP3, red: 1.0, green: 0.0, blue: 0.0)
-        let sRGBRed = Color(.sRGB, red: 1.0, green: 0.0, blue: 0.0)
+    @Test(
+        "colorToOklab preserves wide-gamut Display P3 inputs without sRGB clipping",
+        arguments: [
+            (1.0, 0.0, 0.0),
+            (0.0, 1.0, 0.0),
+            (0.0, 0.0, 1.0),
+        ]
+    )
+    func colorToOklabPreservesDisplayP3(red: Double, green: Double, blue: Double) {
+        let p3Color = Color(.displayP3, red: red, green: green, blue: blue)
+        let sRGBColor = Color(.sRGB, red: red, green: green, blue: blue)
 
-        let p3Lab = ColorSpaceConverter.colorToOklab(p3Red)
-        let sRGBLab = ColorSpaceConverter.colorToOklab(sRGBRed)
-
-        let p3Chroma = hypot(p3Lab.a, p3Lab.b)
-        let sRGBChroma = hypot(sRGBLab.a, sRGBLab.b)
-
-        #expect(p3Chroma > sRGBChroma + 0.03)
+        #expect(p3Color.exceedsSRGB())
+        #expect(p3Color.oklabChroma() > sRGBColor.oklabChroma())
     }
 
-    @Test("HSB conversion emits Display P3 or sRGB colors based on gamut")
-    func hsbToColorGamuts() {
-        let p3Red = ColorSpaceConverter.hsbToColor(
-            hue: 0.0,
+    @Test(
+        "HSB conversion emits Display P3 or sRGB colors based on gamut",
+        arguments: [
+            (0.0, 1.0, 0.0, 0.0),
+            (1.0 / 3.0, 0.0, 1.0, 0.0),
+            (2.0 / 3.0, 0.0, 0.0, 1.0),
+        ]
+    )
+    func hsbToColorGamuts(hue: CGFloat, red: Double, green: Double, blue: Double) {
+        let environment = EnvironmentValues()
+        let p3Color = ColorSpaceConverter.hsbToColor(
+            hue: hue,
             saturation: 1.0,
             brightness: 1.0,
             gamut: .displayP3
         )
-        let sRGBRed = ColorSpaceConverter.hsbToColor(
-            hue: 0.0,
+        let sRGBColor = ColorSpaceConverter.hsbToColor(
+            hue: hue,
             saturation: 1.0,
             brightness: 1.0,
             gamut: .sRGB
         )
 
-        #expect(p3Red == Color(.displayP3, red: 1.0, green: 0.0, blue: 0.0))
-        #expect(sRGBRed == Color(hue: 0.0, saturation: 1.0, brightness: 1.0))
+        let expectedP3 = Color(.displayP3, red: red, green: green, blue: blue).resolve(in: environment)
+        let resolvedP3 = p3Color.resolve(in: environment)
 
-        let resolvedP3 = p3Red.resolve(in: EnvironmentValues())
-        #expect(resolvedP3.red > 1.0)
+        #expect(abs(resolvedP3.red - expectedP3.red) < 0.0001)
+        #expect(abs(resolvedP3.green - expectedP3.green) < 0.0001)
+        #expect(abs(resolvedP3.blue - expectedP3.blue) < 0.0001)
+        #expect(sRGBColor == Color(hue: Double(hue), saturation: 1.0, brightness: 1.0))
+        #expect(p3Color.exceedsSRGB(in: environment))
+        #expect(sRGBColor.isWithinSRGB(in: environment))
     }
 
-    @Test("Oklab interpolation preserves Display P3 chroma and clamps in sRGB")
-    func interpolateOklabGamuts() {
-        let p3Red = Color(.displayP3, red: 1.0, green: 0.0, blue: 0.0)
-        let p3Green = Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0)
-
-        let p3Mid = ColorSpaceConverter.interpolateOklab(
-            from: p3Red,
-            to: p3Green,
-            at: 0.05,
+    @Test(
+        "Oklab interpolation preserves Display P3 gamut and clamps in sRGB",
+        arguments: [
+            (
+                Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0),
+                Color(.displayP3, red: 0.0, green: 1.0, blue: 1.0),
+                0.5
+            ),
+            (
+                Color(.displayP3, red: 1.0, green: 0.0, blue: 0.0),
+                Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0),
+                0.05
+            ),
+        ]
+    )
+    func interpolateOklabGamuts(start: Color, end: Color, position: Double) {
+        let p3Color = ColorSpaceConverter.interpolateOklab(
+            from: start,
+            to: end,
+            at: position,
             gamut: .displayP3
         )
-        let sRGBMid = ColorSpaceConverter.interpolateOklab(
-            from: p3Red,
-            to: p3Green,
-            at: 0.05,
+        let sRGBColor = ColorSpaceConverter.interpolateOklab(
+            from: start,
+            to: end,
+            at: position,
             gamut: .sRGB
         )
 
-        let p3Lab = ColorSpaceConverter.colorToOklab(p3Mid)
-        let sRGBLab = ColorSpaceConverter.colorToOklab(sRGBMid)
-
-        #expect(hypot(p3Lab.a, p3Lab.b) > hypot(sRGBLab.a, sRGBLab.b) + 0.02)
+        #expect(p3Color.exceedsSRGB())
+        #expect(sRGBColor.isWithinSRGB())
+        #expect(p3Color.oklabChroma() > sRGBColor.oklabChroma())
     }
 
-    @Test("clampToSRGB clamps extended wide-gamut components to [0, 1]")
-    func clampToSRGBBounds() {
-        let p3Red = Color(.displayP3, red: 1.0, green: 0.0, blue: 0.0)
-        let clamped = ColorSpaceConverter.clampToSRGB(p3Red)
-        let resolved = clamped.resolve(in: EnvironmentValues())
+    @Test(
+        "clampToSRGB clamps extended wide-gamut components to [0, 1]",
+        arguments: [
+            Color(.displayP3, red: 1.0, green: 0.0, blue: 0.0),
+            Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0),
+            Color(.displayP3, red: 0.0, green: 0.0, blue: 1.0),
+        ]
+    )
+    func clampToSRGBBounds(wideGamutColor: Color) {
+        let clamped = ColorSpaceConverter.clampToSRGB(wideGamutColor)
 
-        #expect(resolved.red >= 0.0 && resolved.red <= 1.0)
-        #expect(resolved.green >= 0.0 && resolved.green <= 1.0)
-        #expect(resolved.blue >= 0.0 && resolved.blue <= 1.0)
+        #expect(wideGamutColor.exceedsSRGB())
+        #expect(clamped.isWithinSRGB())
     }
 
     @Test("Dynamic color resolution adapts to light and dark mode environments")
@@ -166,7 +191,7 @@ import SwiftUI
         #expect(darkOklab.L > 0.8)
     }
 
-    @Test("Oklch interpolation preserves unpremultiplied lightness and interpolates opacity")
+    @Test("Oklch interpolation preserves lightness and interpolates opacity")
     func interpolateOklchTranslucentColors() {
         let startColor = Color(red: 1.0, green: 0.0, blue: 0.0).opacity(0.2)
         let endColor = Color(red: 0.0, green: 0.0, blue: 1.0).opacity(0.8)

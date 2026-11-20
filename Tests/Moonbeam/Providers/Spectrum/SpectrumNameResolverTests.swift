@@ -18,7 +18,7 @@ import Foundation
         return strings
     }()
 
-    @Test("Resolving pure gray in HSB")
+    @Test("Resolve pure gray in HSB")
     func hsbGray() {
         // Gray threshold: primary < 0.05
         let name = SpectrumNameResolver.name(
@@ -27,7 +27,7 @@ import Foundation
         #expect(name == strings.gray)
     }
 
-    @Test("Resolving black and white boundaries")
+    @Test("Resolve black and white boundaries")
     func blackAndWhite() {
         let black = SpectrumNameResolver.name(
             hue: 0.0, primary: 0.0, secondary: 0.1, colorSpace: .hsb, strings: strings
@@ -40,7 +40,7 @@ import Foundation
         #expect(white == strings.white)
     }
 
-    @Test("Resolving base hue names in HSB and Oklch")
+    @Test("Resolve base hue names in HSB and Oklch")
     func baseHues() {
         let hsbRed = SpectrumNameResolver.name(
             hue: 0.0, primary: 0.6, secondary: 0.6, colorSpace: .hsb, strings: strings
@@ -65,7 +65,7 @@ import Foundation
         #expect(oklchCyan == strings.cyan)
     }
 
-    @Test("Resolving tone modifiers")
+    @Test("Resolve tone modifiers")
     func toneModifiers() {
         // HSB dark boundary: secondary < 0.3
         let darkBlue = SpectrumNameResolver.name(
@@ -80,7 +80,7 @@ import Foundation
         #expect(lightGreen == String(format: strings.format, strings.light!, strings.green))
     }
 
-    @Test("Spectrum provider resolves accessibility names using stored configuration and shared strings")
+    @Test("Resolve accessibility names using stored configuration and shared strings")
     func spectrumAccessibilityColorNameResolution() {
         let spectrum = Spectrum<HSB>(
             startSections: [BlackSection(fraction: 0.2)],

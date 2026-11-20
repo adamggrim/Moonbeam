@@ -3,7 +3,7 @@ import Testing
 import SwiftUI
 
 @Suite struct ColorSliderLayoutTests {
-    @Test("Preview alignment centered over thumb in middle of track")
+    @Test("Preview centers over the thumb in the middle of the track")
     func previewCentered() {
         let state = ColorSliderState()
         let layout = ColorSliderLayout(

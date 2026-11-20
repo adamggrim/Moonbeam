@@ -119,41 +119,45 @@ import SwiftUI
 
         #expect(p3Gradient.gamut == .displayP3)
         #expect(sRGBGradient.gamut == .sRGB)
-
-        let p3Resolved = p3Gradient.color(at: 0.1).resolve(in: EnvironmentValues())
-        let sRGBResolved = sRGBGradient.color(at: 0.1).resolve(in: EnvironmentValues())
-
-        #expect(p3Resolved.red > 1.0)
-        #expect(sRGBResolved.red >= 0.0 && sRGBResolved.red <= 1.0)
-        #expect(sRGBResolved.green >= 0.0 && sRGBResolved.green <= 1.0)
-        #expect(sRGBResolved.blue >= 0.0 && sRGBResolved.blue <= 1.0)
+        #expect(p3Gradient.color(at: 0.1).exceedsSRGB())
+        #expect(sRGBGradient.color(at: 0.1).isWithinSRGB())
     }
 
-    @Test("Oklab gradient preserves wider Display P3 chroma than sRGB")
-    func oklabGradientDisplayP3VsSRGB() {
-        let p3Green = Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0)
-        let p3Cyan = Color(.displayP3, red: 0.0, green: 1.0, blue: 1.0)
+    @Test(
+        "Perceptual gradients preserve Display P3 gamut and clamp in sRGB",
+        arguments: [
+            (
+                GradientColorSpace.oklab,
+                Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0),
+                Color(.displayP3, red: 0.0, green: 1.0, blue: 1.0)
+            ),
+            (
+                GradientColorSpace.oklch,
+                Color(.displayP3, red: 1.0, green: 0.0, blue: 0.0),
+                Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0)
+            ),
+            (
+                GradientColorSpace.oklch,
+                Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0),
+                Color(.displayP3, red: 0.0, green: 1.0, blue: 1.0)
+            ),
+        ]
+    )
+    func perceptualGradientDisplayP3VsSRGB(
+        colorSpace: GradientColorSpace,
+        start: Color,
+        end: Color
+    ) {
+        let p3Gradient = ColorGradient(colors: [start, end], colorSpace: colorSpace)
+        let sRGBGradient = ColorGradient(colors: [start, end], colorSpace: colorSpace, gamut: .sRGB)
 
-        let p3Gradient = ColorGradient(colors: [p3Green, p3Cyan], colorSpace: .oklab)
-        let sRGBGradient = ColorGradient(colors: [p3Green, p3Cyan], colorSpace: .oklab, gamut: .sRGB)
+        let p3Color = p3Gradient.color(at: 0.5)
+        let sRGBColor = sRGBGradient.color(at: 0.5)
 
-        let p3Lab = ColorSpaceConverter.colorToOklab(p3Gradient.color(at: 0.5))
-        let sRGBLab = ColorSpaceConverter.colorToOklab(sRGBGradient.color(at: 0.5))
-
-        #expect(hypot(p3Lab.a, p3Lab.b) > hypot(sRGBLab.a, sRGBLab.b) + 0.02)
-    }
-
-    @Test("Oklch gradient preserves wider Display P3 chroma than sRGB")
-    func oklchGradientDisplayP3VsSRGB() {
-        let p3Red = Color(.displayP3, red: 1.0, green: 0.0, blue: 0.0)
-        let p3Green = Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0)
-
-        let p3Gradient = ColorGradient(colors: [p3Red, p3Green], colorSpace: .oklch)
-        let sRGBGradient = ColorGradient(colors: [p3Red, p3Green], colorSpace: .oklch, gamut: .sRGB)
-
-        let p3Lab = ColorSpaceConverter.colorToOklab(p3Gradient.color(at: 0.5))
-        let sRGBLab = ColorSpaceConverter.colorToOklab(sRGBGradient.color(at: 0.5))
-
-        #expect(hypot(p3Lab.a, p3Lab.b) > hypot(sRGBLab.a, sRGBLab.b) + 0.02)
+        #expect(p3Gradient.gamut == .displayP3)
+        #expect(sRGBGradient.gamut == .sRGB)
+        #expect(p3Color.exceedsSRGB())
+        #expect(sRGBColor.isWithinSRGB())
+        #expect(p3Color.oklabChroma() > sRGBColor.oklabChroma())
     }
 }

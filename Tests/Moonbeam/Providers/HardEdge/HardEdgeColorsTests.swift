@@ -3,7 +3,7 @@ import Testing
 import SwiftUI
 
 @Suite struct HardEdgeColorsTests {
-    @Test("Hard-edge modifier bounds validation")
+    @Test("Hard-edge modifier validats bounds")
     func boundsValidation() {
         let gradient = ColorGradient(colors: [.black, .white])
 
@@ -14,7 +14,7 @@ import SwiftUI
         #expect(edgeOne.colors.isEmpty)
     }
 
-    @Test("Hard-edge modifier array conversion")
+    @Test("Hard-edge modifier converts array")
     func modifierConversion() {
         let gradient = ColorGradient(colors: [.black, .white])
         let hardEdgeProvider = gradient.hardEdge(into: 4)
@@ -29,7 +29,7 @@ import SwiftUI
         #expect(sourceColors.count == 4)
     }
 
-    @Test("Hard-edge bypass for existing arrays")
+    @Test("Hard-edge modifier preserves existing color arrays")
     func arrayBypass() {
         let initialColors: [Color] = [.red, .blue, .green]
         let originalProvider = HardEdgeColors(colors: initialColors)

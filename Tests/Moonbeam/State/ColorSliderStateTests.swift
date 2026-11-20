@@ -3,7 +3,7 @@ import Testing
 import Foundation
 
 @Suite struct ColorSliderStateTests {
-    @Test("Thumb drag to the minimum track bounds")
+    @Test("Thumb drag clamps to the minimum track bounds")
     func thumbClampsToMinimumBounds() {
         var state = ColorSliderState()
         state.updateDrag(translation: -500.0, currentValue: 0.1)
@@ -21,7 +21,7 @@ import Foundation
         #expect(layout.liveColorPosition == 0.0)
     }
 
-    @Test("Thumb drag to the maximum track bounds")
+    @Test("Thumb drag clamps to the maximum track bounds")
     func thumbClampsToMaximumBounds() {
         var state = ColorSliderState()
         state.updateDrag(translation: 500.0, currentValue: 0.9)
@@ -39,7 +39,7 @@ import Foundation
         #expect(layout.liveColorPosition == 300.0)
     }
 
-    @Test("Drag live translation and color position clamping")
+    @Test("Drag updates live translation and clamps color position")
     func dragTranslationAndClamping() {
         var state = ColorSliderState()
         state.updateDrag(translation: 20.0, currentValue: 0.5)
@@ -64,7 +64,7 @@ import Foundation
         #expect(state.isDragging == false)
     }
 
-    @Test("Zero-length layout bounds")
+    @Test("Zero-length layout clamps color and thumb positions")
     func zeroLengthLayoutBounds() {
         var state = ColorSliderState()
         state.updateDrag(translation: 100.0, currentValue: 0.0)

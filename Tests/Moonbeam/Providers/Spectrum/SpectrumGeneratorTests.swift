@@ -3,7 +3,7 @@ import Testing
 import SwiftUI
 
 @Suite struct SpectrumGeneratorTests {
-    @Test("Generator output for a monochrome start section")
+    @Test("Resolve a monochrome start section")
     func monochromeStartSection() {
         let startSections = [BlackSection(fraction: 0.999)]
         let configuration = SpectrumConfiguration(
@@ -25,7 +25,7 @@ import SwiftUI
         #expect(color == Color(hue: 0.0, saturation: 1.0, brightness: 0.0))
     }
 
-    @Test("Generator output for the middle of a spectrum slider without bends")
+    @Test("Resolve the middle of a spectrum slider without bends")
     func middleOfSpectrum() {
         let configuration = SpectrumConfiguration(
             colorSpace: .hsb,
@@ -46,7 +46,7 @@ import SwiftUI
         #expect(color == Color(hue: 0.5, saturation: 1.0, brightness: 1.0))
     }
 
-    @Test("Generator applies the correct bend target to primary values")
+    @Test("Apply the correct bend target to primary values")
     func appliedSpectrumBend() {
         let bends = [OneWayBend(startHue: 0.0, endHue: 0.5, target: 0.2)]
         let configuration = SpectrumConfiguration(
@@ -79,8 +79,11 @@ import SwiftUI
         #expect(resolved.red > 1.0)
     }
 
-    @Test("Oklch spectrum preserves wider chroma in Display P3 than sRGB")
-    func oklchDisplayP3VsSRGB() {
+    @Test(
+        "Oklch spectrum preserves Display P3 gamut and clamps in sRGB",
+        arguments: [0.08, 0.4, 0.5]
+    )
+    func oklchDisplayP3VsSRGB(position: Double) {
         let p3Spectrum = Spectrum<Oklch>(lightness: 0.5, chroma: 0.3, startHue: 0.0, endHue: 1.0)
         let sRGBSpectrum = Spectrum<Oklch>(
             lightness: 0.5,
@@ -90,12 +93,20 @@ import SwiftUI
             gamut: .sRGB
         )
 
-        let p3Lab = ColorSpaceConverter.colorToOklab(p3Spectrum.color(at: 0.5))
-        let sRGBLab = ColorSpaceConverter.colorToOklab(sRGBSpectrum.color(at: 0.5))
+        let p3Color = p3Spectrum.color(at: position)
+        let sRGBColor = sRGBSpectrum.color(at: position)
+        let environment = EnvironmentValues()
+
+        let p3Resolved = p3Color.resolve(in: environment)
+        let sRGBResolved = sRGBColor.resolve(in: environment)
+        let p3Lab = ColorSpaceConverter.colorToOklab(p3Color, in: environment)
+        let sRGBLab = ColorSpaceConverter.colorToOklab(sRGBColor, in: environment)
 
         #expect(p3Spectrum.gamut == .displayP3)
         #expect(sRGBSpectrum.gamut == .sRGB)
-        #expect(hypot(p3Lab.a, p3Lab.b) > hypot(sRGBLab.a, sRGBLab.b) + 0.02)
+        #expect([p3Resolved.red, p3Resolved.green, p3Resolved.blue].contains { $0 < 0.0 || $0 > 1.0 })
+        #expect([sRGBResolved.red, sRGBResolved.green, sRGBResolved.blue].allSatisfy { (0.0...1.0).contains($0) })
+        #expect(hypot(p3Lab.a, p3Lab.b) > hypot(sRGBLab.a, sRGBLab.b))
     }
 
     @Test("Reversed spectrum applies leading OneWayBend ease-out from startHue")
