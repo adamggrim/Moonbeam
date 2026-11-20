@@ -208,27 +208,36 @@ public extension View {
     }
 
     /// Sets the visual style of the draggable thumb.
+    ///
+    /// Defaults to `.standard`. Selecting `.colorOutline` automatically enables
+    /// thumb bounce and discrete color snapping (for hard-edge tracks).
     func colorSliderThumbStyle(_ style: ColorSliderThumbStyle) -> some View {
         environment(\.colorSliderThumbStyle, style)
     }
 
-    /// Determines whether the slider automatically snaps to the nearest color
-    /// block.
+    /// Determines whether the slider automatically snaps to the center of the
+    /// nearest discrete color block when a drag or tap ends.
+    ///
+    /// Applies only to discrete color providers such as `HardEdgeColors`.
+    /// Defaults to `true` for `.colorOutline` thumbs and `false` for
+    /// `.standard` thumbs.
     func colorSliderSnapsToColor(_ snaps: Bool) -> some View {
         environment(\.colorSliderSnapsToColor, snaps)
     }
 
-    /// Determines whether the thumb uses spring overshoot easing when dragged,
-    /// released, or tapped.
+    /// Determines whether the thumb uses spring overshoot easing.
     ///
-    /// Defaults to `true` for `.colorOutline` thumbs and `false` for
-    /// `.standard` thumbs.
+    /// Respects the system `accessibilityReduceMotion` setting. Defaults to
+    /// `true` for `.colorOutline` thumbs and `false` for `.standard` thumbs.
     func colorSliderThumbBounce(_ bounces: Bool = true) -> some View {
         environment(\.colorSliderThumbBounce, bounces)
     }
 
-    /// Determines whether tapping directly on the slider track to jumps to that
-    /// position. Defaults to `false`.
+    /// Determines whether tapping directly on the slider track jumps to that
+    /// position.
+    ///
+    /// Respects discrete color snapping and thumb bounce settings when enabled.
+    /// Defaults to `false`.
     func colorSliderTapToSeek(_ enabled: Bool = true) -> some View {
         environment(\.colorSliderTapToSeek, enabled)
     }

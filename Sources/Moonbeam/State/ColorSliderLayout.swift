@@ -10,15 +10,20 @@ internal struct ColorSliderLayout {
     let dimensions: ColorSliderDimensions
     let previewPosition: PreviewPosition?
     let previewSpacing: CGFloat?
-    
+
     var layoutDirection: LayoutDirection = .leftToRight
-    let thumbStyle: ColorSliderThumbStyle
-    let colorCount: Int
+    var thumbStyle: ColorSliderThumbStyle = .standard
+    var colorCount: Int = 0
 
     var resolvedLength: CGFloat { dimensions.length ?? 0 }
     var resolvedTrackThickness: CGFloat { dimensions.resolvedTrackThickness(for: controlSize) }
     var resolvedPreviewSize: CGFloat { dimensions.previewSize ?? ColorSliderDefaults.previewSize(for: controlSize) }
 
+    /// The thumb thickness along the slider's main axis.
+    ///
+    /// For `.colorOutline`, matches one discrete color block (or the fallback
+    /// thumb thickness for continuous tracks) plus the outline padding for
+    /// each side.
     var resolvedThumbThickness: CGFloat {
         switch thumbStyle {
         case .colorOutline(_, let padding):
@@ -31,6 +36,10 @@ internal struct ColorSliderLayout {
         }
     }
 
+    /// The thumb length along the slider's cross axis.
+    ///
+    /// For `.colorOutline`, matches the track thickness plus the outline
+    /// padding for each side.
     var resolvedThumbLength: CGFloat {
         switch thumbStyle {
         case .colorOutline(_, let padding):
@@ -40,6 +49,11 @@ internal struct ColorSliderLayout {
         }
     }
 
+    /// The signed cross-axis offset from the track center to the floating color
+    /// preview.
+    ///
+    /// Negative values place the preview on the `.topLeading` (default) side;
+    /// positive values place it on the `.bottomTrailing` side.
     var resolvedPreviewOffset: CGFloat {
         let fallbackOffset = abs(dimensions.previewOffset ?? ColorSliderDefaults.previewOffset(for: controlSize))
 
@@ -52,6 +66,7 @@ internal struct ColorSliderLayout {
 
         return previewPosition == .bottomTrailing ? spacingOffset : -spacingOffset
     }
+
     var halfThumbThickness: CGFloat { resolvedThumbThickness / 2 }
 
     /// Inset to adjust the leading and trailing bounds of the draggable thumb
@@ -76,6 +91,8 @@ internal struct ColorSliderLayout {
         )
     }
 
+    /// The unclamped main-axis position of the thumb's leading edge during an
+    /// active drag, or its resting position when idle.
     var liveContainerThumbDrag: CGFloat {
         let baseValue = state.isDragging ? (state.dragStartValue ?? value) : value
         let baseThumbPosition = thumbPosition(for: baseValue)

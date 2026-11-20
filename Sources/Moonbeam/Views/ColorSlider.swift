@@ -85,38 +85,44 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             self.preview = previewView
         }
 
-        private var colorCount: Int {
-            if case .array(let colors) = colorProvider.colorSource {
-                return colors.count
-            }
-            return 0
+    private var colorCount: Int {
+        if case .array(let colors) = colorProvider.colorSource {
+            return colors.count
         }
+        return 0
+    }
 
-        private var resolvedThumbBounce: Bool {
-            if let explicitlySet = thumbBounce { return explicitlySet }
-            if case .colorOutline = thumbStyle { return true }
-            return false
-        }
+    /// Whether thumb bounce is active. True for `.colorOutline`, otherwise
+    /// false.
+    private var resolvedThumbBounce: Bool {
+        if let explicitlySet = thumbBounce { return explicitlySet }
+        if case .colorOutline = thumbStyle { return true }
+        return false
+    }
 
-        private var shouldSnapToColor: Bool {
-            if let explicitlySet = snapsToColor { return explicitlySet }
-            if case .colorOutline = thumbStyle, colorCount > 0 { return true }
-            return false
-        }
+    /// Whether the slider snaps to discrete color blocks. True for
+    /// `.colorOutline`, otherwise false.
+    private var shouldSnapToColor: Bool {
+        if let explicitlySet = snapsToColor { return explicitlySet }
+        if case .colorOutline = thumbStyle, colorCount > 0 { return true }
+        return false
+    }
 
-        private func resolvedTargetValue(for rawValue: Double, layout: ColorSliderLayout) -> Double {
-            let clamped = min(max(rawValue, 0.0), 1.0)
-            guard shouldSnapToColor, layout.colorCount > 0 else { return clamped }
-            let index = min(max(0, Int(clamped * Double(layout.colorCount))), layout.colorCount - 1)
-            return (Double(index) + 0.5) / Double(layout.colorCount)
-        }
+    /// Clamps `rawValue` to `0.0...1.0` and aligns it to the center of the
+    /// corresponding discrete color block if `shouldSnapToColor` is true.
+    private func resolvedTargetValue(for rawValue: Double, layout: ColorSliderLayout) -> Double {
+        let clamped = min(max(rawValue, 0.0), 1.0)
+        guard shouldSnapToColor, layout.colorCount > 0 else { return clamped }
+        let index = min(max(0, Int(clamped * Double(layout.colorCount))), layout.colorCount - 1)
+        return (Double(index) + 0.5) / Double(layout.colorCount)
+    }
 
-        /// The color calculated from the current `liveColorPosition` on the
-        /// slider.
-        private func calculatedColor(layout: ColorSliderLayout) -> Color {
-            let nonZeroLength = layout.resolvedLength > 0 ? layout.resolvedLength : 0.001
-            let normalizedPosition = Double(layout.liveColorPosition / nonZeroLength)
-            return colorProvider.color(at: normalizedPosition, in: environment)
+    /// The color calculated from the current `liveColorPosition` on the
+    /// slider.
+    private func calculatedColor(layout: ColorSliderLayout) -> Color {
+        let nonZeroLength = layout.resolvedLength > 0 ? layout.resolvedLength : 0.001
+        let normalizedPosition = Double(layout.liveColorPosition / nonZeroLength)
+        return colorProvider.color(at: normalizedPosition, in: environment)
     }
 
     /// Calculates the discrete index of the slider (used to trigger haptics on
@@ -283,6 +289,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         self.value = layout.normalizedValue(for: sliderState)
     }
 
+    /// Finalizes the active drag gesture and animates the thumb to its resting
+    /// position.
     private func onDragEnded(_ dragValue: DragGesture.Value, layout: ColorSliderLayout) {
         let targetValue = resolvedTargetValue(for: value, layout: layout)
 
@@ -318,6 +326,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         }
     }
 
+    /// Moves the slider to the tapped track coordinate when tap-to-seek is
+    /// active.
     private func onTrackTapped(_ location: CGPoint, layout: ColorSliderLayout) {
         guard !sliderState.isDragging else { return }
 

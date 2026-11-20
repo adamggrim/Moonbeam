@@ -189,6 +189,7 @@ private struct DefaultColorSliderStyleView: View {
                 return AnyShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
             }
 
+            // Morph the outer corners from rounded to sharp.
             let firstBlockMultiplier = max(0.0, min(1.0, 2.0 * (1.0 - (configuration.value * Double(colorCount)))))
             let lastBlockMultiplier = max(
                 0.0, min(1.0, 2.0 * ((configuration.value * Double(colorCount)) - Double(colorCount - 1)))
