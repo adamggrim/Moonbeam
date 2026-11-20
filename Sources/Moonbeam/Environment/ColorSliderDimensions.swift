@@ -46,12 +46,25 @@ public struct ColorSliderDimensions: Sendable, Equatable {
         thickness ?? ColorSliderDefaults.trackThickness(for: controlSize)
     }
 
-    /// Calculates the effective thumb length, falling back to twice the
-    /// resolved track thickness if there is no provided length.
+    /// Calculates the effective thumb length along the cross axis.
     ///
-    /// - Parameter controlSize: The active control size from the environment.
+    /// For `.colorOutline`, equals the resolved track thickness plus each
+    /// side's outline padding. For `.standard`, deafaults to twice the
+    /// resolved track thickness.
+    ///
+    /// - Parameters:
+    ///   - controlSize: The active control size from the environment.
+    ///   - thumbStyle: The active thumb style from the environment.
     /// - Returns: The resolved thumb length in points.
-    internal func resolvedThumbLength(for controlSize: ControlSize) -> CGFloat {
-        thumbLength ?? (resolvedTrackThickness(for: controlSize) * 2)
+    internal func resolvedThumbLength(
+        for controlSize: ControlSize,
+        thumbStyle: ColorSliderThumbStyle = .standard
+    ) -> CGFloat {
+        switch thumbStyle {
+        case .colorOutline(_, let padding):
+            return resolvedTrackThickness(for: controlSize) + (padding * 2)
+        case .standard:
+            return thumbLength ?? (resolvedTrackThickness(for: controlSize) * 2)
+        }
     }
 }

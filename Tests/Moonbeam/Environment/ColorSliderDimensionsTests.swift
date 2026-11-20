@@ -20,4 +20,14 @@ import SwiftUI
         let resolvedThumbLength = dimensions.resolvedThumbLength(for: .regular)
         #expect(resolvedThumbLength == 30.0)
     }
+
+    @Test("Color outline thumb length resolves from track thickness and padding")
+    func colorOutlineThumbLength() {
+        let dimensions = ColorSliderDimensions(thickness: 20.0, thumbLength: 50.0)
+        let resolvedThumbLength = dimensions.resolvedThumbLength(
+            for: .regular,
+            thumbStyle: .colorOutline(lineWidth: 3.0, padding: 4.0)
+        )
+        #expect(resolvedThumbLength == 28.0)
+    }
 }

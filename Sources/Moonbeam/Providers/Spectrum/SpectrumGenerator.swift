@@ -36,7 +36,6 @@ internal struct SpectrumGenerator {
     /// - Parameters:
     ///   - position: The normalized position (0.0 to 1.0) on the slider.
     ///   - configuration: The static properties of a spectrum.
-    ///
     /// - Returns: A `SwiftUI.Color` representing the computed color at the
     ///   provided position.
     static func color(

@@ -12,7 +12,6 @@ import MoonbeamShared
 ///   - bends: The user-provided array of `BendSection` objects.
 ///   - name: A descriptive identifier (e.g., "HSB Saturation") used to format
 ///     the telemetry error message.
-///
 /// - Returns: The sanitized array of bend sections.
 internal func validateBends(_ bends: [BendSection], name: String) -> [BendSection] {
     var validBends: [BendSection] = []

@@ -41,12 +41,7 @@ internal struct ColorSliderLayout {
     /// For `.colorOutline`, matches the track thickness plus the outline
     /// padding for each side.
     var resolvedThumbLength: CGFloat {
-        switch thumbStyle {
-        case .colorOutline(_, let padding):
-            return resolvedTrackThickness + (padding * 2)
-        case .standard:
-            return dimensions.resolvedThumbLength(for: controlSize)
-        }
+        dimensions.resolvedThumbLength(for: controlSize, thumbStyle: thumbStyle)
     }
 
     /// The signed cross-axis offset from the track center to the floating color

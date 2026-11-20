@@ -97,7 +97,9 @@ private struct DefaultColorSliderStyleView: View {
                     Group {
                         switch thumbStyle {
                         case .colorOutline(let lineWidth, _):
-                            shape.stroke(style.thumbColor, lineWidth: lineWidth)
+                            let strokeStyle = style.thumbStroke?.style ?? AnyShapeStyle(style.thumbColor)
+                            let strokeWidth = style.thumbStroke?.lineWidth ?? lineWidth
+                            shape.stroke(strokeStyle, lineWidth: strokeWidth)
 
                         case .standard:
                             let activeLiquidGlassThumb = style.liquidGlassThumb ?? defaultLiquidGlassThumb
@@ -109,19 +111,26 @@ private struct DefaultColorSliderStyleView: View {
                                 return false
                             }()
 
+                            Group {
 #if compiler(>=6.2)
-                            if #available(iOS 26.0, macOS 26.0, *), activeLiquidGlassThumb != .disabled {
-                                Color.clear
-                                    .glassEffect(
-                                        isLiquidGlassActive ? .regular.interactive(true) : .identity, in: shape
-                                    )
-                                    .overlay(shape.fill(style.thumbColor).opacity(isLiquidGlassActive ? 0.0 : 1.0))
-                            } else {
-                                shape.fill(style.thumbColor)
-                            }
+                                if #available(iOS 26.0, macOS 26.0, *), activeLiquidGlassThumb != .disabled {
+                                    Color.clear
+                                        .glassEffect(
+                                            isLiquidGlassActive ? .regular.interactive(true) : .identity, in: shape
+                                        )
+                                        .overlay(shape.fill(style.thumbColor).opacity(isLiquidGlassActive ? 0.0 : 1.0))
+                                } else {
+                                    shape.fill(style.thumbColor)
+                                }
 #else
-                            shape.fill(style.thumbColor)
+                                shape.fill(style.thumbColor)
 #endif
+                            }
+                            .overlay {
+                                if let stroke = style.thumbStroke {
+                                    shape.stroke(stroke.style, lineWidth: stroke.lineWidth)
+                                }
+                            }
                         }
                     }
                     .scaleEffect(dynamicScale)
@@ -131,11 +140,6 @@ private struct DefaultColorSliderStyleView: View {
                         x: style.thumbShadow.x,
                         y: style.thumbShadow.y
                     )
-                    .overlay {
-                        if thumbStyle == .standard, let stroke = style.thumbStroke {
-                            shape.stroke(stroke.style, lineWidth: stroke.lineWidth)
-                        }
-                    }
                     .allowsHitTesting(false)
                 }
 #if !os(macOS)

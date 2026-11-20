@@ -92,6 +92,15 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         return 0
     }
 
+    /// The cross-axis length of the slider's outer frame, clamped to at least
+    /// the track thickness.
+    private var resolvedCrossAxisLength: CGFloat {
+        max(
+            dimensions.resolvedTrackThickness(for: controlSize),
+            dimensions.resolvedThumbLength(for: controlSize, thumbStyle: thumbStyle)
+        )
+    }
+
     /// Whether thumb bounce is active. True for `.colorOutline`, otherwise
     /// false.
     private var resolvedThumbBounce: Bool {
@@ -257,8 +266,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         .accessibilityAdjustableAction(accessibilityAdjust)
         .accessibilityLabel(label)
         .frame(
-            width: axis == .vertical ? dimensions.resolvedThumbLength(for: controlSize) : dimensions.length,
-            height: axis == .horizontal ? dimensions.resolvedThumbLength(for: controlSize) : dimensions.length
+            width: axis == .vertical ? resolvedCrossAxisLength : dimensions.length,
+            height: axis == .horizontal ? resolvedCrossAxisLength : dimensions.length
         )
         .frame(
             maxWidth: axis == .horizontal && dimensions.length == nil ? .infinity : nil,
