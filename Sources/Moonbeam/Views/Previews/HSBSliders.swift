@@ -120,3 +120,20 @@ import SwiftUI
         .colorSliderLiquidGlassThumb(.disabled)
     }
 }
+
+#Preview("HSB spectrum: Display P3 and sRGB") {
+    PreviewContainer { _, progress in
+        VStack(spacing: 32) {
+            ColorSlider(
+                value: progress,
+                colorProvider: Spectrum<HSB>(gamut: .displayP3),
+                axis: .horizontal
+            )
+            ColorSlider(
+                value: progress,
+                colorProvider: Spectrum<HSB>(gamut: .sRGB),
+                axis: .horizontal
+            )
+        }
+    }
+}

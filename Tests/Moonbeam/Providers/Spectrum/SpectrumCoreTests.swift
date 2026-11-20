@@ -4,13 +4,14 @@ import Foundation
 import MoonbeamShared
 
 @Suite struct SpectrumCoreTests {
-    @Test("Shader data encoding mapping to C-struct")
+    @Test("Shader data encoding maps to C-struct")
     func shaderDataEncoding() {
         let startSections: [MonochromeSection] = [BlackSection(fraction: 0.2)]
         let endSections: [MonochromeSection] = [WhiteSection(fraction: 0.3)]
 
         let data = encodeSpectrumData(
             colorSpace: .hsb,
+            gamut: .displayP3,
             startSections: startSections,
             endSections: endSections,
             startHue: 0.1,
@@ -33,10 +34,34 @@ import MoonbeamShared
             #expect(shaderData.saturationBendsCount == 1)
             #expect(shaderData.brightnessBendsCount == 2)
             #expect(shaderData.colorSpaceFlag == ColorSpaceHSB.rawValue)
+            #expect(shaderData.gamutFlag == ColorGamutDisplayP3.rawValue)
         }
     }
 
-    @Test("Monochrome section encoding more than two sections")
+    @Test("Shader data encoding maps sRGB gamut flag")
+    func shaderDataEncodingSRGBGamut() {
+        let data = encodeSpectrumData(
+            colorSpace: .oklch,
+            gamut: .sRGB,
+            startSections: [],
+            endSections: [],
+            startHue: 0.0,
+            endHue: 1.0,
+            primaryValue: 0.15,
+            secondaryValue: 0.75,
+            primaryBendsCount: 0,
+            secondaryBendsCount: 0
+        )
+
+        data.withUnsafeBytes { rawBuffer in
+            let shaderData = rawBuffer.load(as: SpectrumShaderData.self)
+
+            #expect(shaderData.colorSpaceFlag == ColorSpaceOklch.rawValue)
+            #expect(shaderData.gamutFlag == ColorGamutSRGB.rawValue)
+        }
+    }
+
+    @Test("Monochrome section encodes more than two sections")
     func multiSectionMonochromeEncoding() {
         let sections: [MonochromeSection] = [
             BlackSection(fraction: 0.1),
@@ -66,7 +91,7 @@ import MoonbeamShared
         }
     }
 
-    @Test("Empty monochrome section array encoding a placeholder")
+    @Test("Empty monochrome section array encodes a placeholder")
     func emptyMonochromeEncoding() {
         let data = encodeMonochromeSections([], startingAt: 0.0)
 

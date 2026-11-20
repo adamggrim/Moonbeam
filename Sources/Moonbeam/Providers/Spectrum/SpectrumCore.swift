@@ -120,6 +120,7 @@ internal func encodeMonochromeSections(
 
 internal func encodeSpectrumData(
     colorSpace: SpectrumColorSpace,
+    gamut: ColorGamut,
     startSections: [MonochromeSection],
     endSections: [MonochromeSection],
     startHue: Double,
@@ -144,6 +145,7 @@ internal func encodeSpectrumData(
         baseSaturation: Float(primaryValue),
         baseBrightness: Float(secondaryValue),
         colorSpaceFlag: shaderFlag,
+        gamutFlag: gamut.shaderFlag,
         startSectionsCount: UInt32(startSections.count),
         endSectionsCount: UInt32(endSections.count),
         saturationBendsCount: UInt32(primaryBendsCount),

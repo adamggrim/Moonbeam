@@ -43,7 +43,10 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
     let secondaryBends: [BendSection]
     private let configuration: SpectrumConfiguration
 
-    /// Determines how to draw the spectrum onscreen.
+    /// The target RGB color gamut used to render the spectrum.
+    public let gamut: ColorGamut
+
+    /// The Metal shader and Swift fallback used to render the spectrum.
     public let colorSource: ColorSource
 
     public func accessibilityColorName(for value: Double) -> String? {
@@ -71,7 +74,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         primaryBends: [BendSection],
         secondaryBends: [BendSection],
         primaryName: String,
-        secondaryName: String
+        secondaryName: String,
+        gamut: ColorGamut
     ) {
         let validMonochromeSections = validateMonochromeSections(
             startSections: startSections,
@@ -89,9 +93,11 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         self.secondaryValue = secondaryValue
         self.primaryBends = validPrimaryBends
         self.secondaryBends = validSecondaryBends
+        self.gamut = gamut
 
         let configuration = SpectrumConfiguration(
             colorSpace: ColorSpace.colorSpace,
+            gamut: gamut,
             startSections: validMonochromeSections.start,
             endSections: validMonochromeSections.end,
             startHue: startHue,
@@ -112,6 +118,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
 
         let shaderData = encodeSpectrumData(
             colorSpace: ColorSpace.colorSpace,
+            gamut: gamut,
             startSections: validMonochromeSections.start,
             endSections: validMonochromeSections.end,
             startHue: startHue,
@@ -174,6 +181,7 @@ public extension Spectrum where ColorSpace == HSB {
     ///     (0.0 to 1.0).
     ///   - brightness: The baseline brightness applied to the entire hue range
     ///     (0.0 to 1.0).
+    ///   - gamut: The target RGB color gamut. Defaults to `.displayP3`.
     ///   - saturationBends: A result builder providing sections where the
     ///     baseline saturation increases or decreases to `targetValue`.
     ///   - brightnessBends: A result builder providing sections where the
@@ -185,6 +193,7 @@ public extension Spectrum where ColorSpace == HSB {
         endHue: Double = 1.0,
         saturation: Double = 1.0,
         brightness: Double = 1.0,
+        gamut: ColorGamut = .displayP3,
         @BendSectionBuilder saturationBends: () -> [BendSection] = { [] },
         @BendSectionBuilder brightnessBends: () -> [BendSection] = { [] }
     ) {
@@ -198,7 +207,8 @@ public extension Spectrum where ColorSpace == HSB {
             primaryBends: saturationBends(),
             secondaryBends: brightnessBends(),
             primaryName: "Saturation",
-            secondaryName: "Brightness"
+            secondaryName: "Brightness",
+            gamut: gamut
         )
     }
 }
@@ -220,6 +230,7 @@ public extension Spectrum where ColorSpace == Oklch {
     ///     gamut, typically 0.0 to 0.4. Defaults to 0.15.
     ///   - startHue: The starting hue, normalized to 0.0 through 1.0.
     ///   - endHue: The ending hue, normalized to 0.0 through 1.0.
+    ///   - gamut: The target RGB color gamut. Defaults to `.displayP3`.
     ///   - lightnessBends: Sections where the baseline lightness bends toward
     ///     `targetValue`.
     ///   - chromaBends: Sections where the baseline chroma bends toward
@@ -231,6 +242,7 @@ public extension Spectrum where ColorSpace == Oklch {
         chroma: Double = 0.15,
         startHue: Double = 0.0,
         endHue: Double = 1.0,
+        gamut: ColorGamut = .displayP3,
         @BendSectionBuilder lightnessBends: () -> [BendSection] = { [] },
         @BendSectionBuilder chromaBends: () -> [BendSection] = { [] }
     ) {
@@ -244,7 +256,8 @@ public extension Spectrum where ColorSpace == Oklch {
             primaryBends: chromaBends(),
             secondaryBends: lightnessBends(),
             primaryName: "Chroma",
-            secondaryName: "Lightness"
+            secondaryName: "Lightness",
+            gamut: gamut
         )
     }
 }

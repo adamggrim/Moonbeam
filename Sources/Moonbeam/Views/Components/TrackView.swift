@@ -26,7 +26,6 @@ internal struct TrackView: View {
             }
         }
         .frame(width: size.width, height: size.height)
-        .drawingGroup()
     }
 
     @ViewBuilder

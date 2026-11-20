@@ -13,8 +13,7 @@ public struct HardEdgeColors: ColorProvider {
     /// The sequence of colors that make up the discrete blocks on the slider.
     public let colors: [Color]
 
-    /// Provides the model's color source as a discrete array, ensuring the
-    /// slider track renders as discrete color blocks.
+    /// The color array used to render the track as discrete blocks.
     public let colorSource: ColorSource
 
     /// Creates a hard-edge slider model using a discrete array of colors.

@@ -5,12 +5,16 @@ import SwiftUI
 internal enum ColorSpaceConverter {
     internal enum ColorScience {
         static let sRGBGammaThreshold: CGFloat = 0.0031308
-        static let sRGBLinearThreshold: CGFloat = 0.04045
         static let sRGBGammaScale: CGFloat = 12.92
         static let sRGBGammaOffset: CGFloat = 0.055
         static let sRGBGammaHighScale: CGFloat = 1.055
         static let sRGBGammaPower: CGFloat = 1.0 / 2.4
-        static let sRGBInverseGammaPower: CGFloat = 2.4
+
+        static let linearSRGBToDisplayP3Matrix = (
+            m00: 0.8224619687, m01: 0.1775380313, m02: 0.0,
+            m10: 0.0331941989, m11: 0.9668058011, m12: 0.0,
+            m20: 0.0170826307, m21: 0.0723974407, m22: 0.9105199286
+        )
 
         static let rgbToLMSMatrix = (
             m00: 0.4122214708, m01: 0.5363325363, m02: 0.0514459929,
@@ -44,26 +48,17 @@ internal enum ColorSpaceConverter {
         static let gamutSearchIterations: Int = 16
     }
 
-    /// Converts an sRGB `Color` into Oklab `(L, a, b)` coordinates and opacity.
+    /// Converts a `Color` (preserving extended wide-gamut components) into
+    /// Oklab `(L, a, b)` coordinates and opacity.
     internal static func colorToOklab(
         _ color: Color,
         in environment: EnvironmentValues = EnvironmentValues()
     ) -> (L: CGFloat, a: CGFloat, b: CGFloat, opacity: CGFloat) {
         let resolved = color.resolve(in: environment)
 
-        func sRGBToLinear(_ value: CGFloat) -> CGFloat {
-            let clamped = min(max(value, 0.0), 1.0)
-            return clamped <= ColorScience.sRGBLinearThreshold
-                ? clamped / ColorScience.sRGBGammaScale
-                : pow(
-                    (clamped + ColorScience.sRGBGammaOffset) / ColorScience.sRGBGammaHighScale,
-                    ColorScience.sRGBInverseGammaPower
-                )
-        }
-
-        let redLinear = sRGBToLinear(CGFloat(resolved.red))
-        let greenLinear = sRGBToLinear(CGFloat(resolved.green))
-        let blueLinear = sRGBToLinear(CGFloat(resolved.blue))
+        let redLinear = CGFloat(resolved.linearRed)
+        let greenLinear = CGFloat(resolved.linearGreen)
+        let blueLinear = CGFloat(resolved.linearBlue)
 
         let l = ColorScience.rgbToLMSMatrix.m00 * redLinear
             + ColorScience.rgbToLMSMatrix.m01 * greenLinear
@@ -92,6 +87,27 @@ internal enum ColorSpaceConverter {
         return (L: lightness, a: a, b: b, opacity: CGFloat(resolved.opacity))
     }
 
+    /// Interpolates between two colors in Cartesian Oklab space and maps the
+    /// result into the requested RGB gamut.
+    internal static func interpolateOklab(
+        from startColor: Color,
+        to endColor: Color,
+        at position: Double,
+        gamut: ColorGamut = .displayP3,
+        in environment: EnvironmentValues = EnvironmentValues()
+    ) -> Color {
+        let t = CGFloat(min(max(position, 0.0), 1.0))
+        let labStart = colorToOklab(startColor, in: environment)
+        let labEnd = colorToOklab(endColor, in: environment)
+
+        let lightness = labStart.L + (labEnd.L - labStart.L) * t
+        let a = labStart.a + (labEnd.a - labStart.a) * t
+        let b = labStart.b + (labEnd.b - labStart.b) * t
+        let opacity = labStart.opacity + (labEnd.opacity - labStart.opacity) * t
+
+        return oklabToColor(lightness: lightness, a: a, b: b, gamut: gamut).opacity(opacity)
+    }
+
     /// Interpolates between two colors in the cylindrical Oklch color space
     /// using CSS Color 4 achromatic hue carry-over and gamut-mapped chroma
     /// clamping.
@@ -99,6 +115,7 @@ internal enum ColorSpaceConverter {
         from startColor: Color,
         to endColor: Color,
         at position: Double,
+        gamut: ColorGamut = .displayP3,
         in environment: EnvironmentValues = EnvironmentValues()
     ) -> Color {
         let t = CGFloat(min(max(position, 0.0), 1.0))
@@ -137,7 +154,53 @@ internal enum ColorSpaceConverter {
         let hue = (hStart + (hEnd - hStart) * t) / ColorScience.fullCircleRadians
         let opacity = labStart.opacity + (labEnd.opacity - labStart.opacity) * t
 
-        return oklchToColor(lightness: lightness, chroma: chroma, hue: hue).opacity(opacity)
+        return oklchToColor(lightness: lightness, chroma: chroma, hue: hue, gamut: gamut).opacity(opacity)
+    }
+
+    /// Clamps an extended-range `Color` into standard `[0, 1]` sRGB channels.
+    internal static func clampToSRGB(
+        _ color: Color,
+        in environment: EnvironmentValues = EnvironmentValues()
+    ) -> Color {
+        let resolved = color.resolve(in: environment)
+        return Color(
+            .sRGB,
+            red: Double(min(max(resolved.red, 0.0), 1.0)),
+            green: Double(min(max(resolved.green, 0.0), 1.0)),
+            blue: Double(min(max(resolved.blue, 0.0), 1.0)),
+            opacity: Double(min(max(resolved.opacity, 0.0), 1.0))
+        )
+    }
+
+    /// Converts HSB coordinates into a `Color` in the requested RGB gamut.
+    internal static func hsbToColor(
+        hue: CGFloat,
+        saturation: CGFloat,
+        brightness: CGFloat,
+        gamut: ColorGamut = .displayP3
+    ) -> Color {
+        let wrappedHue = hue.truncatingRemainder(dividingBy: 1.0)
+        let normalizedHue = wrappedHue < 0.0 ? wrappedHue + 1.0 : wrappedHue
+        let s = min(max(saturation, 0.0), 1.0)
+        let b = min(max(brightness, 0.0), 1.0)
+
+        if gamut == .sRGB {
+            return Color(hue: Double(normalizedHue), saturation: Double(s), brightness: Double(b))
+        }
+
+        func channel(_ offset: CGFloat) -> Double {
+            let wrapped = (normalizedHue + offset).truncatingRemainder(dividingBy: 1.0)
+            let rgbValue = abs(wrapped * 6.0 - 3.0)
+            let clamped = min(max(rgbValue - 1.0, 0.0), 1.0)
+            return Double(b * (1.0 + (clamped - 1.0) * s))
+        }
+
+        return Color(
+            .displayP3,
+            red: channel(1.0),
+            green: channel(2.0 / 3.0),
+            blue: channel(1.0 / 3.0)
+        )
     }
 
     private static func oklabToLinearRGB(
@@ -172,23 +235,82 @@ internal enum ColorSpaceConverter {
         return (red: redLinear, green: greenLinear, blue: blueLinear)
     }
 
-    private static func isLinearRGBInGamut(_ linear: (red: CGFloat, green: CGFloat, blue: CGFloat)) -> Bool {
-        linear.red >= 0.0 && linear.red <= 1.0
-            && linear.green >= 0.0 && linear.green <= 1.0
-            && linear.blue >= 0.0 && linear.blue <= 1.0
+    private static func linearSRGBToDisplayP3(
+        _ linear: (red: CGFloat, green: CGFloat, blue: CGFloat)
+    ) -> (red: CGFloat, green: CGFloat, blue: CGFloat) {
+        let red = ColorScience.linearSRGBToDisplayP3Matrix.m00 * linear.red
+            + ColorScience.linearSRGBToDisplayP3Matrix.m01 * linear.green
+            + ColorScience.linearSRGBToDisplayP3Matrix.m02 * linear.blue
+        let green = ColorScience.linearSRGBToDisplayP3Matrix.m10 * linear.red
+            + ColorScience.linearSRGBToDisplayP3Matrix.m11 * linear.green
+            + ColorScience.linearSRGBToDisplayP3Matrix.m12 * linear.blue
+        let blue = ColorScience.linearSRGBToDisplayP3Matrix.m20 * linear.red
+            + ColorScience.linearSRGBToDisplayP3Matrix.m21 * linear.green
+            + ColorScience.linearSRGBToDisplayP3Matrix.m22 * linear.blue
+        return (red: red, green: green, blue: blue)
     }
 
-    /// Converts an Oklch color to an sRGB `Color`, clamping chroma to the
-    /// maximum in-gamut value at `(lightness, hue)` before channel clamping.
+    private static func isLinearRGBInGamut(
+        _ linear: (red: CGFloat, green: CGFloat, blue: CGFloat),
+        gamut: ColorGamut
+    ) -> Bool {
+        let target = gamut == .displayP3 ? linearSRGBToDisplayP3(linear) : linear
+        return target.red >= 0.0 && target.red <= 1.0
+            && target.green >= 0.0 && target.green <= 1.0
+            && target.blue >= 0.0 && target.blue <= 1.0
+    }
+
+    private static func linearSRGBToColor(
+        _ linear: (red: CGFloat, green: CGFloat, blue: CGFloat),
+        gamut: ColorGamut
+    ) -> Color {
+        let target = gamut == .displayP3 ? linearSRGBToDisplayP3(linear) : linear
+
+        func applyGamma(_ value: CGFloat) -> Double {
+            let clamped = min(max(value, 0.0), 1.0)
+            let gammaEncoded = clamped <= ColorScience.sRGBGammaThreshold
+                ? ColorScience.sRGBGammaScale * clamped
+                : ColorScience.sRGBGammaHighScale * pow(clamped, ColorScience.sRGBGammaPower)
+                    - ColorScience.sRGBGammaOffset
+            return Double(min(max(gammaEncoded, 0.0), 1.0))
+        }
+
+        return Color(
+            gamut.rgbColorSpace,
+            red: applyGamma(target.red),
+            green: applyGamma(target.green),
+            blue: applyGamma(target.blue)
+        )
+    }
+
+    /// Converts an Oklab color to a `Color` in the requested RGB gamut.
+    internal static func oklabToColor(
+        lightness: CGFloat,
+        a: CGFloat,
+        b: CGFloat,
+        gamut: ColorGamut = .displayP3
+    ) -> Color {
+        let linear = oklabToLinearRGB(lightness: lightness, a: a, b: b)
+        return linearSRGBToColor(linear, gamut: gamut)
+    }
+
+    /// Converts an Oklch color to a `Color` in the requested RGB gamut,
+    /// clamping chroma to the maximum in-gamut value at `(lightness, hue)`
+    /// before channel clamping.
     ///
     /// Taken from "A perceptual color space for image processing" by Björn
     /// Ottosson (2020).
     ///
     /// - SeeAlso:
     /// https://bottosson.github.io/posts/oklab/
-    internal static func oklchToColor(lightness: CGFloat, chroma: CGFloat, hue: CGFloat) -> Color {
-        if lightness <= 0.0 { return Color(red: 0.0, green: 0.0, blue: 0.0) }
-        if lightness >= 1.0 { return Color(red: 1.0, green: 1.0, blue: 1.0) }
+    internal static func oklchToColor(
+        lightness: CGFloat,
+        chroma: CGFloat,
+        hue: CGFloat,
+        gamut: ColorGamut = .displayP3
+    ) -> Color {
+        if lightness <= 0.0 { return Color(gamut.rgbColorSpace, red: 0.0, green: 0.0, blue: 0.0) }
+        if lightness >= 1.0 { return Color(gamut.rgbColorSpace, red: 1.0, green: 1.0, blue: 1.0) }
 
         let hueAngle = hue * ColorScience.fullCircleRadians
         let cosH = cos(hueAngle)
@@ -201,7 +323,7 @@ internal enum ColorSpaceConverter {
             b: clampedChroma * sinH
         )
 
-        if !isLinearRGBInGamut(linear) {
+        if !isLinearRGBInGamut(linear, gamut: gamut) {
             var low: CGFloat = 0.0
             var high: CGFloat = min(clampedChroma, ColorScience.maxOklchChroma)
             let achromaticLinear = pow(lightness, ColorScience.oklabPower)
@@ -214,8 +336,8 @@ internal enum ColorSpaceConverter {
                     a: mid * cosH,
                     b: mid * sinH
                 )
-                if isLinearRGBInGamut(candidate) {
-                    low = mid;
+                if isLinearRGBInGamut(candidate, gamut: gamut) {
+                    low = mid
                     linear = candidate
                 } else {
                     high = mid
@@ -223,16 +345,6 @@ internal enum ColorSpaceConverter {
             }
         }
 
-        func applyGamma(_ value: CGFloat) -> CGFloat {
-            return value <= ColorScience.sRGBGammaThreshold
-                ? ColorScience.sRGBGammaScale * value
-                : 1.055 * pow(value, ColorScience.sRGBGammaPower) - ColorScience.sRGBGammaOffset
-        }
-
-        let red = min(max(applyGamma(linear.red), 0.0), 1.0)
-        let green = min(max(applyGamma(linear.green), 0.0), 1.0)
-        let blue = min(max(applyGamma(linear.blue), 0.0), 1.0)
-
-        return Color(red: red, green: green, blue: blue)
+        return linearSRGBToColor(linear, gamut: gamut)
     }
 }

@@ -45,3 +45,31 @@ import SwiftUI
         )
     }
 }
+
+#Preview("Oklch gradient: Display P3 and sRGB") {
+    let p3Red = Color(.displayP3, red: 1.0, green: 0.0, blue: 0.0)
+    let p3Green = Color(.displayP3, red: 0.0, green: 1.0, blue: 0.0)
+
+    PreviewContainer { _, progress in
+        VStack(spacing: 32) {
+            ColorSlider(
+                value: progress,
+                colorProvider: ColorGradient(
+                    colors: [p3Red, p3Green],
+                    colorSpace: .oklch,
+                    gamut: .displayP3
+                ),
+                axis: .horizontal
+            )
+            ColorSlider(
+                value: progress,
+                colorProvider: ColorGradient(
+                    colors: [p3Red, p3Green],
+                    colorSpace: .oklch,
+                    gamut: .sRGB
+                ),
+                axis: .horizontal
+            )
+        }
+    }
+}

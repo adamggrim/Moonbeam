@@ -21,12 +21,13 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 
 `Moonbeam` supports two color slider modes—spectrum (HSB- and Oklch-based) and gradient (color mixing-based).
 
-- **For spectrum sliders:** Use either the HSB or Oklch color space. To improve the legibility of certain colors, you can bend saturation and brightness (HSB) or lightness and chroma (Oklch) in specific sections using the `saturationBends`, `brightnessBends`, `lightnessBends`, and `chromaBends` parameters. `Moonbeam` also supports starting or ending spectrum sliders with black or white `monochromeSections`.
+- **For spectrum sliders:** Use either the HSB or Oklch color space. To improve the legibility of certain colors, you can bend saturation and brightness (HSB) or lightness and chroma (Oklch) in specific sections using the `saturationBends`, `brightnessBends`, `lightnessBends` or `chromaBends` parameters. `Moonbeam` also supports starting or ending spectrum sliders with black or white `monochromeSections`.
 - **For gradient sliders**: Create a precise gradient between any two colors using the RGB, Oklab or Oklch color space.
 - **For hard-edge sliders**: Create a slider with discrete color blocks by providing an explicit array of colors or adding the `.hardEdge(into:)` modifier to an existing slider.
 
-`Moonbeam` also offers layout and thumb style customization:
+`Moonbeam` also offers gamut, layout and thumb style customization:
 
+- **Color gamut:** Renders in wide-gamut Display P3 (`.displayP3`) by default. `.sRGB` is available as a `gamut` parameter.
 - **Orientation:** Render sliders either horizontally or vertically.
 - **Thumb styles:** Choose any shape (`Capsule` by default) and an optional stroke.
 - **Preview styles:** Choose any shape (`RoundedRectangle` by default) and an optional stroke.
@@ -43,7 +44,7 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
 
 2. **Create the slider and add modifiers:**
 
-    Use the `Spectrum` data source to define the color space and hue range. Add optional black or white `startSections` or `endSections`. Bend saturation, brightness, lightness or chroma using the `saturationBends`, `brightnessBends`, `lightnessBends`, and `chromaBends` parameters.
+    Use the `Spectrum` data source to define the color space and hue range. Add optional black or white `startSections` or `endSections`. Bend saturation, brightness, lightness or chroma using the `saturationBends`, `brightnessBends`, `lightnessBends` or `chromaBends` parameters.
 
     HSB spectrum:
 
@@ -170,7 +171,23 @@ This example demonstrates how to create a hard-edge slider. `Moonbeam` supports 
 
 `Moonbeam` uses an idiomatic SwiftUI styling architecture via the `ColorSliderStyle` protocol.
 
+### Color gamut
+
+`Spectrum`, `ColorGradient` and `ColorSlider` initializers render in Display P3 (`.displayP3`) by default. Constrain rendering to sRGB with the `.sRGB` `gamut` parameter.
+
+```swift
+ColorSlider(
+    value: $progress,
+    colorProvider: Spectrum<Oklch>(
+        lightness: 0.7,
+        chroma: 0.3,
+        gamut: .sRGB
+    )
+)
+```
+
 ### Styling
+
 Customize the appearance of any color slider by applying the `.colorSliderStyle()` modifier to a slider or its parent view.
 
     ```swift
@@ -195,6 +212,7 @@ Customize the appearance of any color slider by applying the `.colorSliderStyle(
 To build a custom layout, create a struct that conforms to the `ColorSliderStyle` protocol.
 
 ### Environment modifiers
+
 Apply these SwiftUI environment modifiers to a single `ColorSlider` or its parent view:
 
 * `.colorSliderDimensions(length:thickness:cornerRadius:thumbThickness:thumbLength:previewSize:previewOffset:previewScale:thumbDragScale:)`
@@ -205,6 +223,7 @@ Apply these SwiftUI environment modifiers to a single `ColorSlider` or its paren
 * `.colorSliderLiquidGlassThumb(_:)` *(Defaults to `.dragging`)*
 
 ## Accessibility
+
 Moonbeam features built-in VoiceOver support. Sliders announce their current percentage and, for `Spectrum` providers, a descriptive color name (e.g., "dark blue at 45%").
 
 To support multiple languages, define the following localization keys:

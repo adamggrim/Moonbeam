@@ -67,17 +67,19 @@ public extension ColorSlider where Source == Spectrum<HSB> {
     ///     Defaults to "Color Slider".
     ///   - axis: The layout orientation of the slider (`.horizontal` or
     ///     `.vertical`). Defaults to `.horizontal`.
+    ///   - gamut: The target RGB color gamut. Defaults to `.displayP3`.
     ///   - preview: A view builder that creates the custom floating color
     ///     preview.
     init(
         value: Binding<Double>,
         label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal,
+        gamut: ColorGamut = .displayP3,
         @ViewBuilder preview: () -> Preview
     ) {
         self.init(
             value: value,
-            colorProvider: Spectrum<HSB>(),
+            colorProvider: Spectrum<HSB>(gamut: gamut),
             label: label,
             axis: axis,
             preview: preview
@@ -94,14 +96,16 @@ public extension ColorSlider where Source == Spectrum<HSB>, Preview == ColorPrev
     ///     Defaults to "Color Slider".
     ///   - axis: The layout orientation of the slider (`.horizontal` or
     ///     `.vertical`). Defaults to `.horizontal`.
+    ///   - gamut: The target RGB color gamut. Defaults to `.displayP3`.
     init(
         value: Binding<Double>,
         label: LocalizedStringKey = "Color Slider",
-        axis: Axis = .horizontal
+        axis: Axis = .horizontal,
+        gamut: ColorGamut = .displayP3
     ) {
         self.init(
             value: value,
-            colorProvider: Spectrum<HSB>(),
+            colorProvider: Spectrum<HSB>(gamut: gamut),
             label: label,
             axis: axis,
             previewView: nil
@@ -119,16 +123,18 @@ public extension ColorSlider where Source == Spectrum<HSB>, Preview == EmptyView
     ///     Defaults to "Color Slider".
     ///   - axis: The layout orientation of the slider (`.horizontal` or
     ///     `.vertical`). Defaults to `.horizontal`.
+    ///   - gamut: The target RGB color gamut. Defaults to `.displayP3`.
     ///   - preview: Explicitly pass `nil` or `EmptyView()` to hide the preview.
     init(
         value: Binding<Double>,
         label: LocalizedStringKey = "Color Slider",
         axis: Axis = .horizontal,
+        gamut: ColorGamut = .displayP3,
         preview: Preview?
     ) {
         self.init(
             value: value,
-            colorProvider: Spectrum<HSB>(),
+            colorProvider: Spectrum<HSB>(gamut: gamut),
             label: label,
             axis: axis,
             previewView: preview

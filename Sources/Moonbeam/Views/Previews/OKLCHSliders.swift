@@ -9,3 +9,32 @@ import SwiftUI
         )
     }
 }
+
+#Preview("Oklch spectrum: Display P3 and sRGB") {
+    PreviewContainer { _, progress in
+        VStack(spacing: 32) {
+            ColorSlider(
+                value: progress,
+                colorProvider: Spectrum<Oklch>(
+                    lightness: 0.7,
+                    chroma: 0.3,
+                    startHue: 0.0,
+                    endHue: 1.0,
+                    gamut: .displayP3
+                ),
+                axis: .horizontal
+            )
+            ColorSlider(
+                value: progress,
+                colorProvider: Spectrum<Oklch>(
+                    lightness: 0.7,
+                    chroma: 0.3,
+                    startHue: 0.0,
+                    endHue: 1.0,
+                    gamut: .sRGB
+                ),
+                axis: .horizontal
+            )
+        }
+    }
+}

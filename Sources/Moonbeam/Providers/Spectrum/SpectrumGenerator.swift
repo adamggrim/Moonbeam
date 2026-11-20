@@ -4,6 +4,8 @@ import SwiftUI
 internal struct SpectrumConfiguration {
     /// Whether to use the HSB or Oklch color space.
     let colorSpace: SpectrumColorSpace
+    /// The target RGB color gamut for rendering and sampling.
+    let gamut: ColorGamut
     /// An array of monochrome sections appearing before the hue spectrum.
     let startSections: [MonochromeSection]
     /// An array of monochrome sections appearing after the hue spectrum.
@@ -51,8 +53,18 @@ internal struct SpectrumGenerator {
         let normalizedHue = wrappedHue < 0 ? wrappedHue + 1.0 : wrappedHue
 
         return configuration.colorSpace == .oklch
-            ? ColorSpaceConverter.oklchToColor(lightness: comps.secondary, chroma: comps.primary, hue: normalizedHue)
-            : Color(hue: normalizedHue, saturation: comps.primary, brightness: comps.secondary)
+            ? ColorSpaceConverter.oklchToColor(
+                lightness: comps.secondary,
+                chroma: comps.primary,
+                hue: normalizedHue,
+                gamut: configuration.gamut
+            )
+            : ColorSpaceConverter.hsbToColor(
+                hue: normalizedHue,
+                saturation: comps.primary,
+                brightness: comps.secondary,
+                gamut: configuration.gamut
+            )
     }
 
     static func components(

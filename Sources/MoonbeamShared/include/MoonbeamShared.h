@@ -39,6 +39,13 @@ typedef enum {
     ColorSpaceOklch = 3
 } ColorSpaceFlag;
 
+/// Determines the target RGB color gamut for color space conversions and
+/// gamut clamping.
+typedef enum {
+    ColorGamutSRGB = 0,
+    ColorGamutDisplayP3 = 1
+} ColorGamutFlag;
+
 /// Defines the bend type of a bend section.
 /// - `BendTypeOneWay`: Transitions from a default value to a target.
 /// - `MoonbeamBendTypeTwoWay`: Transitions from a default value to a target
@@ -70,6 +77,7 @@ typedef struct {
     float baseSaturation;
     float baseBrightness;
     uint32_t colorSpaceFlag;
+    uint32_t gamutFlag;
 
     uint32_t startSectionsCount;
     uint32_t endSectionsCount;

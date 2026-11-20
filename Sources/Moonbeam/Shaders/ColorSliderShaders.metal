@@ -23,16 +23,32 @@ constant float sRGBGammaPower = 2.4;
 constant float sRGBGammaHighScale = 1.055;
 
 float3 linearToSRGB(float3 c) {
-    float3 linear_low = sRGBGammaScale * c;
-    float3 linear_high = sRGBGammaHighScale * pow(c, 1.0 / sRGBGammaPower) - sRGBGammaOffset;
-    return select(linear_high, linear_low, c <= sRGBGammaThreshold);
+    float3 absC = abs(c);
+    float3 linear_low = sRGBGammaScale * absC;
+    float3 linear_high = sRGBGammaHighScale
+        * pow(max(absC, sRGBGammaThreshold), 1.0 / sRGBGammaPower)
+        - sRGBGammaOffset;
+    return sign(c) * select(linear_high, linear_low, absC <= sRGBGammaThreshold);
 }
 
 float3 sRGBToLinear(float3 c) {
-    float3 srgb_low = c / sRGBGammaScale;
-    float3 srgb_high = pow((c + sRGBGammaOffset) / sRGBGammaHighScale, sRGBGammaPower);
-    return select(srgb_high, srgb_low, c <= sRGBLinearThreshold);
+    float3 absC = abs(c);
+    float3 srgb_low = absC / sRGBGammaScale;
+    float3 srgb_high = pow((absC + sRGBGammaOffset) / sRGBGammaHighScale, sRGBGammaPower);
+    return sign(c) * select(srgb_high, srgb_low, absC <= sRGBLinearThreshold);
 }
+
+constant float3x3 linearSRGBToDisplayP3Matrix = float3x3(
+    float3(0.8224619687, 0.0331941989, 0.0170826307),
+    float3(0.1775380313, 0.9668058011, 0.0723974407),
+    float3(0.0, 0.0, 0.9105199286)
+);
+
+constant float3x3 linearDisplayP3ToSRGBMatrix = float3x3(
+    float3(1.2249401763, -0.0420569547, -0.0196375545),
+    float3(-0.2249401763, 1.0420569547, -0.0786360456),
+    float3(0.0, 0.0, 1.0982736001)
+);
 
 // Matrices to convert LMS constants to/from Oklab and RGB.
 //
@@ -66,8 +82,20 @@ float3 convertOklabToLinearRGB(float L, float a, float b) {
     return oklabRGBMatrix * float3(l, m, s);
 }
 
-bool isLinearRGBInGamut(float3 lin) {
+bool isLinearRGBInGamut(float3 lin, uint gamutFlag) {
+    if (gamutFlag == ColorGamutDisplayP3) {
+        float3 linearP3 = linearSRGBToDisplayP3Matrix * lin;
+        return all(linearP3 >= 0.0) && all(linearP3 <= 1.0);
+    }
     return all(lin >= 0.0) && all(lin <= 1.0);
+}
+
+float3 clampLinearToGamut(float3 lin, uint gamutFlag) {
+    if (gamutFlag == ColorGamutDisplayP3) {
+        float3 linearP3 = clamp(linearSRGBToDisplayP3Matrix * lin, 0.0, 1.0);
+        return linearDisplayP3ToSRGBMatrix * linearP3;
+    }
+    return clamp(lin, 0.0, 1.0);
 }
 
 // Matrix to convert Oklab constants to RGB.
@@ -75,9 +103,9 @@ bool isLinearRGBInGamut(float3 lin) {
 // Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
 // https://bottosson.github.io/posts/oklab/
-float3 convertOklabtoRGB(float L, float a, float b) {
+float3 convertOklabtoRGB(float L, float a, float b, uint gamutFlag) {
     float3 lin = convertOklabToLinearRGB(L, a, b);
-    return linearToSRGB(clamp(lin, 0.0, 1.0));
+    return linearToSRGB(clampLinearToGamut(lin, gamutFlag));
 }
 
 // Matrix to convert Oklch constants to RGB.
@@ -85,7 +113,7 @@ float3 convertOklabtoRGB(float L, float a, float b) {
 // Taken from "A perceptual color space for image processing" by Björn Ottosson
 // (2020):
 // https://bottosson.github.io/posts/oklab/
-float3 convertOklchtoRGB(float L, float C, float h) {
+float3 convertOklchtoRGB(float L, float C, float h, uint gamutFlag) {
     if (L <= 0.0) return float3(0.0);
     if (L >= 1.0) return float3(1.0);
 
@@ -96,7 +124,7 @@ float3 convertOklchtoRGB(float L, float C, float h) {
     float clampedC = max(C, 0.0);
     float3 lin = convertOklabToLinearRGB(L, clampedC * cosH, clampedC * sinH);
 
-    if (!isLinearRGBInGamut(lin)) {
+    if (!isLinearRGBInGamut(lin, gamutFlag)) {
         float low = 0.0;
         float high = min(clampedC, maxOklchChroma);
         lin = float3(pow(L, 3.0));
@@ -104,7 +132,7 @@ float3 convertOklchtoRGB(float L, float C, float h) {
         for (int i = 0; i < gamutSearchIterations; i++) {
             float mid = 0.5 * (low + high);
             float3 candidate = convertOklabToLinearRGB(L, mid * cosH, mid * sinH);
-            if (isLinearRGBInGamut(candidate)) {
+            if (isLinearRGBInGamut(candidate, gamutFlag)) {
                 low = mid;
                 lin = candidate;
             } else {
@@ -113,11 +141,20 @@ float3 convertOklchtoRGB(float L, float C, float h) {
         }
     }
 
-    return linearToSRGB(clamp(lin, 0.0, 1.0));
+    return linearToSRGB(clampLinearToGamut(lin, gamutFlag));
 }
 
-float3 resolveColor(uint colorSpace, float h, float s_c, float b_l) {
-    return colorSpace == ColorSpaceOklch ? convertOklchtoRGB(b_l, s_c, h) : convertHSBtoRGB(h, s_c, b_l);
+float3 resolveColor(uint colorSpace, uint gamutFlag, float h, float s_c, float b_l) {
+    if (colorSpace == ColorSpaceOklch) {
+        return convertOklchtoRGB(b_l, s_c, h, gamutFlag);
+    }
+
+    float3 rgb = convertHSBtoRGB(h, s_c, b_l);
+    if (gamutFlag == ColorGamutDisplayP3) {
+        float3 linearP3 = sRGBToLinear(rgb);
+        return linearToSRGB(linearDisplayP3ToSRGBMatrix * linearP3);
+    }
+    return rgb;
 }
 
 // Matrices to convert RGB to LMS and Oklab constants.
@@ -281,7 +318,8 @@ half4 gradientShader(
     int colorsCount,
     float isVertical,
     float colorSpaceFlag,
-    float distributeEvenly
+    float distributeEvenly,
+    float gamutFlag
 ) {
     float normalizedPosition = calculateNormalizedPosition(position, size, isVertical);
 
@@ -299,9 +337,17 @@ half4 gradientShader(
     half4 endColor = colors[index + 1];
 
     uint colorSpace = uint(colorSpaceFlag);
+    uint gamut = uint(gamutFlag);
 
     if (colorSpace == ColorSpaceRGB) {
         half4 blendedColor = mix(startColor, endColor, half(localRatio));
+        if (gamut == ColorGamutSRGB) {
+            float3 unpremultiplied = blendedColor.a > 0.0001h
+                ? clamp(float3(blendedColor.rgb) / float(blendedColor.a), 0.0, 1.0)
+                : float3(0.0);
+            half outAlpha = blendedColor.a * currentColor.a;
+            return half4(half3(unpremultiplied) * outAlpha, outAlpha);
+        }
         return half4(blendedColor.rgb * currentColor.a, blendedColor.a * currentColor.a);
     }
 
@@ -318,7 +364,7 @@ half4 gradientShader(
 
     if (colorSpace == ColorSpaceOklab) {
         float3 mixedLab = mix(labStart, labEnd, localRatio);
-        float3 rgbOut = convertOklabtoRGB(mixedLab.x, mixedLab.y, mixedLab.z);
+        float3 rgbOut = convertOklabtoRGB(mixedLab.x, mixedLab.y, mixedLab.z, gamut);
         return half4(half3(rgbOut) * outAlpha, outAlpha);
     } else {
         float cStart = sqrt(labStart.y * labStart.y + labStart.z * labStart.z);
@@ -349,7 +395,7 @@ half4 gradientShader(
         float C = mix(cStart, cEnd, localRatio);
         float h = mix(hStart, hEnd, localRatio) / (2.0 * M_PI_F);
 
-        float3 rgbOut = convertOklchtoRGB(L, C, h);
+        float3 rgbOut = convertOklchtoRGB(L, C, h, gamut);
         return half4(half3(rgbOut) * outAlpha, outAlpha);
     }
 }
@@ -382,6 +428,7 @@ half4 spectrumShader(
     float baseSaturation = data->baseSaturation;
     float baseBrightness = data->baseBrightness;
     uint colorSpaceFlag = data->colorSpaceFlag;
+    uint gamutFlag = data->gamutFlag;
 
     uint startSectionsCount = data->startSectionsCount;
     uint endSectionsCount = data->endSectionsCount;
@@ -415,7 +462,7 @@ half4 spectrumShader(
                         brightnessBendsData, brightnessBendsCount, true
                     );
                     return half4(
-                        half3(resolveColor(colorSpaceFlag, minimumHue, fade.x, fade.y))
+                        half3(resolveColor(colorSpaceFlag, gamutFlag, minimumHue, fade.x, fade.y))
                             * currentColor.a,
                         currentColor.a
                     );
@@ -427,7 +474,7 @@ half4 spectrumShader(
                     float smoothRel = smoothstep(0.0f, 1.0f, relativePositionInSection);
                     float interpolatedBrightness = startingBrightness + brightnessDelta * smoothRel;
                     return half4(
-                        half3(resolveColor(colorSpaceFlag, minimumHue, 0.0, interpolatedBrightness))
+                        half3(resolveColor(colorSpaceFlag, gamutFlag, minimumHue, 0.0, interpolatedBrightness))
                             * currentColor.a,
                         currentColor.a
                     );
@@ -465,7 +512,7 @@ half4 spectrumShader(
         );
 
         return half4(
-            half3(resolveColor(colorSpaceFlag, currentHue, calculatedSaturation, calculatedBrightness))
+            half3(resolveColor(colorSpaceFlag, gamutFlag, currentHue, calculatedSaturation, calculatedBrightness))
                 * currentColor.a,
             currentColor.a
         );
@@ -494,7 +541,7 @@ half4 spectrumShader(
                         brightnessBendsData, brightnessBendsCount, false
                     );
                     return half4(
-                        half3(resolveColor(colorSpaceFlag, maximumHue, fade.x, fade.y))
+                        half3(resolveColor(colorSpaceFlag, gamutFlag, maximumHue, fade.x, fade.y))
                             * currentColor.a,
                         currentColor.a
                     );
@@ -506,7 +553,7 @@ half4 spectrumShader(
                     float smoothRel = smoothstep(0.0f, 1.0f, relativePositionInSection);
                     float interpolatedBrightness = startingBrightness + brightnessDelta * smoothRel;
                     return half4(
-                        half3(resolveColor(colorSpaceFlag, maximumHue, 0.0, interpolatedBrightness))
+                        half3(resolveColor(colorSpaceFlag, gamutFlag, maximumHue, 0.0, interpolatedBrightness))
                             * currentColor.a,
                         currentColor.a
                     );

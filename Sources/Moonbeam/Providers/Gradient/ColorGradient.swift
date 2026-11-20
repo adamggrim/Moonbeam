@@ -16,7 +16,10 @@ public struct ColorGradient: ColorProvider {
     /// The color space used to interpolate between colors.
     public let colorSpace: GradientColorSpace
 
-    /// Determines how to draw the gradient.
+    /// The target RGB color gamut.
+    public let gamut: ColorGamut
+
+    /// The Metal shader and Swift fallback used to render the gradient.
     public let colorSource: ColorSource
 
     /// A flag indicating whether to inset the interpolation bounds so all colors
@@ -34,38 +37,30 @@ public struct ColorGradient: ColorProvider {
     /// - Parameters:
     ///   - colors: An array of colors to transition through sequentially.
     ///   - colorSpace: The color space used to interpolate between the colors.
-    ///   - distributeEvenly: If `true`, maps the slider track so that all 
-    ///     colors occupy an equal proportional width.
-    public init(colors: [Color], colorSpace: GradientColorSpace = .rgb, distributeEvenly: Bool = false) {
+    ///   - distributeEvenly: If `true`, maps the slider track so that all
+    ///     colors occupy an equal width.
+    ///   - gamut: The target RGB color gamut. Defaults to `.displayP3`.
+    public init(
+        colors: [Color],
+        colorSpace: GradientColorSpace = .rgb,
+        distributeEvenly: Bool = false,
+        gamut: ColorGamut = .displayP3
+    ) {
         precondition(colors.count >= 2, "ColorGradient requires at least two colors.")
         self.colors = colors
         self.colorSpace = colorSpace
         self.distributeEvenly = distributeEvenly
+        self.gamut = gamut
 
         let fallback: @Sendable (Double) -> Color = { position in
-            var adjustedPosition = max(0.0, min(1.0, position))
-            if distributeEvenly {
-                let inset = 0.5 / Double(colors.count)
-                adjustedPosition = min(max(adjustedPosition, inset), 1.0 - inset)
-                adjustedPosition = (adjustedPosition - inset) / (1.0 - 2.0 * inset)
-            }
-
-            let step = 1.0 / Double(colors.count - 1)
-            let scaledPosition = adjustedPosition / step
-            let index = min(Int(scaledPosition), colors.count - 2)
-            let localRatio = scaledPosition - Double(index)
-
-            let start = colors[index]
-            let end = colors[index + 1]
-
-            switch colorSpace {
-            case .rgb:
-                return start.mix(with: end, by: localRatio)
-            case .oklab:
-                return start.mix(with: end, by: localRatio, in: .perceptual)
-            case .oklch:
-                return ColorSpaceConverter.interpolateOklch(from: start, to: end, at: localRatio)
-            }
+            Self.interpolatedColor(
+                at: position,
+                colors: colors,
+                colorSpace: colorSpace,
+                distributeEvenly: distributeEvenly,
+                gamut: gamut,
+                in: EnvironmentValues()
+            )
         }
 
         self.colorSource = .shader(generator: { size, isVertical in
@@ -80,12 +75,31 @@ public struct ColorGradient: ColorProvider {
                 .colorArray(colors),
                 .float(isVertical ? 1.0 : 0.0),
                 .float(spaceFlag),
-                .float(distributeEvenly ? 1.0 : 0.0)
+                .float(distributeEvenly ? 1.0 : 0.0),
+                .float(Float(gamut.shaderFlag))
             )
         }, fallback: fallback)
     }
 
     public func color(at position: Double, in environment: EnvironmentValues) -> Color {
+        Self.interpolatedColor(
+            at: position,
+            colors: colors,
+            colorSpace: colorSpace,
+            distributeEvenly: distributeEvenly,
+            gamut: gamut,
+            in: environment
+        )
+    }
+
+    private static func interpolatedColor(
+        at position: Double,
+        colors: [Color],
+        colorSpace: GradientColorSpace,
+        distributeEvenly: Bool,
+        gamut: ColorGamut,
+        in environment: EnvironmentValues
+    ) -> Color {
         var adjustedPosition = max(0.0, min(1.0, position))
         if distributeEvenly {
             let inset = 0.5 / Double(colors.count)
@@ -103,14 +117,24 @@ public struct ColorGradient: ColorProvider {
 
         switch colorSpace {
         case .rgb:
-            return start.mix(with: end, by: localRatio)
+            let mixed = start.mix(with: end, by: localRatio)
+            return gamut == .sRGB
+                ? ColorSpaceConverter.clampToSRGB(mixed, in: environment)
+                : mixed
         case .oklab:
-            return start.mix(with: end, by: localRatio, in: .perceptual)
+            return ColorSpaceConverter.interpolateOklab(
+                from: start,
+                to: end,
+                at: localRatio,
+                gamut: gamut,
+                in: environment
+            )
         case .oklch:
             return ColorSpaceConverter.interpolateOklch(
                 from: start,
                 to: end,
                 at: localRatio,
+                gamut: gamut,
                 in: environment
             )
         }

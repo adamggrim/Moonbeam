@@ -1,4 +1,30 @@
 import SwiftUI
+import MoonbeamShared
+
+/// The target RGB color gamut.
+public enum ColorGamut: Sendable, Equatable, Hashable {
+    /// Wide-gamut Display P3 color space.
+    case displayP3
+
+    /// Standard sRGB color space.
+    case sRGB
+
+    /// The corresponding SwiftUI `Color.RGBColorSpace`.
+    internal var rgbColorSpace: Color.RGBColorSpace {
+        switch self {
+        case .displayP3: .displayP3
+        case .sRGB: .sRGB
+        }
+    }
+
+    /// The corresponding C/Metal `ColorGamutFlag` raw value.
+    internal var shaderFlag: UInt32 {
+        switch self {
+        case .displayP3: ColorGamutDisplayP3.rawValue
+        case .sRGB: ColorGamutSRGB.rawValue
+        }
+    }
+}
 
 /// Represents whether the colors are defined by an array or a Metal shader.
 public enum ColorSource: Sendable {
@@ -16,7 +42,7 @@ public enum ColorSource: Sendable {
 /// Protocol shared by `Spectrum`, `ColorGradient` and `HardEdgeColors`.
 public protocol ColorProvider: Sendable {
 
-    /// Determines how the slider track is drawn on screen.
+    /// The underlying source used to render the slider track.
     var colorSource: ColorSource { get }
 
     /// Resolves a descriptive color name for VoiceOver.
