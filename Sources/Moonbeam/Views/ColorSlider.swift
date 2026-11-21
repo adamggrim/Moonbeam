@@ -276,6 +276,10 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             maxWidth: axis == .horizontal && dimensions.length == nil ? .infinity : nil,
             maxHeight: axis == .vertical && dimensions.length == nil ? .infinity : nil
         )
+        .focusable(isEnabled)
+        .onKeyPress(keys: [.leftArrow, .rightArrow, .upArrow, .downArrow, .home, .end]) { press in
+            handleKeyPress(press)
+        }
     }
 
     /// Updates the view's state when the position of the `DragGesture`
@@ -361,8 +365,75 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         }
     }
 
+    private var stepAnimation: Animation? {
+        guard !reduceMotion else { return nil }
+        return resolvedThumbBounce
+            ? .spring(
+                duration: ColorSliderDefaults.thumbBounceDuration,
+                bounce: ColorSliderDefaults.thumbBounce
+            )
+            : animation
+    }
+
+    private func stepValue(by steps: Int) {
+        let targetValue: Double
+        if shouldSnapToColor, colorCount > 0 {
+            let clamped = min(max(value, 0.0), 1.0)
+            let currentIndex = min(max(0, Int(clamped * Double(colorCount))), colorCount - 1)
+            let nextIndex = min(max(0, currentIndex + steps), colorCount - 1)
+            targetValue = (Double(nextIndex) + 0.5) / Double(colorCount)
+        } else {
+            targetValue = min(max(value + (Double(steps) * accessibilityStep), 0.0), 1.0)
+        }
+
+        withAnimation(stepAnimation) {
+            value = targetValue
+        }
+    }
+
+    private func jumpToBoundary(_ boundary: Double) {
+        let targetValue: Double
+        if shouldSnapToColor, colorCount > 0 {
+            let index = boundary <= 0.0 ? 0 : (colorCount - 1)
+            targetValue = (Double(index) + 0.5) / Double(colorCount)
+        } else {
+            targetValue = boundary
+        }
+
+        withAnimation(stepAnimation) {
+            value = targetValue
+        }
+    }
+
+    private func handleKeyPress(_ press: KeyPress) -> KeyPress.Result {
+        guard isEnabled else { return .ignored }
+        let isRTL = layoutDirection == .rightToLeft
+
+        switch press.key {
+        case .leftArrow:
+            stepValue(by: isRTL ? 1 : -1)
+            return .handled
+        case .rightArrow:
+            stepValue(by: isRTL ? -1 : 1)
+            return .handled
+        case .downArrow:
+            stepValue(by: -1)
+            return .handled
+        case .upArrow:
+            stepValue(by: 1)
+            return .handled
+        case .home:
+            jumpToBoundary(0.0)
+            return .handled
+        case .end:
+            jumpToBoundary(1.0)
+            return .handled
+        default:
+            return .ignored
+        }
+    }
+
     private func accessibilityAdjust(direction: AccessibilityAdjustmentDirection) {
-        let delta = direction == .increment ? accessibilityStep : -accessibilityStep
-        self.value = min(max(value + delta, 0.0), 1.0)
+        stepValue(by: direction == .increment ? 1 : -1)
     }
 }
