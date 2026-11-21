@@ -30,21 +30,27 @@ public extension ColorProvider {
     /// Converts a continuous color slider into a hard-edge slider with discrete
     /// color blocks.
     ///
-    /// - Parameter steps: The number of discrete color blocks to generate.
+    /// - Parameters:
+    ///   - steps: The number of discrete color blocks to generate.
+    ///   - environment: The environment used to resolve dynamic colors.
+    ///     Defaults to `EnvironmentValues()`.
     /// - Returns: A `HardEdgeColors` provider containing the sampled colors.
-    func hardEdge(into steps: Int) -> HardEdgeColors {
+    func hardEdge(
+        into steps: Int,
+        in environment: EnvironmentValues = EnvironmentValues()
+    ) -> HardEdgeColors {
         guard steps > 1 else { return HardEdgeColors(colors: []) }
 
         switch self.colorSource {
         case .array(let colors):
             return HardEdgeColors(colors: colors)
 
-        case .shader(_, let colorGenerator):
+        case .shader:
             let generatedColors = (0..<steps).map { i in
                 // Sample from the center of the discrete color block's
                 // position.
                 let position = (Double(i) + 0.5) / Double(steps)
-                return colorGenerator(position)
+                return self.color(at: position, in: environment)
             }
             return HardEdgeColors(colors: generatedColors)
         }

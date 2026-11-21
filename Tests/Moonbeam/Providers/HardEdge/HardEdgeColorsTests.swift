@@ -39,4 +39,26 @@ import SwiftUI
         // Return the original array when the source was already hard-edge.
         #expect(modifiedProvider.colors.count == 3)
     }
+
+    @Test("Hard-edge modifier resolves dynamic colors using the provided EnvironmentValues")
+    func dynamicColorEnvironmentResolution() {
+        let gradient = ColorGradient(colors: [.primary, .primary], colorSpace: .oklch)
+
+        var lightEnvironment = EnvironmentValues()
+        lightEnvironment.colorScheme = .light
+
+        var darkEnvironment = EnvironmentValues()
+        darkEnvironment.colorScheme = .dark
+
+        let lightHardEdge = gradient.hardEdge(into: 4, in: lightEnvironment)
+        let darkHardEdge = gradient.hardEdge(into: 4, in: darkEnvironment)
+
+        let lightLab = ColorSpaceConverter.colorToOklab(lightHardEdge.colors[0], in: lightEnvironment)
+        let darkLab = ColorSpaceConverter.colorToOklab(darkHardEdge.colors[0], in: darkEnvironment)
+
+        #expect(lightHardEdge.colors.count == 4)
+        #expect(darkHardEdge.colors.count == 4)
+        #expect(lightLab.L < 0.2)
+        #expect(darkLab.L > 0.8)
+    }
 }
