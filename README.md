@@ -22,7 +22,7 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 `Moonbeam` supports two color slider modes—spectrum (HSB- and Oklch-based) and gradient (color mixing-based).
 
 - **For spectrum sliders:** Use either the HSB or Oklch color space. To improve the legibility of certain colors, you can bend saturation and brightness (HSB) or lightness and chroma (Oklch) in specific sections using the `saturationBends`, `brightnessBends`, `lightnessBends` or `chromaBends` parameters. `Moonbeam` also supports starting or ending spectrum sliders with black or white `monochromeSections`.
-- **For gradient sliders**: Create a precise gradient between any two colors using the RGB, Oklab or Oklch color space.
+- **For gradient sliders**: Create a precise gradient across two or more colors using the RGB, Oklab or Oklch color space.
 - **For hard-edge sliders**: Create a slider with discrete color blocks by providing an explicit array of colors or adding the `.hardEdge(into:)` modifier to an existing slider.
 
 `Moonbeam` also offers gamut, layout and thumb style customization:
@@ -232,6 +232,15 @@ To support multiple languages, define the following localization keys:
 * **Format string:** `"color_name_format"` (Defaults to `"%1$@ %2$@"`, where `%1$@` represents the adjective and `%2$@` represents the base color)
 
 Adjust the VoiceOver increment with the `.colorSliderAccessibilityStep(_:)` modifier.
+
+### Localization
+
+By default, localization keys resolve from the host app's main bundle. Define any of the following custom localization keys:
+- **Colors:** `"black"`, `"white"`, `"gray"`, `"red"`, `"orange"`, `"yellow"`, `"green"`, `"cyan"`, `"blue"`, `"purple"`, `"pink"`
+- **Tone modifiers:** `"light"`, `"dark"`, `"bright"`, `"dull"`
+- **Format strings:**
+  - `"color_name_format"` (Defaults to `"%1$@ %2$@"`, combining tone modifier and base color)
+  - `"color_slider_value_format"` (Defaults to `"%1$@, %2$@"`, combining color name and percentage)
 
 ## Structure
 

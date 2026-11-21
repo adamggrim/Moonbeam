@@ -187,6 +187,8 @@ public extension Spectrum where ColorSpace == HSB {
     ///   - brightness: The baseline brightness applied to the entire hue range
     ///     (0.0 to 1.0).
     ///   - gamut: The target RGB color gamut. Defaults to `.displayP3`.
+    ///   - accessibilityStrings: Localized strings used for VoiceOver. Defaults
+    ///     to strings resolved from `Bundle.main`.
     ///   - saturationBends: A result builder providing sections where the
     ///     baseline saturation increases or decreases to `targetValue`.
     ///   - brightnessBends: A result builder providing sections where the
@@ -238,6 +240,8 @@ public extension Spectrum where ColorSpace == Oklch {
     ///   - startHue: The starting hue, normalized to 0.0 through 1.0.
     ///   - endHue: The ending hue, normalized to 0.0 through 1.0.
     ///   - gamut: The target RGB color gamut. Defaults to `.displayP3`.
+    ///   - accessibilityStrings: Localized strings used for VoiceOver.
+    ///     Defaults to strings resolved from `Bundle.main`.
     ///   - lightnessBends: Sections where the baseline lightness bends toward
     ///     `targetValue`.
     ///   - chromaBends: Sections where the baseline chroma bends toward

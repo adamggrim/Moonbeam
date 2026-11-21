@@ -129,6 +129,8 @@ extension EnvironmentValues {
 public extension View {
     /// Customizes the layout dimensions of the color slider.
     ///
+    /// Only non-`nil` parameters override values inherited from ancestor views.
+    ///
     /// - Parameters:
     ///   - length: The length of the slider track along the main axis.
     ///   - thickness: The thickness of cross axis.
@@ -173,7 +175,7 @@ public extension View {
     }
 
     /// Customizes the step percentage used when adjusting the slider via
-    /// VoiceOver.
+    /// VoiceOver or keyboard arrow keys.
     func colorSliderAccessibilityStep(_ step: Double) -> some View {
         environment(\.colorSliderAccessibilityStep, step)
     }

@@ -15,13 +15,13 @@ typedef simd_float4 mb_float4;
 /// and Metal.
 ///
 /// Mapping for `data0`:
-/// - x: Bend Type (1.0 = OneWay, 2.0 = TwoWay) mapped to `MoonbeamBendType`
-/// - y: Start Hue (normalized 0.0 - 1.0)
-/// - z: End Hue (normalized 0.0 - 1.0)
-/// - w: Target Value (saturation, brightness, chroma, or lightness)
+/// - x: Bend type (1.0 = OneWay, 2.0 = TwoWay) mapped to `MoonbeamBendType`
+/// - y: Start hue (normalized 0.0 - 1.0)
+/// - z: End hue (normalized 0.0 - 1.0)
+/// - w: Target value (saturation, brightness, chroma or lightness)
 ///
 /// Mapping for `data1`:
-/// - x: Hue Count (difference between start and end hues)
+/// - x: Hue count (difference between start and end hues)
 /// - y: Unused padding to force 16-byte GPU memory alignment
 /// - z: Unused padding to force 16-byte GPU memory alignment
 /// - w: Unused padding to force 16-byte GPU memory alignment

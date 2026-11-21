@@ -21,9 +21,8 @@ internal struct ColorSliderLayout {
 
     /// The thumb thickness along the slider's main axis.
     ///
-    /// For `.colorOutline`, matches one discrete color block (or the fallback
-    /// thumb thickness for continuous tracks) plus the outline padding for
-    /// each side.
+    /// For `.colorOutline`, matches one discrete color block plus both sides'
+    /// outline padding and stroke width.
     var resolvedThumbThickness: CGFloat {
         switch thumbStyle {
         case .colorOutline(let lineWidth, let padding):
@@ -38,8 +37,8 @@ internal struct ColorSliderLayout {
 
     /// The thumb length along the slider's cross axis.
     ///
-    /// For `.colorOutline`, matches the track thickness plus the outline
-    /// padding for each side.
+    /// For `.colorOutline`, matches the track thickness plus both sides'
+    /// outline padding and stroke width.
     var resolvedThumbLength: CGFloat {
         dimensions.resolvedThumbLength(for: controlSize, thumbStyle: thumbStyle)
     }

@@ -48,9 +48,9 @@ public struct ColorSliderDimensions: Sendable, Equatable {
 
     /// Calculates the effective thumb length along the cross axis.
     ///
-    /// For `.colorOutline`, equals the resolved track thickness plus each
-    /// side's outline padding. For `.standard`, deafaults to twice the
-    /// resolved track thickness.
+    /// For `.colorOutline`, equals the resolved track thickness plus both
+    /// sides' outline padding and stroke width. For `.standard`, defaults to
+    /// twice the resolved track thickness.
     ///
     /// - Parameters:
     ///   - controlSize: The active control size from the environment.

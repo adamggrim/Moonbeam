@@ -45,7 +45,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     /// Initializes a customizable color slider.
     ///
     /// Created by providing a data source such as `Spectrum<ColorSpace>`,
-    /// `ColorGradient`, or `HardEdgeColors`.
+    /// `ColorGradient` or `HardEdgeColors`.
     ///
     /// - Parameters:
     ///   - value: A binding to the slider's normalized position (0.0 to 1.0).
