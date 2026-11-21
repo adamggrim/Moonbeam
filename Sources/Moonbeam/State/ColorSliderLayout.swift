@@ -198,4 +198,13 @@ internal struct ColorSliderLayout {
 
         return min(max(Double(rawPosition / resolvedLength), 0.0), 1.0)
     }
+
+    /// Clamps `rawValue` to `0.0...1.0` and optionally aligns it to the center
+    /// of the corresponding discrete color block.
+    func snappedValue(for rawValue: Double, snapsToColor: Bool) -> Double {
+        let clamped = min(max(rawValue, 0.0), 1.0)
+        guard snapsToColor, colorCount > 0 else { return clamped }
+        let index = min(max(0, Int(clamped * Double(colorCount))), colorCount - 1)
+        return (Double(index) + 0.5) / Double(colorCount)
+    }
 }

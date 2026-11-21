@@ -124,10 +124,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     /// Clamps `rawValue` to `0.0...1.0` and aligns it to the center of the
     /// corresponding discrete color block if `shouldSnapToColor` is true.
     private func resolvedTargetValue(for rawValue: Double, layout: ColorSliderLayout) -> Double {
-        let clamped = min(max(rawValue, 0.0), 1.0)
-        guard shouldSnapToColor, layout.colorCount > 0 else { return clamped }
-        let index = min(max(0, Int(clamped * Double(layout.colorCount))), layout.colorCount - 1)
-        return (Double(index) + 0.5) / Double(layout.colorCount)
+        layout.snappedValue(for: rawValue, snapsToColor: shouldSnapToColor)
     }
 
     /// The color calculated from the current `liveColorPosition` on the
