@@ -95,10 +95,14 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     /// The cross-axis length of the slider's outer frame, clamped to at least
     /// the track thickness.
     private var resolvedCrossAxisLength: CGFloat {
-        max(
-            dimensions.resolvedTrackThickness(for: controlSize),
-            dimensions.resolvedThumbLength(for: controlSize, thumbStyle: thumbStyle)
-        )
+        let thumbOuterLength: CGFloat
+        switch thumbStyle {
+        case .colorOutline(let lineWidth, _):
+            thumbOuterLength = dimensions.resolvedThumbLength(for: controlSize, thumbStyle: thumbStyle) + lineWidth
+        case .standard:
+            thumbOuterLength = dimensions.resolvedThumbLength(for: controlSize, thumbStyle: thumbStyle)
+        }
+        return max(dimensions.resolvedTrackThickness(for: controlSize), thumbOuterLength)
     }
 
     /// Whether thumb bounce is active. True for `.colorOutline`, otherwise

@@ -61,8 +61,8 @@ public struct ColorSliderDimensions: Sendable, Equatable {
         thumbStyle: ColorSliderThumbStyle = .standard
     ) -> CGFloat {
         switch thumbStyle {
-        case .colorOutline(_, let padding):
-            return resolvedTrackThickness(for: controlSize) + (padding * 2)
+        case .colorOutline(let lineWidth, let padding):
+            return resolvedTrackThickness(for: controlSize) + (padding * 2) + lineWidth
         case .standard:
             return thumbLength ?? (resolvedTrackThickness(for: controlSize) * 2)
         }

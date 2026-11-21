@@ -183,11 +183,12 @@ private struct DefaultColorSliderStyleView: View {
     private var resolvedThumbShape: AnyShape {
         if let shape = style.thumbShape { return shape }
         switch thumbStyle {
-        case .colorOutline(_, let padding):
-            let colorCount = configuration.colorCount
+            case .colorOutline(let lineWidth, let padding):
+                let colorCount = configuration.colorCount
 
-            let baseRadius = dimensions.cornerRadius ?? (dimensions.resolvedTrackThickness(for: controlSize) / 2)
-            let radius = baseRadius + padding
+                let baseRadius = dimensions.cornerRadius ?? (dimensions.resolvedTrackThickness(for: controlSize) / 2)
+                let strokeWidth = style.thumbStroke?.lineWidth ?? lineWidth
+                let radius = baseRadius + padding + (strokeWidth / 2)
 
             if colorCount <= 1 {
                 return AnyShape(RoundedRectangle(cornerRadius: radius, style: .continuous))

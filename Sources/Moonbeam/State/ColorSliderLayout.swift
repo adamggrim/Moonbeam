@@ -26,11 +26,11 @@ internal struct ColorSliderLayout {
     /// each side.
     var resolvedThumbThickness: CGFloat {
         switch thumbStyle {
-        case .colorOutline(_, let padding):
+        case .colorOutline(let lineWidth, let padding):
             let blockWidth = colorCount > 0
                 ? (resolvedLength / CGFloat(colorCount))
                 : (dimensions.thumbThickness ?? resolvedTrackThickness)
-            return blockWidth + (padding * 2)
+            return blockWidth + (padding * 2) + lineWidth
         case .standard:
             return dimensions.thumbThickness ?? resolvedTrackThickness
         }
@@ -68,8 +68,8 @@ internal struct ColorSliderLayout {
     /// on the main axis.
     var mainAxisThumbInset: CGFloat {
         switch thumbStyle {
-        case .colorOutline(_, let padding):
-            return -padding
+        case .colorOutline(let lineWidth, let padding):
+            return -(padding + (lineWidth / 2))
         case .standard:
             return (resolvedTrackThickness - resolvedThumbThickness) / 2
         }
