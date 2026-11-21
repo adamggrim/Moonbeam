@@ -36,10 +36,9 @@ For a given hue range, `Moonbeam` lets you bend saturation or brightness in spec
 
 This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
 
-1. **Initialize the state variables**
+1. **Initialize the state variable**
     ```swift
     @State private var progress: Double = 0.5
-    @State private var selectedColor: Color = .white
     ```
 
 2. **Create the slider and add modifiers:**
@@ -49,17 +48,21 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
     HSB spectrum:
 
     ```swift
+    let spectrum = Spectrum<HSB>(
+        startSections: [BlackSection()], // Fade from black
+        endSections: [WhiteSection()],   // Fade to white
+        startHue: 0.0,
+        endHue: 1.0,
+        saturationBends: {
+            OneWayBend(startHue: 0.0, endHue: 40.0 / 360, target: 0.5)
+        }
+    )
+
+    let selectedColor = spectrum.color(at: progress)
+
     ColorSlider(
         value: $progress,
-        colorProvider: Spectrum<HSB>(
-            startSections: [BlackSection()], // Fade from black
-            endSections: [WhiteSection()],   // Fade to white
-            startHue: 0.0,
-            endHue: 1.0,
-            saturationBends: {
-                OneWayBend(startHue: 0.0, endHue: 40.0 / 360, target: 0.5)
-            }
-        ),
+        colorProvider: spectrum,
         axis: .horizontal
     )
     .colorSliderStyle(
@@ -92,21 +95,23 @@ This example demonstrates how to create an HSB spectrum slider using `Moonbeam`.
 
 This example demonstrates how to create a gradient slider using `Moonbeam`.
 
-1. **Initialize the state variables**
+1. **Initialize the state variable**
 
-    ```swift
-    @State private var progress: Double = 0.0
-    @State private var selectedColor: Color = .cyan
-    ```
+```swift
+@State private var progress: Double = 0.0
+```
 
 2. **Create the slider and add modifiers**
 
     `Moonbeam` gradient sliders also support Oklch and Oklab color spaces.
 
     ```swift
+    let gradient = ColorGradient(colors: [.orange, .blue], colorSpace: .rgb)
+    let selectedColor = gradient.color(at: progress)
+
     ColorSlider(
         value: $progress,
-        colorProvider: ColorGradient(colors: [.orange, .blue], colorSpace: .rgb),
+        colorProvider: gradient,
         axis: .vertical
     )
     .colorSliderStyle(DefaultColorSliderStyle(
@@ -134,7 +139,10 @@ This example demonstrates how to create a hard-edge slider. `Moonbeam` supports 
 
     ```swift
     @State private var progress: Double = 0.0
-    @State private var selectedColor: Color = .green
+
+    var selectedColor: Color {
+        customStops.color(at: progress)
+    }
 
     var body: some View {
         ColorSlider(
@@ -147,11 +155,10 @@ This example demonstrates how to create a hard-edge slider. `Moonbeam` supports 
 
 ### Implicit
 
-1. **Initialize the state variables**
+1. **Initialize the state variable**
 
     ```swift
     @State private var progress: Double = 0.0
-    @State private var selectedColor: Color = .cyan
     ```
 
 2. **Create the slider and add modifiers**
@@ -159,10 +166,13 @@ This example demonstrates how to create a hard-edge slider. `Moonbeam` supports 
     Add the `.hardEdge(into:)` modifier to a gradient or spectrum slider to automatically sample the track.
 
     ```swift
+    let discreteGradient = ColorGradient(colors: [.red, .blue], colorSpace: .rgb)
+        .hardEdge(into: 6)
+    let selectedColor = discreteGradient.color(at: progress)
+
     ColorSlider(
         value: $progress,
-        colorProvider: ColorGradient(colors: [.red, .blue], colorSpace: .rgb)
-            .hardEdge(into: 6),
+        colorProvider: discreteGradient,
         axis: .horizontal
     )
     ```
