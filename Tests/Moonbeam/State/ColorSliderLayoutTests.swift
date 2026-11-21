@@ -57,4 +57,24 @@ import SwiftUI
         #expect(layout.previewMainAxisOffset == 70.0)
         #expect(abs(layout.previewScaleAnchor.x - 0.833) < 0.01)
     }
+
+    @Test("Press at 0.0 and 1.0 does not jump the normalized value")
+    func zeroTranslationPressAtEndpoints() {
+        for endpoint in [0.0, 1.0] {
+            var state = ColorSliderState()
+            state.updateDrag(translation: 0.0, currentValue: endpoint)
+
+            let layout = ColorSliderLayout(
+                state: state,
+                value: endpoint,
+                axis: .horizontal,
+                controlSize: .regular,
+                dimensions: ColorSliderDimensions(length: 200.0, thickness: 24.0),
+                previewPosition: nil,
+                previewSpacing: nil
+            )
+
+            #expect(layout.normalizedValue(for: state) == endpoint)
+        }
+    }
 }

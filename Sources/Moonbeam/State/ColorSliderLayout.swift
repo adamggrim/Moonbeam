@@ -89,9 +89,9 @@ internal struct ColorSliderLayout {
     /// The unclamped main-axis position of the thumb's leading edge during an
     /// active drag, or its resting position when idle.
     var liveContainerThumbDrag: CGFloat {
-        let baseValue = state.isDragging ? (state.dragStartValue ?? value) : value
-        let baseThumbPosition = thumbPosition(for: baseValue)
-        return state.isDragging ? baseThumbPosition + state.liveContainerDrag : baseThumbPosition
+        let baseValue = min(max(state.isDragging ? (state.dragStartValue ?? value) : value, 0.0), 1.0)
+        let unclampedBasePosition = (CGFloat(baseValue) * resolvedLength) - halfThumbThickness
+        return state.isDragging ? unclampedBasePosition + state.liveContainerDrag : unclampedBasePosition
     }
 
     /// The clamped main-axis position of the current selected color on the
