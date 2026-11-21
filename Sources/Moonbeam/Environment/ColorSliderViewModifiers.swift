@@ -150,21 +150,20 @@ public extension View {
         thumbLength: CGFloat? = nil,
         previewSize: CGFloat? = nil,
         previewOffset: CGFloat? = nil,
-        previewScale: CGFloat = ColorSliderDefaults.previewScale,
-        thumbDragScale: CGFloat = ColorSliderDefaults.thumbDragScale
+        previewScale: CGFloat? = nil,
+        thumbDragScale: CGFloat? = nil
     ) -> some View {
-        let dimensions = ColorSliderDimensions(
-            length: length,
-            thickness: thickness,
-            cornerRadius: cornerRadius,
-            thumbThickness: thumbThickness,
-            thumbLength: thumbLength,
-            previewSize: previewSize,
-            previewOffset: previewOffset,
-            previewScale: previewScale,
-            thumbDragScale: thumbDragScale
-        )
-        return environment(\.colorSliderDimensions, dimensions)
+        transformEnvironment(\.colorSliderDimensions) { dimensions in
+            if let length { dimensions.length = length }
+            if let thickness { dimensions.thickness = thickness }
+            if let cornerRadius { dimensions.cornerRadius = cornerRadius }
+            if let thumbThickness { dimensions.thumbThickness = thumbThickness }
+            if let thumbLength { dimensions.thumbLength = thumbLength }
+            if let previewSize { dimensions.previewSize = previewSize }
+            if let previewOffset { dimensions.previewOffset = previewOffset }
+            if let previewScale { dimensions.previewScale = previewScale }
+            if let thumbDragScale { dimensions.thumbDragScale = thumbDragScale }
+        }
     }
 
     /// Customizes the minimum distance to drag the thumb before the slider
