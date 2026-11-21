@@ -30,4 +30,24 @@ import SwiftUI
         )
         #expect(resolvedThumbLength == 31.0)
     }
+
+    @Test("Merging dimensions overrides non-nil values and preserves ancestor settings")
+    func mergePreservesAncestorValues() {
+        var dimensions = ColorSliderDimensions(
+            length: 200.0,
+            thickness: 24.0,
+            previewSize: 60.0,
+            previewScale: 0.5,
+            thumbDragScale: 1.25
+        )
+
+        dimensions.merge(thickness: 32.0, previewOffset: 80.0)
+
+        #expect(dimensions.length == 200.0)
+        #expect(dimensions.thickness == 32.0)
+        #expect(dimensions.previewSize == 60.0)
+        #expect(dimensions.previewOffset == 80.0)
+        #expect(dimensions.previewScale == 0.5)
+        #expect(dimensions.thumbDragScale == 1.25)
+    }
 }

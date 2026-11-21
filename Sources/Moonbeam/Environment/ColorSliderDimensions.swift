@@ -67,4 +67,28 @@ public struct ColorSliderDimensions: Sendable, Equatable {
             return thumbLength ?? (resolvedTrackThickness(for: controlSize) * 2)
         }
     }
+
+    /// Overrides non-`nil` dimension properties while preserving existing
+    /// values.
+    internal mutating func merge(
+        length: CGFloat? = nil,
+        thickness: CGFloat? = nil,
+        cornerRadius: CGFloat? = nil,
+        thumbThickness: CGFloat? = nil,
+        thumbLength: CGFloat? = nil,
+        previewSize: CGFloat? = nil,
+        previewOffset: CGFloat? = nil,
+        previewScale: CGFloat? = nil,
+        thumbDragScale: CGFloat? = nil
+    ) {
+        if let length { self.length = length }
+        if let thickness { self.thickness = thickness }
+        if let cornerRadius { self.cornerRadius = cornerRadius }
+        if let thumbThickness { self.thumbThickness = thumbThickness }
+        if let thumbLength { self.thumbLength = thumbLength }
+        if let previewSize { self.previewSize = previewSize }
+        if let previewOffset { self.previewOffset = previewOffset }
+        if let previewScale { self.previewScale = previewScale }
+        if let thumbDragScale { self.thumbDragScale = thumbDragScale }
+    }
 }
