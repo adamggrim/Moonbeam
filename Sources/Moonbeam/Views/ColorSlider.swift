@@ -254,10 +254,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             if let colorName = defaultName {
                 if hidePercentage { return Text(colorName) }
 
-                let format = String(
-                    localized: "color_slider_value_format",
-                    defaultValue: "%1$@, %2$@",
-                    bundle: .module
+                let format = SpectrumAccessibilityStrings.localized(
+                    "color_slider_value_format",
+                    defaultValue: "%1$@, %2$@"
                 )
                 return Text(String(format: format, colorName, percentage))
             }

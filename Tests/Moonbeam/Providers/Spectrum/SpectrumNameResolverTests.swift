@@ -96,4 +96,22 @@ import Foundation
         #expect(spectrum.accessibilityColorName(for: 0.5) == SpectrumAccessibilityStrings.shared.cyan)
         #expect(spectrum.accessibilityColorName(for: 1.0) == SpectrumAccessibilityStrings.shared.white)
     }
+
+    @Test("Spectrum uses custom accessibility strings when provided")
+    func spectrumCustomAccessibilityStrings() {
+        let spectrum = Spectrum<HSB>(
+            startSections: [BlackSection(fraction: 0.2)],
+            endSections: [WhiteSection(fraction: 0.2)],
+            startHue: 0.0,
+            endHue: 1.0,
+            saturation: 0.6,
+            brightness: 1.0,
+            accessibilityStrings: strings
+        )
+
+        #expect(spectrum.accessibilityColorName(for: 0.0) == strings.black)
+        #expect(spectrum.accessibilityColorName(for: 0.2) == strings.red)
+        #expect(spectrum.accessibilityColorName(for: 0.5) == strings.cyan)
+        #expect(spectrum.accessibilityColorName(for: 1.0) == strings.white)
+    }
 }

@@ -43,6 +43,9 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
     let secondaryBends: [BendSection]
     private let configuration: SpectrumConfiguration
 
+    /// The localized strings used to announce VoiceOver color descriptions.
+    public let accessibilityStrings: SpectrumAccessibilityStrings
+
     /// The target RGB color gamut used to render the spectrum.
     public let gamut: ColorGamut
 
@@ -60,7 +63,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
             primary: comps.primary,
             secondary: comps.secondary,
             colorSpace: ColorSpace.colorSpace,
-            strings: .shared
+            strings: accessibilityStrings
         )
     }
 
@@ -75,7 +78,8 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         secondaryBends: [BendSection],
         primaryName: String,
         secondaryName: String,
-        gamut: ColorGamut
+        gamut: ColorGamut,
+        accessibilityStrings: SpectrumAccessibilityStrings = .shared
     ) {
         let validMonochromeSections = validateMonochromeSections(
             startSections: startSections,
@@ -94,6 +98,7 @@ public struct Spectrum<ColorSpace: SpectrumColorSpaceProfile>: ColorProvider {
         self.primaryBends = validPrimaryBends
         self.secondaryBends = validSecondaryBends
         self.gamut = gamut
+        self.accessibilityStrings = accessibilityStrings
 
         let configuration = SpectrumConfiguration(
             colorSpace: ColorSpace.colorSpace,
@@ -194,6 +199,7 @@ public extension Spectrum where ColorSpace == HSB {
         saturation: Double = 1.0,
         brightness: Double = 1.0,
         gamut: ColorGamut = .displayP3,
+        accessibilityStrings: SpectrumAccessibilityStrings = SpectrumAccessibilityStrings(),
         @BendSectionBuilder saturationBends: () -> [BendSection] = { [] },
         @BendSectionBuilder brightnessBends: () -> [BendSection] = { [] }
     ) {
@@ -208,7 +214,8 @@ public extension Spectrum where ColorSpace == HSB {
             secondaryBends: brightnessBends(),
             primaryName: "Saturation",
             secondaryName: "Brightness",
-            gamut: gamut
+            gamut: gamut,
+            accessibilityStrings: accessibilityStrings
         )
     }
 }
@@ -243,6 +250,7 @@ public extension Spectrum where ColorSpace == Oklch {
         startHue: Double = 0.0,
         endHue: Double = 1.0,
         gamut: ColorGamut = .displayP3,
+        accessibilityStrings: SpectrumAccessibilityStrings = SpectrumAccessibilityStrings(),
         @BendSectionBuilder lightnessBends: () -> [BendSection] = { [] },
         @BendSectionBuilder chromaBends: () -> [BendSection] = { [] }
     ) {
@@ -257,7 +265,8 @@ public extension Spectrum where ColorSpace == Oklch {
             secondaryBends: lightnessBends(),
             primaryName: "Chroma",
             secondaryName: "Lightness",
-            gamut: gamut
+            gamut: gamut,
+            accessibilityStrings: accessibilityStrings
         )
     }
 }

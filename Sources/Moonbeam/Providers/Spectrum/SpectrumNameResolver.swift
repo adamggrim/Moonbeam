@@ -1,49 +1,105 @@
 import Foundation
 
-/// An explicit configuration object that allows host apps to override default
-/// VoiceOver translations.
+/// A configuration object that allows host apps to override default VoiceOver
+/// translations.
 public struct SpectrumAccessibilityStrings: Sendable {
-    /// Shared default instance initialized once per process to avoid repeated bundle lookups.
+    private static let missingTranslationSentinel = "\u{FFFF}_MOONBEAM_MISSING_"
+
+    /// Shared default instance initialized once per process to avoid repeated
+    /// bundle lookups.
     internal static let shared = SpectrumAccessibilityStrings()
 
+    /// Resolves a localized accessibility string, first from the specified
+    /// bundle, then the package bundle, then the default.
+    internal static func localized(
+        _ key: String,
+        defaultValue: String? = nil,
+        table: String? = nil,
+        bundle: Bundle = .main
+    ) -> String {
+        let resolved = bundle.localizedString(
+            forKey: key,
+            value: missingTranslationSentinel,
+            table: table
+        )
+        if resolved != missingTranslationSentinel {
+            return resolved
+        }
+        return Bundle.module.localizedString(
+            forKey: key,
+            value: defaultValue ?? key,
+            table: table
+        )
+    }
+
     /// The localized accessibility string for gray colors.
-    public var gray: String = String(localized: "gray", bundle: .module)
+    public var gray: String
     /// The localized accessibility string for white colors.
-    public var white: String = String(localized: "white", bundle: .module)
+    public var white: String
     /// The localized accessibility string for black colors.
-    public var black: String = String(localized: "black", bundle: .module)
+    public var black: String
 
     /// The localized accessibility string for red colors.
-    public var red: String = String(localized: "red", bundle: .module)
+    public var red: String
     /// The localized accessibility string for orange colors.
-    public var orange: String = String(localized: "orange", bundle: .module)
+    public var orange: String
     /// The localized accessibility string for yellow colors.
-    public var yellow: String = String(localized: "yellow", bundle: .module)
+    public var yellow: String
     /// The localized accessibility string for green colors.
-    public var green: String = String(localized: "green", bundle: .module)
+    public var green: String
     /// The localized accessibility string for cyan colors.
-    public var cyan: String = String(localized: "cyan", bundle: .module)
+    public var cyan: String
     /// The localized accessibility string for blue colors.
-    public var blue: String = String(localized: "blue", bundle: .module)
+    public var blue: String
     /// The localized accessibility string for purple colors.
-    public var purple: String = String(localized: "purple", bundle: .module)
+    public var purple: String
     /// The localized accessibility string for pink colors.
-    public var pink: String = String(localized: "pink", bundle: .module)
+    public var pink: String
 
     /// The localized tone modifier for light colors.
-    public var light: String? = String(localized: "light", bundle: .module)
+    public var light: String?
     /// The localized tone modifier for dark colors.
-    public var dark: String? = String(localized: "dark", bundle: .module)
+    public var dark: String?
     /// The localized tone modifier for bright colors.
-    public var bright: String? = String(localized: "bright", bundle: .module)
+    public var bright: String?
     /// The localized tone modifier for dull colors.
-    public var dull: String? = String(localized: "dull", bundle: .module)
+    public var dull: String?
 
     /// The format string used to combine tone modifiers and base color names.
-    public var format: String = String(localized: "color_name_format", defaultValue: "%1$@ %2$@", bundle: .module)
+    public var format: String
 
     /// Initializes a new set of localized accessibility strings.
-    public init() {}
+    ///
+    /// - Parameters:
+    ///   - bundle: The bundle searched first for localized keys. Defaults to
+    ///     `Bundle.main`.
+    ///   - table: An optional `.strings` or `.xcstrings` table name.
+    public init(bundle: Bundle = .main, table: String? = nil) {
+        self.gray = Self.localized("gray", table: table, bundle: bundle)
+        self.white = Self.localized("white", table: table, bundle: bundle)
+        self.black = Self.localized("black", table: table, bundle: bundle)
+
+        self.red = Self.localized("red", table: table, bundle: bundle)
+        self.orange = Self.localized("orange", table: table, bundle: bundle)
+        self.yellow = Self.localized("yellow", table: table, bundle: bundle)
+        self.green = Self.localized("green", table: table, bundle: bundle)
+        self.cyan = Self.localized("cyan", table: table, bundle: bundle)
+        self.blue = Self.localized("blue", table: table, bundle: bundle)
+        self.purple = Self.localized("purple", table: table, bundle: bundle)
+        self.pink = Self.localized("pink", table: table, bundle: bundle)
+
+        self.light = Self.localized("light", table: table, bundle: bundle)
+        self.dark = Self.localized("dark", table: table, bundle: bundle)
+        self.bright = Self.localized("bright", table: table, bundle: bundle)
+        self.dull = Self.localized("dull", table: table, bundle: bundle)
+
+        self.format = Self.localized(
+            "color_name_format",
+            defaultValue: "%1$@ %2$@",
+            table: table,
+            bundle: bundle
+        )
+    }
 }
 
 /// Thresholds for VoiceOver color descriptions.
