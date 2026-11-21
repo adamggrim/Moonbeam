@@ -106,7 +106,7 @@ This example demonstrates how to create a gradient slider using `Moonbeam`.
     ```swift
     ColorSlider(
         value: $progress,
-        colorProvider: ColorGradient(startColor: .orange, endColor: .blue, colorSpace: .rgb),
+        colorProvider: ColorGradient(colors: [.orange, .blue], colorSpace: .rgb),
         axis: .vertical
     )
     .colorSliderStyle(DefaultColorSliderStyle(
@@ -161,7 +161,7 @@ This example demonstrates how to create a hard-edge slider. `Moonbeam` supports 
     ```swift
     ColorSlider(
         value: $progress,
-        colorProvider: ColorGradient(startColor: .red, endColor: .blue, colorSpace: .rgb)
+        colorProvider: ColorGradient(colors: [.red, .blue], colorSpace: .rgb)
             .hardEdge(into: 6),
         axis: .horizontal
     )
