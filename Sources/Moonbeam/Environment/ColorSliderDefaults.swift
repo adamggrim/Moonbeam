@@ -64,10 +64,24 @@ public enum ColorSliderDefaults {
     public static let strokeLineWidth: CGFloat = 1.0
     /// The default duration for slider animation in seconds.
     public static let animationDuration: Double = 0.25
-    /// The default duration for the thumb bounce spring animation in seconds.
+    /// The default duration for the positional thumb spring animation in
+    /// seconds.
     public static let thumbBounceDuration: Double = 0.4
-    /// The default bounce for the thumb spring animation (0.0 to 1.0).
+    /// The default bounce for the positional thumb spring animation (0.0 to
+    /// 1.0).
     public static let thumbBounce: Double = 0.4
+    /// The default duration for the thumb spring overshoot animation in
+    /// seconds.
+    public static let thumbScaleBounceDuration: Double = 0.35
+    /// The default bounce for the thumb spring overshoot animation (0.0 to
+    /// 1.0).
+    public static let thumbScaleBounce: Double = 0.4
+    /// The default asymptotic maximum distance in points the thumb can move
+    /// past a track boundary during rubber banding.
+    public static let rubberBandLimit: CGFloat = 24.0
+    /// The default resistance coefficient controlling how quickly the thumb
+    /// slows down past a track boundary during rubber banding.
+    public static let rubberBandResistance: CGFloat = 0.55
     /// The minimum interactive touch target size in points.
     public static let minimumTouchTarget: CGFloat = 44.0
 }

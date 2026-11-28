@@ -33,6 +33,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
     @Environment(\.colorSliderThumbStyle) private var thumbStyle
     @Environment(\.colorSliderSnapsToColor) private var snapsToColor
     @Environment(\.colorSliderThumbBounce) private var thumbBounce
+    @Environment(\.colorSliderSpringDuration) private var springDuration
+    @Environment(\.colorSliderSpringBounce) private var springBounce
+    @Environment(\.colorSliderRubberBanding) private var rubberBanding
     @Environment(\.colorSliderTapToSeek) private var tapToSeek
 
     /// A localized string key used for VoiceOver accessibility.
@@ -82,8 +85,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         self.colorProvider = colorProvider
         self.label = label
         self.axis = axis
-            self.preview = previewView
-        }
+        self.preview = previewView
+    }
 
     private var colorCount: Int {
         if case .array(let colors) = colorProvider.colorSource {
@@ -103,14 +106,6 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             thumbOuterLength = dimensions.resolvedThumbLength(for: controlSize, thumbStyle: thumbStyle)
         }
         return max(dimensions.resolvedTrackThickness(for: controlSize), thumbOuterLength)
-    }
-
-    /// Whether thumb bounce is active. True for `.colorOutline`, otherwise
-    /// false.
-    private var resolvedThumbBounce: Bool {
-        if let explicitlySet = thumbBounce { return explicitlySet }
-        if case .colorOutline = thumbStyle { return true }
-        return false
     }
 
     /// Whether the slider snaps to discrete color blocks. True for
@@ -179,7 +174,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                 previewSpacing: previewSpacing,
                 layoutDirection: layoutDirection,
                 thumbStyle: thumbStyle,
-                colorCount: colorCount
+                colorCount: colorCount,
+                rubberBanding: rubberBanding
             )
 
             let configuration = ColorSliderStyleConfiguration(
@@ -236,7 +232,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
                     if sliderState.isDragging || reduceMotion {
                         transaction.animation = nil
                     } else if transaction.animation == nil {
-                        transaction.animation = animation
+                        transaction.animation = thumbMovementAnimation
                     }
                 }
                 .opacity(isEnabled ? 1.0 : 0.5)
@@ -279,6 +275,22 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         }
     }
 
+    private var dragAnimation: Animation? {
+        reduceMotion ? nil : animation
+    }
+
+    /// The animation used for thumb and preview movement when tapping,
+    /// stepping or updating `value` externally.
+    private var thumbMovementAnimation: Animation? {
+        guard !reduceMotion else { return nil }
+        return thumbBounce
+            ? .spring(
+                duration: springDuration,
+                bounce: springBounce
+            )
+            : animation
+    }
+
     /// Updates the view's state when the position of the `DragGesture`
     /// changes.
     ///
@@ -295,7 +307,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         let translation = axis == .horizontal ? horizontalTranslation : -dragValue.translation.height
 
         if !sliderState.isDragging {
-            withAnimation(reduceMotion ? nil : animation) { sliderState.isDragging = true }
+            withAnimation(dragAnimation) { sliderState.isDragging = true }
         }
 
         sliderState.updateDrag(translation: translation, currentValue: value)
@@ -309,15 +321,16 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
 
         let releaseAnimation: Animation? = {
             guard !reduceMotion else { return nil }
-            guard resolvedThumbBounce else { return animation }
+            guard thumbBounce else { return animation }
+
+            let targetThumbPosition = layout.thumbPosition(for: targetValue)
+            let distancePoints = targetThumbPosition - layout.liveThumbPosition
+            guard abs(distancePoints) >= 0.001 else { return animation }
 
             let horizontalVelocity = layout.layoutDirection == .rightToLeft
                 ? -dragValue.velocity.width
                 : dragValue.velocity.width
             let axisVelocity = axis == .horizontal ? horizontalVelocity : -dragValue.velocity.height
-
-            let targetThumbPosition = layout.thumbPosition(for: targetValue)
-            let distancePoints = targetThumbPosition - layout.liveThumbPosition
 
             let normalizedVelocity: Double
             if abs(distancePoints) >= 1.0 {
@@ -327,8 +340,8 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             }
 
             return .interpolatingSpring(
-                duration: ColorSliderDefaults.thumbBounceDuration,
-                bounce: ColorSliderDefaults.thumbBounce,
+                duration: springDuration,
+                bounce: springBounce,
                 initialVelocity: normalizedVelocity
             )
         }()
@@ -347,29 +360,9 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
         let rawValue = layout.normalizedValue(forTrackLocation: location)
         let targetValue = resolvedTargetValue(for: rawValue, layout: layout)
 
-        let tapAnimation: Animation? = {
-            guard !reduceMotion else { return nil }
-            return resolvedThumbBounce
-                ? .spring(
-                    duration: ColorSliderDefaults.thumbBounceDuration,
-                    bounce: ColorSliderDefaults.thumbBounce
-                )
-                : animation
-        }()
-
-        withAnimation(tapAnimation) {
+        withAnimation(thumbMovementAnimation) {
             value = targetValue
         }
-    }
-
-    private var stepAnimation: Animation? {
-        guard !reduceMotion else { return nil }
-        return resolvedThumbBounce
-            ? .spring(
-                duration: ColorSliderDefaults.thumbBounceDuration,
-                bounce: ColorSliderDefaults.thumbBounce
-            )
-            : animation
     }
 
     private func stepValue(by steps: Int) {
@@ -383,7 +376,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             targetValue = min(max(value + (Double(steps) * accessibilityStep), 0.0), 1.0)
         }
 
-        withAnimation(stepAnimation) {
+        withAnimation(thumbMovementAnimation) {
             value = targetValue
         }
     }
@@ -397,7 +390,7 @@ public struct ColorSlider<Source: ColorProvider, Preview: View>: View {
             targetValue = boundary
         }
 
-        withAnimation(stepAnimation) {
+        withAnimation(thumbMovementAnimation) {
             value = targetValue
         }
     }

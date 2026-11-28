@@ -9,13 +9,15 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     public var trackShape: AnyShape?
     /// The stroke applied to the slider track.
     public var trackStroke: ShapeStroke?
+    /// The shadow applied to the slider track.
+    public var trackShadow: ShapeShadow?
     /// The shape of the draggable thumb.
     public var thumbShape: AnyShape?
     /// The fill color of the draggable thumb.
     public var thumbColor: Color
     /// The stroke styling applied to the draggable thumb.
     public var thumbStroke: ShapeStroke?
-    /// The shadow properties applied to the draggable thumb.
+    /// The shadow applied to the draggable thumb.
     public var thumbShadow: ShapeShadow
     /// Determines when to render the draggable thumb with Liquid Glass.
     public var liquidGlassThumb: LiquidGlassThumb?
@@ -23,7 +25,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     public var previewShape: AnyShape?
     /// The stroke styling applied to the floating color preview.
     public var previewStroke: ShapeStroke?
-    /// The shadow properties applied to the floating color preview.
+    /// The shadow applied to the floating color preview.
     public var previewShadow: ShapeShadow
 
     /// Initializes a default color slider style.
@@ -31,18 +33,20 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     /// - Parameters:
     ///   - trackShape: The shape of the slider track.
     ///   - trackStroke: The stroke applied to the slider track.
+    ///   - trackShadow: The shadow applied to the slider track.
     ///   - thumbShape: The shape of the draggable thumb.
     ///   - thumbColor: The fill color of the draggable thumb.
     ///   - thumbStroke: The stroke styling applied to the draggable thumb.
-    ///   - thumbShadow: The shadow properties applied to the draggable thumb.
+    ///   - thumbShadow: The shadow applied to the draggable thumb.
     ///   - liquidGlassThumb: Determines when to render the thumb with Liquid
     ///     Glass.
     ///   - previewShape: The shape applied to the floating color preview.
     ///   - previewStroke: The stroke styling applied to the floating color preview.
-    ///   - previewShadow: The shadow properties applied to the floating color preview.
+    ///   - previewShadow: The shadow applied to the floating color preview.
     public init(
         trackShape: AnyShape? = nil,
         trackStroke: ShapeStroke? = nil,
+        trackShadow: ShapeShadow? = nil,
         thumbShape: AnyShape? = nil,
         thumbColor: Color = .white,
         thumbStroke: ShapeStroke? = nil,
@@ -54,6 +58,7 @@ public struct DefaultColorSliderStyle: ColorSliderStyle {
     ) {
         self.trackShape = trackShape
         self.trackStroke = trackStroke
+        self.trackShadow = trackShadow
         self.thumbShape = thumbShape
         self.thumbColor = thumbColor
         self.thumbStroke = thumbStroke
@@ -75,8 +80,35 @@ private struct DefaultColorSliderStyleView: View {
 
     @Environment(\.colorSliderLiquidGlassThumb) private var defaultLiquidGlassThumb
     @Environment(\.colorSliderThumbStyle) private var thumbStyle
+    @Environment(\.colorSliderThumbBounce) private var thumbBounce
+    @Environment(\.colorSliderThumbScaleBounce) private var thumbScaleBounce
     @Environment(\.colorSliderDimensions) private var dimensions
     @Environment(\.controlSize) private var controlSize
+    @Environment(\.colorSliderAnimation) private var animation
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var dragAnimation: Animation? {
+        reduceMotion ? nil : animation
+    }
+
+    /// The animation applied to the thumb's scale on drag start and
+    /// release, using spring overshoot by default when `thumbScaleBounce` is
+    /// enabled.
+    private var thumbScaleAnimation: Animation? {
+        guard !reduceMotion else { return nil }
+        return thumbScaleBounce
+            ? .spring(
+                duration: ColorSliderDefaults.thumbScaleBounceDuration,
+                bounce: ColorSliderDefaults.thumbScaleBounce
+            )
+            : animation
+    }
+
+    /// The easing animation applied to thumb and preview position when spring
+    /// bounce is disabled.
+    private var positionAnimation: Animation? {
+        (configuration.isDragging || reduceMotion) ? nil : animation
+    }
 
     var body: some View {
         ZStack(alignment: configuration.axis == .horizontal ? .leading : .bottom) {
@@ -88,86 +120,133 @@ private struct DefaultColorSliderStyleView: View {
                         resolvedTrackShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
                     }
                 }
+                .shadow(
+                    color: style.trackShadow?.color ?? .clear,
+                    radius: style.trackShadow?.radius ?? 0,
+                    x: style.trackShadow?.x ?? 0,
+                    y: style.trackShadow?.y ?? 0
+                )
 
-            configuration.thumb
-                .overlay {
-                    let shape = resolvedThumbShape
-                    let dynamicScale: CGFloat = configuration.isDragging ? dimensions.thumbDragScale : 1.0
+            applyPositionOffset(configuration.thumbOffset) {
+                configuration.thumb
+                    .overlay {
+                        let dynamicScale: CGFloat = configuration.isDragging ? dimensions.thumbDragScale : 1.0
 
-                    Group {
-                        switch thumbStyle {
-                        case .colorOutline(let lineWidth, _):
-                            let strokeStyle = style.thumbStroke?.style ?? AnyShapeStyle(style.thumbColor)
-                            let strokeWidth = style.thumbStroke?.lineWidth ?? lineWidth
-                            shape.stroke(strokeStyle, lineWidth: strokeWidth)
-
-                        case .standard:
-                            let activeLiquidGlassThumb = style.liquidGlassThumb ?? defaultLiquidGlassThumb
-                            let isLiquidGlassActive: Bool = {
-                                if #available(iOS 26.0, macOS 26.0, *) {
-                                    return activeLiquidGlassThumb == .always
-                                        || (activeLiquidGlassThumb == .dragging && configuration.isDragging)
-                                }
-                                return false
-                            }()
-
-                            Group {
-#if compiler(>=6.2)
-                                if #available(iOS 26.0, macOS 26.0, *), activeLiquidGlassThumb != .disabled {
-                                    Color.clear
-                                        .glassEffect(
-                                            isLiquidGlassActive ? .regular.interactive(true) : .identity, in: shape
-                                        )
-                                        .overlay(shape.fill(style.thumbColor).opacity(isLiquidGlassActive ? 0.0 : 1.0))
+                        Group {
+                            switch thumbStyle {
+                            case .colorOutline(let lineWidth, let padding):
+                                let strokeStyle = style.thumbStroke?.style ?? AnyShapeStyle(style.thumbColor)
+                                let strokeWidth = style.thumbStroke?.lineWidth ?? lineWidth
+                                if let customShape = style.thumbShape {
+                                    customShape.stroke(strokeStyle, lineWidth: strokeWidth)
                                 } else {
-                                    shape.fill(style.thumbColor)
+                                    resolvedColorOutlineShape(lineWidth: lineWidth, padding: padding)
+                                        .stroke(strokeStyle, lineWidth: strokeWidth)
+                                        .transaction(value: configuration.value) { transaction in
+                                            if configuration.isDragging || reduceMotion {
+                                                transaction.animation = nil
+                                            } else if !thumbBounce {
+                                                transaction.animation = animation
+                                            }
+                                        }
                                 }
+
+                            case .standard:
+                                let shape = resolvedThumbShape
+                                let activeLiquidGlassThumb = style.liquidGlassThumb ?? defaultLiquidGlassThumb
+                                let isLiquidGlassActive: Bool = {
+                                    if #available(iOS 26.0, macOS 26.0, *) {
+                                        return activeLiquidGlassThumb == .always
+                                            || (activeLiquidGlassThumb == .dragging && configuration.isDragging)
+                                    }
+                                    return false
+                                }()
+
+                                Group {
+#if compiler(>=6.2)
+                                    if #available(iOS 26.0, macOS 26.0, *), activeLiquidGlassThumb != .disabled {
+                                        Color.clear
+                                            .glassEffect(
+                                                isLiquidGlassActive ? .regular.interactive(true) : .identity, in: shape
+                                            )
+                                            .overlay(shape.fill(style.thumbColor).opacity(isLiquidGlassActive ? 0.0 : 1.0))
+                                            .transaction(value: isLiquidGlassActive) { transaction in
+                                                transaction.animation = dragAnimation
+                                            }
+                                    } else {
+                                        shape.fill(style.thumbColor)
+                                    }
 #else
-                                shape.fill(style.thumbColor)
+                                    shape.fill(style.thumbColor)
 #endif
-                            }
-                            .overlay {
-                                if let stroke = style.thumbStroke {
-                                    shape.stroke(stroke.style, lineWidth: stroke.lineWidth)
+                                }
+                                .overlay {
+                                    if let stroke = style.thumbStroke {
+                                        shape.stroke(stroke.style, lineWidth: stroke.lineWidth)
+                                    }
                                 }
                             }
                         }
+                        .animation(thumbScaleAnimation) { content in
+                            content.scaleEffect(dynamicScale)
+                        }
+                        .shadow(
+                            color: style.thumbShadow.color,
+                            radius: style.thumbShadow.radius,
+                            x: style.thumbShadow.x,
+                            y: style.thumbShadow.y
+                        )
+                        .allowsHitTesting(false)
                     }
-                    .scaleEffect(dynamicScale)
-                    .shadow(
-                        color: style.thumbShadow.color,
-                        radius: style.thumbShadow.radius,
-                        x: style.thumbShadow.x,
-                        y: style.thumbShadow.y
-                    )
-                    .allowsHitTesting(false)
-                }
 #if !os(macOS)
-                .contentShape(.hoverEffect, resolvedThumbShape)
-                .hoverEffect()
+                    .contentShape(.hoverEffect, resolvedThumbShape)
+                    .hoverEffect()
 #endif
-                .offset(configuration.thumbOffset)
+            }
 
-            configuration.preview
-                .clipShape(resolvedPreviewShape)
-                .overlay {
-                    if let stroke = style.previewStroke {
-                        resolvedPreviewShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
+            applyPositionOffset(configuration.previewOffset) {
+                configuration.preview
+                    .clipShape(resolvedPreviewShape)
+                    .overlay {
+                        if let stroke = style.previewStroke {
+                            resolvedPreviewShape.stroke(stroke.style, lineWidth: stroke.lineWidth)
+                        }
                     }
+                    .shadow(
+                        color: style.previewShadow.color,
+                        radius: style.previewShadow.radius,
+                        x: style.previewShadow.x,
+                        y: style.previewShadow.y
+                    )
+                    .animation(dragAnimation) { content in
+                        content
+                            .scaleEffect(
+                                (!configuration.isDragging) ? dimensions.previewScale : 1.0,
+                                anchor: configuration.previewScaleAnchor
+                            )
+                            .opacity((!configuration.isDragging) ? 0.0 : 1.0)
+                    }
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+
+    /// Applies the positional offset for the thumb or preview, scoping easing
+    /// directly when positional spring bounce is disabled and deferring to the
+    /// parent spring transaction when bounce is enabled.
+    @ViewBuilder
+    private func applyPositionOffset<Content: View>(
+        _ offset: CGSize,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        if thumbBounce {
+            content()
+                .offset(offset)
+        } else {
+            content()
+                .animation(positionAnimation) { view in
+                    view.offset(offset)
                 }
-                .shadow(
-                    color: style.previewShadow.color,
-                    radius: style.previewShadow.radius,
-                    x: style.previewShadow.x,
-                    y: style.previewShadow.y
-                )
-                .scaleEffect(
-                    (!configuration.isDragging) ? dimensions.previewScale : 1.0,
-                    anchor: configuration.previewScaleAnchor
-                )
-                .opacity((!configuration.isDragging) ? 0.0 : 1.0)
-                .offset(configuration.previewOffset)
-                .allowsHitTesting(false)
         }
     }
 
@@ -180,47 +259,60 @@ private struct DefaultColorSliderStyleView: View {
         }
     }
 
+    /// Resolves the rounded-rectangle geometry for a `.colorOutline` thumb so
+    /// corner radius transitions remain animatable.
+    private func resolvedColorOutlineShape(
+        lineWidth: CGFloat,
+        padding: CGFloat
+    ) -> UnevenRoundedRectangle {
+        let colorCount = configuration.colorCount
+        let baseRadius = dimensions.cornerRadius ?? (dimensions.resolvedTrackThickness(for: controlSize) / 2)
+        let strokeWidth = style.thumbStroke?.lineWidth ?? lineWidth
+        let radius = baseRadius + padding + (strokeWidth / 2)
+
+        if colorCount <= 1 {
+            return UnevenRoundedRectangle(
+                topLeadingRadius: radius,
+                bottomLeadingRadius: radius,
+                bottomTrailingRadius: radius,
+                topTrailingRadius: radius,
+                style: .continuous
+            )
+        }
+
+        // Morph the outer corners from rounded to sharp.
+        let firstBlockMultiplier = max(0.0, min(1.0, 2.0 * (1.0 - (configuration.value * Double(colorCount)))))
+        let lastBlockMultiplier = max(
+            0.0, min(1.0, 2.0 * ((configuration.value * Double(colorCount)) - Double(colorCount - 1)))
+        )
+
+        let firstRadius = radius * firstBlockMultiplier
+        let lastRadius = radius * lastBlockMultiplier
+
+        if configuration.axis == .horizontal {
+            return UnevenRoundedRectangle(
+                topLeadingRadius: firstRadius,
+                bottomLeadingRadius: firstRadius,
+                bottomTrailingRadius: lastRadius,
+                topTrailingRadius: lastRadius,
+                style: .continuous
+            )
+        } else {
+            return UnevenRoundedRectangle(
+                topLeadingRadius: lastRadius,
+                bottomLeadingRadius: firstRadius,
+                bottomTrailingRadius: firstRadius,
+                topTrailingRadius: lastRadius,
+                style: .continuous
+            )
+        }
+    }
+
     private var resolvedThumbShape: AnyShape {
         if let shape = style.thumbShape { return shape }
         switch thumbStyle {
-            case .colorOutline(let lineWidth, let padding):
-                let colorCount = configuration.colorCount
-
-                let baseRadius = dimensions.cornerRadius ?? (dimensions.resolvedTrackThickness(for: controlSize) / 2)
-                let strokeWidth = style.thumbStroke?.lineWidth ?? lineWidth
-                let radius = baseRadius + padding + (strokeWidth / 2)
-
-            if colorCount <= 1 {
-                return AnyShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-            }
-
-            // Morph the outer corners from rounded to sharp.
-            let firstBlockMultiplier = max(0.0, min(1.0, 2.0 * (1.0 - (configuration.value * Double(colorCount)))))
-            let lastBlockMultiplier = max(
-                0.0, min(1.0, 2.0 * ((configuration.value * Double(colorCount)) - Double(colorCount - 1)))
-            )
-
-            let firstRadius = radius * firstBlockMultiplier
-            let lastRadius = radius * lastBlockMultiplier
-
-            if configuration.axis == .horizontal {
-                return AnyShape(UnevenRoundedRectangle(
-                    topLeadingRadius: firstRadius,
-                    bottomLeadingRadius: firstRadius,
-                    bottomTrailingRadius: lastRadius,
-                    topTrailingRadius: lastRadius,
-                    style: .continuous
-                ))
-            } else {
-                return AnyShape(UnevenRoundedRectangle(
-                    topLeadingRadius: lastRadius,
-                    bottomLeadingRadius: firstRadius,
-                    bottomTrailingRadius: firstRadius,
-                    topTrailingRadius: lastRadius,
-                    style: .continuous
-                ))
-            }
-
+        case .colorOutline(let lineWidth, let padding):
+            return AnyShape(resolvedColorOutlineShape(lineWidth: lineWidth, padding: padding))
         case .standard:
             return AnyShape(Capsule(style: .continuous))
         }

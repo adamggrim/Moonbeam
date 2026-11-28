@@ -35,6 +35,18 @@ public enum LiquidGlassThumb: Sendable, Equatable {
     case disabled
 }
 
+/// Encapsulates the boundary resistance parameters applied when dragging past
+/// the ends of the slider track.
+internal struct ColorSliderRubberBandingConfiguration: Sendable, Equatable {
+    /// Indicates whether boundary rubber banding is enabled.
+    var isEnabled: Bool = false
+    /// The asymptotic maximum displacement in points past a track boundary.
+    var limit: CGFloat = ColorSliderDefaults.rubberBandLimit
+    /// The resistance coefficient controlling drag deceleration past a
+    /// boundary.
+    var resistance: CGFloat = ColorSliderDefaults.rubberBandResistance
+}
+
 // MARK: - Environment keys
 
 private struct LiquidGlassThumbKey: EnvironmentKey { static let defaultValue: LiquidGlassThumb = .dragging }
@@ -54,7 +66,17 @@ private struct AccessibilityFormatterKey: EnvironmentKey {
 }
 private struct ThumbStyleKey: EnvironmentKey { static let defaultValue: ColorSliderThumbStyle = .standard }
 private struct SnapToColorKey: EnvironmentKey { static let defaultValue: Bool? = nil }
-private struct ThumbBounceKey: EnvironmentKey { static let defaultValue: Bool? = nil }
+private struct ThumbBounceKey: EnvironmentKey { static let defaultValue: Bool = false }
+private struct SpringDurationKey: EnvironmentKey {
+    static let defaultValue: Double = ColorSliderDefaults.thumbBounceDuration
+}
+private struct SpringBounceKey: EnvironmentKey {
+    static let defaultValue: Double = ColorSliderDefaults.thumbBounce
+}
+private struct ThumbScaleBounceKey: EnvironmentKey { static let defaultValue: Bool = true }
+private struct RubberBandingKey: EnvironmentKey {
+    static let defaultValue = ColorSliderRubberBandingConfiguration()
+}
 private struct TapToSeekKey: EnvironmentKey { static let defaultValue: Bool = false }
 
 extension EnvironmentValues {
@@ -68,9 +90,29 @@ extension EnvironmentValues {
         set { self[SnapToColorKey.self] = newValue }
     }
 
-    var colorSliderThumbBounce: Bool? {
+    var colorSliderThumbBounce: Bool {
         get { self[ThumbBounceKey.self] }
         set { self[ThumbBounceKey.self] = newValue }
+    }
+
+    var colorSliderSpringDuration: Double {
+        get { self[SpringDurationKey.self] }
+        set { self[SpringDurationKey.self] = newValue }
+    }
+
+    var colorSliderSpringBounce: Double {
+        get { self[SpringBounceKey.self] }
+        set { self[SpringBounceKey.self] = newValue }
+    }
+
+    var colorSliderThumbScaleBounce: Bool {
+        get { self[ThumbScaleBounceKey.self] }
+        set { self[ThumbScaleBounceKey.self] = newValue }
+    }
+
+    var colorSliderRubberBanding: ColorSliderRubberBandingConfiguration {
+        get { self[RubberBandingKey.self] }
+        set { self[RubberBandingKey.self] = newValue }
     }
 
     var colorSliderTapToSeek: Bool {
@@ -182,9 +224,41 @@ public extension View {
         environment(\.colorSliderAccessibilityStep, step)
     }
 
-    /// Sets the animation used when the drag gesture starts and ends.
+    /// Sets the animation used for drag start and end transitions.
     func colorSliderAnimation(_ animation: Animation) -> some View {
         environment(\.colorSliderAnimation, animation)
+    }
+
+    /// Configures thumb and preview positional movement to use an ease-in,
+    /// ease-out timing curve with no positional overshoot.
+    ///
+    /// - Parameter duration: The duration of the easing curve in seconds.
+    ///   Defaults to `ColorSliderDefaults.animationDuration`.
+    func colorSliderEaseInOut(
+        duration: Double = ColorSliderDefaults.animationDuration
+    ) -> some View {
+        self
+            .environment(\.colorSliderAnimation, .easeInOut(duration: duration))
+            .environment(\.colorSliderThumbBounce, false)
+    }
+
+    /// Configures thumb and preview positional movement to use a spring curve
+    /// with customizable duration and bounce.
+    ///
+    /// - Parameters:
+    ///   - duration: The perceptual duration of the spring in seconds. Defaults
+    ///     to `ColorSliderDefaults.thumbBounceDuration`.
+    ///   - bounce: The spring bounce factor (`0.0` for critically damped with
+    ///     no overshoot, positive values for underdamped spring overshoot).
+    ///     Defaults to `ColorSliderDefaults.thumbBounce`.
+    func colorSliderSpring(
+        duration: Double = ColorSliderDefaults.thumbBounceDuration,
+        bounce: Double = ColorSliderDefaults.thumbBounce
+    ) -> some View {
+        self
+            .environment(\.colorSliderThumbBounce, true)
+            .environment(\.colorSliderSpringDuration, max(0.0, duration))
+            .environment(\.colorSliderSpringBounce, bounce)
     }
 
     /// Customizes the position and spacing of the floating color preview.
@@ -213,7 +287,7 @@ public extension View {
     /// Sets the visual style of the draggable thumb.
     ///
     /// Defaults to `.standard`. Selecting `.colorOutline` automatically enables
-    /// thumb bounce and discrete color snapping (for hard-edge tracks).
+    /// discrete color snapping (for hard-edge tracks).
     func colorSliderThumbStyle(_ style: ColorSliderThumbStyle) -> some View {
         environment(\.colorSliderThumbStyle, style)
     }
@@ -228,12 +302,50 @@ public extension View {
         environment(\.colorSliderSnapsToColor, snaps)
     }
 
-    /// Determines whether the thumb uses spring overshoot easing.
+    /// Determines whether thumb and preview positional movement uses spring
+    /// overshoot along the slider axis.
     ///
     /// Respects the system `accessibilityReduceMotion` setting. Defaults to
-    /// `true` for `.colorOutline` thumbs and `false` for `.standard` thumbs.
+    /// `false`.
     func colorSliderThumbBounce(_ bounces: Bool = true) -> some View {
         environment(\.colorSliderThumbBounce, bounces)
+    }
+
+    /// Determines whether the draggable thumb's scale transition uses a spring
+    /// overshoot when starting and ending a drag.
+    ///
+    /// Unlike `colorSliderThumbBounce(_:)`, the spring overshoot animates the
+    /// thumb's scale without overshooting its horizontal or vertical position.
+    /// Respects the system `accessibilityReduceMotion` setting. Defaults to
+    /// `true`.
+    func colorSliderThumbScaleBounce(_ bounces: Bool = true) -> some View {
+        environment(\.colorSliderThumbScaleBounce, bounces)
+    }
+
+    /// Determines whether dragging past the start or end of the slider track
+    /// applies asymptotic rubber banding.
+    ///
+    /// - Parameters:
+    ///   - enabled: Whether boundary rubber banding is active. Defaults to
+    ///     `true`.
+    ///   - limit: The asymptotic maximum over-pull distance in points. Defaults
+    ///     to `ColorSliderDefaults.rubberBandLimit`.
+    ///   - resistance: The drag resistance coefficient controlling how quickly
+    ///     the thumb slows down past the edge. Defaults to
+    ///     `ColorSliderDefaults.rubberBandResistance`.
+    func colorSliderRubberBanding(
+        _ enabled: Bool = true,
+        limit: CGFloat = ColorSliderDefaults.rubberBandLimit,
+        resistance: CGFloat = ColorSliderDefaults.rubberBandResistance
+    ) -> some View {
+        environment(
+            \.colorSliderRubberBanding,
+            ColorSliderRubberBandingConfiguration(
+                isEnabled: enabled,
+                limit: max(0.0, limit),
+                resistance: max(0.0, resistance)
+            )
+        )
     }
 
     /// Determines whether tapping directly on the slider track jumps to that

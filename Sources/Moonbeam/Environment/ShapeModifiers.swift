@@ -38,7 +38,7 @@ public struct ShapeShadow: Sendable, Equatable {
     /// The vertical offset of the shadow.
     public var y: CGFloat
 
-    /// Initializes new shadow properties.
+    /// Initializes a new shadow.
     ///
     /// - Parameters:
     ///   - color: The color of the shadow. Defaults to a semi-transparent

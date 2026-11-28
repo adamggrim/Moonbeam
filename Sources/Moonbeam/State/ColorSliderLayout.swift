@@ -14,6 +14,7 @@ internal struct ColorSliderLayout {
     var layoutDirection: LayoutDirection = .leftToRight
     var thumbStyle: ColorSliderThumbStyle = .standard
     var colorCount: Int = 0
+    var rubberBanding: ColorSliderRubberBandingConfiguration = ColorSliderRubberBandingConfiguration()
 
     var resolvedLength: CGFloat { dimensions.length ?? 0 }
     var resolvedTrackThickness: CGFloat { dimensions.resolvedTrackThickness(for: controlSize) }
@@ -74,6 +75,23 @@ internal struct ColorSliderLayout {
         }
     }
 
+    /// Applies asymptotic resistance to drag distance beyond the track
+    /// boundary.
+    ///
+    /// - Parameters:
+    ///   - overflow: The positive drag distance in points past the track edge.
+    ///   - limit: The asymptotic maximum displacement in points.
+    ///   - resistance: The drag resistance coefficient.
+    /// - Returns: The damped displacement in points.
+    internal static func rubberBandOffset(
+        _ overflow: CGFloat,
+        limit: CGFloat,
+        resistance: CGFloat
+    ) -> CGFloat {
+        guard overflow > 0, limit > 0, resistance > 0 else { return 0 }
+        return (overflow * limit * resistance) / (limit + resistance * overflow)
+    }
+
     /// Calculates the resting leading-edge thumb position for a normalized
     /// slider value.
     func thumbPosition(for normalizedValue: Double) -> CGFloat {
@@ -103,12 +121,33 @@ internal struct ColorSliderLayout {
         min(max(liveContainerThumbDrag + halfThumbThickness, 0), resolvedLength)
     }
 
-    /// The clamped main-axis position of the leading edge of the draggable
-    /// thumb.
+    /// The clamped or rubber-banded main-axis position of the leading edge of
+    /// the draggable thumb.
     var liveThumbPosition: CGFloat {
         let minPosition = mainAxisThumbInset
         let maxPosition = resolvedLength - resolvedThumbThickness - mainAxisThumbInset
-        return min(max(liveContainerThumbDrag, minPosition), maxPosition)
+
+        guard rubberBanding.isEnabled, state.isDragging, maxPosition >= minPosition else {
+            return min(max(liveContainerThumbDrag, minPosition), maxPosition)
+        }
+
+        if liveContainerThumbDrag < minPosition {
+            let overflow = minPosition - liveContainerThumbDrag
+            return minPosition - Self.rubberBandOffset(
+                overflow,
+                limit: rubberBanding.limit,
+                resistance: rubberBanding.resistance
+            )
+        } else if liveContainerThumbDrag > maxPosition {
+            let overflow = liveContainerThumbDrag - maxPosition
+            return maxPosition + Self.rubberBandOffset(
+                overflow,
+                limit: rubberBanding.limit,
+                resistance: rubberBanding.resistance
+            )
+        }
+
+        return liveContainerThumbDrag
     }
 
     /// The main axis offset for the floating color preview.
